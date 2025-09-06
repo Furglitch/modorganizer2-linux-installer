@@ -63,7 +63,7 @@ if [ "$UID" == "0" ]; then
 	exit 1
 fi
 
-source "$step/update_check.sh"
+#source "$step/update_check.sh"
 
 expect_exit=1
 
