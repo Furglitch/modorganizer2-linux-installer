@@ -5,7 +5,7 @@ extract="$utils/extract.sh"
 
 jdk_url='https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u312-b07/OpenJDK8U-jre_x64_windows_hotspot_8u312b07.zip'
 
-mo2_url='https://my.microsoftpersonalcontent.com/personal/371272c49a37cc4a/_layouts/15/download.aspx?UniqueId=ba34a6d1-e3a4-4178-97ff-e90e0816a027&Translate=false&ApiVersion=2.0'
+mo2_url='https://1drv.ms/u/c/371272c49a37cc4a/EdGmNLqk43hBl__pDggWoCcBRT8T1N_hd-o3HkdWADqPtA'
 mo2_sha256='a9f36c8f622491fe7ce8e9feeb685b7c80a37eb0880bd81a23e139c7bdeb42a2'
 
 winetricks_url='https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks'
@@ -15,7 +15,7 @@ extracted_jdk="${downloaded_jdk%.*}"
 downloaded_winetricks="$downloads_cache/winetricks"
 executable_winetricks="$shared/winetricks"
 
-downloaded_mo2="$downloads_cache/Mod.Organizer-2.5.3dev5.7z"
+downloaded_mo2="$downloads_cache/Mod.Organizer-2.5.3beta2.7z"
 extracted_mo2="${downloaded_mo2%.*}"
 
 downloaded_scriptextender=""
@@ -122,16 +122,18 @@ if [ ! -f "$downloaded_jdk" ]; then
 fi
 
 mo2_attempts=0
-mo2_max_attempts=5
+mo2_max_attempts=2
 while ! validate_sha256 "$downloaded_mo2" "$mo2_sha256"; do
 	mo2_attempts=$((mo2_attempts + 1))
 	if [ "$mo2_attempts" -ge "$mo2_max_attempts" ]; then
-		log_info "Failed to download MO2 with correct checksum after $mo2_max_attempts attempts. Aborting."
+		log_info "Failed to match checksum of downloaded MO2 after $mo2_max_attempts attempts. Aborting."
 		exit 1
 	fi
-	log_info "Attempt $mo2_attempts: Downloading MO2 again due to checksum failure."
-	rm -f "$downloaded_mo2"
-	"$download" "$mo2_url" "$downloaded_mo2"
+	log_info "Running MO2 beta download workaround"
+	source "$workarounds/mo2_beta.sh"
+	#log_info "Attempt $mo2_attempts: Downloading MO2 again due to checksum failure."
+	#rm -f "$downloaded_mo2"
+	#"$download" "$mo2_url" "$downloaded_mo2"
 done
 if [ ! -d "$extracted_mo2" ]; then
 	mkdir "$extracted_mo2"
