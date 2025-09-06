@@ -14,9 +14,10 @@
         }
     ],
     "ignore_labels": [
+        "discussion",
         "documentation",
         "duplicate",
-        "good first issue",
+        "insufficient",
         "invalid",
         "not our bug",
         "stale",

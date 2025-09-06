@@ -163,29 +163,6 @@ loading() {
 	return 0
 }
 
-form() {
-	title=$1
-	shift
-	local fields=()
-	while [ "$#" -gt "0" ]; do
-		fields+=("--add-entry=$1")
-		shift
-	done
-
-	submitted_data=$( \
-		zenity --forms \
-		--text="$title" \
-		--separator=',' \
-		"${fields[@]}"
-	)
-
-	if [ -z "$submitted_data" ]; then
-		return 1
-	fi
-
-	echo "$submitted_data"
-}
-
 $dialogtype "$@"
 exit $?
 

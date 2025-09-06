@@ -6,6 +6,7 @@ extract="$utils/extract.sh"
 jdk_url='https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u312-b07/OpenJDK8U-jre_x64_windows_hotspot_8u312b07.zip'
 
 mo2_url='https://my.microsoftpersonalcontent.com/personal/371272c49a37cc4a/_layouts/15/download.aspx?UniqueId=ba34a6d1-e3a4-4178-97ff-e90e0816a027&Translate=false&ApiVersion=2.0'
+mo2_sha256='a9f36c8f622491fe7ce8e9feeb685b7c80a37eb0880bd81a23e139c7bdeb42a2'
 
 winetricks_url='https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks'
 
@@ -22,6 +23,22 @@ extracted_scriptextender=""
 
 downloaded_plugins=()
 extracted_plugins=()
+
+function validate_sha256() {
+	local file="$1"
+	local expected="$2"
+	if [ ! -f "$file" ]; then
+		return 1
+	fi
+	local actual
+	actual=$(sha256sum "$file" | awk '{print $1}')
+	if [ "$actual" != "$expected" ]; then
+		log_info "Checksum mismatch for $file: expected $expected, got $actual. Removing file."
+		rm -f "$file"
+		return 1
+	fi
+	return 0
+}
 
 if [ -n "$game_scriptextender_url" ]; then
 	downloaded_scriptextender="$downloads_cache/${game_nexusid}_${game_scriptextender_url##*/}"
@@ -104,8 +121,19 @@ if [ ! -f "$downloaded_jdk" ]; then
 	"$extract" "$downloaded_jdk" "$extracted_jdk"
 fi
 
-if [ ! -f "$downloaded_mo2" ]; then
+mo2_attempts=0
+mo2_max_attempts=5
+while ! validate_sha256 "$downloaded_mo2" "$mo2_sha256"; do
+	mo2_attempts=$((mo2_attempts + 1))
+	if [ "$mo2_attempts" -ge "$mo2_max_attempts" ]; then
+		log_info "Failed to download MO2 with correct checksum after $mo2_max_attempts attempts. Aborting."
+		exit 1
+	fi
+	log_info "Attempt $mo2_attempts: Downloading MO2 again due to checksum failure."
+	rm -f "$downloaded_mo2"
 	"$download" "$mo2_url" "$downloaded_mo2"
+done
+if [ ! -d "$extracted_mo2" ]; then
 	mkdir "$extracted_mo2"
 	"$extract" "$downloaded_mo2" "$extracted_mo2"
 fi

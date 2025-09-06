@@ -2,8 +2,23 @@ name: Bug Report
 description: Create a report to help us fix issues
 title: "[Bug]: "
 labels: ['bug']
-assignees: Furglitch
 body:
+  - type: checkboxes
+    id: troubleshooting
+    attributes:
+      label: Troubleshooting
+      description: Please confirm you have tried the following before submitting this bug report.
+      options:
+        - label: I have read the documentation.
+          required: true
+        - label: I have searched for existing issues.
+          required: true
+        - label: I have updated to the latest installer version.
+          required: false
+        - label: I have read the [post-install documentation](https://github.com/Furglitch/modorganizer2-linux-installer/blob/master/post-install.md).
+          required: true
+        - label: I have read the ['Troubleshooting' section](https://github.com/Furglitch/modorganizer2-linux-installer/blob/master/post-install.md#Troubleshooting) of the post-install documentation.
+          required: true
   - type: textarea
     id: issue
     attributes:
@@ -22,7 +37,7 @@ body:
       label: Steps to reproduce the issue
       value: '1. '
     validations:
-      required: true
+      required: false
   - type: markdown
     attributes:
       value: '## Install Environment'
@@ -31,7 +46,7 @@ body:
     attributes:
       label: Installer version
       description: Do not put 'latest', put the version number
-      value: '5.1.X'
+      value: '5.2.X'
     validations:
       required: true
   - type: dropdown
@@ -41,6 +56,7 @@ body:
       description: Which game are you trying to install?
       options:
         - Cyberpunk 2077
+        - "Dragon Age: Origins"
         - Enderal
         - Enderal SE
         - Fallout 3
@@ -70,9 +86,11 @@ body:
     id: logs
     attributes:
       label: Logs
-      description: Please include any logs here. This field is automatically formatted into code, so you do not need to include any backticks.
-      placeholder: Paste logs here
+      description: Please include the logs here. You can find your log file (`install-[DATE_TIME].log`) in the same folder as `install.sh`.
+      placeholder: Drag & drop your install.log file here
       render: shell
+    validations:
+      required: true
   - type: textarea
     id: misc
     attributes:

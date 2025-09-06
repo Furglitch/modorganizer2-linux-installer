@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
-load_gameinfo="$gamesinfo/$selected_game.sh"
+if [ -z "$custom_game" ]; then
+	load_gameinfo="$gamesinfo/$selected_game.sh"
+else
+	load_gameinfo="$custom_game"
+fi
 
 if [ ! -f "$load_gameinfo" ]; then
 	log_error "no gameinfo for '$selected_game'"
@@ -22,10 +26,16 @@ fi
 steam_library=$("$utils/find-library-for-file.sh" "$game_steam_subdirectory/$game_executable")
 
 if [ ! -d "$steam_library" ]; then
-	log_error "could not find any Steam library containing a game with appid '$game_appid'. If you known exactly where the library is, you can specify it using the environment variable STEAM_LIBRARY"
+	if { [ "$game_appid" -eq 22300 ] || [ "$game_appid" -eq 22370 ]; } && [ -f "$steam_library/$game_steam_subdirectory/Fallout3Launcher.exe" ]; then
+		log_error "Fallout 3 and Fallout 3 GOTY require the game version to be downgraded. Instructions have been provided in the workarounds folder."
+		"$dialog" errorbox \
+			"Fallout 3 and Fallout 3 GOTY require the game version to be downgraded. Instructions have been provided in the workarounds folder."
+	fi 
+	log_error "could not find any Steam library containing a game with appid '$game_appid'. If you know exactly where the library is, you can specify it using the environment variable STEAM_LIBRARY"
 	"$dialog" errorbox \
 		"Could not find '$game_steam_subdirectory' in any of your Steam libraries\nMake sure the game is installed and that you've run it at least once"
 	exit 1
+	
 fi
 
 if [ "$game_scriptextender_url" != "" ]; then

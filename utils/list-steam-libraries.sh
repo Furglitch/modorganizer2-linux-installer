@@ -20,6 +20,7 @@ for steam_install in "${steam_install_candidates[@]}"; do
 		fi
 
 		grep -oE '/[^"]+' "$main_library/steamapps/libraryfolders.vdf"
+		exit 0
 	else
 		log_info "steam not found in '$steam_install'"
 	fi

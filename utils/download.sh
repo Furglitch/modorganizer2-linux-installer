@@ -55,17 +55,17 @@ log_info "downloading '$url' to '$out_file'"
 
 case "$download_backend" in
 	"wget2")
-		wget2 "$url" --no-verbose --force-progress -O "$out_file" 2>&1 \
+		wget2 "$url" --verbose --force-progress -O "$out_file" 2>&1 \
 			| progress_bar "$progress_text"
 		;;
 		
 	"wget")
-		wget "$url" --progress=dot --no-verbose --show-progress -O "$out_file" 2>&1 \
+		wget "$url" --progress=dot --verbose --show-progress -O "$out_file" 2>&1 \
 			| progress_bar "$progress_text"
 		;;
 
 	"curl")
-		redirected_url=$(curl -ILs -o /dev/null -w '%{url_effective}' "$url")
+		redirected_url=$(curl -ILs -v -o /dev/null -w '%{url_effective}' "$url")
 
 		curl "$redirected_url" -o "$out_file" -# 2>&1 \
 			| progress_bar "$progress_text"

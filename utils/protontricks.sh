@@ -26,11 +26,11 @@ function do_protontricks() {
 	case "$release" in
 		flatpak)
 			WINETRICKS='' \
-			flatpak run 'com.github.Matoking.protontricks' "$@"
+			flatpak run 'com.github.Matoking.protontricks' --verbose "$@"
 			return $?
 		;;
 		system)
-			protontricks "$@"
+			protontricks --verbose "$@"
 			return $?
 		;;
 		*)
@@ -42,7 +42,7 @@ function do_protontricks() {
 
 function apply() {
 	appid=$1; shift
-	do_protontricks "$appid" -q "$@"
+	do_protontricks "$appid" -q --force "$@"
 	return $?
 }
 
