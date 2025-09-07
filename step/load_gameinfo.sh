@@ -38,11 +38,15 @@ if [ ! -d "$steam_library" ]; then
 	
 fi
 
-if [ "$game_scriptextender_url" != "" ]; then
+if [ -n "$game_scriptextender_url" ] || { [ -n "$game_scriptextender_modid" ] && [ -n "$game_scriptextender_fileid" ]; }; then
 	hasScriptExtender=true
+	if [ -z "$game_scriptextender_url" ] && { [ -n "$game_scriptextender_modid" ] || [ -n "$game_scriptextender_fileid" ]; }; then
+		nexus_scriptextender=true
+	fi
 else
 	hasScriptExtender=false
 fi
+echo $nexus_scriptextender
 
 game_installation="$steam_library/steamapps/common/$game_steam_subdirectory"
 
