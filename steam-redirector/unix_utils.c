@@ -1,5 +1,5 @@
 #include <unistd.h>
-#include <stdio.h>
+#include <string.h>
 
 #include "unix_utils.h"
 
@@ -15,3 +15,10 @@ void check_can_execute(const char_t* path) {
 	access(path, X_OK);
 }
 
+char_t* str_contains(const char_t* string, const char_t* substring) {
+	return strstr(string, substring);
+}
+
+int str_compare(const char_t* lhs, const char_t* rhs) {
+	return strcmp(lhs, rhs);
+}

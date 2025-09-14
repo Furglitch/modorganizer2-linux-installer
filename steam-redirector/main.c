@@ -13,11 +13,19 @@
 
 #define MO2_PATH_FILE "modorganizer2\\instance_path.txt"
 
+#define NXM_PROTO L"nxm://"
+#define MO2_SHORTCUT_PROTO L"moshortcut://"
+#define MO2_PICK_ARG L"--pick"
+
 #elif __unix__
 
 #include "unix_utils.h"
 
 #define MO2_PATH_FILE "modorganizer2/instance_path.txt"
+
+#define NXM_PROTO "nxm://"
+#define MO2_SHORTCUT_PROTO "moshortcut://"
+#define MO2_PICK_ARG "--pick"
 
 #endif
 
@@ -97,13 +105,42 @@ int check_file_access(const char_t* path) {
 
 int MAIN(argc, argv) {
 	int exit_status = 1;
-
 	char_t *arg = NULL;
+	char_t *exe_path = NULL;
+
+	// Open log file later if needed.
+	FILE *log_file = NULL;
+
 	if (argc > 1) {
-		arg = argv[1];
+		// Visit all arguments, since multiple may be desired or needed by the game executable.
+		for (int i = 1; i < argc; i++) {
+			if (
+				// Contains check for protocol prefixes
+				str_contains(argv[i], NXM_PROTO) != NULL ||
+				str_contains(argv[i], MO2_SHORTCUT_PROTO) != NULL ||
+
+				// Equality check for specific options
+				str_compare(argv[i], MO2_PICK_ARG) == 0
+			) {
+				arg = argv[i];
+				break;
+			}
+
+			// Open log file if not yet done.
+			if (log_file == NULL)
+			{
+				log_file = fopen("steam-redirector.log", "w");
+				if (log_file == NULL) {
+					fprintf(stderr, "ERROR: failed to open log file\n");
+					goto exit_point;
+				}
+			}
+
+			// Log unrecognized arguments to file for the user's benefit.
+			fprintf(log_file, "Unknown argument: '"PATHSUBST"'\n", argv[i]);
+		}
 	}
 
-	char_t *exe_path = NULL;
 	if (getenv("NO_REDIRECT") == NULL) {
 		putenv("NO_REDIRECT=1");
 		exe_path = read_path_from_file(MO2_PATH_FILE);
@@ -135,6 +172,9 @@ int MAIN(argc, argv) {
 exit_point:
 	if (exe_path != NULL) {
 		free(exe_path);
+	}
+	if (log_file != NULL) {
+		fclose(log_file);
 	}
 	return exit_status;
 }

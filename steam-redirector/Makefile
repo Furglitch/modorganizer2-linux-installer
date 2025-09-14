@@ -9,7 +9,7 @@ all: main.exe main
 
 # this build is mostly for debugging purposes
 main: main.c unix_utils.c
-	$(GNU_C) -o main unix_utils.c main.c
+	$(GNU_C) -g -o main unix_utils.c main.c
 
 main.exe: $(WIN_SRC)
 	$(WIN_C) $(WIN_FLAGS) -mwindows -o main.exe $^

@@ -18,3 +18,6 @@ char_t read_character(FILE* file);
 
 char_t* convert_utf8_to_wchar(const char* str);
 
+char_t* str_contains(const char_t* string, const char_t* substring);
+
+int str_compare(const char_t* lhs, const char_t* rhs);

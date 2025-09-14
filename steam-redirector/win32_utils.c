@@ -40,3 +40,10 @@ char_t* convert_utf8_to_wchar(const char* str) {
 	return converted_str;
 }
 
+char_t* str_contains(const char_t* string, const char_t* substring) {
+	return wcsstr(string, substring);
+}
+
+int str_compare(const char_t* lhs, const char_t* rhs) {
+	return wcscmp(lhs, rhs);
+}
