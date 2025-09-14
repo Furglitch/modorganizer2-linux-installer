@@ -3,27 +3,33 @@
 Additional steps you may want to take after installing Mod Organizer 2.
 
 ## Launch Options
-Remember, when adding anything to your Launch Options, include the `%command%` argument. If it's part of the game (i.e. `--skip-launcher`) then it goes after, otherwise it goes before. Other than that, ordering doesn't really matter. For example:
+Remember, when adding anything to your Launch Options, include the `%command%` argument. If it's part of the game 
+(i.e. `--skip-launcher`) then it goes after, otherwise it goes before. Other than that, ordering doesn't really matter. For example:
 ```bash
 BEFORE=true %command% --after
 ```
 <sup>The above is only an example, not actual arguments</sup>
 
 ### Accessing/Installing outside of $HOME
-When installing Mod Organizer 2 outside of your `$HOME` directory, you may encounter issues launching it due to Steam's Proton compatibility layer not being able to access the files. To resolve this, you can set the `STEAM_COMPAT_MOUNTS` environment variable in your game's Launch Options.
+When installing Mod Organizer 2 outside of your `$HOME` directory, you may encounter issues launching it due to Steam's 
+Proton compatibility layer not being able to access the files. To resolve this, you can set the `STEAM_COMPAT_MOUNTS` 
+environment variable in your game's Launch Options.
 
-This can also be used to mount additional folders for Mod Organizer 2 to access, such as a folder containing external tools or scripts.
+This can also be used to mount additional folders for Mod Organizer 2 to access, such as a folder containing external 
+tools or scripts.
 
 ```bash
 STEAM_COMPAT_MOUNTS="/folder1/":"/folder2/" %command%
 ```
 
 Example:
-If you install your instances on a secondary drive mounted at `/nvme2/`, under a folder called `/modding/`, the argument for you would be `STEAM_COMPAT_MOUNTS="/nvme2/modding" %command%`.
+If you install your instances on a secondary drive mounted at `/nvme2/`, under a folder called `/modding/`, the argument 
+for you would be `STEAM_COMPAT_MOUNTS="/nvme2/modding" %command%`.
 
 ### Launching without opening MO2
 
-You can pass a single parameter to Mod Organizer 2 through the game's launch options on Steam. This allows you to tell Mod Organizer 2 to skip its UI and directly launch an executable.
+You can pass a single parameter to Mod Organizer 2 through the game's launch options on Steam. This allows you to tell 
+Mod Organizer 2 to skip its UI and directly launch an executable.
 
 1. Open Steam;
 2. Right click the game you want to launch directly and click on "Properties";
@@ -38,11 +44,29 @@ Example:
 %command% 'moshortcut://"SKSE"'
 ```
 
-**IMPORTANT:** Pay attention to the usage of single and double quotes in the examples above, as they ensure executable names including spaces will still work. The entire launch option should be wrapped in single quotes and the executable name should be wrapped in double quotes.
+**IMPORTANT:** Pay attention to the usage of single and double quotes in the examples above, as they ensure executable 
+names including spaces will still work. The entire launch option should be wrapped in single quotes and the executable name should be wrapped in double quotes.
 
 ### 'gamemoderun' Issue
-Usually, `gamemoderun` to a proton game's Launch Options within Steam can give a significant improvement in performance. </br>
-However, it appears that having this option in a game that's been modified by this script will prevent MO2 from launching, rendering the game unplayable.
+Usually, `gamemoderun` to a proton game's Launch Options within Steam can give a significant improvement in performance.
+
+However, it appears that having this option in a game that's been modified by this script will prevent MO2 from 
+launching, rendering the game unplayable.
+
+### Nexus Links Not Handled Properly
+If you notice that Nexus links aren't opening Mod Organizer 2 as expected, it's possible that the handler for "nxm" 
+links didn't install correctly. Re-run the installer and watch for an error like: 
+`/usr/bin/xdg-mime: line 885: qtpaths: command not found`.
+
+Fixing this is as simple as linking the executable to its actual location (make sure the target [left] is actually 
+present first):
+```bash
+sudo ln -s /usr/bin/qtpaths6 /usr/bin/qtpaths
+```
+
+This issue has been encountered on Fedora 41+ and Manjaro, but it probably affects any distribution using KDE 6.
+
+Solution found by [witt](https://segmentfault.com/a/1190000045432085).
 
 ### Game Specific Adjustments
 
