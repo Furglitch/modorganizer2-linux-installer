@@ -14,6 +14,7 @@ exec > >(tee -a "$log_file") 2>&1
 utils="$script_root/utils"
 dialog="$utils/dialog.sh"
 pluginsinfo="$script_root/pluginsinfo.json"
+nexusapi="$utils/nexus-api.sh"
 gamesinfo="$script_root/gamesinfo"
 handlers="$script_root/handlers"
 launchers="$script_root/launchers"
@@ -109,7 +110,7 @@ source "$step/load_plugininfo.sh"
 
 source "$step/clean_game_prefix.sh"
 
-install_dir=$(source "$step/select_install_dir.sh")
+install_dir='/home/furglitch/Downloads/test' #$(source "$step/select_install_dir.sh")
 log_info "selected install directory '$install_dir'"
 
 expect_exit=0
