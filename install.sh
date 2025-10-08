@@ -8,7 +8,7 @@ set -o pipefail
 script_root=$(realpath "$(dirname "${BASH_SOURCE[0]}")")
 log_datetime=$(date +"%Y%m%d_%H%M%S")
 log_file="$script_root/install_$log_datetime.log"
-: > "$log_file"
+: >"$log_file"
 exec > >(tee -a "$log_file") 2>&1
 
 utils="$script_root/utils"
@@ -72,8 +72,8 @@ source "$step/check_dependencies.sh"
 # Parse options; implemented as a loop in case there are additional uses for it later.
 while getopts "c:w:" launch_options; do
 	case "${launch_options}" in
-		c) custom_game="$OPTARG" ;;
-		w) custom_workaround="$OPTARG" ;;
+	c) custom_game="$OPTARG" ;;
+	w) custom_workaround="$OPTARG" ;;
 	esac
 done
 
@@ -125,5 +125,4 @@ source "$step/apply_workarounds.sh"
 
 log_info "installation completed successfully"
 expect_exit=1
-"$dialog" infobox "Installation successful!\n\Launch the game on Steam to use Mod Organizer 2"
-
+"$dialog" infobox "Installation successful!\n\Launch the game on ${game_launcher^} to use Mod Organizer 2"
