@@ -8,11 +8,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: astral-sh/ruff-action@v3.5.1
+      - uses: astral-sh/ruff-action@v3
         with:
-          options: "--check --verbose"
           src: "./src"
-          version: "25.11.0"
+          version: "0.14.6"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - run: ruff check --fix
       - run: ruff format
