@@ -1,5 +1,7 @@
 <img src="./.github/README/logo.svg" alt="Mod Organizer 2 Linux Installer Logo" width="96" align="left" />
+
 # Mod Organizer 2 Linux Installer (MO2-LINT)
+
 <br clear="left"/>
 
 Currently, MO2-LINT is almost written entirely in Bash. (As stated by the original developer)[https://github.com/Furglitch/modorganizer2-linux-installer/issues/182#issuecomment-740300503], this was due to it's ease of access and integration.
