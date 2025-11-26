@@ -1,11 +1,18 @@
 name: Formatting Check
 
-on:
-  workflow_dispatch:
+on: [push, pull_request]
 
 jobs:
-  disabled:
+  lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Workflow Disabled
-        run: echo "This workflow is currently disabled"
+      - uses: actions/checkout@v6
+
+      - uses: astral-sh/ruff-action@v3.5.1
+        with:
+          options: "--check --verbose"
+          src: "./src"
+          version: "25.11.0"
+
+      - run: ruff check --fix
+      - run: ruff format

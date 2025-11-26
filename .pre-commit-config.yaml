@@ -1,0 +1,28 @@
+repos:
+
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+    -   id: detect-private-key
+    -   id: trailing-whitespace
+    -   id: check-yaml
+    -   id: check-json
+    -   id: pretty-format-json
+        args: [--autofix, --no-sort-keys]
+    -   id: requirements-txt-fixer
+    -   id: end-of-file-fixer
+    -   id: check-added-large-files
+        args: [--maxkb=150]
+    -   id: no-commit-to-branch
+        args: [--branch, master, --branch, prerelease, --branch, v1]
+
+
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.6
+    hooks:
+    -   id: ruff-check
+        args: [ --fix ]
+    -   id: ruff-format
+
+default_language_version:
+    python: python3.13
