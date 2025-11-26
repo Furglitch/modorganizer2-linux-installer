@@ -1,8 +1,0 @@
-[Desktop Entry]
-Type=Application
-Categories=Game;
-Exec=bash -c '"$HOME/.local/share/modorganizer2/modorganizer2-nxm-broker.sh" "$@"' "$HOME/.local/share/modorganizer2/modorganizer2-nxm-broker.sh" %u
-Name=Mod Organizer 2 NXM Handler
-MimeType=x-scheme-handler/nxm;
-NoDisplay=true
-
