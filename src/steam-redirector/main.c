@@ -138,4 +138,3 @@ exit_point:
 	}
 	return exit_status;
 }
-

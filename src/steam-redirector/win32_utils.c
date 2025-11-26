@@ -39,4 +39,3 @@ char_t* convert_utf8_to_wchar(const char* str) {
 
 	return converted_str;
 }
-

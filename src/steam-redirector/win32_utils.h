@@ -17,4 +17,3 @@ void check_can_execute(const char_t* path);
 char_t read_character(FILE* file);
 
 char_t* convert_utf8_to_wchar(const char* str);
-

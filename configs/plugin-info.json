@@ -1,52 +1,52 @@
 [
-    {
-        "Name": "Root Builder",
-        "Identifier": "rootbuilder",
-        "Manifest": "https://raw.githubusercontent.com/Kezyma/ModOrganizer-Plugins/main/directory/plugins/rootbuilder.json"
-    },
-    {
-        "Name": "Reinstaller",
-        "Identifier": "reinstaller",
-        "Manifest": "https://raw.githubusercontent.com/Kezyma/ModOrganizer-Plugins/main/directory/plugins/reinstaller.json"
-    },
-    {
-        "Name": "Shortcutter",
-        "Identifier": "shortcutter",
-        "Manifest": "https://raw.githubusercontent.com/Kezyma/ModOrganizer-Plugins/main/directory/plugins/shortcutter.json"
-    },
-    {
-        "Name": "Plugin Finder",
-        "Identifier": "pluginfinder",
-        "Manifest": "https://raw.githubusercontent.com/Kezyma/ModOrganizer-Plugins/main/directory/plugins/pluginfinder.json"
-    },
-    {
-        "Name": "Profile Sync",
-        "Identifier": "profilesync",
-        "Manifest": "https://raw.githubusercontent.com/Kezyma/ModOrganizer-Plugins/main/directory/plugins/profilesync.json"
-    },
-    {
-        "Name": "OpenMW Player (Morrowind)",
-        "Identifier": "openmwplayer",
-        "Manifest": "https://raw.githubusercontent.com/Kezyma/ModOrganizer-Plugins/main/directory/plugins/openmwplayer.json"
-    },
-    {
-        "Name": "Grass Precacher",
-        "Identifier": "grassprecacher",
-        "Manifest": "https://raw.githubusercontent.com/Al12rs/modorganizer-GrassPrecacher/master/manifest.json"
-    },
-    {
-        "Name": "Auto-Activator",
-        "Identifier": "autoactivator",
-        "Manifest": "https://raw.githubusercontent.com/JonathanFeenstra/modorganizer-auto-activator/main/manifest.json"
-    },
-    {
-        "Name": "FOMOD Plus",
-        "Identifier": "fomod-plus",
-        "Manifest": "https://raw.githubusercontent.com/aglowinthefield/mo2-fomod-plus/refs/heads/main/plugindefinition.json"
-    },
-    {
-        "Name": "Nexus Collection Downloader",
-        "Identifier": "nxm-collection-dl",
-        "Manifest": "https://raw.githubusercontent.com/Furglitch/modorganizer2-nxm-collection-dl/main/plugindefinition.json"
-    }
+  {
+    "Name": "Root Builder",
+    "Identifier": "rootbuilder",
+    "Manifest": "https://raw.githubusercontent.com/Kezyma/ModOrganizer-Plugins/main/directory/plugins/rootbuilder.json"
+  },
+  {
+    "Name": "Reinstaller",
+    "Identifier": "reinstaller",
+    "Manifest": "https://raw.githubusercontent.com/Kezyma/ModOrganizer-Plugins/main/directory/plugins/reinstaller.json"
+  },
+  {
+    "Name": "Shortcutter",
+    "Identifier": "shortcutter",
+    "Manifest": "https://raw.githubusercontent.com/Kezyma/ModOrganizer-Plugins/main/directory/plugins/shortcutter.json"
+  },
+  {
+    "Name": "Plugin Finder",
+    "Identifier": "pluginfinder",
+    "Manifest": "https://raw.githubusercontent.com/Kezyma/ModOrganizer-Plugins/main/directory/plugins/pluginfinder.json"
+  },
+  {
+    "Name": "Profile Sync",
+    "Identifier": "profilesync",
+    "Manifest": "https://raw.githubusercontent.com/Kezyma/ModOrganizer-Plugins/main/directory/plugins/profilesync.json"
+  },
+  {
+    "Name": "OpenMW Player (Morrowind)",
+    "Identifier": "openmwplayer",
+    "Manifest": "https://raw.githubusercontent.com/Kezyma/ModOrganizer-Plugins/main/directory/plugins/openmwplayer.json"
+  },
+  {
+    "Name": "Grass Precacher",
+    "Identifier": "grassprecacher",
+    "Manifest": "https://raw.githubusercontent.com/Al12rs/modorganizer-GrassPrecacher/master/manifest.json"
+  },
+  {
+    "Name": "Auto-Activator",
+    "Identifier": "autoactivator",
+    "Manifest": "https://raw.githubusercontent.com/JonathanFeenstra/modorganizer-auto-activator/main/manifest.json"
+  },
+  {
+    "Name": "FOMOD Plus",
+    "Identifier": "fomod-plus",
+    "Manifest": "https://raw.githubusercontent.com/aglowinthefield/mo2-fomod-plus/refs/heads/main/plugindefinition.json"
+  },
+  {
+    "Name": "Nexus Collection Downloader",
+    "Identifier": "nxm-collection-dl",
+    "Manifest": "https://raw.githubusercontent.com/Furglitch/modorganizer2-nxm-collection-dl/main/plugindefinition.json"
+  }
 ]
