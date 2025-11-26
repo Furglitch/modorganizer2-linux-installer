@@ -1,0 +1,11 @@
+name: Build Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  disabled:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Workflow Disabled
+        run: echo "This workflow is currently disabled"
