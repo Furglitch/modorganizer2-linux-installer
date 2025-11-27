@@ -4,7 +4,7 @@
 
 <br clear="left"/>
 
-Currently, MO2-LINT is almost written entirely in Bash. (As stated by the original developer)[https://github.com/Furglitch/modorganizer2-linux-installer/issues/182#issuecomment-740300503], this was due to it's ease of access and integration.
+Currently, MO2-LINT is almost written entirely in Bash. [As stated by the original developer](https://github.com/Furglitch/modorganizer2-linux-installer/issues/182#issuecomment-740300503), this was due to it's ease of access and integration.
 
 But, as the functionality and userbase of this project has grown, the cracks in approach have started to show. The codebase is becoming increasingly difficult to manage and expand upon.
 
