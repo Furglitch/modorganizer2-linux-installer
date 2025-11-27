@@ -1,2 +1,4 @@
+click>=8.3.1
 pre-commit>=4.5.0
+pydantic>=2.12.5
 ruff==0.14.6

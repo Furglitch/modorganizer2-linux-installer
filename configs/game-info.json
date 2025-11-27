@@ -1,0 +1,75 @@
+{
+  "cyberpunk2077": {
+    "display": "Cyberpunk 2077",
+    "nexus_id": "cyberpunk2077",
+    "steam_id": 1091500,
+    "gog_id": 1423049311,
+    "epic_id": "Ginger",
+    "steam_subdirectory": "Cyberpunk 2077",
+    "executable": "REDprelauncher.exe",
+    "protontricks_args": [
+      "xaudio2_7=native",
+      "d3dcompiler_47",
+      "vcrun2022"
+    ],
+    "script_extender": null
+  },
+  "fallout4": {
+    "display": "Fallout 4",
+    "nexus_id": "fallout4",
+    "steam_id": 377160,
+    "gog_id": 1998527297,
+    "epic_id": "61d52ce4d09d41e48800c22784d13ae8",
+    "steam_subdirectory": "Fallout 4",
+    "executable": "Fallout4Launcher.exe",
+    "protontricks_args": [
+      "xaudio2_7=native",
+      "grabfullscreen=y"
+    ],
+    "script_extender": {
+      "epic": null,
+      "gog": null,
+      "steam": {
+        "#note": "Fallout 4 runtime 1.11.159",
+        "resource": {
+          "version": "0.7.6",
+          "mod_id": 42147,
+          "file_id": 374185
+        },
+        "files": [
+          "f4se_0_07_05/Data",
+          "f4se_0_07_05/CustomControlMap.txt",
+          "f4se_0_07_05/f4se_1_11_159.dll",
+          "f4se_0_07_05/f4se_loader.exe"
+        ]
+      }
+    }
+  },
+  "skyrimspecialedition": {
+    "nexus_id": "skyrimspecialedition",
+    "steam_id": 489830,
+    "gog_id": 1711230643,
+    "epic_id": "",
+    "steam_subdirectory": "Skyrim Special Edition",
+    "executable": "SkyrimSELauncher.exe",
+    "protontricks": [
+      "xaudio2_7=native",
+      "xact",
+      "d3dcompiler_43",
+      "vcrun2022"
+    ],
+    "script_extender": {
+      "steam": {
+        "resource": {
+          "version": "2.2.6",
+          "url": "https://skse.silverlock.org/beta/skse64_2_02_06.7z"
+        },
+        "files": [
+          "skse64_2_02_06/Data",
+          "skse64_2_02_06/skse64_1_6_1170.dll",
+          "skse64_2_02_06/skse64_loader.exe"
+        ]
+      }
+    }
+  }
+}
