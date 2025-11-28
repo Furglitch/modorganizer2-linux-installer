@@ -71,15 +71,18 @@ def get_steam_library():
     return None
 
 
-def main():
-    """Load and store game_info in variables module, determine launcher and install path."""
+def get_heroic_config():
+    from util.heroic.find_library import get_heroic_data
 
+    heroic_config = get_heroic_data()
+    return heroic_config
+
+
+def get_install_path():
     import util.variables as var
 
-    var.load_gameinfo(var.parameters["game"])
-
     steam_library = get_steam_library()
-    # heroic_library = get_heroic_library()
+    heroic_config = get_heroic_config()
 
     # if steam_library and heroic_library:
     if steam_library:
@@ -87,11 +90,27 @@ def main():
         var.game_install_path = os.path.join(
             steam_library, "steamapps", "common", var.game_info["steam_subdirectory"]
         )
-    # elif heroic_library:
-    #    var.launcher = "heroic"
-    #    # determine heroic path logic here
+    elif heroic_config:
+        var.launcher = "heroic"
+        app = heroic_config[3]
+        var.game_install_path = os.path.join(
+            str(app[0]), str(var.game_info["executable"])
+        )
     else:
         var.launcher = None
         var.game_install_path = None
+        logger.error(
+            "Could not determine game installation via Steam or Heroic. Please ensure the game is installed and that it's been run at least once."
+        )
+        return None
     logger.debug(f"Determined launcher: {var.launcher}")
     logger.debug(f"Determined game install path: {var.game_install_path}")
+
+
+def main():
+    """Load and store game_info in variables module, determine launcher and install path."""
+    from util.variables import load_gameinfo, parameters
+
+    load_gameinfo(parameters["game"])
+
+    get_install_path()
