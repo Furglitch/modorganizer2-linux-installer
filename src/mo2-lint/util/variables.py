@@ -7,7 +7,13 @@ from loguru import logger
 parameters = {}
 game_info = None
 launcher = None
+heroic_runner = None
 game_install_path = None
+scriptextender_url = None
+scriptextender_nxm_modid = None
+scriptextender_nxm_fileid = None
+scriptextender_version = None
+scriptextender_files = []
 
 
 def gameinfo_path():

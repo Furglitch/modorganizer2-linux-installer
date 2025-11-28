@@ -92,6 +92,7 @@ def get_install_path():
         )
     elif heroic_config:
         var.launcher = "heroic"
+        var.heroic_runner = str(heroic_config[2])
         app = heroic_config[0]
         if heroic_config[2] == "gog":
             app = app[0]
@@ -104,8 +105,60 @@ def get_install_path():
         )
         return None
 
-    logger.info(f"Determined launcher: {var.launcher}")
-    logger.info(f"Determined game install path: {var.game_install_path}")
+    logger.debug(f"Determined launcher: {var.launcher}")
+    logger.debug(f"Determined game install path: {var.game_install_path}")
+
+
+def get_scriptextender_url():
+    import util.variables as var
+
+    if var.launcher == "heroic":
+        type = var.heroic_runner
+    else:
+        type = "steam"
+
+    var.scriptextender_version = (
+        var.game_info.get("script_extender", {})
+        .get(type, {})
+        .get("resource", {})
+        .get("version")
+    )
+
+    url = (
+        var.game_info.get("script_extender", {})
+        .get(type, {})
+        .get("resource", {})
+        .get("url")
+    )
+    mod_id = (
+        var.game_info.get("script_extender", {})
+        .get(type, {})
+        .get("resource", {})
+        .get("mod_id")
+    )
+    file_id = (
+        var.game_info.get("script_extender", {})
+        .get(type, {})
+        .get("resource", {})
+        .get("file_id")
+    )
+
+    if url:
+        var.scriptextender_url = url
+        logger.debug(f"Determined Script Extender URL: {var.scriptextender_url}")
+    elif mod_id and file_id:
+        var.scriptextender_nxm_modid = mod_id
+        var.scriptextender_nxm_fileid = file_id
+        logger.debug(
+            f"Determined Script Extender Nexus Mod ID: {var.scriptextender_nxm_modid} - File ID: {var.scriptextender_nxm_fileid}"
+        )
+    else:
+        var.scriptextender_url = None
+        var.scriptextender_nxm_modid = None
+        var.scriptextender_nxm_fileid = None
+        logger.warn(
+            f"Unable to find Script Extender download URL or Nexus Mod IDs for {var.launcher}."
+        )
 
 
 def main():
@@ -113,5 +166,5 @@ def main():
     from util.variables import load_gameinfo, parameters
 
     load_gameinfo(parameters["game"])
-
     get_install_path()
+    get_scriptextender_url()
