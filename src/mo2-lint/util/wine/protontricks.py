@@ -21,11 +21,11 @@ def run(command: list) -> str:
             out_lines.append(raw)
             # Special handling can be added here:, e.g. `if "INFO" in raw: logger.info(raw.strip())`
     proc.wait()
-
     return "".join(out_lines)
 
 
 def apply(id: int, command: list):
+    logger.info(f"Applying tricks to prefix {id}: {command}")
     run([f"{id}", "-q", "--force"] + command)
 
 

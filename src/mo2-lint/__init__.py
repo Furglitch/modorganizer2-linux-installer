@@ -83,6 +83,10 @@ def main(game, directory, log_level, script_extender, plugin):
 
     load_gameinfo()
 
+    from step.configure_prefix import main as configure_prefix
+
+    configure_prefix()
+
 
 if __name__ == "__main__":
     main()
