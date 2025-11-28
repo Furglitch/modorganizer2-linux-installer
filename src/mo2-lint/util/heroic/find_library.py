@@ -34,7 +34,9 @@ def get_heroic_data():
                 launcher, id, install, wine, prefix = None, None, None, None, None
             else:
                 launcher, id, install, wine, prefix = None, None, None, None, None
-            if not install or not launcher or not id or not wine or not prefix:
+            if any(
+                v is None for v in (install, launcher, id, wine, prefix)
+            ) and not all(v is None for v in (install, launcher, id, wine, prefix)):
                 logger.warning("Could not retrieve complete Heroic library data.")
                 continue
             else:
