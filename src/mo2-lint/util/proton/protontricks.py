@@ -9,12 +9,24 @@ pt = shutil.which("protontricks") or "venv/bin/protontricks"
 
 
 def run(command: list) -> str:
-    proc = subprocess.run([pt, "--verbose"] + command, capture_output=True, text=True)
-    return proc.stdout
+    proc = subprocess.Popen(
+        [pt, "--verbose"] + command,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+    )
+    out_lines = []
+    if proc.stdout:
+        for raw in proc.stdout:
+            out_lines.append(raw)
+            # Special handling can be added here:, e.g. `if "INFO" in raw: logger.info(raw.strip())`
+    proc.wait()
+
+    return "".join(out_lines)
 
 
 def apply(id: int, command: list):
-    logger.info(run([f"{id}", "-q", "--force"] + command))
+    run([f"{id}", "-q", "--force"] + command)
 
 
 def get_prefix(id: int):
