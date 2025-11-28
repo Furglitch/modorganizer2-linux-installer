@@ -156,7 +156,7 @@ def get_scriptextender_url():
         var.scriptextender_url = None
         var.scriptextender_nxm_modid = None
         var.scriptextender_nxm_fileid = None
-        logger.warn(
+        logger.warning(
             f"Unable to find Script Extender download URL or Nexus Mod IDs for {var.launcher}."
         )
 
