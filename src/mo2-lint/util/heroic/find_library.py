@@ -100,7 +100,7 @@ def get_gog_libraries(config_dir: str):
 
     from util.variables import game_info
 
-    if not game_info["gog_id"]:
+    if not game_info.get("gog_id", ""):
         logger.warning(f"GOG ID for {game_info['display']} is not set.")
         return None
     if not installed_json.exists():
@@ -149,7 +149,7 @@ def get_epic_libraries(config_dir: str):
 
     from util.variables import game_info
 
-    if not game_info["epic_id"]:
+    if not game_info.get("epic_id", ""):
         logger.warning(f"Epic ID for {game_info['display']} is not set.")
         return None
     if not installed_json.exists():
