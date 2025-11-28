@@ -117,6 +117,12 @@ def get_scriptextender_url():
     else:
         type = "steam"
 
+    if (
+        var.game_info.get("script_extender") is None
+        or var.game_info.get("script_extender", {}).get(type) is None
+    ):
+        return
+
     var.scriptextender_version = (
         var.game_info.get("script_extender", {})
         .get(type, {})
