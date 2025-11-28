@@ -91,7 +91,6 @@ def get_install_path():
             steam_library, "steamapps", "common", var.game_info["steam_subdirectory"]
         )
     elif heroic_config:
-        print(heroic_config)
         var.launcher = "heroic"
         app = heroic_config[0]
         if heroic_config[2] == "gog":

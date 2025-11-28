@@ -101,7 +101,6 @@ def get_gog_libraries(config_dir: str):
     if not game_info["gog_id"]:
         logger.warning(f"GOG ID for {game_info['display']} is not set.")
         return None
-
     if not installed_json.exists():
         logger.error(f"{installed_json} not found.")
         return None
@@ -114,15 +113,19 @@ def get_gog_libraries(config_dir: str):
     except Exception as e:
         logger.error(f"Unable to parse {installed_json}: {e}")
         return None
+
+    installed = data.get("installed", [])
     install_path = [
         item.get("install_path")
-        for item in data.get("installed", [])
-        if item.get("install_path")
+        for item in installed
+        if item.get("install_path") and item.get("appName") == str(game_info["gog_id"])
     ]
     if not install_path:
-        logger.error(f"Unable to extract install_path from {installed_json}")
+        if any(item.get("appName") == str(game_info["gog_id"]) for item in installed):
+            logger.error(f"Unable to extract install_path from {installed_json}")
+        else:
+            logger.error("Game not found in installed GOG games.")
         return None
-
     logger.info(f"Found GOG install paths: {install_path}")
 
     wine_vars = get_wine_variables(game_info["gog_id"], config_dir)
@@ -147,7 +150,6 @@ def get_epic_libraries(config_dir: str):
     if not game_info["epic_id"]:
         logger.warning(f"Epic ID for {game_info['display']} is not set.")
         return None
-
     if not installed_json.exists():
         logger.error(f"{installed_json} not found.")
         return None
@@ -162,9 +164,11 @@ def get_epic_libraries(config_dir: str):
         return None
     install_path = data.get(game_info["epic_id"], {}).get("install_path", "")
     if not install_path:
-        logger.error(f"Unable to extract install_path from {installed_json}")
+        if game_info["epic_id"] in data:
+            logger.error(f"Unable to extract install_path from {installed_json}")
+        else:
+            logger.error("Game not found in installed Epic games.")
         return None
-
     logger.info(f"Found Epic install paths: {install_path}")
 
     wine_vars = get_wine_variables(game_info["epic_id"], config_dir)
