@@ -4,7 +4,7 @@ from loguru import logger
 import os
 from pathlib import Path
 
-runner = None
+launcher = None
 
 
 def get_heroic_data():
@@ -23,16 +23,18 @@ def get_heroic_data():
         if os.path.exists(dir):
             logger.info(f"Found {release} release, Heroic config directory at {dir}")
 
-            result = get_gog_libraries(dir)
-            if result:
-                install, runner, app, wine, prefix = result
+            gog_result = get_gog_libraries(dir)
+            epic_result = get_epic_libraries(dir)
+            if gog_result:
+                launcher, id, install, wine, prefix = gog_result
+            elif epic_result:
+                launcher, id, install, wine, prefix = epic_result
+            elif gog_result and epic_result:
+                logger.error("Both GOG and Epic libraries found, ambiguous.")
+                launcher, id, install, wine, prefix = None, None, None, None, None
             else:
-                result = get_epic_libraries(dir)
-                if result:
-                    install, runner, app, wine, prefix = result
-                else:
-                    install, runner, app, wine, prefix = None, None, None, None, None
-            if not install or not runner or not app or not wine or not prefix:
+                launcher, id, install, wine, prefix = None, None, None, None, None
+            if not install or not launcher or not id or not wine or not prefix:
                 logger.warning("Could not retrieve complete Heroic library data.")
                 continue
             else:
@@ -41,9 +43,9 @@ def get_heroic_data():
             logger.info(f"Heroic config directory not present at {dir}")
 
     logger.debug(
-        f"Heroic library data: install={install}, release={release}, runner={runner}, app={app}, wine={wine}, prefix={prefix}"
+        f"Heroic library data: install={install}, release={release}, launcher={launcher}, id={id}, wine={wine}, prefix={prefix}"
     )
-    return install, release, runner, app, wine, prefix
+    return install, release, launcher, id, wine, prefix
 
 
 def get_wine_variables(id: str | int, config_dir: str):
@@ -91,7 +93,7 @@ def get_wine_variables(id: str | int, config_dir: str):
 
 
 def get_gog_libraries(config_dir: str):
-    """Finds GOG Galaxy library folders from configuration files."""
+    """Finds GOG library folders from Heroic configuration files."""
     installed_json = Path(config_dir) / "gog_store" / "installed.json"
 
     from util.variables import game_info
@@ -112,7 +114,6 @@ def get_gog_libraries(config_dir: str):
     except Exception as e:
         logger.error(f"Unable to parse {installed_json}: {e}")
         return None
-
     install_path = [
         item.get("install_path")
         for item in data.get("installed", [])
@@ -130,10 +131,48 @@ def get_gog_libraries(config_dir: str):
         return None
     wine_path, wine_prefix = wine_vars
 
-    runner = "gog"
-    appname = game_info["gog_id"]
-    return runner, appname, install_path, wine_path, wine_prefix
+    launcher = "gog"
+    appid = game_info["gog_id"]
+    return launcher, appid, install_path, wine_path, wine_prefix
 
 
 def get_epic_libraries(config_dir: str):
-    pass
+    """Finds Epic library folders from Heroic configuration files."""
+    installed_json = (
+        Path(config_dir) / "legendaryConfig" / "legendary" / "installed.json"
+    )
+
+    from util.variables import game_info
+
+    if not game_info["epic_id"]:
+        logger.warning(f"Epic ID for {game_info['display']} is not set.")
+        return None
+
+    if not installed_json.exists():
+        logger.error(f"{installed_json} not found.")
+        return None
+
+    import json
+
+    try:
+        data = json.loads(installed_json.read_text())
+        logger.debug(f"Parsed installed.json: {data}")
+    except Exception as e:
+        logger.error(f"Unable to parse {installed_json}: {e}")
+        return None
+    install_path = data.get(game_info["epic_id"], {}).get("install_path", "")
+    if not install_path:
+        logger.error(f"Unable to extract install_path from {installed_json}")
+        return None
+
+    logger.info(f"Found Epic install paths: {install_path}")
+
+    wine_vars = get_wine_variables(game_info["epic_id"], config_dir)
+    if not wine_vars:
+        logger.error("Could not retrieve Wine variables")
+        return None
+    wine_path, wine_prefix = wine_vars
+
+    launcher = "epic"
+    appid = game_info["epic_id"]
+    return launcher, appid, install_path, wine_path, wine_prefix

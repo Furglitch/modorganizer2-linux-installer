@@ -91,11 +91,12 @@ def get_install_path():
             steam_library, "steamapps", "common", var.game_info["steam_subdirectory"]
         )
     elif heroic_config:
+        print(heroic_config)
         var.launcher = "heroic"
-        app = heroic_config[3]
-        var.game_install_path = os.path.join(
-            str(app[0]), str(var.game_info["executable"])
-        )
+        app = heroic_config[0]
+        if heroic_config[2] == "gog":
+            app = app[0]
+        var.game_install_path = os.path.join(str(app), str(var.game_info["executable"]))
     else:
         var.launcher = None
         var.game_install_path = None
@@ -103,8 +104,9 @@ def get_install_path():
             "Could not determine game installation via Steam or Heroic. Please ensure the game is installed and that it's been run at least once."
         )
         return None
-    logger.debug(f"Determined launcher: {var.launcher}")
-    logger.debug(f"Determined game install path: {var.game_install_path}")
+
+    logger.info(f"Determined launcher: {var.launcher}")
+    logger.info(f"Determined game install path: {var.game_install_path}")
 
 
 def main():

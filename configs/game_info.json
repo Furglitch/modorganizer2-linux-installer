@@ -96,5 +96,16 @@
         ]
       }
     }
+  },
+  "assassinscreed": {
+    "display": "Assassin's Creed I",
+    "nexus_id": "assassinscreed",
+    "steam_id": null,
+    "gog_id": 1458058109,
+    "epic_id": "0b9d1072cd674b8b91c8e25e9d695ed9",
+    "steam_subdirectory": "AssassinsCreedI",
+    "executable": "UplayLaunch.exe",
+    "protontricks_args": [],
+    "script_extender": {}
   }
 }
