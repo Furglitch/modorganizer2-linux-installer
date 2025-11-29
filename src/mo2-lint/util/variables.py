@@ -4,17 +4,18 @@ from pydantic_core import from_json
 from pathlib import Path
 from loguru import logger
 
-parameters = {}
-game_info = None
-launcher = None
-heroic_runner = None
-heroic_config = []
-game_install_path = None
-scriptextender_url = None
-scriptextender_nxm_modid = None
-scriptextender_nxm_fileid = None
-scriptextender_version = None
-scriptextender_files = []
+parameters: dict = None
+game_info: dict = None
+launcher: str = None
+heroic_runner: str = None
+heroic_config: list = None
+game_install_path: Path = None
+scriptextender_url: str = None
+scriptextender_nxm_modid: int = None
+scriptextender_nxm_fileid: int = None
+scriptextender_version: str = None
+scriptextender_files: list = None
+archived_prefix: Path = None
 
 
 def gameinfo_path():
