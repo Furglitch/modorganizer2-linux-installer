@@ -19,14 +19,16 @@ archived_prefix: Path = None
 
 
 def gameinfo_path():
-    return Path(__file__).resolve().parents[3] / "configs" / "game_info.json"
+    path = Path(__file__).resolve().parents[3] / "configs" / "game_info.json"
+    logger.trace(f"Game info path: {path}")
+    return path
 
 
 def load_gameinfo_file():
     """Returns the entire game_info.json content as a dictionary."""
     with open(gameinfo_path(), "r", encoding="utf-8") as file:
         json = from_json(file.read())
-    logger.debug(f"Loaded game info file: {json}")
+    logger.trace(f"Loaded game info file: {json}")
     return json
 
 
@@ -34,7 +36,7 @@ def load_gameinfo(gamekey: str):
     """Returns the game_info.json data for a specific game."""
     global game_info
     game_info = load_gameinfo_file().get(gamekey)
-    logger.debug(f"Loaded game info for {gamekey}: {game_info}")
+    logger.trace(f"Loaded game info for {gamekey}: {game_info}")
     return game_info
 
 

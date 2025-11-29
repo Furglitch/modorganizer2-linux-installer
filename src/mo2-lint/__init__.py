@@ -4,14 +4,28 @@ import click
 import sys
 from pydantic_core import from_json
 from pathlib import Path
-from util.variables import gameinfo_path, set_parameters
 from loguru import logger
+
+"""
+Log Levels:
+TRACE: Detailed debug info. Logfile level.
+DEBUG: General debug info
+INFO: General operational info. Default terminal level.
+SUCCESS: Successful operation (including function completions)
+WARNING: User error
+ERROR: Operational error
+CRITICAL: Fatal error
+"""
 
 
 def load_game_list():
+    from util.variables import gameinfo_path
+
     with open(gameinfo_path(), "r", encoding="utf-8") as file:
         json = from_json(file.read())
-    return list(json.keys())
+        games = list(json.keys())
+        logger.trace(f"Loaded game list: {games}")
+    return games
 
 
 @click.command()
@@ -28,7 +42,7 @@ def load_game_list():
 @click.option(
     "--log-level",
     "-l",
-    type=click.Choice(["DEBUG", "INFO"], case_sensitive=False),
+    type=click.Choice(["DEBUG", "INFO", "TRACE"], case_sensitive=False),
     default="INFO",
     help="Set the logging level.",
     show_default=True,
@@ -36,8 +50,9 @@ def load_game_list():
 @click.option(
     "--script-extender",
     "-s",
-    type=bool,
-    help="Enable download of script extenders for supported games.",
+    is_flag=True,
+    default=False,
+    help="Automatically download and install script extenders if available.",
 )
 @click.option(
     "--plugin",
@@ -47,7 +62,7 @@ def load_game_list():
     help="Specify MO2 plugins to download and install.",
 )
 def main(game, directory, log_level, script_extender, plugin):
-    """A tool to install and manage Mod Organizer 2 instances."""
+    """A tool to install and manage Mod Organizer 2 instances for games from Steam and Heroic Games Launcher."""
 
     logger.remove(0)
     logger.add(
@@ -58,22 +73,23 @@ def main(game, directory, log_level, script_extender, plugin):
     )
     logger.add(
         "mo2-lint.{time:YYYY-MM-DD_HH-mm-ss}.log",
+        level="TRACE",
         rotation="10 MB",
         retention="7 days",
         compression="zip",
     )
     logger.info("Starting mo2-lint...")
 
-    logger.info(f"Selected game: {game}")
-    logger.info(f"Target directory: {directory}")
-
     if not Path(directory).exists():
         Path(directory).mkdir(parents=True, exist_ok=True)
+
+    from util.variables import set_parameters
 
     set_parameters(
         {
             "game": game,
             "directory": directory,
+            "log_level": log_level,
             "script_extender": script_extender,
             "plugins": plugin,
         }

@@ -13,7 +13,6 @@ libraries = []
 
 
 def get_libraries():
-    """Retrieves Steam library paths from libraryfolders.vdf file"""
     for dir in steam_directories:
         dir = Path(os.path.expandvars(dir)).resolve()
         if dir.exists():

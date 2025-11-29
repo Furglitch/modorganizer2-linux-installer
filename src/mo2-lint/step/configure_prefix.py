@@ -3,25 +3,22 @@
 from loguru import logger
 from pathlib import Path
 
-prompt_archive = """
-It is highly recommended to clean your current game prefix before starting the installation process.
+prompt_archive = """It is highly recommended to clean your current game prefix before starting the installation process.
 """
 
-prompt_clean_steam = """
-In order to create a clean game prefix, follow the instructions below:
+prompt_clean_steam = """In order to create a clean game prefix, follow the instructions below:
 
-1. Within Steam: right-click the game in your library, select 'Properties', and navigate to the 'Compatibility' tab.
+1. In Steam: right-click the game in your library, select 'Properties', and navigate to the 'Compatibility' tab.
 2. Check the box for 'Force the use of a specific Steam Play compatibility tool' if it's not already checked.
    * Proton 9.0 is the currently supported and recommended version
-3. From the dropdown menu, select your preferred Proton version.9.0 is the supported and recommended version.
+3. From the dropdown menu, select your preferred Proton version. 9.0 is the supported and recommended version.
 4. Close the properties window and launch the game once to allow Steam to set up the new prefix.
 5. Exit the game completely. Do not launch it until the installation process is finished.
 """
 
-prompt_clean_heroic = """
-In order to create a clean game prefix, follow the instructions below:
+prompt_clean_heroic = """In order to create a clean game prefix, follow the instructions below:
 
-1. Within Heroic: right-click the game in your library, select 'Settings', and navigate to the 'WINE' tab.
+1. In Heroic: right-click the game in your library, select 'Settings', and navigate to the 'WINE' tab.
 2. Under 'Wine Version', select your preferred Wine/Proton version.
    * Proton - Proton 9.0 (Beta) is the currently supported and recommended version.
      This is a stable release, not beta, but Valve never changed the file name.
@@ -46,19 +43,19 @@ def archive_prefix(prefix: str = None):
         from datetime import datetime
 
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-        var.archived_prefix = prefix_path.with_name(f"{prefix_path.name}-{timestamp}")
+        var.archived_prefix = prefix_path.with_name(f"{prefix_path.name}.{timestamp}")
         try:
             import shutil
 
             shutil.move(str(prefix_path), str(var.archived_prefix))
-            logger.info(f"Archived prefix to {var.archived_prefix}")
+            logger.debug(f"Archived prefix to {var.archived_prefix}")
         except Exception as e:
             logger.error("Failed to archive existing prefix. See debug for details.")
             logger.debug(f"Exception: {e}")
             raise
 
 
-def restore_prefix_data():
+def restore_prefix_data(prefix: str = None):
     from util.variables import launcher, archived_prefix
 
     match launcher:
@@ -66,20 +63,17 @@ def restore_prefix_data():
             src = Path(archived_prefix) / "pfx" / "drive_c" / "users"
         case "heroic":
             src = Path(archived_prefix) / "drive_c" / "users"
-    from util.variables import heroic_config
-
-    dst = Path(heroic_config[5]) / "drive_c" / "users"
+    dst = Path(prefix) / "drive_c" / "users"
 
     try:
         import shutil
 
         shutil.move(str(dst), str(dst) + ".bak")
         shutil.move(str(src), str(dst))
-        logger.info(f"Restored archived prefix from {archived_prefix}")
+        logger.debug(f"Restored archived prefix from {archived_prefix}")
     except Exception as e:
         logger.error("Failed to restore archived prefix. See debug for details.")
         logger.debug(f"Exception: {e}")
-        raise
 
 
 def create_prefix() -> bool:
@@ -122,16 +116,15 @@ def load_prefix():
 def prompt_prefix():
     prefix = load_prefix()
     if prefix is not None and Path(prefix.strip()).exists():
-        logger.info(f"Using existing prefix at {prefix}")
+        logger.debug(f"Using existing prefix at {prefix}")
     else:
-        logger.error(
-            "A prefix does not exist for this game. Make sure you have run the game at least once. See debug for more details."
-        )
         if prefix is None:
-            logger.error("Could not determine prefix path.")
+            logger.error("Was unable to determine prefix path.")
         elif not Path(prefix.strip()).exists():
             logger.warning(f"Prefix path does not exist: {prefix.strip()}")
+        logger.warning("Make sure you have run the game at least once.")
         raise SystemExit(1)
+    logger.debug("Prompting user to archive existing prefix")
     print(prompt_archive)
     if input(
         "Would you like to archive your current game prefix and create a new one? [y/N]: "
@@ -140,30 +133,30 @@ def prompt_prefix():
         "y",
         "yes",
     ):
-        archive_prefix(prefix)
+        archive_prefix(str(Path(prefix).parent))
     else:
         logger.debug("User refused to archive the prefix.")
     if create_prefix() is True:
         logger.debug("User confirmed prefix cleaning.")
     else:
-        logger.info("Aborting per user request.")
+        logger.critical("Aborting operation...")
         raise SystemExit(1)
     from util.variables import archived_prefix
 
     logger.debug(f"Archived prefix: {archived_prefix}")
     if archived_prefix is not None:
-        logger.info("Restoring personal data from archived prefix.")
-        restore_prefix_data()
-        info = """
-Your own prefix has been archived and a new clean prefix has been created.
+        logger.debug("Restoring personal data from archived prefix.")
+        restore_prefix_data(prefix)
+        info = """Your own prefix has been archived and a new clean prefix has been created.
 You can find your archived prefix at: {archived_prefix}
 
 Personal data from the archived prefix (e.g. saved games) has been preserved and restored to the new prefix.
 Feel free to delete the archive if you no longer need it after confirming your data is intact.
 
-A list of all archived prefixes can be found at: TBD
-""".format(archived_prefix=archived_prefix)
-        logger.info(info)
+A list of all archived prefixes can be found at: TBD""".format(
+            archived_prefix=archived_prefix
+        )
+        print(info)
 
 
 def configure():
@@ -174,7 +167,7 @@ def configure():
 
     match launcher:
         case "steam":
-            logger.info("Configuring Steam prefix")
+            logger.info("Configuring Steam prefix with protontricks")
             logger.info(
                 "This may take a while. Failure at this step may indicate an issue with protontricks"
             )
@@ -182,7 +175,7 @@ def configure():
 
             protontricks.apply(game_info["steam_id"], tricks)
         case "heroic":
-            logger.info("Configuring Heroic prefix")
+            logger.info("Configuring Heroic prefix with winetricks")
             logger.info(
                 "This may take a while. Failure at this step may indicate an issue with winetricks"
             )
@@ -192,7 +185,7 @@ def configure():
             wine = heroic_config[4]
             if Path(wine).name == "proton":
                 wine = Path(wine).parent / "files" / "bin" / "wine"
-            logger.info(f'Using Heroic runner with wine: "{wine}", prefix: "{prefix}"')
+            logger.debug(f'Using Heroic runner with wine: "{wine}", prefix: "{prefix}"')
             from util.wine import winetricks
 
             winetricks.apply(wine, prefix, tricks)
@@ -202,10 +195,13 @@ def main():
     prompt_prefix()
     try:
         configure()
-    except Exception:
-        logger.exception("An error occurred while configuring the prefix.")
+    except Exception as e:
+        logger.error(
+            "An error occurred while configuring the prefix. See debug for details."
+        )
+        logger.debug(f"Exception: {e}")
         if input(
             "Would you like to ignore and continue? [y/N]: "
         ).strip().lower() not in ("", "y", "yes"):
-            logger.info("Aborting per user request.")
+            logger.critical("Aborting operation...")
             raise SystemExit(1)

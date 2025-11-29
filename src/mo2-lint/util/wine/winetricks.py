@@ -11,12 +11,7 @@ exe = shutil.which("winetricks") or None
 
 
 def run(prefix: Path, command: List[str]) -> str:
-    if exe is None:
-        raise FileNotFoundError(
-            "winetricks executable not found in PATH. Pass its path to `apply(wine=...)` or install winetricks."
-        )
-
-    cmd = [str(exe), f"prefix={str(prefix)}"] + [str(c) for c in command]
+    cmd = [str(exe), f"prefix={str(prefix)}"] + command
     env = os.environ.copy()
     env.setdefault("WINEPREFIX", str(prefix))
 
@@ -34,10 +29,11 @@ def run(prefix: Path, command: List[str]) -> str:
     if proc.stdout:
         for raw in proc.stdout:
             out_lines.append(raw)
+            logger.trace(raw.strip())
 
     ret = proc.wait()
     if ret == 0:
-        logger.info("winetricks completed successfully.")
+        logger.success("winetricks completed successfully.")
     else:
         logger.warning(f"winetricks exited with non-zero status: {ret}")
 
@@ -45,7 +41,7 @@ def run(prefix: Path, command: List[str]) -> str:
 
 
 def apply(wine: Optional[Path], prefix: Path, command: List[str]):
-    logger.info(f"Applying tricks to prefix {prefix}: {command}")
+    logger.info(f"Applying tricks to prefix: {command}")
     global exe
     if exe is None and wine is not None:
         exe = str(wine)
