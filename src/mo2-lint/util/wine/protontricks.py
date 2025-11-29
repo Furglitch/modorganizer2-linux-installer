@@ -5,12 +5,12 @@ import subprocess
 import shutil
 from loguru import logger
 
-pt = shutil.which("protontricks") or "venv/bin/protontricks"
+exe = shutil.which("protontricks") or "venv/bin/protontricks"
 
 
 def run(command: list) -> str:
     proc = subprocess.Popen(
-        [pt, "--verbose"] + command,
+        [exe, "--verbose"] + command,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,

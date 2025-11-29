@@ -92,6 +92,7 @@ def get_install_path():
         )
     elif heroic_config:
         var.launcher = "heroic"
+        var.heroic_config = heroic_config
         var.heroic_runner = str(heroic_config[2])
         app = heroic_config[0]
         if heroic_config[2] == "gog":

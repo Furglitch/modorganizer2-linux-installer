@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from loguru import logger
+from pathlib import Path
 
 prompt_archive = """
 It is highly recommended to clean your current game prefix before starting the installation process.
@@ -41,15 +42,33 @@ tricks = [
 def configure():
     from util.variables import launcher, game_info
 
+    global tricks
+    tricks = tricks + game_info.get("protontricks_args", [])
+
     match launcher:
         case "steam":
-            logger.info("Configuring Steam prefix...")
-            global tricks
-            tricks = tricks + game_info.get("protontricks_args", [])
+            logger.info("Configuring Steam prefix")
+            logger.info(
+                "This may take a while. Failure at this step may indicate an issue with protontricks"
+            )
             from util.wine import protontricks
 
             protontricks.apply(game_info["steam_id"], tricks)
-            pass
+        case "heroic":
+            logger.info("Configuring Heroic prefix")
+            logger.info(
+                "This may take a while. Failure at this step may indicate an issue with winetricks"
+            )
+            from util.variables import heroic_config
+
+            prefix = heroic_config[5]
+            wine = heroic_config[4]
+            if Path(wine).name == "proton":
+                wine = Path(wine).parent / "files" / "bin" / "wine"
+            logger.info(f'Using Heroic runner with wine: "{wine}", prefix: "{prefix}"')
+            from util.wine import winetricks
+
+            winetricks.apply(wine, prefix, tricks)
 
 
 def main():

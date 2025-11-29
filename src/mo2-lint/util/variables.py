@@ -8,6 +8,7 @@ parameters = {}
 game_info = None
 launcher = None
 heroic_runner = None
+heroic_config = []
 game_install_path = None
 scriptextender_url = None
 scriptextender_nxm_modid = None
