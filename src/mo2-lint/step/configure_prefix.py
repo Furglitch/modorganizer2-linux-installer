@@ -72,4 +72,17 @@ def configure():
 
 
 def main():
-    configure()
+    try:
+        configure()
+    except Exception as e:
+        logger.exception("An error occurred while configuring the prefix.")
+        try:
+            answer = (
+                input("Would you like to ignore and continue? [y/N]: ").strip().lower()
+            )
+        except (EOFError, KeyboardInterrupt):
+            logger.info("No response received; aborting.")
+            raise SystemExit(1) from e
+        if answer not in ("Y", "y", "yes"):
+            logger.info("Aborting per user request.")
+            raise SystemExit(1)
