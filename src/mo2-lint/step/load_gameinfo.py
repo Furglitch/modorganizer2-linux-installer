@@ -7,9 +7,9 @@ import os
 def get_steam_data():
     from util.variables import game_info
 
-    id = game_info["steam_id"]
-    subdir = game_info["steam_subdirectory"]
-    exe = game_info["executable"]
+    id = game_info.get("steam_id")
+    subdir = game_info.get("steam_subdirectory")
+    exe = game_info.get("executable")
     id_valid = isinstance(id, int) and id > 0
     subdir_valid = isinstance(subdir, str) and subdir != ""
     exe_valid = isinstance(exe, str) and exe.endswith(".exe")
@@ -23,26 +23,30 @@ def get_steam_data():
     else:
         if not id_valid:
             logger.error(
-                f'Steam ID for {game_info["display"]} ("{id or "None"}") is not set or invalid.'
+                f'Steam ID for {game_info.get("display")} ("{id or "None"}") is not set or invalid.'
             )
         if not subdir_valid:
             logger.error(
-                f'Steam subdirectory for {game_info["display"]} ("{subdir or "None"}") is not set or invalid.'
+                f'Steam subdirectory for {game_info.get("display")} ("{subdir or "None"}") is not set or invalid.'
             )
         if not exe_valid:
             logger.error(
-                f'Executable for {game_info["display"]} ("{exe or "None"}") is not set or invalid.'
+                f'Executable for {game_info.get("display")} ("{exe or "None"}") is not set or invalid.'
             )
 
     match (id_valid, subdir_valid, exe_valid):
         case (False, False, False):
             return None, None, None
         case (True, True, False):
-            return game_info["steam_id"], game_info["steam_subdirectory"], None
+            return game_info.get("steam_id"), game_info.get("steam_subdirectory"), None
         case (True, False, True):
-            return game_info["steam_id"], None, game_info["executable"]
+            return game_info.get("steam_id"), None, game_info.get("executable")
         case (False, True, True):
-            return None, game_info["steam_subdirectory"], game_info["executable"]
+            return (
+                None,
+                game_info.get("steam_subdirectory"),
+                game_info.get("executable"),
+            )
         case _:
             logger.critical("Unexpected error in Steam data validation.")
             logger.critical("Aborting operation...")
@@ -91,22 +95,35 @@ def get_install_path():
 
     steam_library = get_steam_library()
     heroic_config = get_heroic_config()
+    heroic_config_valid = (
+        any(heroic_config[i] is not None for i in (0, 2, 3, 4, 5))
+        if heroic_config
+        else False
+    )
 
-    # if steam_library and heroic_library: # TODO Handle multiple installs through different launchers
-    if steam_library:
+    if steam_library and heroic_config_valid:  # TODO
+        logger.info("Both Steam and Heroic installations detected.")
+        logger.error("Multi-launcher setups have not been implemented yet.")
+        logger.critical("Aborting operation...")
+        raise SystemExit(1)
+    elif steam_library:
         var.launcher = "steam"
         var.game_install_path = os.path.join(
-            steam_library, "steamapps", "common", var.game_info["steam_subdirectory"]
+            steam_library,
+            "steamapps",
+            "common",
+            var.game_info.get("steam_subdirectory"),
         )
-
-    elif heroic_config:
+    elif heroic_config_valid:
         var.launcher = "heroic"
         var.heroic_config = heroic_config
         var.heroic_runner = str(heroic_config[2])
         app = heroic_config[0]
         if heroic_config[2] == "gog":
             app = app[0]
-        var.game_install_path = os.path.join(str(app), str(var.game_info["executable"]))
+        var.game_install_path = os.path.join(
+            str(app), str(var.game_info.get("executable"))
+        )
     else:
         var.launcher = None
         var.game_install_path = None
@@ -120,70 +137,9 @@ def get_install_path():
     logger.debug(f"Determined game install path: {var.game_install_path}")
 
 
-def get_scriptextender_url():
-    import util.variables as var
-
-    if var.launcher == "heroic":
-        type = var.heroic_runner
-    else:
-        type = "steam"
-
-    if (
-        var.game_info.get("script_extender") is None
-        or var.game_info.get("script_extender", {}).get(type) is None
-    ):
-        logger.warning(f"No Script Extender information available for {var.launcher}.")
-        return
-
-    var.scriptextender_version = (
-        var.game_info.get("script_extender", {})
-        .get(type, {})
-        .get("resource", {})
-        .get("version")
-    )
-
-    url = (
-        var.game_info.get("script_extender", {})
-        .get(type, {})
-        .get("resource", {})
-        .get("url")
-    )
-    mod_id = (
-        var.game_info.get("script_extender", {})
-        .get(type, {})
-        .get("resource", {})
-        .get("mod_id")
-    )
-    file_id = (
-        var.game_info.get("script_extender", {})
-        .get(type, {})
-        .get("resource", {})
-        .get("file_id")
-    )
-
-    if url:
-        var.scriptextender_url = url
-        logger.debug(f"Determined Script Extender URL: {var.scriptextender_url}")
-    elif mod_id and file_id:
-        var.scriptextender_nxm_modid = mod_id
-        var.scriptextender_nxm_fileid = file_id
-        logger.debug(
-            f"Determined Script Extender Nexus Mod ID: {var.scriptextender_nxm_modid} - File ID: {var.scriptextender_nxm_fileid}"
-        )
-    else:
-        var.scriptextender_url = None
-        var.scriptextender_nxm_modid = None
-        var.scriptextender_nxm_fileid = None
-        logger.warning(
-            f"Unable to find Script Extender download URL or Nexus Mod IDs for {var.launcher}."
-        )
-
-
 def main():
     from util.variables import load_gameinfo, parameters
 
-    load_gameinfo(parameters["game"])
+    load_gameinfo(parameters.get("game"))
     get_install_path()
-    if parameters["script_extender"] is True:
-        get_scriptextender_url()
     logger.success("Game information loaded successfully.")

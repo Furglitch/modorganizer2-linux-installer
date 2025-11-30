@@ -72,7 +72,7 @@ def main(game, directory, log_level, script_extender, plugin):
         level=log_level,
     )
     logger.add(
-        "mo2-lint.{time:YYYY-MM-DD_HH-mm-ss}.log",
+        "mo2-lint.{time:YYYY-MM-DD_HH-mm-ss}.log",  # "~/.cache/mo2-lint/logs/install.{time:YYYY-MM-DD_HH-mm-ss}.log"
         level="TRACE",
         rotation="10 MB",
         retention="7 days",
@@ -102,6 +102,10 @@ def main(game, directory, log_level, script_extender, plugin):
     from step.configure_prefix import main as configure_prefix
 
     configure_prefix()
+
+    from step.external_resources import main as external_resources
+
+    external_resources()
 
 
 if __name__ == "__main__":

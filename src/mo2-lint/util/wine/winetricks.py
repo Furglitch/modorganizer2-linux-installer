@@ -30,6 +30,7 @@ def run(prefix: Path, command: List[str]) -> str:
         for raw in proc.stdout:
             out_lines.append(raw)
             logger.trace(raw.strip())
+            # TODO handle 'translation' of specific winetricks outputs
 
     ret = proc.wait()
     if ret == 0:

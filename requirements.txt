@@ -1,5 +1,6 @@
 click>=8.3.1
 loguru>=0.7.3
+patool>=4.0.2
 pre-commit>=4.5.0
 protontricks>=1.13.1
 pydantic>=2.12.5

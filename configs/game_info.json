@@ -34,7 +34,8 @@
         "resource": {
           "version": "0.7.6",
           "mod_id": 42147,
-          "file_id": 374185
+          "file_id": 374185,
+          "checksum": "41e7acf12688f640658b593172cb6d806b83643ad76facf27fbbfb3641025e0b"
         },
         "files": [
           "f4se_0_07_05/Data",
@@ -61,7 +62,8 @@
       "steam": {
         "resource": {
           "version": "22.13",
-          "url": "https://github.com/llde/xOBSE/releases/download/22.13/xOBSE-22.13.zip"
+          "url": "https://github.com/llde/xOBSE/releases/download/22.13/xOBSE-22.13.zip",
+          "checksum": "92d18411a9da803ffaac8c0b005cb6b37c4f9ce2f1571215f39363760d832bf2"
         },
         "files": [
           "*"
@@ -87,7 +89,8 @@
       "steam": {
         "resource": {
           "version": "2.2.6",
-          "url": "https://skse.silverlock.org/beta/skse64_2_02_06.7z"
+          "url": "https://skse.silverlock.org/beta/skse64_2_02_06.7z",
+          "checksum": "d7297f1a1d613e5265e1af4dbbfe8bd37a32719c1ccef363fc6187fa6eba0848"
         },
         "files": [
           "skse64_2_02_06/Data",

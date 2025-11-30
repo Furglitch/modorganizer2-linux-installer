@@ -1,0 +1,17 @@
+{
+  "mod_organizer": {
+    "download_url": "https://github.com/ModOrganizer2/modorganizer/releases/download/v2.5.2/Mod.Organizer-2.5.2.7z",
+    "version": "2.5.2",
+    "checksum": "e6376efd87fd5ddd95aee959405e8f067afa526ea6c2c0c5aa03c5108bf4a815"
+  },
+  "java": {
+    "download_url": "https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u312-b07/OpenJDK8U-jre_x64_windows_hotspot_8u312b07.zip",
+    "version": "8u312-b07",
+    "checksum": "a4623365d70e7bc969e84b7f29b6b2eecb6c0686863ed67651506e2b5adf43b0"
+  },
+  "winetricks": {
+    "download_url": "https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks",
+    "version": "latest",
+    "checksum": "ae6f98e9fe58410f7103e7a3142d988ee114a76d842d16029c0884be4e0523e4"
+  }
+}
