@@ -12,7 +12,9 @@ scriptextender_nexus_dl = False
 plugin_download_dir: Path = download_cache / "plugins"
 plugin_extract_dir: Path = extract_cache / "plugins"
 
+name: dict[str, str] = {}
 url: dict[str, str] = {}
+files: dict[str, list] = {}
 download_dir: dict[str, Path] = {}
 extract_dir: dict[str, Path] = {}
 
@@ -203,20 +205,102 @@ def scriptextender_install():
             )
 
 
-def plugin_path():  # TODO
-    pass
+def plugin_path(plugin: str):
+    from util.variables import load_plugininfo
+
+    info = load_plugininfo()
+
+    manifest = {}
+    for entry in info:
+        if entry.get("Identifier") == plugin:
+            manifest[plugin] = entry.get("Manifest")
+            break
+    from urllib.request import urlretrieve
+
+    file = Path(urlretrieve(manifest.get(plugin))[0])
+    with open(file, "r", encoding="utf-8") as f:
+        from pydantic_core import from_json
+
+        manifest_json = from_json(f.read())
+        logger.trace(f"Loaded plugin manifest for {plugin}: {manifest_json}")
+    name[plugin] = manifest_json.get("Name")
+    latest_version = manifest_json.get("Versions", [])[-1] if manifest_json else None
+    files[plugin] = latest_version.get("PluginPath") if latest_version else []
+    if latest_version:
+        url[plugin] = latest_version.get("DownloadUrl")
+        logger.trace(
+            f"Download URL for {name.get(plugin)}, version {latest_version.get('Version')}: {url.get(plugin)}"
+        )
+        logger.trace(
+            f"Files for {name.get(plugin)}, version {latest_version.get('Version')}: {files.get(plugin)}"
+        )
+
+    filename = url.get(plugin).split("/")[-1]
+    download_dir[plugin] = download_cache / "plugins" / filename
+    extract_dir[plugin] = extract_cache / "plugins" / Path(filename).stem
+    download_dir[plugin].parent.mkdir(parents=True, exist_ok=True)
+    extract_dir[plugin].mkdir(parents=True, exist_ok=True)
 
 
-def plugin_download():  # TODO
-    pass
+def plugin_download(plugin: str):
+    _name = name.get(plugin)
+    _url = url.get(plugin)
+    _dir = download_dir.get(plugin)
+    attempts = 3
+    for i in range(attempts):
+        if i < attempts:
+            logger.debug(f"Attempt {i + 1} to download {_name}.")
+            logger.trace(f"Downloading from URL: {_url}")
+            from urllib.request import urlretrieve
+
+            try:
+                urlretrieve(_url, _dir)
+                logger.debug(f"Downloaded {_name} to {_dir}")
+                return
+            except Exception as e:
+                logger.error(f"Failed to download {_name}: {e}")
+            break
+    logger.error(f"Failed to download resource after {attempts} attempts.")
+    return
 
 
-def plugin_extract():  # TODO
-    pass
+def plugin_extract(plugin: str):
+    _download_dir = download_dir.get(plugin)
+    _extract_dir = extract_dir.get(plugin)
+    _name = name.get(plugin)
+    from patoolib import extract_archive as unzip
+
+    try:
+        unzip(str(_download_dir), outdir=str(_extract_dir))
+        logger.debug(f"Extracted {_name} to {_extract_dir}")
+    except Exception as e:
+        logger.error(f"Failed to extract {_name}: {e}")
+        return
 
 
-def plugin_install():  # TODO
-    pass
+def plugin_install(plugin: str):
+    _extract_dir = extract_dir.get(plugin)
+    _name = name.get(plugin)
+    _files = files.get(plugin)
+
+    for file in _files:
+        from util.variables import parameters
+
+        file = Path(file)
+        source = _extract_dir / file
+        destination = Path(parameters.get("directory")) / "plugins" / file.name
+        import shutil
+
+        if source.is_dir():
+            shutil.copytree(source, destination, dirs_exist_ok=True)
+            logger.trace(f"Copied {_name} plugin directory {source} to {destination}")
+        elif source.is_file() and not destination.exists():
+            shutil.copy(source, destination)
+            logger.trace(f"Copied {_name} plugin file {source} to {destination}")
+        else:
+            logger.debug(
+                f"{_name} plugin file {destination} already exists; skipping copy."
+            )
 
 
 def resource_download(resource_name: str):
@@ -375,14 +459,16 @@ def main():
         scriptextender_path()
         scriptextender_download_url()
         scriptextender_extract()
-    #    scriptextender_install()
-    # if parameters.get("plugins"): # TODO
-    #    plugin_path()
-    #    plugin_download()
-    #    plugin_extract()
-    #    plugin_install()
+        scriptextender_install()
 
     resource_download("mod_organizer")
     resource_download("winetricks")
     if parameters.get("game") == ("skyrim" or "enderal"):
         resource_download("java")
+
+    if parameters.get("plugins"):
+        for plugin in parameters.get("plugins"):
+            plugin_path(plugin)
+            plugin_download(plugin)
+            plugin_extract(plugin)
+            plugin_install(plugin)
