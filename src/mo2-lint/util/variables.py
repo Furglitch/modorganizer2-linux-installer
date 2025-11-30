@@ -8,6 +8,7 @@ parameters: dict = None
 game_info: dict = None
 resource_info: dict = None
 launcher: str = None
+prefix: Path = None
 heroic_runner: str = None
 heroic_config: list = None
 game_install_path: Path = None
@@ -58,31 +59,19 @@ def load_gameinfo(gamekey: str):
     return game_info
 
 
-def load_resourceinfo_file():
-    with open(resourceinfo_path(), "r", encoding="utf-8") as file:
-        json = from_json(file.read())
-    logger.trace(f"Loaded resource info file: {json}")
-    return json
-
-
-def load_resourceinfo(resource: str):
+def load_resourceinfo():
     global resource_info
-    resource_info = load_resourceinfo_file().get(resource)
-    logger.trace(f"Loaded resource info for {resource}: {resource_info}")
+    with open(resourceinfo_path(), "r", encoding="utf-8") as file:
+        resource_info = from_json(file.read())
+    logger.trace(f"Loaded resource info: {resource_info}")
     return resource_info
 
 
-def load_plugininfo_file():
-    with open(plugininfo_path(), "r", encoding="utf-8") as file:
-        json = from_json(file.read())
-    logger.trace(f"Loaded plugin info file: {json}")
-    return json
-
-
-def load_plugininfo(resource: str):
+def load_plugininfo():
     global plugin_info
-    plugin_info = load_plugininfo_file().get(resource)
-    logger.trace(f"Loaded plugin info for {resource}: {plugin_info}")
+    with open(plugininfo_path(), "r", encoding="utf-8") as file:
+        plugin_info = from_json(file.read())
+    logger.trace(f"Loaded plugin info file: {plugin_info}")
     return plugin_info
 
 

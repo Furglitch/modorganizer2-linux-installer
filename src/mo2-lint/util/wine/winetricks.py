@@ -7,7 +7,10 @@ import os
 from typing import List, Optional
 from loguru import logger
 
-exe = shutil.which("winetricks") or None
+exe = (
+    shutil.which("winetricks")
+    or Path("~/.cache/mo2-lint/downloads/winetricks").expanduser()
+)
 
 
 def run(prefix: Path, command: List[str]) -> str:

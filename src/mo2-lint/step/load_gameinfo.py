@@ -114,6 +114,9 @@ def get_install_path():
             "common",
             var.game_info.get("steam_subdirectory"),
         )
+        from util.wine.protontricks import get_prefix
+
+        var.prefix = get_prefix(var.game_info.get("steam_id"))
     elif heroic_config_valid:
         var.launcher = "heroic"
         var.heroic_config = heroic_config
@@ -124,6 +127,7 @@ def get_install_path():
         var.game_install_path = os.path.join(
             str(app), str(var.game_info.get("executable"))
         )
+        var.prefix = heroic_config[5]
     else:
         var.launcher = None
         var.game_install_path = None

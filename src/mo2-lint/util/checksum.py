@@ -15,7 +15,7 @@ def checksum_local(target: Path, expected: str) -> bool:
         digest = hash.hexdigest()
     if digest == expected:
         check_pass = True
-        logger.debug("Checksum matches expected value.")
+        logger.trace("Checksum matches expected value.")
     else:
         check_pass = False
         logger.warning("Checksum does not match expected value.")

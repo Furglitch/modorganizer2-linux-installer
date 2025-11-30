@@ -9,6 +9,12 @@ extract_cache: Path = cache / "extracted"
 scriptextender_download_dir: Path = download_cache / "script_extenders"
 scriptextender_extract_dir: Path = extract_cache / "script_extenders"
 scriptextender_nexus_dl = False
+plugin_download_dir: Path = download_cache / "plugins"
+plugin_extract_dir: Path = extract_cache / "plugins"
+
+url: dict[str, str] = {}
+download_dir: dict[str, Path] = {}
+extract_dir: dict[str, Path] = {}
 
 
 def scriptextender_get_info():
@@ -116,10 +122,10 @@ def scriptextender_path():
 
 
 def scriptextender_download_url():
-    if scriptextender_download_dir.exists():
-        from util.checksum import checksum_local
-        from util.variables import scriptextender_checksum
+    from util.checksum import checksum_local
+    from util.variables import scriptextender_checksum
 
+    if scriptextender_download_dir.exists():
         if scriptextender_checksum:
             if checksum_local(scriptextender_download_dir, scriptextender_checksum):
                 logger.debug(
@@ -153,7 +159,6 @@ def scriptextender_extract():
     from patoolib import extract_archive as unzip
     from util.variables import scriptextender_files
 
-    print(scriptextender_files)
     if scriptextender_files:
         logger.trace(
             f"Verifying existing Script Extender files in {scriptextender_extract_dir}"
@@ -214,83 +219,170 @@ def plugin_install():  # TODO
     pass
 
 
-def modorganizer_path():  # TODO
+def resource_download(resource_name: str):
+    from util.variables import load_resourceinfo
+
+    load_resourceinfo()
+    path(resource_name)
+    download(resource_name)
+    if not resource_name == "winetricks":
+        extract(resource_name)
+        install(resource_name)
     pass
 
 
-def modorganizer_download():  # TODO
-    pass
+def path(resource_name: str):
+    from util.variables import resource_info
+
+    url[resource_name] = resource_info.get(resource_name, {}).get("download_url")
+    filename = url.get(resource_name).split("/")[-1]
+    download_dir[resource_name] = _download_dir = download_cache / filename
+    extract_dir[resource_name] = _extract_dir = extract_cache / Path(filename).stem
+    _download_dir.parent.mkdir(parents=True, exist_ok=True)
+    _extract_dir.mkdir(parents=True, exist_ok=True)
+    logger.debug(
+        f"{resource_name.replace('_', ' ').title()} download path created: {_download_dir.parent}"
+    )
+    logger.debug(
+        f"{resource_name.replace('_', ' ').title()} extract path created: {_extract_dir}"
+    )
 
 
-def modorganizer_extract():  # TODO
-    pass
+def download(resource_name: str):
+    from util.checksum import checksum_local
+    from util.variables import resource_info
+
+    _data = resource_info.get(resource_name)
+    _dir = download_dir.get(resource_name)
+    _url = url.get(resource_name)
+    _name = resource_name.replace("_", " ").title()
+
+    if _dir.exists():
+        expected = _data.get("checksum")
+        if expected:
+            if checksum_local(_dir, expected):
+                logger.debug(f"{_name} already downloaded and verified at: {_dir}")
+                import stat
+
+                _dir.chmod(
+                    _dir.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
+                )
+                return
+            else:
+                logger.warning(
+                    f"Checksum mismatch for existing {_name} at: {_dir}. Re-downloading."
+                )
+
+    attempts = 3
+    for i in range(attempts):
+        if i < attempts:
+            logger.debug(f"Attempt {i + 1} to download {_name}.")
+            logger.trace(f"Downloading from URL: {_url}")
+
+            from urllib.request import urlretrieve
+
+            try:
+                urlretrieve(_url, _dir)
+                checksum_local(_dir, _data.get("checksum"))
+                logger.debug(f"Downloaded {_name} to {_dir}")
+                if resource_name == "winetricks":
+                    import stat
+
+                    _dir.chmod(
+                        _dir.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
+                    )
+                return
+            except Exception as e:
+                logger.error(f"Failed to download {_name}: {e}")
+            break
+    logger.error(f"Failed to download resource after {attempts} attempts.")
+    return
 
 
-def modorganizer_install():  # TODO
-    pass
+def extract(resource_name: str):
+    _download_dir = download_dir.get(resource_name)
+    _extract_dir = extract_dir.get(resource_name)
+    _name = resource_name.replace("_", " ").title()
+
+    from patoolib import extract_archive as unzip
+
+    if not check_existing(resource_name, _extract_dir):
+        try:
+            unzip(str(_download_dir), outdir=str(_extract_dir))
+            logger.debug(f"Extracted {_name} to {_extract_dir}")
+        except Exception as e:
+            logger.error(f"Failed to extract {_name}: {e}")
+            return
 
 
-def java_path():  # TODO
-    pass
+def check_existing(resource_name: str, dir: Path = None) -> bool:
+    match resource_name:
+        case "mod_organizer":
+            name = "Mod Organizer"
+            exe = Path("ModOrganizer.exe")
+        case "java":
+            name = "Java"
+            exe = Path("bin") / "java.exe"
+        case "winetricks":
+            name = "winetricks"
+            exe = Path("winetricks")
+    exists = (dir / exe).exists()
+    if exists:
+        logger.trace(f"{name} exe found at: {dir}")
+    return exists
 
 
-def java_download():  # TODO
-    pass
+def install(resource_name: str):
+    _name = resource_name.replace("_", " ").title()
+    _extract_dir = extract_dir.get(resource_name)
 
+    match resource_name:
+        case "mod_organizer":
+            from util.variables import parameters
 
-def java_extract():  # TODO
-    pass
+            dir = Path(parameters.get("directory"))
+        case "java":
+            from util.variables import prefix
 
+            # prefix = Path("~/.cache/mo2-lint/test-output/prefix").expanduser()
+            dir = (Path(prefix) / "drive_c" / "java").expanduser()
+    dir.mkdir(parents=True, exist_ok=True)
+    if check_existing(resource_name, dir):
+        logger.debug(f"{_name} already installed at {dir}; skipping installation.")
+        return
+    else:
+        try:
+            import shutil
 
-def java_install():  # TODO
-    pass
-
-
-def winetricks_path():  # TODO
-    pass
-
-
-def winetricks_download():  # TODO
-    pass
-
-
-def winetricks_extract():  # TODO
-    pass
-
-
-def winetricks_install():  # TODO
-    pass
-
-
-# ! To be fair, I think aside from scriptextender, most of these can use a singular extract and download function with parameters, rather than individual ones.
-# ! Scriptextender is just special because of the file lists. Anyways, I'll cross that bridge when I get to it.
+            logger.debug(f"Installing {_name} to {dir}...")
+            shutil.copytree(_extract_dir, dir, dirs_exist_ok=True)
+            logger.success(f"{_name} installed to {dir}.")
+        except Exception as e:
+            logger.error(f"Failed to install {_name}: {e}")
+            return
 
 
 def main():
     cache.mkdir(parents=True, exist_ok=True)
     logger.debug(f"Cache directory ensured at: {cache}")
-    from util.variables import parameters
+    from util.variables import parameters, game_info, launcher
 
-    if parameters.get("script_extender") is True:
+    if (
+        parameters.get("script_extender") is True
+        and game_info.get("script_extender").get(launcher) is not None
+    ):
         scriptextender_get_info()
         scriptextender_path()
         scriptextender_download_url()
         scriptextender_extract()
-        scriptextender_install()
+    #    scriptextender_install()
     # if parameters.get("plugins"): # TODO
     #    plugin_path()
     #    plugin_download()
     #    plugin_extract()
     #    plugin_install()
-    modorganizer_path()
-    modorganizer_download()
-    modorganizer_extract()
-    modorganizer_install()
-    java_path()
-    java_download()
-    java_extract()
-    java_install()
-    winetricks_path()
-    winetricks_download()
-    winetricks_extract()
-    winetricks_install()
+
+    resource_download("mod_organizer")
+    resource_download("winetricks")
+    if parameters.get("game") == ("skyrim" or "enderal"):
+        resource_download("java")

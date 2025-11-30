@@ -64,7 +64,6 @@ def restore_prefix_data(prefix: str = None):
         case "heroic":
             src = Path(archived_prefix) / "drive_c" / "users"
     dst = Path(prefix) / "drive_c" / "users"
-
     try:
         import shutil
 
@@ -133,7 +132,14 @@ def prompt_prefix():
         "y",
         "yes",
     ):
-        archive_prefix(str(Path(prefix).parent))
+        from util.variables import launcher
+
+        _prefix = (
+            str(Path(prefix).expanduser())
+            if launcher != "steam"
+            else str(Path(prefix).parent.expanduser())
+        )
+        archive_prefix(_prefix)
     else:
         logger.debug("User refused to archive the prefix.")
     if create_prefix() is True:
@@ -187,7 +193,9 @@ def configure():
                 wine = Path(wine).parent / "files" / "bin" / "wine"
             logger.debug(f'Using Heroic runner with wine: "{wine}", prefix: "{prefix}"')
             from util.wine import winetricks
+            from step.external_resources import resource_download
 
+            resource_download("winetricks")
             winetricks.apply(wine, prefix, tricks)
 
 
@@ -200,6 +208,9 @@ def main():
             "An error occurred while configuring the prefix. See debug for details."
         )
         logger.debug(f"Exception: {e}")
+        import traceback
+
+        logger.debug("Traceback:\n" + traceback.format_exc())
         if input(
             "Would you like to ignore and continue? [y/N]: "
         ).strip().lower() not in ("", "y", "yes"):
