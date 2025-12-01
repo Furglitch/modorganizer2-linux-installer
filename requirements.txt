@@ -4,4 +4,6 @@ patool>=4.0.2
 pre-commit>=4.5.0
 protontricks>=1.13.1
 pydantic>=2.12.5
+pyinstaller>=6.17.0
+pyinstaller-hooks-contrib>=2025.10
 ruff==0.14.6
