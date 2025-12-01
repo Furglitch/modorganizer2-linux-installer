@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import click
-import sys
 from pydantic_core import from_json
 from pathlib import Path
 from loguru import logger
@@ -53,6 +52,8 @@ logout = None
 
 
 def set_logger(log_level):
+    import sys
+
     global stdout, logout
 
     logger.remove(stdout)
@@ -155,6 +156,10 @@ def main(game, directory, log_level, script_extender, plugin):
     from step.external_resources import main as external_resources
 
     external_resources()
+
+    from util.nexus.install_handler import main as install_handler
+
+    install_handler()
 
 
 if __name__ == "__main__":

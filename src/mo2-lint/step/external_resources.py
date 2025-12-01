@@ -225,6 +225,37 @@ def install(src: str):
     logger.success(f"Installed {_name} to {dir}.")
 
 
+def symlink_instance():
+    from pathlib import Path
+    from util.variables import parameters, game_info
+
+    source = Path(parameters.get("directory")).expanduser()
+    target = Path("~/.config/mo2-lint/instances").expanduser()
+    target.mkdir(parents=True, exist_ok=True)
+    link = target / game_info.get("nexus_id")
+
+    if not source.exists():
+        logger.warning(f"MO2 instance directory does not exist: {source}")
+        return
+    try:
+        if link.exists() or link.is_symlink():
+            if link.is_symlink() and link.resolve() == source.resolve():
+                logger.debug(f"Symlink already correct at {link}")
+                return
+            elif link.is_symlink():
+                link.unlink()
+                logger.debug(f"Removed stale symlink at {link}")
+            else:
+                logger.warning(
+                    f"Path exists, but is not a symlink. Please remove it manually: {link}"
+                )
+                return
+        link.symlink_to(source)
+        logger.success(f"Created symlink {link} -> {source}")
+    except Exception as e:
+        logger.error(f"Failed to create symlink {link} -> {source}: {e}")
+
+
 def main():
     cache_dir.mkdir(parents=True, exist_ok=True)
     logger.debug(f"Cache directory ensured at {cache_dir}")
@@ -239,3 +270,4 @@ def main():
     if parameters.get("plugins"):
         for plugin in parameters.get("plugins"):
             download_plugins(plugin)
+    symlink_instance()
