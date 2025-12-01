@@ -15,32 +15,24 @@ game_install_path: Path = None
 archived_prefix: Path = None
 
 
-def gameinfo_path():
-    path = (
-        Path(__file__).resolve().parents[3] / "configs" / "game_info.json"
-    )  # TODO Change path to .config
-    logger.trace(f"Game info path: {path}")
-    return path
+def internal_file(*parts):
+    import sys
+
+    path = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve()))
+    return path.joinpath(*parts)
 
 
-def resourceinfo_path():
-    path = (
-        Path(__file__).resolve().parents[3] / "configs" / "resource_info.json"
-    )  # TODO Change path to .config
-    logger.trace(f"Resource info path: {path}")
-    return path
-
-
-def plugininfo_path():
-    path = (
-        Path(__file__).resolve().parents[3] / "configs" / "plugin_info.json"
-    )  # TODO Change path to .config
-    logger.trace(f"Plugin info path: {path}")
+def path(file: str):
+    if not Path("~/.config/mo2-lint/", file).expanduser().exists():
+        path = internal_file("cfg", file)
+    else:
+        path = Path("~/.config/mo2-lint/", file).expanduser()
+    logger.trace(f"{file} path: {path}")
     return path
 
 
 def load_gameinfo_file():
-    with open(gameinfo_path(), "r", encoding="utf-8") as file:
+    with open(path("game_info.json"), "r", encoding="utf-8") as file:
         json = from_json(file.read())
     logger.trace(f"Loaded game info file: {json}")
     return json
@@ -55,7 +47,7 @@ def load_gameinfo(gamekey: str):
 
 def load_resourceinfo():
     global resource_info
-    with open(resourceinfo_path(), "r", encoding="utf-8") as file:
+    with open(path("resource_info.json"), "r", encoding="utf-8") as file:
         resource_info = from_json(file.read())
     logger.trace(f"Loaded resource info: {resource_info}")
     return resource_info
@@ -63,7 +55,7 @@ def load_resourceinfo():
 
 def load_plugininfo():
     global plugin_info
-    with open(plugininfo_path(), "r", encoding="utf-8") as file:
+    with open(path("plugin_info.json"), "r", encoding="utf-8") as file:
         plugin_info = from_json(file.read())
     logger.trace(f"Loaded plugin info file: {plugin_info}")
     return plugin_info

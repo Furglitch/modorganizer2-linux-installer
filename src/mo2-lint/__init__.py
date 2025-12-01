@@ -18,10 +18,67 @@ CRITICAL: Fatal error
 """
 
 
-def load_game_list():
-    from util.variables import gameinfo_path
+def pull_config():
+    configs = {"game_info.json", "resource_info.json", "plugin_info.json"}
+    for config in configs:
+        # Pull defaults from internal if not present in .config
+        if not Path("~/.config/mo2-lint/", config).expanduser().exists():
+            logger.debug(
+                f"{config} not found in ~/.config/mo2-lint/, copying default from internal files."
+            )
+            from shutil import copy2
+            from util.variables import internal_file
 
-    with open(gameinfo_path(), "r", encoding="utf-8") as file:
+            src = internal_file("cfg", config)
+            dest = Path("~/.config/mo2-lint/", config).expanduser()
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            copy2(src, dest)
+            logger.debug(f"Copied default {config} to ~/.config/mo2-lint/")
+        # Download latest from GitHub
+        try:
+            from urllib.request import urlretrieve
+
+            Path("~/.config/mo2-lint/").expanduser().mkdir(parents=True, exist_ok=True)
+            urlretrieve(
+                f"https://raw.githubusercontent.com/Furglitch/modorganizer2-linux-installer/refs/heads/rewrite/configs/{config}",
+                Path("~/.config/mo2-lint/", config).expanduser(),
+            )
+            logger.debug(f"Downloaded latest {config} from GitHub.")
+        except Exception as e:
+            logger.error(f"Failed to download {config}: {e}")
+
+
+stdout = None
+logout = None
+
+
+def set_logger(log_level):
+    global stdout, logout
+
+    logger.remove(stdout)
+    logger.remove(logout)
+
+    stdout = logger.add(
+        sys.stdout,
+        colorize=True,
+        format="<green>{time}</green> | <level>{level}</level> | {message}",
+        level=log_level,
+    )
+    logout = logger.add(
+        "mo2-lint.{time:YYYY-MM-DD_HH-mm-ss}.log",  # "~/.cache/mo2-lint/logs/install.{time:YYYY-MM-DD_HH-mm-ss}.log"
+        level="TRACE",
+        rotation="10 MB",
+        retention="7 days",
+        compression="zip",
+    )
+
+
+def load_game_list():
+    from util.variables import path
+
+    set_logger("TRACE")
+    pull_config()
+    with open(path("game_info.json"), "r", encoding="utf-8") as file:
         json = from_json(file.read())
         games = list(json.keys())
         logger.trace(f"Loaded game list: {games}")
@@ -32,7 +89,9 @@ def load_game_list():
 @click.version_option(version="1.0.0", prog_name="mo2-lint")
 @click.help_option("-h", "--help")
 @click.argument(
-    "game", type=click.Choice(load_game_list(), case_sensitive=False), required=True
+    "game",
+    type=click.Choice(load_game_list(), case_sensitive=False),
+    required=True,
 )
 @click.argument(
     "directory",
@@ -63,21 +122,7 @@ def load_game_list():
 )
 def main(game, directory, log_level, script_extender, plugin):
     """A tool to install and manage Mod Organizer 2 instances for games from Steam and Heroic Games Launcher."""
-
-    logger.remove(0)
-    logger.add(
-        sys.stdout,
-        colorize=True,
-        format="<green>{time}</green> | <level>{level}</level> | {message}",
-        level=log_level,
-    )
-    logger.add(
-        "mo2-lint.{time:YYYY-MM-DD_HH-mm-ss}.log",  # "~/.cache/mo2-lint/logs/install.{time:YYYY-MM-DD_HH-mm-ss}.log"
-        level="TRACE",
-        rotation="10 MB",
-        retention="7 days",
-        compression="zip",
-    )
+    set_logger(log_level.upper())
     logger.info("Starting mo2-lint...")
 
     if not Path(directory).exists():

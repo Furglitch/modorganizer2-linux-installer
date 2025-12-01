@@ -9,6 +9,7 @@ pyinstaller: venv/bin/activate
 	./venv/bin/pyinstaller --onefile --name mo2-lint \
 		--paths src \
 		--add-data "src/mo2-lint:src" \
+		--add-data "configs:cfg" \
 		--runtime-hook "build/runtime_hooks.py" \
 		src/mo2-lint/__init__.py
 
