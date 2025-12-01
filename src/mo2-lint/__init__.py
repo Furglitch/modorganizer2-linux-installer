@@ -61,11 +61,15 @@ def set_logger(log_level):
     stdout = logger.add(
         sys.stdout,
         colorize=True,
-        format="<green>{time}</green> | <level>{level}</level> | {message}",
+        format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | {message}",
         level=log_level,
     )
+
+    filename = Path(
+        "~/.cache/mo2-lint/logs/install.{time:YYYY-MM-DD_HH-mm-ss}.log"
+    ).expanduser()
     logout = logger.add(
-        "mo2-lint.{time:YYYY-MM-DD_HH-mm-ss}.log",  # "~/.cache/mo2-lint/logs/install.{time:YYYY-MM-DD_HH-mm-ss}.log"
+        filename,
         level="TRACE",
         rotation="10 MB",
         retention="7 days",

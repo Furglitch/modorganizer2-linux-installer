@@ -46,7 +46,7 @@ body:
     attributes:
       label: Installer version
       description: Do not put 'latest', put the version number
-      value: '6.X.X'
+      value: '7.X.X'
     validations:
       required: true
   - type: dropdown
@@ -86,7 +86,7 @@ body:
     id: logs
     attributes:
       label: Logs
-      description: Please include the logs here. You can find your log file (`install-[DATE_TIME].log`) in the same folder as `install.sh`.
+      description: Please include the logs here. You can find your log file in ~/.cache/mo2-lint/logs/.
       placeholder: Drag & drop your install.log file here. _Do not copy-paste, it will not fit_
       render: shell
     validations:
