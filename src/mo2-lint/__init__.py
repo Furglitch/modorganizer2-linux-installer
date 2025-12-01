@@ -90,7 +90,7 @@ def load_game_list():
 
 
 @click.command()
-@click.version_option(version="1.0.0", prog_name="mo2-lint")
+@click.version_option(version="7.0.0", prog_name="mo2-lint")
 @click.help_option("-h", "--help")
 @click.argument(
     "game",
