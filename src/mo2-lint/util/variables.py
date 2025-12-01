@@ -12,12 +12,6 @@ prefix: Path = None
 heroic_runner: str = None
 heroic_config: list = None
 game_install_path: Path = None
-scriptextender_url: str = None
-scriptextender_nxm_modid: int = None
-scriptextender_nxm_fileid: int = None
-scriptextender_version: str = None
-scriptextender_files: list = None
-scriptextender_checksum: str = None
 archived_prefix: Path = None
 
 

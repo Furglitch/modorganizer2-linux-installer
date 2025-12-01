@@ -3,472 +3,239 @@
 from pathlib import Path
 from loguru import logger
 
-cache: Path = Path("~/.cache/mo2-lint").expanduser()
-download_cache: Path = cache / "downloads"
-extract_cache: Path = cache / "extracted"
-scriptextender_download_dir: Path = download_cache / "script_extenders"
-scriptextender_extract_dir: Path = extract_cache / "script_extenders"
-scriptextender_nexus_dl = False
-plugin_download_dir: Path = download_cache / "plugins"
-plugin_extract_dir: Path = extract_cache / "plugins"
-
 name: dict[str, str] = {}
 url: dict[str, str] = {}
+nexus_id: dict[str, tuple[int, int]] = {}
+checksum: dict[str, str] = {}
 files: dict[str, list] = {}
 download_dir: dict[str, Path] = {}
 extract_dir: dict[str, Path] = {}
+cache_dir: Path = Path("~/.cache/mo2-lint").expanduser()
 
 
-def scriptextender_get_info():
+def download_scriptextender():
     import util.variables as var
 
     if var.launcher == "heroic":
-        type = var.heroic_runner
+        info = var.game_info.get("script_extender", {}).get(var.heroic_runner, {})
     else:
-        type = "steam"
+        info = var.game_info.get("script_extender", {}).get("steam", {})
 
-    if (
-        var.game_info.get("script_extender") is None
-        or var.game_info.get("script_extender", {}).get(type) is None
+    se = "scriptextender"
+    se_info = info.get("resource", {})
+    name[se] = "Script Extender"
+    url[se] = se_info.get("url")
+    nexus_id[se] = se_info.get("mod_id"), se_info.get("file_id")
+    checksum[se] = se_info.get("checksum")
+    files[se] = info.get("files")
+
+    logger.trace(
+        f"Determined values for Script Extender: URL={url.get(se)}, Nexus IDs={nexus_id.get(se)}, Checksum={checksum.get(se)}, Files={files.get(se)}"
+    )
+    get_paths(se)
+    download(se)
+    extract(se)
+    install(se)
+
+
+def download_resources():
+    from util.variables import load_resourceinfo
+
+    load_resourceinfo()
+    from util.variables import parameters, resource_info as info
+
+    for resource in (
+        ("mod_organizer", "winetricks", "java")
+        if parameters.get("game") == ("skyrim" or "enderal")
+        else ("mod_organizer", "winetricks")
     ):
-        logger.warning(f"No Script Extender information available for {var.launcher}.")
-        return
-
-    var.scriptextender_version = (
-        var.game_info.get("script_extender", {})
-        .get(type, {})
-        .get("resource", {})
-        .get("version")
-    )
-
-    url = (
-        var.game_info.get("script_extender", {})
-        .get(type, {})
-        .get("resource", {})
-        .get("url")
-    )
-    mod_id = (
-        var.game_info.get("script_extender", {})
-        .get(type, {})
-        .get("resource", {})
-        .get("mod_id")
-    )
-    file_id = (
-        var.game_info.get("script_extender", {})
-        .get(type, {})
-        .get("resource", {})
-        .get("file_id")
-    )
-    checksum = (
-        var.game_info.get("script_extender", {})
-        .get(type, {})
-        .get("resource", {})
-        .get("checksum")
-    )
-    files = var.game_info.get("script_extender", {}).get(type, {}).get("files")
-
-    if url:
-        var.scriptextender_url = url
-        logger.trace(f"Determined Script Extender URL: {var.scriptextender_url}")
-    if mod_id and file_id:
-        var.scriptextender_nxm_modid = mod_id
-        var.scriptextender_nxm_fileid = file_id
-        logger.trace(
-            f"Determined Script Extender Nexus Mod ID: {var.scriptextender_nxm_modid} - File ID: {var.scriptextender_nxm_fileid}"
-        )
-    if not (url or (mod_id and file_id)):
-        var.scriptextender_url = None
-        var.scriptextender_nxm_modid = None
-        var.scriptextender_nxm_fileid = None
-        logger.warning(
-            f"Unable to find Script Extender download URL or Nexus Mod IDs for {var.launcher}."
-        )
-    if checksum:
-        var.scriptextender_checksum = checksum
-        logger.trace(
-            f"Determined Script Extender checksum: {var.scriptextender_checksum}"
-        )
-    if files:
-        var.scriptextender_files = files
-        logger.trace(
-            f"Determined Script Extender file list: {var.scriptextender_files}"
-        )
+        name[resource] = resource.replace("_", " ").title()
+        url[resource] = info.get(resource, {}).get("download_url")
+        checksum[resource] = info.get(resource, {}).get("checksum")
+        files[resource] = ["*"]
+        get_paths(resource)
+        download(resource)
+        if not resource == "winetricks":
+            extract(resource)
+            install(resource)
 
 
-def scriptextender_path():
-    from util.variables import (
-        scriptextender_url,
-        scriptextender_nxm_modid,
-        scriptextender_nxm_fileid,
-    )
-
-    filename = None
-    if scriptextender_url:
-        filename = scriptextender_url.split("/")[-1]
-        logger.trace(f"Determined Script Extender filename: {filename}")
-    elif scriptextender_nxm_modid and scriptextender_nxm_fileid:
-        global scriptextender_nexus_dl
-        scriptextender_nexus_dl = True
-        logger.error("NXM handling for Script Extender is not yet implemented.")
-        pass  # TODO Implement NXM handling
-
-    global scriptextender_download_dir, scriptextender_extract_dir
-    scriptextender_download_dir = scriptextender_download_dir / filename
-    scriptextender_extract_dir = scriptextender_extract_dir / Path(filename).stem
-    scriptextender_download_dir.parent.mkdir(parents=True, exist_ok=True)
-    scriptextender_extract_dir.mkdir(parents=True, exist_ok=True)
-    logger.debug(
-        f"Script Extender download path created: {scriptextender_download_dir.parent}"
-    )
-    logger.debug(f"Script Extender extract path created: {scriptextender_extract_dir}")
-
-
-def scriptextender_download_url():
-    from util.checksum import checksum_local
-    from util.variables import scriptextender_checksum
-
-    if scriptextender_download_dir.exists():
-        if scriptextender_checksum:
-            if checksum_local(scriptextender_download_dir, scriptextender_checksum):
-                logger.debug(
-                    f"Script Extender already downloaded and verified at: {scriptextender_download_dir}"
-                )
-                return
-            else:
-                logger.warning(
-                    f"Checksum mismatch for existing Script Extender at: {scriptextender_download_dir}. Re-downloading."
-                )
-    from util.variables import scriptextender_url, scriptextender_version
-    from urllib.request import urlretrieve
-
-    logger.debug(
-        f"Downloading Script Extender version {scriptextender_version} from {scriptextender_url}"
-    )
-    try:
-        urlretrieve(scriptextender_url, scriptextender_download_dir)
-        checksum_local(scriptextender_download_dir, scriptextender_checksum)
-        logger.debug(f"Downloaded Script Extender to {scriptextender_download_dir}")
-    except Exception as e:
-        logger.error(f"Failed to download Script Extender: {e}")
-        return
-
-
-def scriptextender_download_nexus():  # TODO
-    pass
-
-
-def scriptextender_extract():
-    from patoolib import extract_archive as unzip
-    from util.variables import scriptextender_files
-
-    if scriptextender_files:
-        logger.trace(
-            f"Verifying existing Script Extender files in {scriptextender_extract_dir}"
-        )
-        missing = []
-        for rel in scriptextender_files:
-            path = scriptextender_extract_dir / rel
-            if not path.exists():
-                missing.append(path)
-                logger.trace(f"Missing Script Extender file: {path}")
-        if not missing:
-            logger.debug(
-                f"All Script Extender files already exist in {scriptextender_extract_dir}; skipping extraction."
-            )
-            return
-
-    try:
-        unzip(str(scriptextender_download_dir), outdir=str(scriptextender_extract_dir))
-        logger.debug(f"Extracted Script Extender to {scriptextender_extract_dir}")
-    except Exception as e:
-        logger.error(f"Failed to extract Script Extender: {e}")
-        return
-
-
-def scriptextender_install():
-    from util.variables import game_install_path, scriptextender_files
-    import shutil
-
-    for file in scriptextender_files:
-        file = Path(file)
-        source = scriptextender_extract_dir / file
-        destination = Path(game_install_path) / file.name
-        if source.is_dir():
-            shutil.copytree(source, destination, dirs_exist_ok=True)
-            logger.trace(f"Copied Script Extender directory {source} to {destination}")
-        elif source.is_file() and not destination.exists():
-            shutil.copy(source, destination)
-            logger.trace(f"Copied Script Extender file {source} to {destination}")
-        else:
-            logger.debug(
-                f"Script Extender file {destination} already exists; skipping copy."
-            )
-
-
-def plugin_path(plugin: str):
+def download_plugins(plugin: str):
     from util.variables import load_plugininfo
 
     info = load_plugininfo()
-
     manifest = {}
     for entry in info:
         if entry.get("Identifier") == plugin:
             manifest[plugin] = entry.get("Manifest")
             break
-    from urllib.request import urlretrieve
 
-    file = Path(urlretrieve(manifest.get(plugin))[0])
-    with open(file, "r", encoding="utf-8") as f:
+    from urllib.request import urlretrieve as dl
+
+    file = Path(dl(manifest.get(plugin))[0])
+    with open(file, "r") as f:
         from pydantic_core import from_json
 
-        manifest_json = from_json(f.read())
-        logger.trace(f"Loaded plugin manifest for {plugin}: {manifest_json}")
-    name[plugin] = manifest_json.get("Name")
-    latest_version = manifest_json.get("Versions", [])[-1] if manifest_json else None
-    files[plugin] = latest_version.get("PluginPath") if latest_version else []
-    if latest_version:
-        url[plugin] = latest_version.get("DownloadUrl")
-        logger.trace(
-            f"Download URL for {name.get(plugin)}, version {latest_version.get('Version')}: {url.get(plugin)}"
-        )
-        logger.trace(
-            f"Files for {name.get(plugin)}, version {latest_version.get('Version')}: {files.get(plugin)}"
-        )
+        json = from_json(f.read())
+        logger.trace(f"Downloaded plugin manifest for {plugin}: {json}")
 
-    filename = url.get(plugin).split("/")[-1]
-    download_dir[plugin] = download_cache / "plugins" / filename
-    extract_dir[plugin] = extract_cache / "plugins" / Path(filename).stem
-    download_dir[plugin].parent.mkdir(parents=True, exist_ok=True)
-    extract_dir[plugin].mkdir(parents=True, exist_ok=True)
+    name[plugin] = json.get("Name")
+    latest = json.get("Versions", [])[-1]
+    files[plugin] = latest.get("PluginPath")
+    url[plugin] = latest.get("DownloadUrl")
+    checksum[plugin] = None
+
+    get_paths(plugin)
+    download(plugin)
+    extract(plugin)
+    install(plugin)
 
 
-def plugin_download(plugin: str):
-    _name = name.get(plugin)
-    _url = url.get(plugin)
-    _dir = download_dir.get(plugin)
-    attempts = 3
-    for i in range(attempts):
-        if i < attempts:
-            logger.debug(f"Attempt {i + 1} to download {_name}.")
-            logger.trace(f"Downloading from URL: {_url}")
-            from urllib.request import urlretrieve
-
-            try:
-                urlretrieve(_url, _dir)
-                logger.debug(f"Downloaded {_name} to {_dir}")
-                return
-            except Exception as e:
-                logger.error(f"Failed to download {_name}: {e}")
-            break
-    logger.error(f"Failed to download resource after {attempts} attempts.")
-    return
+def check_existing(src: str, dir: Path) -> bool:
+    match src:
+        case "mod_organizer":
+            return (dir / "ModOrganizer.exe").exists()
+        case "winetricks":
+            return (dir / "winetricks").exists()
+        case "java":
+            return (dir / "bin" / "java").exists()
+        case "scriptextender":
+            return any((dir / f).exists() for f in files.get(src, []))
 
 
-def plugin_extract(plugin: str):
-    _download_dir = download_dir.get(plugin)
-    _extract_dir = extract_dir.get(plugin)
-    _name = name.get(plugin)
-    from patoolib import extract_archive as unzip
+def get_paths(src: str):
+    filename = url.get(src).split("/")[-1]
 
-    try:
-        unzip(str(_download_dir), outdir=str(_extract_dir))
-        logger.debug(f"Extracted {_name} to {_extract_dir}")
-    except Exception as e:
-        logger.error(f"Failed to extract {_name}: {e}")
-        return
+    download_dir[src] = cache_dir / "downloads" / filename
+    download_dir.get(src).parent.mkdir(parents=True, exist_ok=True)
+    logger.debug(f"Download path for {src}: {download_dir.get(src)}")
+
+    extract_dir[src] = cache_dir / "extracted" / Path(filename).stem
+    extract_dir.get(src).mkdir(parents=True, exist_ok=True)
+    logger.debug(f"Extraction path for {src}: {extract_dir.get(src)}")
 
 
-def plugin_install(plugin: str):
-    _extract_dir = extract_dir.get(plugin)
-    _name = name.get(plugin)
-    _files = files.get(plugin)
-
-    for file in _files:
-        from util.variables import parameters
-
-        file = Path(file)
-        source = _extract_dir / file
-        destination = Path(parameters.get("directory")) / "plugins" / file.name
-        import shutil
-
-        if source.is_dir():
-            shutil.copytree(source, destination, dirs_exist_ok=True)
-            logger.trace(f"Copied {_name} plugin directory {source} to {destination}")
-        elif source.is_file() and not destination.exists():
-            shutil.copy(source, destination)
-            logger.trace(f"Copied {_name} plugin file {source} to {destination}")
-        else:
-            logger.debug(
-                f"{_name} plugin file {destination} already exists; skipping copy."
-            )
-
-
-def resource_download(resource_name: str):
-    from util.variables import load_resourceinfo
-
-    load_resourceinfo()
-    path(resource_name)
-    download(resource_name)
-    if not resource_name == "winetricks":
-        extract(resource_name)
-        install(resource_name)
-    pass
-
-
-def path(resource_name: str):
-    from util.variables import resource_info
-
-    url[resource_name] = resource_info.get(resource_name, {}).get("download_url")
-    filename = url.get(resource_name).split("/")[-1]
-    download_dir[resource_name] = _download_dir = download_cache / filename
-    extract_dir[resource_name] = _extract_dir = extract_cache / Path(filename).stem
-    _download_dir.parent.mkdir(parents=True, exist_ok=True)
-    _extract_dir.mkdir(parents=True, exist_ok=True)
-    logger.debug(
-        f"{resource_name.replace('_', ' ').title()} download path created: {_download_dir.parent}"
-    )
-    logger.debug(
-        f"{resource_name.replace('_', ' ').title()} extract path created: {_extract_dir}"
-    )
-
-
-def download(resource_name: str):
+def download(src: str):
     from util.checksum import checksum_local
-    from util.variables import resource_info
 
-    _data = resource_info.get(resource_name)
-    _dir = download_dir.get(resource_name)
-    _url = url.get(resource_name)
-    _name = resource_name.replace("_", " ").title()
+    hash = checksum.get(src) if checksum.get(src) else None
+    dir = download_dir.get(src)
 
-    if _dir.exists():
-        expected = _data.get("checksum")
-        if expected:
-            if checksum_local(_dir, expected):
-                logger.debug(f"{_name} already downloaded and verified at: {_dir}")
+    if hash is not None and dir.exists():
+        logger.debug(f"{src} already downloaded at {dir}; ensuring validity.")
+        if checksum_local(dir, hash):
+            logger.debug(f"Checksum for {src} verified.")
+            if src == "winetricks":
                 import stat
 
-                _dir.chmod(
-                    _dir.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
-                )
-                return
-            else:
-                logger.warning(
-                    f"Checksum mismatch for existing {_name} at: {_dir}. Re-downloading."
-                )
-
-    attempts = 3
-    for i in range(attempts):
-        if i < attempts:
-            logger.debug(f"Attempt {i + 1} to download {_name}.")
-            logger.trace(f"Downloading from URL: {_url}")
-
-            from urllib.request import urlretrieve
-
-            try:
-                urlretrieve(_url, _dir)
-                checksum_local(_dir, _data.get("checksum"))
-                logger.debug(f"Downloaded {_name} to {_dir}")
-                if resource_name == "winetricks":
-                    import stat
-
-                    _dir.chmod(
-                        _dir.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH
-                    )
-                return
-            except Exception as e:
-                logger.error(f"Failed to download {_name}: {e}")
-            break
-    logger.error(f"Failed to download resource after {attempts} attempts.")
-    return
-
-
-def extract(resource_name: str):
-    _download_dir = download_dir.get(resource_name)
-    _extract_dir = extract_dir.get(resource_name)
-    _name = resource_name.replace("_", " ").title()
-
-    from patoolib import extract_archive as unzip
-
-    if not check_existing(resource_name, _extract_dir):
-        try:
-            unzip(str(_download_dir), outdir=str(_extract_dir))
-            logger.debug(f"Extracted {_name} to {_extract_dir}")
-        except Exception as e:
-            logger.error(f"Failed to extract {_name}: {e}")
+                dir.chmod(dir.stat().st_mode | stat.S_IEXEC)
             return
 
+    _name = name.get(src)
+    _url = url.get(src)
+    attempts = 3
+    for i in range(attempts):
+        logger.trace(f"Attempt {i + 1} to download {_name} from {_url}")
+        from urllib.request import urlretrieve as dl
 
-def check_existing(resource_name: str, dir: Path = None) -> bool:
-    match resource_name:
+        try:
+            dl(_url, dir)
+            checksum_local(dir, hash)
+            logger.debug(f"Downloaded {_name} to {dir} and verified checksum.")
+            if src == "winetricks":
+                import stat
+
+                dir.chmod(dir.stat().st_mode | stat.S_IEXEC)
+            return
+        except Exception as e:
+            logger.error(f"Failed to download {_name} on attempt {i + 1}: {e}")
+    logger.error(f"Failed to download resource after {attempts} attempts.")
+
+
+def extract(src: str):
+    if not check_existing(src, extract_dir.get(src)):
+        try:
+            from patoolib import extract_archive as unzip
+
+            unzip(str(download_dir.get(src)), outdir=extract_dir.get(src))
+            logger.debug(f"Extracted {name.get(src)} to {extract_dir.get(src)}")
+        except Exception as e:
+            logger.error(f"Failed to extract {name.get(src)}: {e}")
+
+
+def install(src: str):
+    _name = name.get(src)
+    dir = None
+    from util.variables import parameters
+
+    match src:
         case "mod_organizer":
-            name = "Mod Organizer"
-            exe = Path("ModOrganizer.exe")
-        case "java":
-            name = "Java"
-            exe = Path("bin") / "java.exe"
-        case "winetricks":
-            name = "winetricks"
-            exe = Path("winetricks")
-    exists = (dir / exe).exists()
-    if exists:
-        logger.trace(f"{name} exe found at: {dir}")
-    return exists
-
-
-def install(resource_name: str):
-    _name = resource_name.replace("_", " ").title()
-    _extract_dir = extract_dir.get(resource_name)
-
-    match resource_name:
-        case "mod_organizer":
-            from util.variables import parameters
-
-            dir = Path(parameters.get("directory"))
+            dir = Path(parameters.get("directory")).expanduser()
         case "java":
             from util.variables import prefix
 
-            # prefix = Path("~/.cache/mo2-lint/test-output/prefix").expanduser()
-            dir = (Path(prefix) / "drive_c" / "java").expanduser()
+            dir = Path(prefix) / "drive_c" / "java".expanduser()
+        case "scriptextender":
+            from util.variables import game_install_path
+
+            dir = Path(game_install_path).expanduser()
+        case src if src in (parameters.get("plugins")):
+            dir = (Path(parameters.get("directory")) / "plugins").expanduser()
     dir.mkdir(parents=True, exist_ok=True)
-    if check_existing(resource_name, dir):
+
+    if check_existing(src, dir):
         logger.debug(f"{_name} already installed at {dir}; skipping installation.")
         return
     else:
         try:
-            import shutil
+            from shutil import copytree, copy2
 
-            logger.debug(f"Installing {_name} to {dir}...")
-            shutil.copytree(_extract_dir, dir, dirs_exist_ok=True)
-            logger.success(f"{_name} installed to {dir}.")
+            if (
+                files[src] != "*"
+                and files[src] != ["*"]
+                and files[src] != []
+                and files[src] is not None
+            ):
+                for file in files[src]:
+                    file = Path(file)
+                    source = extract_dir.get(src) / file
+                    destination = dir / file.name
+                    if not source.exists():
+                        logger.warning(
+                            f"Expected file {source} does not exist; aborting installation."
+                        )
+                        return
+                    elif source.is_dir():
+                        copytree(source, destination, dirs_exist_ok=True)
+                        logger.trace(f"Copied directory {source} to {destination}.")
+                    elif source.is_file() and not destination.exists():
+                        copy2(source, destination)
+                        logger.trace(f"Copied file {source} to {destination}.")
+                    else:
+                        logger.warning(
+                            f"Destination {destination} already exists; skipping copy of {source}."
+                        )
+            else:
+                copytree(extract_dir.get(src), dir, dirs_exist_ok=True)
         except Exception as e:
+            import traceback
+
             logger.error(f"Failed to install {_name}: {e}")
-            return
+            logger.debug("Traceback:\n" + traceback.format_exc())
+    logger.success(f"Installed {_name} to {dir}.")
 
 
 def main():
-    cache.mkdir(parents=True, exist_ok=True)
-    logger.debug(f"Cache directory ensured at: {cache}")
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    logger.debug(f"Cache directory ensured at {cache_dir}")
     from util.variables import parameters, game_info, launcher
 
     if (
         parameters.get("script_extender") is True
         and game_info.get("script_extender").get(launcher) is not None
     ):
-        scriptextender_get_info()
-        scriptextender_path()
-        scriptextender_download_url()
-        scriptextender_extract()
-        scriptextender_install()
-
-    resource_download("mod_organizer")
-    resource_download("winetricks")
-    if parameters.get("game") == ("skyrim" or "enderal"):
-        resource_download("java")
-
+        download_scriptextender()
+    download_resources()
     if parameters.get("plugins"):
         for plugin in parameters.get("plugins"):
-            plugin_path(plugin)
-            plugin_download(plugin)
-            plugin_extract(plugin)
-            plugin_install(plugin)
+            download_plugins(plugin)
