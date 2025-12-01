@@ -16,4 +16,7 @@ pyinstaller: venv/bin/activate
 clean:
 	rm -rf venv
 	rm -rf .ruff_cache
+	rm -rf build/mo2-lint
+	rm -rf dist
+	rm -rf mo2-lint.spec
 	find . -type d -name '__pycache__' -exec rm -r {} +
