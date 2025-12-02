@@ -6,18 +6,27 @@ run: venv/bin/activate
 	./venv/bin/python3 src/mo2-lint/__init__.py
 
 pyinstaller: venv/bin/activate
-	./venv/bin/pyinstaller --onefile --name mo2-lint \
+	./venv/bin/pyinstaller --onefile --name nxm_handler \
+		--paths src \
+		--add-data "src/nxm-handler:src" \
+		--runtime-hook "build/runtime_hooks.py" \
+		src/nxm-handler/handler.py
+	./venv/bin/pyinstaller --onefile --name mo2_lint \
 		--paths src \
 		--hidden-import patoolib \
 		--add-data "src/mo2-lint:src" \
 		--add-data "configs:cfg" \
+		--add-data "dist:dist" \
 		--runtime-hook "build/runtime_hooks.py" \
 		src/mo2-lint/__init__.py
 
 clean:
 	rm -rf venv
 	rm -rf .ruff_cache
-	rm -rf build/mo2-lint
+	rm -rf build/mo2_lint
+	rm -rf build/nxm_handler
 	rm -rf dist
-	rm -rf mo2-lint.spec
+	rm -rf mo2_lint.spec
+	rm -rf nxm_handler.spec
 	find . -type d -name '__pycache__' -exec rm -r {} +
+	venv/bin/activate

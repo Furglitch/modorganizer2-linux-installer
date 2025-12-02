@@ -22,16 +22,16 @@ def install_handlers():
     output.chmod(output.stat().st_mode | stat.S_IEXEC)
 
     output = Path(
-        "~/.local/share/applications/modorganizer2-nxm-handler.desktop"
+        "~/.local/share/applications/mo2lint_nxm_handler.desktop"
     ).expanduser()
     output.parent.mkdir(parents=True, exist_ok=True)
-    copy2(internal_file("src", "modorganizer2-nxm-handler.desktop"), output)
+    copy2(internal_file("cfg", "nxm_handler.desktop"), output)
     output.chmod(output.stat().st_mode | stat.S_IEXEC)
 
 
 def set_handler():
     desktop = Path(
-        "~/.local/share/applications/modorganizer2-nxm-handler.desktop"
+        "~/.local/share/applications/mo2lint_nxm_handler.desktop"
     ).expanduser()
 
     import subprocess
@@ -48,7 +48,7 @@ def set_handler():
 def set_variables():
     from util.variables import game_info, parameters, launcher
 
-    dest = Path(parameters.get("directory") + "lint.env")
+    dest = Path(parameters.get("directory") + "/lint.env")
     if dest.exists():
         dest.open("w").close()  # Truncate
     else:
