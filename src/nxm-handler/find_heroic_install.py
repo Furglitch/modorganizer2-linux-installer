@@ -5,6 +5,9 @@ from pathlib import Path
 from loguru import logger
 from pydantic_core import from_json
 
+stdout = None
+logout = None
+
 
 def set_logger(log_level):
     import sys
