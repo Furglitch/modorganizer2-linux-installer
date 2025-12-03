@@ -7,6 +7,11 @@ from loguru import logger
 stdout = None
 logout = None
 
+launcher: str = None
+steam_id: int = None
+gog_id: int = None
+epic_id: str = None
+
 
 def set_logger(log_level):
     import sys
@@ -33,6 +38,13 @@ def set_logger(log_level):
         retention="7 days",
         compression="zip",
     )
+
+
+def internal_file(*parts):
+    import sys
+
+    path = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve()))
+    return path.joinpath(*parts)
 
 
 @click.command()
@@ -63,7 +75,7 @@ def main(url, log_level):
         logger.warning("Invalid NXM URL format.")
         return
 
-    instance_link = Path(f"~/.config/modorganizer2/instances/{game_id}").expanduser()
+    instance_link = Path(f"~/.config/mo2-lint/instances/{game_id}").expanduser()
     instance_dir = instance_link.resolve()
     if not instance_dir.exists():
         if instance_link.is_symlink():
@@ -72,18 +84,64 @@ def main(url, log_level):
         logger.warning(f"Instance directory does not exist: {instance_dir}")
         return
 
-    # TODO `if [ -r "$instance_dir/variables.sh" ]; then`
+    env_file = Path(instance_dir / "lint.env")
+    logger.debug(f"Looking for env file at: {env_file}")
+    if env_file.exists():
+        from dotenv import dotenv_values
 
-    exe = ("Z:" + str(instance_dir) + "/modorganizer2" + "/ModOrganizer.exe").replace(
-        "/", "\\\\"
-    )
+        info = dotenv_values(env_file)
+        logger.trace(f"Loaded env file: {info}")
+        global launcher, steam_id, gog_id, epic_id
+        for key, value in info.items():
+            print(f"Key: {key}, Value: {value}")
+            if str(key) == "launcher":
+                launcher = str(value)
+            if str(key) == "steam_id":
+                steam_id = int(value)
+            if str(key) == "gog_id":
+                gog_id = int(value)
+            if str(key) == "epic_id":
+                epic_id = str(value)
+        logger.debug(
+            f"Set launcher to {launcher}, steam_id to {steam_id}, gog_id to {gog_id}, epic_id to {epic_id}"
+        )
+        match launcher:
+            case "steam":
+                logger.info("Using steam launcher handler.")
+                pass
+            case "heroic":
+                logger.info("Using heroic launcher handler.")
+                finder = internal_file("dist", "find_heroic_install")
+                import subprocess
+
+                proc = subprocess.run(
+                    [finder, "--gog-id", f"{gog_id}", "--epic-id", f"{epic_id}"],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                )
+                out = (proc.stdout)[proc.stdout.find("{") : proc.stdout.rfind("}") + 1]
+                logger.trace(f"Received from heroic finder: {out!r}")
+
+                import ast
+
+                json = ast.literal_eval(out)
+                wine = str(json.get("wine"))
+
+                if Path(wine).name == "proton":
+                    wine = Path(wine).parent / "files" / "bin" / "wine"
+                else:
+                    wine = Path(wine)
+                logger.debug(f"Resolved heroic wine path: {wine}")
+
+    exe = ("Z:" + str(instance_dir) + "/ModOrganizer.exe").replace("/", "\\\\")
     logger.debug(f"Resolved instance directory: {exe}")
     import subprocess
     import shutil
 
     pgrep = shutil.which("pgrep") or "pgrep"
     cmd = [pgrep, "-f", exe]
-    print(f"Running command: {' '.join(cmd)}")
+    logger.debug(f"Running command: {' '.join(cmd)}")
     proc = subprocess.run(
         cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
     )

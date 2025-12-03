@@ -248,9 +248,8 @@ def main(log_level="INFO", gog_id: int = None, epic_id: str = None):
         "wine": wine,
         "prefix": prefix,
     }
-    import json
 
-    print(json.dumps(out))  # Output for use in handler
+    print(out)  # Output for use in handler
     return install, release, launcher, id, wine, prefix
 
 

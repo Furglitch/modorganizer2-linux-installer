@@ -16,11 +16,6 @@ def install_handlers():
     copy2(internal_file("dist", "nxm_handler"), output)
     output.chmod(output.stat().st_mode | stat.S_IEXEC)
 
-    output = Path("~/.local/share/mo2-lint/find_heroic_install").expanduser()
-    output.parent.mkdir(parents=True, exist_ok=True)
-    copy2(internal_file("dist", "find_heroic_install"), output)
-    output.chmod(output.stat().st_mode | stat.S_IEXEC)
-
     output = Path(
         "~/.local/share/applications/mo2lint_nxm_handler.desktop"
     ).expanduser()

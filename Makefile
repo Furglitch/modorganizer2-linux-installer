@@ -14,7 +14,7 @@ pyinstaller: venv/bin/activate
 	./venv/bin/pyinstaller --onefile --name nxm_handler \
 		--paths src \
 		--add-data "src/nxm-handler:src" \
-		--add-data "dist/find_heroic_install:dist/find_heroic_install" \
+		--add-data "dist:dist" \
 		--runtime-hook "build/runtime_hooks.py" \
 		src/nxm-handler/handler.py
 	./venv/bin/pyinstaller --onefile --name mo2_lint \
@@ -31,8 +31,23 @@ clean:
 	rm -rf .ruff_cache
 	rm -rf build/mo2_lint
 	rm -rf build/nxm_handler
+	rm -rf build/find_heroic_install
 	rm -rf dist
 	rm -rf mo2_lint.spec
 	rm -rf nxm_handler.spec
+	rm -rf find_heroic_install.spec
 	find . -type d -name '__pycache__' -exec rm -r {} +
-	venv/bin/activate
+
+revenv:
+	rm -rf venv
+	rm -rf .ruff_cache
+	rm -rf build/mo2_lint
+	rm -rf build/nxm_handler
+	rm -rf build/find_heroic_install
+	rm -rf dist
+	rm -rf mo2_lint.spec
+	rm -rf nxm_handler.spec
+	rm -rf find_heroic_install.spec
+	find . -type d -name '__pycache__' -exec rm -r {} +
+	python3 -m venv venv
+	./venv/bin/pip install -r requirements.txt
