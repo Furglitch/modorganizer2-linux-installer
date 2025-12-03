@@ -12,6 +12,10 @@ download_dir: dict[str, Path] = {}
 extract_dir: dict[str, Path] = {}
 cache_dir: Path = Path("~/.cache/mo2-lint").expanduser()
 
+prompt_mod_organizer_update = """
+It appears that Mod Organizer 2 is already installed in the target folder.
+"""
+
 
 def download_scriptextender():
     import util.variables as var
@@ -184,44 +188,54 @@ def install(src: str):
     dir.mkdir(parents=True, exist_ok=True)
 
     if check_existing(src, dir):
-        logger.debug(f"{_name} already installed at {dir}; skipping installation.")
-        return
-    else:
-        try:
-            from shutil import copytree, copy2
+        if not src == "mod_organizer":
+            logger.debug(f"{_name} already installed at {dir}; skipping installation.")
+            return
+        else:
+            logger.debug(
+                f"{_name} already installed at {dir}; prompting for reinstallation."
+            )
+            print(prompt_mod_organizer_update)
+            if input(
+                "Would you like to update it? This will overwrite existing files. [y/N]: "
+            ).strip().lower() not in ("", "y", "yes"):
+                logger.info(f"Skipping reinstallation of {_name}.")
+                return
+    try:
+        from shutil import copytree, copy2
 
-            if (
-                files[src] != "*"
-                and files[src] != ["*"]
-                and files[src] != []
-                and files[src] is not None
-            ):
-                for file in files[src]:
-                    file = Path(file)
-                    source = extract_dir.get(src) / file
-                    destination = dir / file.name
-                    if not source.exists():
-                        logger.warning(
-                            f"Expected file {source} does not exist; aborting installation."
-                        )
-                        return
-                    elif source.is_dir():
-                        copytree(source, destination, dirs_exist_ok=True)
-                        logger.trace(f"Copied directory {source} to {destination}.")
-                    elif source.is_file() and not destination.exists():
-                        copy2(source, destination)
-                        logger.trace(f"Copied file {source} to {destination}.")
-                    else:
-                        logger.warning(
-                            f"Destination {destination} already exists; skipping copy of {source}."
-                        )
-            else:
-                copytree(extract_dir.get(src), dir, dirs_exist_ok=True)
-        except Exception as e:
-            import traceback
+        if (
+            files[src] != "*"
+            and files[src] != ["*"]
+            and files[src] != []
+            and files[src] is not None
+        ):
+            for file in files[src]:
+                file = Path(file)
+                source = extract_dir.get(src) / file
+                destination = dir / file.name
+                if not source.exists():
+                    logger.warning(
+                        f"Expected file {source} does not exist; aborting installation."
+                    )
+                    return
+                elif source.is_dir():
+                    copytree(source, destination, dirs_exist_ok=True)
+                    logger.trace(f"Copied directory {source} to {destination}.")
+                elif source.is_file() and not destination.exists():
+                    copy2(source, destination)
+                    logger.trace(f"Copied file {source} to {destination}.")
+                else:
+                    logger.warning(
+                        f"Destination {destination} already exists; skipping copy of {source}."
+                    )
+        else:
+            copytree(extract_dir.get(src), dir, dirs_exist_ok=True)
+    except Exception as e:
+        import traceback
 
-            logger.error(f"Failed to install {_name}: {e}")
-            logger.debug("Traceback:\n" + traceback.format_exc())
+        logger.error(f"Failed to install {_name}: {e}")
+        logger.debug("Traceback:\n" + traceback.format_exc())
     logger.success(f"Installed {_name} to {dir}.")
 
 
