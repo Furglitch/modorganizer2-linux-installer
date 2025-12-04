@@ -6,6 +6,10 @@ run: venv/bin/activate
 	./venv/bin/python3 src/mo2-lint/__init__.py
 
 pyinstaller: venv/bin/activate
+	rm -rf build/mo2_lint
+	rm -rf build/nxm_handler
+	rm -rf build/find_heroic_install
+	rm -rf dist
 	./venv/bin/pyinstaller --onefile --name find_heroic_install \
 		--paths src \
 		--add-data "src/nxm-handler:src" \

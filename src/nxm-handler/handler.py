@@ -120,13 +120,16 @@ def main(url, log_level):
                     stderr=subprocess.PIPE,
                     text=True,
                 )
+                logger.trace(f"Heroic finder stdout: {proc.stdout!r}")
                 out = (proc.stdout)[proc.stdout.find("{") : proc.stdout.rfind("}") + 1]
                 logger.trace(f"Received from heroic finder: {out!r}")
-
                 import ast
 
                 json = ast.literal_eval(out)
+                logger.trace(f"Heroic finder output JSON: {json}")
                 wine = str(json.get("wine"))
+                app = str(json.get("id"))
+                runner = str(json.get("launcher"))
 
                 if Path(wine).name == "proton":
                     wine = Path(wine).parent / "files" / "bin" / "wine"
@@ -134,29 +137,47 @@ def main(url, log_level):
                     wine = Path(wine)
                 logger.debug(f"Resolved heroic wine path: {wine}")
 
-    exe = ("Z:" + str(instance_dir) + "/ModOrganizer.exe").replace("/", "\\\\")
+    exe = ("Z:" + str(instance_dir) + "/ModOrganizer.exe").replace("/", "\\")
     logger.debug(f"Resolved instance directory: {exe}")
     import subprocess
-    import shutil
+    import psutil
 
-    pgrep = shutil.which("pgrep") or "pgrep"
-    cmd = [pgrep, "-f", exe]
-    logger.debug(f"Running command: {' '.join(cmd)}")
-    proc = subprocess.run(
-        cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
-    )
-    logger.debug("Running pgrep")
-    if proc.stdout:
-        logger.debug("Successful pgrep for Mod Organizer 2 instance.")
-        # TODO if [ "$process_search_status" == "1" ]; then
-    else:
-        logger.error(
-            f"Application not running: {exe.replace('Z:', '').replace('\\\\', '/')}"
-        )
-        # TODO if [ "$process_search_status" != "1" ]; then
-        return
-
-    # TODO if [ "$download_start_status" != "0" ]; then
+    found = False
+    logger.info("Checking for running Mod Organizer 2 instances...")
+    for p in psutil.process_iter():
+        cmdline = p.cmdline()
+        for c in cmdline:
+            cmd = c.strip('"').strip("'")
+            if exe in cmd:
+                found = True
+                break
+        if found:
+            break
+    print(found)
+    if found:
+        logger.debug("Found running Mod Organizer 2 instance.")
+    elif not found:
+        logger.debug("No running Mod Organizer 2 instance found.")
+        logger.info(f"Starting Mod Organizer 2 to download {url}")
+        match launcher:
+            case "steam":
+                cmd = ["steam", "-applaunch", f"{steam_id}", f"{url}"]
+                print(f"Executing command: {' '.join(cmd)}")
+                subprocess.Popen(
+                    cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+                )
+            case "heroic":
+                cmd = (
+                    "heroic://launch"
+                    + f"?appName={app}"
+                    + f"&launcher={runner}"
+                    + f"&arg={url}"
+                )
+                cmd = ["xdg-open", cmd]
+                subprocess.Popen(
+                    cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+                )
+                pass
 
 
 if __name__ == "__main__":
