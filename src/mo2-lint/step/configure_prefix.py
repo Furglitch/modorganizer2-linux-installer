@@ -193,9 +193,9 @@ def configure():
                 wine = Path(wine).parent / "files" / "bin" / "wine"
             logger.debug(f'Using Heroic runner with wine: "{wine}", prefix: "{prefix}"')
             from util.wine import winetricks
-            from step.external_resources import resource_download
+            from step.external_resources import download_resources
 
-            resource_download("winetricks")
+            download_resources()
             winetricks.apply(wine, prefix, tricks)
 
 
