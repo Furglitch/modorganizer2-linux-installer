@@ -127,6 +127,7 @@ def main(url, log_level):
                 json = ast.literal_eval(out)
                 logger.trace(f"Heroic finder output JSON: {json}")
                 wine = str(json.get("wine"))
+                release = str(json.get("release"))
                 app = str(json.get("id"))
                 runner = str(json.get("launcher"))
 
@@ -177,6 +178,41 @@ def main(url, log_level):
                     cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
                 )
                 pass
+
+    logger.info(f"Sending download {url} to running Mod Organizer 2 instance.")
+    handler = instance_dir / "nxmhandler.exe"
+    import os
+
+    env = os.environ.copy()
+    env.setdefault("WINEESYNC", "1")
+    env.setdefault("WINEFSYNC", "1")
+    match launcher:
+        case "steam":
+            cmd = [
+                "protontricks-launch",
+                "--appid",
+                f"{steam_id}",
+                f"{handler}",
+                f"{url}",
+            ]
+        case "heroic":
+            match release:
+                case "stable":
+                    cmd = [f"{wine}", f"{handler}", f"{url}"]
+                case "flatpak":
+                    cmd = [
+                        "flatpak",
+                        "run",
+                        f"--command='{wine}'",
+                        "com.heroicgameslauncher.hgl",
+                        f"{handler}",
+                        f"{url}",
+                    ]
+
+    logger.trace(f"Executing handler command: {cmd}")
+    subprocess.Popen(
+        cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env
+    )
 
 
 if __name__ == "__main__":
