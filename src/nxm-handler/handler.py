@@ -93,7 +93,6 @@ def main(url, log_level):
         logger.trace(f"Loaded env file: {info}")
         global launcher, steam_id, gog_id, epic_id
         for key, value in info.items():
-            print(f"Key: {key}, Value: {value}")
             if str(key) == "launcher":
                 launcher = str(value)
             if str(key) == "steam_id":
@@ -153,7 +152,6 @@ def main(url, log_level):
                 break
         if found:
             break
-    print(found)
     if found:
         logger.debug("Found running Mod Organizer 2 instance.")
     elif not found:
@@ -162,7 +160,7 @@ def main(url, log_level):
         match launcher:
             case "steam":
                 cmd = ["steam", "-applaunch", f"{steam_id}", f"{url}"]
-                print(f"Executing command: {' '.join(cmd)}")
+                logger.trace(f"Launching via Steam: {cmd}")
                 subprocess.Popen(
                     cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
                 )
@@ -174,6 +172,7 @@ def main(url, log_level):
                     + f"&arg={url}"
                 )
                 cmd = ["xdg-open", cmd]
+                logger.trace(f"Launching via Heroic: {cmd}")
                 subprocess.Popen(
                     cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
                 )
