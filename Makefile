@@ -10,17 +10,13 @@ pyinstaller: venv/bin/activate
 	rm -rf build/nxm_handler
 	rm -rf build/find_heroic_install
 	rm -rf dist
-	./venv/bin/pyinstaller --onefile --name find_heroic_install \
-		--paths src \
-		--add-data "src/nxm-handler:src" \
-		--runtime-hook "build/runtime_hooks.py" \
-		src/nxm-handler/find_heroic_install.py
 	./venv/bin/pyinstaller --onefile --name nxm_handler \
 		--paths src \
+		--hidden-import find_heroic_install \
+		--hidden-import pydantic_core \
 		--add-data "src/nxm-handler:src" \
-		--add-data "dist:dist" \
 		--runtime-hook "build/runtime_hooks.py" \
-		src/nxm-handler/handler.py
+		src/nxm-handler/__init__.py
 	./venv/bin/pyinstaller --onefile --name mo2_lint \
 		--paths src \
 		--hidden-import patoolib \

@@ -1,90 +1,8 @@
 #!/usr/bin/env python3
 
-import click
 from pathlib import Path
 from loguru import logger
 from pydantic_core import from_json
-
-stdout = None
-logout = None
-
-
-def set_logger(log_level):
-    import sys
-
-    global stdout, logout
-
-    logger.remove(stdout)
-    logger.remove(logout)
-
-    stdout = logger.add(
-        sys.stdout,
-        colorize=True,
-        format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | <bold>Heroic Install Finder</bold> | {message}",
-        level=log_level,
-    )
-
-    filename = Path(
-        "~/.cache/mo2-lint/logs/heroic-install-finder.{time:YYYY-MM-DD_HH-mm-ss}.log"
-    ).expanduser()
-    logout = logger.add(
-        filename,
-        level="TRACE",
-        rotation="10 MB",
-        retention="7 days",
-        compression="zip",
-    )
-
-
-def get_heroic_data(gog_id: int = None, epic_id: str = None):
-    config_directories = [
-        "${HOME}/.config/heroic",
-        "${HOME}/.var/app/com.heroicgameslauncher.hgl/config/heroic",
-    ]
-    release_type = [
-        "stable",
-        "flatpak",
-    ]
-
-    import os
-
-    for i, dir in enumerate(config_directories):
-        release = release_type[i]
-        dir = os.path.expandvars(dir)
-        if os.path.exists(dir):
-            logger.debug(f"Found {release} release. Heroic config located at {dir}")
-
-            gog_result = get_gog_libraries(gog_id, dir)
-            epic_result = get_epic_libraries(epic_id, dir)
-            if gog_result and epic_result:
-                # TODO Handle multiple installs through different runners
-                logger.error(
-                    "Both GOG and Epic libraries found. Functionality not yet implemented."
-                )
-                launcher, id, install, wine, prefix = None, None, None, None, None
-            elif gog_result:
-                launcher, id, install, wine, prefix = gog_result
-            elif epic_result:
-                launcher, id, install, wine, prefix = epic_result
-            else:
-                launcher, id, install, wine, prefix = None, None, None, None, None
-
-            if any(
-                v is None for v in (install, launcher, id, wine, prefix)
-            ) and not all(v is None for v in (install, launcher, id, wine, prefix)):
-                logger.warning(
-                    "Received incomplete Heroic library data. Continuing to next config directory if available."
-                )
-                continue
-            else:
-                break
-        else:
-            logger.warning(f"Unable to find Heroic config at {dir}")
-
-    logger.debug(
-        f"Heroic library data: install={install}, release={release}, launcher={launcher}, id={id}, wine={wine}, prefix={prefix}"
-    )
-    return install, release, launcher, id, wine, prefix
 
 
 def get_wine_variables(id: str | int, config_dir: str):
@@ -171,7 +89,7 @@ def get_gog_libraries(id: int, config_dir: str):
 
     launcher = "gog"
     appid = id
-    return launcher, appid, install_path, wine_path, wine_prefix
+    return launcher, appid, wine_path, wine_prefix
 
 
 def get_epic_libraries(id: str, config_dir: str):
@@ -210,48 +128,54 @@ def get_epic_libraries(id: str, config_dir: str):
 
     launcher = "epic"
     appid = id
-    return launcher, appid, install_path, wine_path, wine_prefix
+    return launcher, appid, wine_path, wine_prefix
 
 
-@click.command()
-@click.version_option(version="1.0.0", prog_name="mo2-lint")
-@click.help_option("-h", "--help")
-@click.option(
-    "--log-level",
-    "-l",
-    type=click.Choice(["DEBUG", "INFO", "TRACE"], case_sensitive=False),
-    default="INFO",
-    help="Set the logging level.",
-    show_default=True,
-)
-@click.option(
-    "--gog-id",
-    type=int,
-    required=False,
-    help="The GOG ID of the game to find the installation for.",
-)
-@click.option(
-    "--epic-id",
-    type=str,
-    required=False,
-    help="The Epic ID of the game to find the installation for.",
-)
-def main(log_level="INFO", gog_id: int = None, epic_id: str = None):
-    """A handler for Nexus Mods URLs to interact with Mod Organizer 2 instances that are managed by mo2-lint. (Enables the 'Mod Manager Download' button on mod pages.)"""
-    set_logger(log_level.upper())
-    install, release, launcher, id, wine, prefix = get_heroic_data(gog_id, epic_id)
-    out = {
-        "install": install,
-        "release": release,
-        "launcher": launcher,
-        "id": id,
-        "wine": wine,
-        "prefix": prefix,
-    }
+def get_heroic_data(gog_id: int = None, epic_id: str = None):
+    config_directories = [
+        "${HOME}/.config/heroic",
+        "${HOME}/.var/app/com.heroicgameslauncher.hgl/config/heroic",
+    ]
+    release_type = [
+        "stable",
+        "flatpak",
+    ]
 
-    print(out)  # Output for use in handler
-    return install, release, launcher, id, wine, prefix
+    import os
 
+    for i, dir in enumerate(config_directories):
+        release = release_type[i]
+        dir = os.path.expandvars(dir)
+        if os.path.exists(dir):
+            logger.debug(f"Found {release} release. Heroic config located at {dir}")
 
-if __name__ == "__main__":
-    main()
+            gog_result = get_gog_libraries(gog_id, dir)
+            epic_result = get_epic_libraries(epic_id, dir)
+            if gog_result and epic_result:
+                # TODO Handle multiple installs through different runners
+                logger.error(
+                    "Both GOG and Epic libraries found. Functionality not yet implemented."
+                )
+                launcher, id, wine, prefix = None, None, None, None
+            elif gog_result:
+                launcher, id, wine, prefix = gog_result
+            elif epic_result:
+                launcher, id, wine, prefix = epic_result
+            else:
+                launcher, id, wine, prefix = None, None, None, None
+            if any(v is None for v in (launcher, id, wine, prefix)) and not all(
+                v is None for v in (launcher, id, wine, prefix)
+            ):
+                logger.warning(
+                    "Received incomplete Heroic library data. Continuing to next config directory if available."
+                )
+                continue
+            else:
+                break
+        else:
+            logger.warning(f"Unable to find Heroic config at {dir}")
+
+    logger.debug(
+        f"Heroic library data: release={release}, launcher={launcher}, id={id}, wine={wine}"
+    )
+    return release, launcher, id, wine, prefix
