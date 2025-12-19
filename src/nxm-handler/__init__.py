@@ -221,7 +221,7 @@ def send_url(instance_dir, url, env_info):
 
 
 @click.command()
-@click.version_option(version="1.0.0", prog_name="mo2-lint")
+@click.version_option(version="2.0.0", prog_name="mo2-lint-nxm-handler")
 @click.help_option("-h", "--help")
 @click.argument(
     "url",
