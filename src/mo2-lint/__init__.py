@@ -4,6 +4,9 @@ import click
 from pydantic_core import from_json
 from pathlib import Path
 from loguru import logger
+from step import configure_prefix, load_gameinfo, external_resources
+from util.nexus import install_handler
+import util.state.state_file as state
 
 """
 Log Levels:
@@ -145,21 +148,19 @@ def main(game, directory, log_level, script_extender, plugin):
         }
     )
 
-    from step.load_gameinfo import main as load_gameinfo
+    state.load_state()
+    state.check_existing_instances(directory, game)
+    state.select_index()
+    state.set_nexus_id(game)
+    state.set_instance_path(directory)
+    state.set_plugins(list(plugin))
 
-    load_gameinfo()
+    load_gameinfo.main()
+    configure_prefix.main()
+    external_resources.main()
+    install_handler.main()
 
-    from step.configure_prefix import main as configure_prefix
-
-    configure_prefix()
-
-    from step.external_resources import main as external_resources
-
-    external_resources()
-
-    from util.nexus.install_handler import main as install_handler
-
-    install_handler()
+    state.write_state()
 
 
 if __name__ == "__main__":

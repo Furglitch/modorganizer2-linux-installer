@@ -2,6 +2,7 @@
 
 from loguru import logger
 import os
+import util.state.state_file as state
 
 
 def get_steam_data():
@@ -138,6 +139,12 @@ def get_install_path():
         raise SystemExit(1)
 
     logger.debug(f"Determined launcher: {var.launcher}")
+    state.set_launcher(var.launcher)
+    state.set_launcher_ids(
+        steam_id=var.game_info.get("steam_id"),
+        gog_id=var.game_info.get("gog_id"),
+        epic_id=var.game_info.get("epic_id"),
+    )
     logger.debug(f"Determined game install path: {var.game_install_path}")
 
 

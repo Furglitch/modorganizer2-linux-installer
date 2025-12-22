@@ -3,6 +3,7 @@
 import click
 from pathlib import Path
 from loguru import logger
+import state_file as state
 import subprocess
 import psutil
 import os
@@ -67,52 +68,51 @@ def get_instance_dir(url):
 
 
 def get_env(instance_dir):
-    env_file = Path(instance_dir / "lint.env")
-    logger.debug(f"Looking for env file at: {env_file}")
+    state.load_state()
+    instance = state.check_existing_instances(str(instance_dir))
+    info = state.game_data(instance)
 
-    release = runner = app = wine = None
+    for key, value in info.items():
+        if str(key) == "launcher":
+            logger.debug(f"Setting launcher to {value}")
+            launcher = str(value)
+        if str(key) == "steam_id" and value is not None and value != "":
+            logger.debug(f"Setting steam_id to {value}")
+            steam_id = int(value)
+        if str(key) == "gog_id" and value is not None and value != "":
+            logger.debug(f"Setting gog_id to {value}")
+            gog_id = int(value)
+        if str(key) == "epic_id":
+            logger.debug(f"Setting epic_id to {value}")
+            epic_id = str(value)
 
-    if env_file.exists():
-        from dotenv import dotenv_values
+    logger.debug(
+        f"Set launcher to {launcher}, steam_id to {steam_id}, gog_id to {gog_id}, epic_id to {epic_id}"
+    )
 
-        info = dotenv_values(env_file)
-        logger.trace(f"Loaded env file: {info}")
-        global launcher, steam_id, gog_id, epic_id
-        for key, value in info.items():
-            if str(key) == "launcher":
-                launcher = str(value)
-            if str(key) == "steam_id" and value is not None and value != "":
-                steam_id = int(value)
-            if str(key) == "gog_id" and value is not None and value != "":
-                gog_id = int(value)
-            if str(key) == "epic_id":
-                epic_id = str(value)
+    release, runner, app, wine, prefix = None, None, None, None, None
 
-        logger.debug(
-            f"Set launcher to {launcher}, steam_id to {steam_id}, gog_id to {gog_id}, epic_id to {epic_id}"
-        )
+    if launcher == "heroic":
+        logger.info("Using heroic launcher handler.")
+        from find_heroic_install import get_heroic_data
 
-        if launcher == "heroic":
-            logger.info("Using heroic launcher handler.")
-            from find_heroic_install import get_heroic_data
+        release, runner, app, wine, prefix = get_heroic_data(gog_id, epic_id)
 
-            release, runner, app, wine, prefix = get_heroic_data(gog_id, epic_id)
-
-            if wine is None:
-                logger.warning(
-                    "Heroic handler did not return a wine path; continuing without resolved wine path"
-                )
-            else:
-                try:
-                    if Path(wine).name == "proton":
-                        wine = Path(wine).parent / "files" / "bin" / "wine"
-                    else:
-                        wine = Path(wine)
-                except Exception:
-                    logger.exception("Failed to resolve heroic wine path")
-                    wine = None
-        elif launcher == "steam":
-            logger.info("Using steam launcher handler.")
+        if wine is None:
+            logger.warning(
+                "Heroic handler did not return a wine path; continuing without resolved wine path"
+            )
+        else:
+            try:
+                if Path(wine).name == "proton":
+                    wine = Path(wine).parent / "files" / "bin" / "wine"
+                else:
+                    wine = Path(wine)
+            except Exception:
+                logger.exception("Failed to resolve heroic wine path")
+                wine = None
+    elif launcher == "steam":
+        logger.info("Using steam launcher handler.")
 
     return {
         "launcher": launcher,
