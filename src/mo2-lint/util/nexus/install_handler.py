@@ -40,25 +40,7 @@ def set_handler():
     logger.info("Registered nxm:// handler with xdg-mime.")
 
 
-def set_variables():
-    from util.variables import game_info, parameters, launcher
-
-    dest = Path(parameters.get("directory") + "/lint.env")
-    if dest.exists():
-        dest.open("w").close()  # Truncate
-    else:
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        dest.touch()
-    with dest.open("a") as f:
-        f.write(f'launcher="{launcher}"\n')
-        f.write(f'steam_id="{game_info.get("steam_id")}"\n')
-        f.write(f'gog_id="{game_info.get("gog_id")}"\n')
-        f.write(f'epic_id="{game_info.get("epic_id")}"\n')
-    logger.info(f"Created variables file at {dest}")
-
-
 def main():
     install_handlers()
     set_handler()
-    set_variables()
     logger.success("Nexus Mods handlers installed successfully.")
