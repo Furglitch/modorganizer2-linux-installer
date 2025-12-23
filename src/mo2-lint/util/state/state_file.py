@@ -1,8 +1,12 @@
+#!/usr/bin/env python3
+
 from loguru import logger
 from pathlib import Path
+import uuid
 import json
 
 state_file = Path("~/.config/mo2-lint/instance_state.json").expanduser()
+nexus_api = {}
 instances = []
 instance = {}
 existing_index = []
@@ -147,6 +151,24 @@ def set_plugins(plugins: list[str]):
     instance["plugins"] = plugins
 
 
+def set_nexus_uuid(id: uuid.UUID | str):
+    global nexus_api
+    if isinstance(id, uuid.UUID):
+        nexus_api["uuid"] = str(id)
+    else:
+        nexus_api["uuid"] = id
+
+
+def set_nexus_connection_token(token: str):
+    global nexus_api
+    nexus_api["connection_token"] = token
+
+
+def set_nexus_api_key(token: str):
+    global nexus_api
+    nexus_api["api_key"] = token
+
+
 def write_state():
     """Writes current state to disk."""
     with state_file.open("w", encoding="utf-8") as f:
@@ -155,5 +177,5 @@ def write_state():
             instances.remove({})
         if instance not in instances:
             instances.append(instance)
-        json.dump({"instances": instances}, f, indent=2)
+        json.dump({"nexus_api": nexus_api, "instances": instances}, f, indent=2)
         logger.debug(f"Wrote state file with {len(instances)} instances.")

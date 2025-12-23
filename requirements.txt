@@ -9,3 +9,4 @@ pydantic>=2.12.5
 pyinstaller>=6.17.0
 pyinstaller-hooks-contrib>=2025.10
 ruff==0.14.6
+websockets>=15.0.1
