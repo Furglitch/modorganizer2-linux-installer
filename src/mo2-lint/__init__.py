@@ -7,6 +7,7 @@ from loguru import logger
 from step import configure_prefix, load_gameinfo, external_resources
 from util.nexus import install_handler
 import util.state.state_file as state
+from util.variables import version
 
 """
 Log Levels:
@@ -94,7 +95,7 @@ def load_game_list():
 
 
 @click.command()
-@click.version_option(version="7.0.0", prog_name="mo2-lint")
+@click.version_option(version=version, prog_name="mo2-lint")
 @click.help_option("-h", "--help")
 @click.argument(
     "game",

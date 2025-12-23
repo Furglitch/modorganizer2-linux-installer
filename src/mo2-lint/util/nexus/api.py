@@ -1,22 +1,19 @@
 #!/usr/bin/env python3
 
 from loguru import logger
-from pathlib import Path
 import uuid
 import json
 import websockets.sync.client as websockets
+import webbrowser
 from ..state import state_file as state
 
-state_file: Path = None
 api_info = {}
 
 
 def load_state() -> dict:
     global api_info
-    global state_file
-    state_file = state.state_file
-    with state_file.open("r", encoding="utf-8") as f:
-        api_info = json.load(f).get("nexus_api", {})
+    state.load_state()
+    api_info = state.nexus_api
 
 
 def nexus_uuid() -> uuid.UUID:
@@ -27,9 +24,13 @@ def nexus_uuid() -> uuid.UUID:
     else:
         id = uuid.uuid4()
         logger.trace(f"Created new Nexus UUID: {id}")
-    state.set_nexus_uuid(id)
-    api_info["uuid"] = str(id)
-    return id
+
+    if id:
+        api_info["uuid"] = str(id)
+        state.set_nexus_uuid(id)
+        return id
+    else:
+        raise Exception("Failed to generate or load Nexus UUID.")
 
 
 def connection_token() -> str:
@@ -42,17 +43,21 @@ def connection_token() -> str:
             logger.error(f"Error requesting connection token: {e}")
     else:
         logger.trace(f"Loaded existing connection token: {token}")
-    state.set_nexus_connection_token(token)
-    api_info["connection_token"] = token
-    return token
+    if token:
+        api_info["connection_token"] = token
+        state.set_nexus_connection_token(token)
+        return token
+    else:
+        raise Exception("Failed to generate or load connection token.")
 
 
 def request_connection_token() -> str:
+    id = api_info.get("uuid", "") if api_info.get("uuid") else nexus_uuid()
     with websockets.connect("wss://sso.nexusmods.com") as socket:
         socket.send(
             json.dumps(
                 {
-                    "id": api_info.get("uuid", ""),
+                    "id": id,
                     "protocol": 2,
                 }
             )
@@ -68,35 +73,39 @@ def request_connection_token() -> str:
 
 
 def nexus_key() -> str:
-    key = api_info.get("api_key", "")
-    if not key:
+    token = api_info.get("api_key", "")
+    if not token:
         try:
-            key = request_nexus_key()
-            logger.trace(f"Requested Nexus API key: {key}")
+            token = request_nexus_key()
+            logger.trace(f"Requested api token: {token}")
         except Exception as e:
-            key = None
-            logger.error(f"Error requesting Nexus API key: {e}")
+            logger.error(f"Error requesting api token: {e}")
     else:
-        logger.trace(f"Loaded existing Nexus API key: {key}")
-    state.set_nexus_api_key(key)
-    api_info["api_key"] = key
-    return key
+        logger.trace(f"Loaded existing api token: {token}")
+    if token:
+        api_info["api_key"] = token
+        state.set_nexus_api_key(token)
+        return token
+    else:
+        raise Exception("Failed to grab api token.")
 
 
 def request_nexus_key() -> str:
-    import webbrowser
-
     key = None
-    id = api_info.get("uuid")
-    token = api_info.get("connection_token")
+    id = api_info.get("uuid") if api_info.get("uuid") else nexus_uuid()
+    token = (
+        api_info.get("connection_token")
+        if api_info.get("connection_token")
+        else connection_token()
+    )
     url = f"https://www.nexusmods.com/sso?id={str(id)}&application=mo2lint"
-    webbrowser.open(url)
+    webbrowser.open_new_tab(url)
     try:
         with websockets.connect("wss://sso.nexusmods.com") as socket:
             socket.send(
                 json.dumps(
                     {
-                        "id": id,
+                        "id": str(id),
                         "token": token,
                         "protocol": 2,
                     }
@@ -112,18 +121,13 @@ def request_nexus_key() -> str:
                     break
     except Exception as e:
         logger.error(f"WebSocket error during SSO: {e}")
+    api_info["api_key"] = key
+    print("Key obtained:", key)
     return key
 
 
 def main():
     load_state()
-    if nexus_uuid():
-        if connection_token():
-            if nexus_key():
-                logger.info("Nexus API credentials successfully obtained and stored.")
-            else:
-                logger.error("Failed to obtain Nexus API key.")
-        else:
-            logger.error("Failed to obtain connection token.")
-    else:
-        logger.error("Failed to create Nexus UUID.")
+    api_key = api_info.get("api_key") if api_info.get("api_key") else nexus_key()
+    print(api_info)
+    return api_key

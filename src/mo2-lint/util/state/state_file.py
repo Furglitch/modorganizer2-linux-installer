@@ -14,12 +14,14 @@ existing_index = []
 
 def load_state() -> list[dict]:
     logger.debug(f"Loading state file from: {state_file}")
+    global instances, nexus_api
     if state_file.exists():
         with state_file.open("r", encoding="utf-8") as f:
-            global instances
-            instances = json.load(f)
-            logger.trace(f"Loaded state file: {instances}")
-            instances = instances.get("instances", [])
+            data = json.load(f)
+            logger.trace(f"Loaded state file: {data}")
+            nexus_api = data.get("nexus_api", {})
+            logger.debug(f"Nexus API data: {nexus_api}")
+            instances = data.get("instances", [])
             logger.debug(f"Loaded {len(instances)} instances from state file.")
     else:
         state_file.parent.mkdir(parents=True, exist_ok=True)
