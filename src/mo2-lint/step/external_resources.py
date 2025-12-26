@@ -21,12 +21,47 @@ def download_scriptextender():
     import util.variables as var
 
     if var.launcher == "heroic":
-        info = var.game_info.get("script_extender", {}).get(var.heroic_runner, {})
+        se_entries = var.game_info.get("script_extender", {}).get(var.heroic_runner)
     else:
-        info = var.game_info.get("script_extender", {}).get("steam", {})
+        se_entries = var.game_info.get("script_extender", {}).get("steam")
+    if not se_entries:
+        logger.debug("No script extender information available for this launcher.")
+        return
+    if isinstance(se_entries, dict):
+        se_entries = [se_entries]
+    logger.trace(f"Available script extender entries: {se_entries}")
+
+    choice_index = 0
+    if len(se_entries) > 1:
+        print("Multiple script extender versions are available for this game:")
+        for i, entry in enumerate(se_entries):
+            ver = entry.get("version") or entry.get("name") or f"entry {i + 1}"
+            runtime = entry.get("runtime")
+            mod_id = entry.get("mod_id")
+            file_id = entry.get("file_id")
+            src = entry.get("url") or (
+                f"nexus(mod={mod_id}, file={file_id})"
+                if mod_id or file_id
+                else "unknown"
+            )
+            if runtime:
+                msg = f"{ver} for {runtime} - {src}"
+            else:
+                msg = f"{ver} - {src}"
+            print(f"{i + 1}: {msg}")
+        sel = input(
+            f"Choose version [1-{len(se_entries)}] (default {len(se_entries)}): "
+        ).strip()
+        if sel.isdigit():
+            idx = int(sel) - 1
+            if 0 <= idx < len(se_entries):
+                choice_index = idx
+        else:
+            choice_index = len(se_entries) - 1
+
+    se_info = se_entries[choice_index]
 
     se = "scriptextender"
-    se_info = info.get("resource", {})
     name[se] = "Script Extender"
     url[se] = se_info.get("url")
     nexus_id[se] = (
@@ -35,29 +70,32 @@ def download_scriptextender():
         se_info.get("file_id"),
     )
     checksum[se] = se_info.get("checksum")
-    files[se] = info.get("files")
+    files[se] = se_info.get("files") or []
 
     logger.trace(
         f"Determined values for Script Extender: URL={url.get(se)}, Nexus IDs={nexus_id.get(se)}, Checksum={checksum.get(se)}, Files={files.get(se)}"
     )
 
-    if url.get(se) is not None:
+    # Prefer direct URL if present, otherwise fall back to Nexus IDs when available
+    if url.get(se):
         get_paths(se)
         download(se)
         extract(se)
         install(se)
-    elif (
-        nexus_id.get(se)[0] is not (None or "")
-        and nexus_id.get(se)[1] is not (None or 0)
-        and nexus_id.get(se)[2] is not (None or 0)
-    ):
-        from util.nexus.download_mod import filename
+    else:
+        game_id, mod_id, file_id = nexus_id.get(se, (None, None, None))
+        if game_id and mod_id and file_id:
+            from util.nexus.download_mod import filename
 
-        file = filename(nexus_id.get(se)[0], nexus_id.get(se)[1], nexus_id.get(se)[2])
-        get_paths(se, file)
-        download_nexus(se)
-        extract(se)
-        install(se)
+            file = filename(game_id, mod_id, file_id)
+            get_paths(se, file)
+            download_nexus(se)
+            extract(se)
+            install(se)
+        else:
+            logger.error(
+                "No valid download information for Script Extender; skipping installation."
+            )
 
 
 def download_resources():
