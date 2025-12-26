@@ -20,6 +20,7 @@ pyinstaller: venv/bin/activate
 	./venv/bin/pyinstaller --onefile --name mo2_lint \
 		--paths src \
 		--hidden-import patoolib \
+		--hidden-import requests \
 		--add-data "src/mo2-lint:src" \
 		--add-data "configs:cfg" \
 		--add-data "dist:dist" \

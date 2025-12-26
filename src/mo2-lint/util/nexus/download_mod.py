@@ -2,9 +2,8 @@
 
 from loguru import logger
 from pathlib import Path
-import json
 from ..state import state_file as state
-import requests
+import json
 
 
 def get_api_key() -> str:
@@ -39,6 +38,8 @@ def header() -> dict:
 
 
 def nexus_request(url: str):
+    import requests
+
     headers = header()
     response = requests.get(url, headers=headers)
     return response
@@ -55,12 +56,16 @@ def filename(game_id: str, mod_id: str, file_id: str) -> str:
     return name
 
 
-def nexus_download(game_id: str, mod_id: str, file_id: str, dest: Path):
+def nexus_download(
+    game_id: str, mod_id: str, file_id: str, dest: Path, file: str = None
+):
+    import requests
+
     url = f"https://api.nexusmods.com/v1/games/{game_id}/mods/{mod_id}/files/{file_id}/download_link.json"
-    file = nexus_request(url)
-    path = dest / filename(game_id, mod_id, file_id)
+    json = nexus_request(url)
+    path = (dest / file) if file else (dest / filename(game_id, mod_id, file_id))
     with open(path, "wb") as f:
-        data = file.json()
+        data = json.json()
         download_url = ""
         for item in data:
             if item.get("short_name") == "Nexus CDN":

@@ -5,7 +5,7 @@ from loguru import logger
 
 name: dict[str, str] = {}
 url: dict[str, str] = {}
-nexus_id: dict[str, tuple[int, int]] = {}
+nexus_id: dict[str, tuple[str, int, int]] = {}
 checksum: dict[str, str] = {}
 files: dict[str, list] = {}
 download_dir: dict[str, Path] = {}
@@ -29,17 +29,35 @@ def download_scriptextender():
     se_info = info.get("resource", {})
     name[se] = "Script Extender"
     url[se] = se_info.get("url")
-    nexus_id[se] = se_info.get("mod_id"), se_info.get("file_id")
+    nexus_id[se] = (
+        var.game_info.get("nexus_id"),
+        se_info.get("mod_id"),
+        se_info.get("file_id"),
+    )
     checksum[se] = se_info.get("checksum")
     files[se] = info.get("files")
 
     logger.trace(
         f"Determined values for Script Extender: URL={url.get(se)}, Nexus IDs={nexus_id.get(se)}, Checksum={checksum.get(se)}, Files={files.get(se)}"
     )
-    get_paths(se)
-    download(se)
-    extract(se)
-    install(se)
+
+    if url.get(se) is not None:
+        get_paths(se)
+        download(se)
+        extract(se)
+        install(se)
+    elif (
+        nexus_id.get(se)[0] is not (None or "")
+        and nexus_id.get(se)[1] is not (None or 0)
+        and nexus_id.get(se)[2] is not (None or 0)
+    ):
+        from util.nexus.download_mod import filename
+
+        file = filename(nexus_id.get(se)[0], nexus_id.get(se)[1], nexus_id.get(se)[2])
+        get_paths(se, file)
+        download_nexus(se)
+        extract(se)
+        install(se)
 
 
 def download_resources():
@@ -107,8 +125,9 @@ def check_existing(src: str, dir: Path) -> bool:
             return any((dir / f).exists() for f in files.get(src, []))
 
 
-def get_paths(src: str):
-    filename = url.get(src).split("/")[-1]
+def get_paths(src: str, filename: str = None):
+    if not filename:
+        filename = url.get(src).split("/")[-1]
 
     download_dir[src] = cache_dir / "downloads" / filename
     download_dir.get(src).parent.mkdir(parents=True, exist_ok=True)
@@ -154,6 +173,24 @@ def download(src: str):
         except Exception as e:
             logger.error(f"Failed to download {_name} on attempt {i + 1}: {e}")
     logger.error(f"Failed to download resource after {attempts} attempts.")
+
+
+def download_nexus(src: str):
+    from util.checksum import checksum_local
+
+    hash = checksum.get(src) if checksum.get(src) else None
+    dir = download_dir.get(src)
+
+    if hash is not None and dir.exists():
+        logger.debug(f"{src} already downloaded at {dir}; ensuring validity.")
+        if checksum_local(dir, hash):
+            logger.debug(f"Checksum for {src} verified.")
+            return
+
+    from util.nexus.download_mod import nexus_download
+
+    game_id, mod_id, file_id = nexus_id.get(src, ("", 0, 0))
+    nexus_download(game_id, str(mod_id), str(file_id), dir.parent)
 
 
 def extract(src: str):
