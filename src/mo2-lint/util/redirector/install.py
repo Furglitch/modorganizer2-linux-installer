@@ -6,7 +6,11 @@ import util.variables as var
 
 
 def create_path_entry():
-    redir_path = Path(var.game_install_path) / "modorganizer2" / "instance_path.txt"
+    game_path = Path(var.game_install_path)
+    if str(game_path).endswith(".exe"):
+        game_path = game_path.parent
+
+    redir_path = Path(game_path) / "modorganizer2" / "instance_path.txt"
     mo2_path = Path(var.parameters.get("directory")) / "ModOrganizer.exe"
     logger.info(f"Creating instance path entry at {redir_path}...")
 
@@ -22,7 +26,11 @@ def install():
 
     logger.info("Installing Redirector...")
 
-    exec_dir = Path(var.game_install_path)
+    game_path = Path(var.game_install_path)
+    if str(game_path).endswith(".exe"):
+        game_path = game_path.parent
+
+    exec_dir = Path(game_path)
     logger.debug(f"Game executable directory: {exec_dir}")
     exec_path = exec_dir / var.game_info.get("executable")
     logger.debug(f"Game executable path: {exec_path}")
