@@ -6,6 +6,7 @@ from pathlib import Path
 from loguru import logger
 from step import configure_prefix, load_gameinfo, external_resources
 from util.nexus import install_handler
+from util.redirector import install as install_redirector
 import util.state.state_file as state
 from util.variables import version
 
@@ -160,6 +161,7 @@ def main(game, directory, log_level, script_extender, plugin):
     configure_prefix.main()
     external_resources.main()
     install_handler.main()
+    install_redirector.main()
 
     state.write_state()
 

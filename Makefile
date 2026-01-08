@@ -26,7 +26,6 @@ _build: venv/bin/activate
 		src/mo2-lint/__init__.py
 
 redirector:
-    rm -f src/steam-redirector/redirector.exe || true
 	(cd src/steam-redirector && \
 	x86_64-w64-mingw32-gcc -v -municode -static -static-libgcc -Bstatic -lpthread -mwindows -o redirector.exe main.c win32_utils.c)
 	mkdir -p dist
