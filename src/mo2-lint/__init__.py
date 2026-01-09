@@ -89,6 +89,9 @@ def set_logger(log_level):
     )
 
 
+game_list = []
+
+
 def load_game_list():
     from util.variables import path
 
@@ -97,21 +100,36 @@ def load_game_list():
         json = from_json(file.read())
         games = list(json.keys())
         logger.trace(f"Loaded game list: {games}")
+    global game_list
+    game_list = ", ".join(sorted(games))
     return games
 
 
-@click.command()
+class CustomCommand(click.Command):
+    def get_help(self, ctx):
+        import re
+
+        help_text = super().get_help(ctx)
+        help_text = re.sub(r"\.\n\n(\W+)\[", r".\n\1CHOICES: [", help_text)
+        help_text = re.sub(r"\nOptions:\s*\n", "\n  [OPTIONS]\n\n", help_text)
+        return help_text
+
+
 @click.version_option(version=version, prog_name="mo2-lint")
-@click.help_option("-h", "--help")
-@click.argument(
-    "game",
-    required=False,
-    type=click.Choice(load_game_list(), case_sensitive=False),
+@click.help_option("-h", "--help", help="Show this message.")
+@click.option(
+    "--script-extender",
+    "-s",
+    is_flag=True,
+    default=False,
+    help="Automatically install script extenders (if available).",
 )
-@click.argument(
-    "directory",
-    required=False,
-    type=click.Path(file_okay=False, dir_okay=True),
+@click.option(
+    "--plugin",
+    "-p",
+    type=str,
+    multiple=True,
+    help="Specify MO2 plugins to download and install.",
 )
 @click.option(
     "--log-level",
@@ -127,25 +145,28 @@ def load_game_list():
     "list_instances",
     is_flag=True,
     default=False,
-    help="List existing instances of Mod Organizer 2. Does not require [GAME] or [DIRECTORY] arguments.",
+    help="List existing instances of Mod Organizer 2.\nDoes not require [GAME] or [DIRECTORY] arguments.",
 )
-@click.option(
-    "--script-extender",
-    "-s",
-    is_flag=True,
-    default=False,
-    help="Automatically download and install script extenders if available.",
+@click.argument(
+    "directory",
+    required=False,
+    type=click.Path(file_okay=False, dir_okay=True),
 )
-@click.option(
-    "--plugin",
-    "-p",
-    type=str,
-    multiple=True,
-    help="Specify MO2 plugins to download and install.",
+@click.argument(
+    "game",
+    required=False,
+    type=click.Choice(load_game_list(), case_sensitive=False),
+    metavar="[GAME]",
+)
+@click.command(
+    cls=CustomCommand,
+    help=f"""
+    [GAME]                          The game to configure Mod Organizer 2 for.\n
+                                    [{game_list}]\n
+    [DIRECTORY]                     Mod Organizer 2 install path.\n
+    """,
 )
 def main(game, directory, log_level, script_extender, plugin, list_instances):
-    """A tool to install and manage Mod Organizer 2 instances for games from Steam and Heroic Games Launcher."""
-
     if not list_instances:
         set_logger(log_level.upper())
     logger.info("Starting mo2-lint...")
