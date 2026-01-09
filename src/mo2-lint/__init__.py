@@ -23,11 +23,23 @@ CRITICAL: Fatal error
 
 
 def pull_config():
-    # Silence if --list is used
     import sys
 
-    if any(arg in sys.argv for arg in ["--list", "-L"]):
+    # Get log level
+    if any(arg in sys.argv for arg in ["--log-level", "-l"]):
+        log_index = (
+            sys.argv.index("--log-level")
+            if "--log-level" in sys.argv
+            else sys.argv.index("-l")
+        )
+        if log_index + 1 < len(sys.argv):
+            log_level = sys.argv[log_index + 1].upper()
+            set_logger(log_level)
+    # Silence if --list is used
+    elif any(arg in sys.argv for arg in ["--list", "-L"]):
         set_logger("WARNING")
+    else:
+        set_logger("INFO")
 
     configs = {"game_info.json", "resource_info.json", "plugin_info.json"}
     for config in configs:
@@ -167,8 +179,6 @@ class CustomCommand(click.Command):
     """,
 )
 def main(game, directory, log_level, script_extender, plugin, list_instances):
-    if not list_instances:
-        set_logger(log_level.upper())
     logger.info("Starting mo2-lint...")
 
     state.load_state()
