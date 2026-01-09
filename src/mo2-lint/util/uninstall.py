@@ -55,7 +55,7 @@ def uninstall_instance(instances: dict):
             )
         if not modified_game_install:
             print(
-                f"\nNo backup found for {exec}. You may need to manually restore the original executable ('Verify' in your game launcher). Skipping restoration."
+                f"\nNo backup found for {game_executable.name}. You may need to manually restore the original executable ('Verify' in your game launcher). Skipping restoration."
             )
             continue
 
@@ -78,7 +78,7 @@ def restore_game_exec(exec: str):
         os.remove(backup)
     except FileNotFoundError:
         print(
-            f"No backup found for {exec}. You may need to manually restore the original executable ('Verify' in your game launcher)."
+            f"No backup found for {exec.name}. You may need to manually restore the original executable ('Verify' in your game launcher)."
         )
     try:
         rmtree(exec.parent / "modorganizer2")
@@ -89,18 +89,19 @@ def restore_game_exec(exec: str):
 def delete_instance(inst: dict):
     path = Path(inst.get("modorganizer_path", "")).parent
     confirm = input(
-        f"Are you sure you want to uninstall the instance at '{path}'? [y/N/t(rash)]: "
+        f"Are you sure you want to uninstall the instance at '{path}'? [y/t(rash)/N]: "
+        # y = permanent delete, t = send to trash, N = cancel
     )
-    if confirm.lower() == "y" or confirm.lower() == "t":
+    if not confirm.lower() == "n":
         try:
             if confirm.lower() == "t":
                 trash(path)
             else:
                 rmtree(path)
-            print(f"Successfully uninstalled instance at '{path}'.")
+            print(f"\nSuccessfully uninstalled instance at '{path}'.")
         except FileNotFoundError:
             print(
-                f"Instance path '{path}' not found. It may have already been removed."
+                f"\nInstance path '{path}' not found. It may have already been removed."
             )
         state_file.remove_instance(int(inst.get("index", -1)))
     else:
@@ -108,7 +109,7 @@ def delete_instance(inst: dict):
 
 
 def main(game=None):
-    print("Uninstalling Mod Organizer 2 instance...\n")
+    print()
 
     state_list.main(game)
     length = len(state_list.parsed)
@@ -118,7 +119,7 @@ def main(game=None):
         print("\nOnly one instance found. Proceeding to uninstall...")
         choice = state_list.parsed
     else:
-        index = input("Enter index of instance to uninstall (or 'all'): ").strip()
+        index = input("\nEnter index of instance to uninstall (or 'all'): ").strip()
         if index.isdigit():
             if not (
                 index.isdigit()
