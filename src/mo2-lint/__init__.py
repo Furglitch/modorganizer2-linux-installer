@@ -7,7 +7,7 @@ from loguru import logger
 from step import configure_prefix, load_gameinfo, external_resources
 from util.nexus import install_handler
 from util.redirector import install as install_redirector
-import util.state.state_file as state
+from util.state import state_file as state, state_list
 from util.variables import version
 
 """
@@ -23,6 +23,12 @@ CRITICAL: Fatal error
 
 
 def pull_config():
+    # Silence if --list is used
+    import sys
+
+    if any(arg in sys.argv for arg in ["--list", "-L"]):
+        set_logger("WARNING")
+
     configs = {"game_info.json", "resource_info.json", "plugin_info.json"}
     for config in configs:
         # Pull defaults from internal if not present in .config
@@ -86,7 +92,6 @@ def set_logger(log_level):
 def load_game_list():
     from util.variables import path
 
-    set_logger("TRACE")
     pull_config()
     with open(path("game_info.json"), "r", encoding="utf-8") as file:
         json = from_json(file.read())
@@ -100,13 +105,13 @@ def load_game_list():
 @click.help_option("-h", "--help")
 @click.argument(
     "game",
+    required=False,
     type=click.Choice(load_game_list(), case_sensitive=False),
-    required=True,
 )
 @click.argument(
     "directory",
+    required=False,
     type=click.Path(file_okay=False, dir_okay=True),
-    required=True,
 )
 @click.option(
     "--log-level",
@@ -115,6 +120,14 @@ def load_game_list():
     default="INFO",
     help="Set the logging level.",
     show_default=True,
+)
+@click.option(
+    "--list",
+    "-L",
+    "list_instances",
+    is_flag=True,
+    default=False,
+    help="List existing instances of Mod Organizer 2. Does not require [GAME] or [DIRECTORY] arguments.",
 )
 @click.option(
     "--script-extender",
@@ -130,10 +143,22 @@ def load_game_list():
     multiple=True,
     help="Specify MO2 plugins to download and install.",
 )
-def main(game, directory, log_level, script_extender, plugin):
+def main(game, directory, log_level, script_extender, plugin, list_instances):
     """A tool to install and manage Mod Organizer 2 instances for games from Steam and Heroic Games Launcher."""
-    set_logger(log_level.upper())
+
+    if not list_instances:
+        set_logger(log_level.upper())
     logger.info("Starting mo2-lint...")
+
+    state.load_state()
+
+    if list_instances:
+        state_list.main()
+        return
+    elif not directory or not game:
+        raise click.BadArgumentUsage(
+            "GAME and DIRECTORY arguments are required unless --list is used."
+        )
 
     if not Path(directory).exists():
         Path(directory).mkdir(parents=True, exist_ok=True)
@@ -150,7 +175,6 @@ def main(game, directory, log_level, script_extender, plugin):
         }
     )
 
-    state.load_state()
     state.check_existing_instances(directory, game)
     state.select_index()
     state.set_nexus_id(game)
