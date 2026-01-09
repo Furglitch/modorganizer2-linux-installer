@@ -5,6 +5,7 @@ from pydantic_core import from_json
 from pathlib import Path
 from loguru import logger
 from step import configure_prefix, load_gameinfo, external_resources
+from util import uninstall as uninstall_instance
 from util.nexus import install_handler
 from util.redirector import install as install_redirector
 from util.state import state_file as state, state_list
@@ -35,9 +36,9 @@ def pull_config():
         if log_index + 1 < len(sys.argv):
             log_level = sys.argv[log_index + 1].upper()
             set_logger(log_level)
-    # Silence if --list is used
-    elif any(arg in sys.argv for arg in ["--list", "-L"]):
-        set_logger("WARNING")
+    # Silence if --list or --uninstall is used
+    elif any(arg in sys.argv for arg in ["--list", "-L", "--uninstall", "-U"]):
+        set_logger("ERROR")
     else:
         set_logger("INFO")
 
@@ -152,6 +153,14 @@ class CustomCommand(click.Command):
     show_default=True,
 )
 @click.option(
+    "--uninstall",
+    "-U",
+    "uninstall",
+    is_flag=True,
+    default=False,
+    help="Choose to uninstall a Mod Organizer 2 instance instead of installing.\n[GAME] and [DIRECTORY] arguments are optional.",
+)
+@click.option(
     "--list",
     "-L",
     "list_instances",
@@ -178,21 +187,10 @@ class CustomCommand(click.Command):
     [DIRECTORY]                     Mod Organizer 2 install path.\n
     """,
 )
-def main(game, directory, log_level, script_extender, plugin, list_instances):
+def main(
+    game, directory, log_level, script_extender, plugin, list_instances, uninstall
+):
     logger.info("Starting mo2-lint...")
-
-    state.load_state()
-
-    if list_instances:
-        state_list.main()
-        return
-    elif not directory or not game:
-        raise click.BadArgumentUsage(
-            "GAME and DIRECTORY arguments are required unless --list is used."
-        )
-
-    if not Path(directory).exists():
-        Path(directory).mkdir(parents=True, exist_ok=True)
 
     from util.variables import set_parameters
 
@@ -205,6 +203,22 @@ def main(game, directory, log_level, script_extender, plugin, list_instances):
             "plugins": plugin,
         }
     )
+
+    state.load_state()
+
+    if list_instances:
+        state_list.main()
+        return
+    elif uninstall:
+        uninstall_instance.main(game)
+        return
+    elif not directory or not game:
+        raise click.BadArgumentUsage(
+            "GAME and DIRECTORY arguments are required unless --list or --uninstall is used."
+        )
+
+    if not Path(directory).exists():
+        Path(directory).mkdir(parents=True, exist_ok=True)
 
     state.check_existing_instances(directory, game)
     state.select_index()

@@ -124,10 +124,10 @@ def set_instance_path(path: Path):
     global instance
     path = Path(path).expanduser().resolve()
     if path.exists() and path.is_dir():
-        path = path / "ModOrganizer2.exe"
-    elif not path.exists() and not path.name.lower().endswith("ModOrganizer2.exe"):
+        path = path / "ModOrganizer.exe"
+    elif not path.exists() and not path.name.lower().endswith("modorganizer.exe"):
         path.mkdir(parents=True, exist_ok=True)
-        path = path / "ModOrganizer2.exe"
+        path = path / "ModOrganizer.exe"
     logger.debug(f"Setting instance path to: {path}")
     instance["modorganizer_path"] = str(path)
 
@@ -171,13 +171,22 @@ def set_nexus_api_key(token: str):
     nexus_api["api_key"] = token
 
 
-def write_state():
-    """Writes current state to disk."""
+def remove_instance(index: int):
+    global instances
+    instances = [inst for inst in instances if int(inst.get("index", -1)) != index]
+    logger.debug(
+        f"Removed instance with index {index}. Remaining instances: {len(instances)}"
+    )
+    write_state(add_current=False)
+
+
+def write_state(add_current: bool = True):
+    global instances
+    if {} in instances:
+        instances.remove({})
+    if add_current and instance and instance not in instances:
+        instances.append(instance)
+
     with state_file.open("w", encoding="utf-8") as f:
-        global instances
-        if {} in instances:
-            instances.remove({})
-        if instance not in instances:
-            instances.append(instance)
         json.dump({"nexus_api": nexus_api, "instances": instances}, f, indent=2)
-        logger.debug(f"Wrote state file with {len(instances)} instances.")
+    logger.debug(f"Wrote state file with {len(instances)} instances.")

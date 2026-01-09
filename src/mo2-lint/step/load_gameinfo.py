@@ -148,9 +148,9 @@ def get_install_path():
     logger.debug(f"Determined game install path: {var.game_install_path}")
 
 
-def main():
+def main(game=None):
     from util.variables import load_gameinfo, parameters
 
-    load_gameinfo(parameters.get("game"))
+    load_gameinfo(game or parameters.get("game"))
     get_install_path()
     logger.success("Game information loaded successfully.")
