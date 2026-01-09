@@ -55,7 +55,7 @@ def uninstall_instance(instances: dict):
             )
         if not modified_game_install:
             print(
-                f"\nBackup executable not found for '{game}', nor redirector data folder. Skipping restoration."
+                f"\nNo backup found for {exec}. You may need to manually restore the original executable ('Verify' in your game launcher). Skipping restoration."
             )
             continue
 
