@@ -4,7 +4,7 @@ from pydantic_core import from_json
 from pathlib import Path
 from loguru import logger
 
-version = "6.0.5"
+version = "7.0.0"
 
 parameters: dict = None
 game_info: dict = None
