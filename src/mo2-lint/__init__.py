@@ -23,6 +23,26 @@ CRITICAL: Fatal error
 """
 
 
+def check_updates():
+    # Checks for updates from https://github.com/Furglitch/modorganizer2-linux-installer
+    import requests
+
+    try:
+        response = requests.get(
+            "https://api.github.com/repos/Furglitch/modorganizer2-linux-installer/releases/latest"
+        )
+        git_version = response.json()["tag_name"]
+        if git_version != str(version):
+            git_parts = list(map(int, git_version.split(".")))
+            version_parts = list(map(int, str(version).split(".")))
+            if git_parts > version_parts:
+                logger.warning(
+                    f"A new version of mo2-lint is available: {git_version} (current: {version}). Please update to the latest version."
+                )
+    except Exception as e:
+        logger.error(f"Failed to check for updates: {e}")
+
+
 def pull_config():
     import sys
 
@@ -191,6 +211,7 @@ def main(
     game, directory, log_level, script_extender, plugin, list_instances, uninstall
 ):
     logger.info("Starting mo2-lint...")
+    check_updates()
 
     from util.variables import set_parameters
 
