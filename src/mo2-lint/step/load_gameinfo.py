@@ -140,6 +140,7 @@ def get_install_path():
 
     logger.debug(f"Determined launcher: {var.launcher}")
     state.set_launcher(var.launcher)
+    state.set_game_install_path(var.game_install_path)
     state.set_launcher_ids(
         steam_id=var.game_info.get("steam_id"),
         gog_id=var.game_info.get("gog_id"),

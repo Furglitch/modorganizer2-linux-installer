@@ -153,6 +153,13 @@ def set_plugins(plugins: list[str]):
     instance["plugins"] = plugins
 
 
+def set_game_install_path(path: Path):
+    global instance
+    path = Path(path).expanduser().resolve()
+    logger.debug(f"Setting instance game install path to: {path}")
+    instance["game_install_path"] = str(path)
+
+
 def set_nexus_uuid(id: uuid.UUID | str):
     global nexus_api
     if isinstance(id, uuid.UUID):
