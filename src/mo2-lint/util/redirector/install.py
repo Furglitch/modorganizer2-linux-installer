@@ -26,16 +26,23 @@ def install():
 
     logger.info("Installing Redirector...")
 
-    game_path = Path(var.game_install_path)
-    if str(game_path).endswith(".exe"):
-        game_path = game_path.parent
+    game_path = (
+        Path(var.game_install_path)
+        if not Path(var.game_install_path).is_file()
+        else Path(var.game_install_path).parent
+    )
+    from .validation import validate_redirector as validate
 
-    exec_dir = Path(game_path)
-    logger.debug(f"Game executable directory: {exec_dir}")
-    exec_path = exec_dir / var.game_info.get("executable")
+    if validate(game_path):
+        logger.info("Redirector is already installed and up to date.")
+        return
+
+    exec_path = game_path / var.game_info.get("executable")
     logger.debug(f"Game executable path: {exec_path}")
+
     exec_backup = exec_path.with_suffix(".exe.bak")
     logger.debug(f"Game executable backup path: {exec_backup}")
+
     if not exec_backup.exists():
         logger.info(f"Creating backup of original executable at {exec_backup}...")
         copy2(exec_path, exec_backup)
