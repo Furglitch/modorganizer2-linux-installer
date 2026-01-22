@@ -126,7 +126,7 @@ game_list = []
 
 
 def load_game_list():
-    from util.variables import path
+    from util.variables import internal_path as path
 
     pull_config()
     with open(path("game_info.json"), "r", encoding="utf-8") as file:
