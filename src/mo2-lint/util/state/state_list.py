@@ -8,7 +8,7 @@ def indent(text: str, prefix: str = "- ") -> str:
 parsed = []
 
 
-def main(game=None, directory=None):
+def main(game=None, directory=None, function=None):
     from util.state.state_file import instances
     import util.variables as var
 
@@ -32,7 +32,11 @@ def main(game=None, directory=None):
                 continue
 
         game_info = var.load_gameinfo(nexus_id)
-        display_name = game_info.get("display", "Unknown Game")
+        display_name = (
+            game_info.get("display", "Unknown Game")
+            if not (function and not game_info)
+            else inst.get("nexus_id", "N/A")
+        )
         print(f"Instance {i} - {display_name}")
         indent(f"Path: {path}")
         indent(f"Launcher: {inst.get('launcher', 'N/A')}")

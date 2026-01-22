@@ -160,6 +160,25 @@ def set_game_install_path(path: Path):
     instance["game_install_path"] = str(path)
 
 
+def get_game_install_path() -> Path | None:
+    global instance
+    path_str = instance.get("game_install_path", None)
+    if path_str:
+        return Path(path_str)
+    return None
+
+
+def set_game_executable(exec: str):
+    global instance
+    logger.debug(f"Setting instance game executable path to: {exec}")
+    instance["game_executable"] = exec
+
+
+def get_game_executable() -> str | None:
+    global instance
+    return instance.get("game_executable", None)
+
+
 def set_nexus_uuid(id: uuid.UUID | str):
     global nexus_api
     if isinstance(id, uuid.UUID):

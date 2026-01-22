@@ -141,6 +141,7 @@ def get_install_path():
     logger.debug(f"Determined launcher: {var.launcher}")
     state.set_launcher(var.launcher)
     state.set_game_install_path(var.game_install_path)
+    state.set_game_executable(var.game_info.get("executable"))
     state.set_launcher_ids(
         steam_id=var.game_info.get("steam_id"),
         gog_id=var.game_info.get("gog_id"),
@@ -149,9 +150,13 @@ def get_install_path():
     logger.debug(f"Determined game install path: {var.game_install_path}")
 
 
-def main(game=None):
+def main(game=None, custom_game_info_path: str = None):
     from util.variables import load_gameinfo, parameters
 
-    load_gameinfo(game or parameters.get("game"))
+    load_gameinfo(
+        game or parameters.get("game")
+    ) if not custom_game_info_path else load_gameinfo(
+        game or parameters.get("game"), custom_game_info_path
+    )
     get_install_path()
     logger.success("Game information loaded successfully.")

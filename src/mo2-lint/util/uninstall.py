@@ -4,7 +4,6 @@ from util.state import state_list, state_file
 from pathlib import Path
 from shutil import copy2 as copy, rmtree
 from send2trash import send2trash as trash
-from util import variables as var
 
 
 def uninstall_instance(instances: dict):
@@ -27,17 +26,13 @@ def uninstall_instance(instances: dict):
         matched.clear()
 
     for game, count in match_count.items():
-        from step import load_gameinfo
-
-        load_gameinfo.main(game)
-
         game_instances = [
             inst for inst in instances if inst.get("nexus_id", None) == game
         ]
         revert_gamepath = ""
-        game_executable = Path(
-            matches[game][0].get("game_path", "")
-        ) / var.game_info.get("executable")
+        game_executable = Path(inst.get("game_install_path", None)) / inst.get(
+            "game_executable", None
+        )
 
         modified_game_install = game_executable.exists() and (
             game_executable.with_suffix(".exe.bak").exists()
@@ -111,7 +106,7 @@ def delete_instance(inst: dict):
 def main(game=None):
     print()
 
-    state_list.main(game)
+    state_list.main(game, function="uninstall")
     length = len(state_list.parsed)
     choice = []
 

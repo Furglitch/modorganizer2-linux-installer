@@ -173,6 +173,14 @@ class CustomCommand(click.Command):
     show_default=True,
 )
 @click.option(
+    "--custom",
+    "-c",
+    "custom",
+    is_flag=True,
+    default=False,
+    help="Use a custom game_info file to install for any game.\nRequires [GAME], [DIRECTORY], [GAMEINFO] arguments.\nUnsupported.",
+)
+@click.option(
     "--uninstall",
     "-U",
     "uninstall",
@@ -189,6 +197,12 @@ class CustomCommand(click.Command):
     help="List existing instances of Mod Organizer 2.\nDoes not require [GAME] or [DIRECTORY] arguments.",
 )
 @click.argument(
+    "gameinfo_path",
+    required=False,
+    type=click.Path(file_okay=True, dir_okay=False),
+    metavar="[GAMEINFO]",
+)
+@click.argument(
     "directory",
     required=False,
     type=click.Path(file_okay=False, dir_okay=True),
@@ -196,7 +210,7 @@ class CustomCommand(click.Command):
 @click.argument(
     "game",
     required=False,
-    type=click.Choice(load_game_list(), case_sensitive=False),
+    type=str,
     metavar="[GAME]",
 )
 @click.command(
@@ -205,11 +219,27 @@ class CustomCommand(click.Command):
     [GAME]                          The game to configure Mod Organizer 2 for.\n
                                     [{game_list}]\n
     [DIRECTORY]                     Mod Organizer 2 install path.\n
+    [GAMEINFO]                      Path to custom game_info JSON file. Only needed if --custom is used.\n
     """,
 )
 def main(
-    game, directory, log_level, script_extender, plugin, list_instances, uninstall
+    custom,
+    game,
+    directory,
+    gameinfo_path,
+    log_level,
+    script_extender,
+    plugin,
+    list_instances,
+    uninstall,
 ):
+    if not (custom or list_instances or uninstall):
+        if game not in load_game_list():
+            logger.critical(
+                f"Invalid game specified: {game}. Available games are: {game_list}"
+            )
+            raise SystemExit(1)
+
     logger.info("Starting mo2-lint...")
     check_updates()
 
@@ -247,7 +277,9 @@ def main(
     state.set_instance_path(directory)
     state.set_plugins(list(plugin))
 
-    load_gameinfo.main()
+    load_gameinfo.main() if not custom else load_gameinfo.main(
+        custom_game_info_path=gameinfo_path
+    )
     configure_prefix.main()
     external_resources.main()
     install_handler.main()
