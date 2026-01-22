@@ -83,12 +83,18 @@ def restore_game_exec(exec: str):
 
 def delete_instance(inst: dict):
     path = Path(inst.get("modorganizer_path", "")).parent
+    instance_link = Path("~/.config/mo2-lint/instances").expanduser() / inst.get(
+        "nexus_id"
+    )
+
     confirm = input(
         f"Are you sure you want to uninstall the instance at '{path}'? [y/t(rash)/N]: "
-        # y = permanent delete, t = send to trash, N = cancel
+        # y = permanent delete, t = send to trash, N (default) = cancel
     )
     if not confirm.lower() == "n":
         try:
+            if instance_link.exists() and instance_link.is_symlink():
+                instance_link.unlink(missing_ok=True)
             if confirm.lower() == "t":
                 trash(path)
             else:
