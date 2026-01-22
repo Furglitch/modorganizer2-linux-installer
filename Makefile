@@ -19,6 +19,7 @@ _build: venv/bin/activate
 		--paths src \
 		--hidden-import patoolib \
 		--hidden-import requests \
+		--hidden-import send2trash \
 		--add-data "src/mo2-lint:src" \
 		--add-data "configs:cfg" \
 		--add-data "dist:dist" \
