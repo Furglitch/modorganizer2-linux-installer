@@ -12,18 +12,22 @@ _build: venv/bin/activate
 		--paths src \
 		--hidden-import find_heroic_install \
 		--hidden-import pydantic_core \
+		--hidden-import protontricks \
 		--add-data "src/nxm-handler:src" \
 		--runtime-hook "build/runtime_hooks.py" \
+		--additional-hooks-dir "build/hooks" \
 		src/nxm-handler/__init__.py
 	./venv/bin/pyinstaller --onefile --name mo2_lint \
 		--paths src \
 		--hidden-import patoolib \
 		--hidden-import requests \
 		--hidden-import send2trash \
+		--hidden-import protontricks \
 		--add-data "src/mo2-lint:src" \
 		--add-data "configs:cfg" \
 		--add-data "dist:dist" \
 		--runtime-hook "build/runtime_hooks.py" \
+		--additional-hooks-dir "build/hooks" \
 		src/mo2-lint/__init__.py
 
 redirector:

@@ -20,6 +20,8 @@ __pycache__/
 .Python
 build/**
 !build/runtime_hooks.py
+!build/hooks/
+!build/hooks/hook-protontricks.py
 !build/
 develop-eggs/
 dist/

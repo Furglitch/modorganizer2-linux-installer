@@ -187,13 +187,9 @@ def send_url(instance_dir, url, env_info):
     prefix = env_info.get("prefix")
 
     if launcher == "steam":
-        cmd = [
-            "protontricks-launch",
-            "--appid",
-            f"{steam_id}",
-            f"{handler}",
-            f"{url}",
-        ]
+        from protontricks.cli.main import main as pt
+
+        pt("--verbose", "--appid", f"{steam_id}", f"{handler}", f"{url}")
     elif launcher == "heroic":
         if release == "stable":
             cmd = [f"{wine}", f"{handler}", f"{url}"]
@@ -207,17 +203,16 @@ def send_url(instance_dir, url, env_info):
                 f"{handler}",
                 f"{url}",
             ]
+        try:
+            subprocess.run(
+                cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env
+            )
+            logger.debug(f"Executing handler command: {cmd}")
+        except Exception as e:
+            logger.exception(f"Failed to execute handler command: {e}")
     else:
         logger.warning("Unknown launcher, cannot send URL")
         return
-
-    try:
-        subprocess.run(
-            cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env
-        )
-        logger.debug(f"Executing handler command: {cmd}")
-    except Exception as e:
-        logger.exception(f"Failed to execute handler command: {e}")
 
 
 @click.command()
