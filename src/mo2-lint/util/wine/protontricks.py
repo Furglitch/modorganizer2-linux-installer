@@ -5,6 +5,8 @@ import os
 from pathlib import Path
 import sys
 from loguru import logger
+from util.logger import remove_loggers, add_loggers
+from util.variables import parameters
 from protontricks.cli.main import main as pt
 from typing import List
 import threading
@@ -66,19 +68,17 @@ def redirect_output_to_logger():
     original_stderr_fd = os.dup(sys.stderr.fileno())
     original_stdout_file = os.fdopen(original_stdout_fd, "w", buffering=1)
 
-    handler_ids = list(logger._core.handlers.keys())
-    for hid in handler_ids:
-        logger.remove(hid)
-    new_handler_id = logger.add(
-        original_stdout_file, format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}"
+    remove_loggers()
+    add_loggers(
+        parameters["log_level"], "protontricks", console_sink=original_stdout_file
     )
 
     def reader_thread():
         with os.fdopen(read_fd, "r", buffering=1) as reader:
             for line in reader:
-                if line := line.rstrip("\n").rstrip("protontricks (INFO):"):
+                if line := line.rstrip("\n"):
                     output_lines.append(line)
-                    logger.info(line)
+                    logger.trace(line)
 
     threading.Thread(target=reader_thread, daemon=True).start()
 
@@ -94,21 +94,6 @@ def redirect_output_to_logger():
         os.close(write_fd)
         os.close(original_stderr_fd)
 
-        logger.remove(new_handler_id)
+        remove_loggers()
         original_stdout_file.close()
-
-        logger.add(  # TODO refactor to helper function for use with __init__
-            sys.stdout,
-            colorize=True,
-            format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | {message}",
-        )
-        filename = Path(
-            "~/.cache/mo2-lint/logs/install.{time:YYYY-MM-DD_HH-mm-ss}.log"
-        ).expanduser()
-        logger.add(
-            filename,
-            level="TRACE",
-            rotation="10 MB",
-            retention="7 days",
-            compression="zip",
-        )
+        add_loggers(parameters["log_level"])

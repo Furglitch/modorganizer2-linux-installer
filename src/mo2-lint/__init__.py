@@ -3,13 +3,14 @@
 import click
 from pydantic_core import from_json
 from pathlib import Path
-from loguru import logger
 from step import configure_prefix, load_gameinfo, external_resources
 from util import uninstall as uninstall_instance
 from util.nexus import install_handler
 from util.redirector import install as install_redirector
 from util.state import state_file as state, state_list
 from util.variables import version
+from util.logger import add_loggers, remove_loggers
+from loguru import logger
 
 """
 Log Levels:
@@ -46,6 +47,8 @@ def check_updates():
 def pull_config():
     import sys
 
+    remove_loggers()
+
     # Get log level
     if any(arg in sys.argv for arg in ["--log-level", "-l"]):
         log_index = (
@@ -55,12 +58,12 @@ def pull_config():
         )
         if log_index + 1 < len(sys.argv):
             log_level = sys.argv[log_index + 1].upper()
-            set_logger(log_level)
+            add_loggers(log_level)
     # Silence if --list or --uninstall is used
     elif any(arg in sys.argv for arg in ["--list", "-L", "--uninstall", "-U"]):
-        set_logger("ERROR")
+        add_loggers("ERROR")
     else:
-        set_logger("INFO")
+        add_loggers("INFO")
 
     configs = {"game_info.json", "resource_info.json", "plugin_info.json"}
     for config in configs:
@@ -93,33 +96,6 @@ def pull_config():
 
 stdout = None
 logout = None
-
-
-def set_logger(log_level):
-    import sys
-
-    global stdout, logout
-
-    logger.remove(stdout)
-    logger.remove(logout)
-
-    stdout = logger.add(
-        sys.stdout,
-        colorize=True,
-        format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | {message}",
-        level=log_level,
-    )
-
-    filename = Path(
-        "~/.cache/mo2-lint/logs/install.{time:YYYY-MM-DD_HH-mm-ss}.log"
-    ).expanduser()
-    logout = logger.add(
-        filename,
-        level="TRACE",
-        rotation="10 MB",
-        retention="7 days",
-        compression="zip",
-    )
 
 
 game_list = []
