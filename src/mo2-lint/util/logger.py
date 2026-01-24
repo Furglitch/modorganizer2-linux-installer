@@ -5,8 +5,8 @@ from pathlib import Path
 import sys
 from datetime import datetime
 
-_filename_timestamp: str = None
-_message_time_placeholder = "{time:YYYY-MM-DD_HH-mm-ss}"
+timestamp: str = None
+time_format = "{time:YYYY-MM-DD_HH-mm-ss}"
 
 
 def remove_loggers():
@@ -15,18 +15,17 @@ def remove_loggers():
         logger.remove(hid)
 
 
-def _ensure_filename_timestamp() -> str:
-    global _filename_timestamp
-    if not _filename_timestamp:
-        _filename_timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    return _filename_timestamp
+def persist_timestamp() -> str:
+    global timestamp
+    if not timestamp:
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
 
 def add_loggers(log_level: str = "INFO", process: str = None, console_sink=None):
-    filename_ts = _ensure_filename_timestamp()
+    persist_timestamp()
 
     format_str = (
-        f"<green>{_message_time_placeholder}</green> | "
+        f"<green>{time_format}</green> | "
         + "<level>{level: <8}</level> | "
         + (f"{process.upper()} | " if process else "")
         + "{message}"
@@ -38,8 +37,8 @@ def add_loggers(log_level: str = "INFO", process: str = None, console_sink=None)
     )
 
     logger.add(
-        sink=Path(f"~/.cache/mo2-lint/logs/install.{filename_ts}.log").expanduser(),
-        format=f"{_message_time_placeholder} | "
+        sink=Path(f"~/.cache/mo2-lint/logs/install.{timestamp}.log").expanduser(),
+        format=f"{time_format} | "
         + " {level: <8} | "
         + (f"{process.upper()} | " if process else "")
         + " {module}:{function}:{line} - "
