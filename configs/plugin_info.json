@@ -1,42 +1,42 @@
 [
   {
-    "Identifier": "rootbuilder",
-    "Manifest": "https://raw.githubusercontent.com/Kezyma/ModOrganizer-Plugins/main/directory/plugins/rootbuilder.json"
+    "identifier": "rootbuilder",
+    "manifest": "https://raw.githubusercontent.com/Kezyma/ModOrganizer-Plugins/main/directory/plugins/rootbuilder.json"
   },
   {
-    "Identifier": "reinstaller",
-    "Manifest": "https://raw.githubusercontent.com/Kezyma/ModOrganizer-Plugins/main/directory/plugins/reinstaller.json"
+    "identifier": "reinstaller",
+    "manifest": "https://raw.githubusercontent.com/Kezyma/ModOrganizer-Plugins/main/directory/plugins/reinstaller.json"
   },
   {
-    "Identifier": "shortcutter",
-    "Manifest": "https://raw.githubusercontent.com/Kezyma/ModOrganizer-Plugins/main/directory/plugins/shortcutter.json"
+    "identifier": "shortcutter",
+    "manifest": "https://raw.githubusercontent.com/Kezyma/ModOrganizer-Plugins/main/directory/plugins/shortcutter.json"
   },
   {
-    "Identifier": "pluginfinder",
-    "Manifest": "https://raw.githubusercontent.com/Kezyma/ModOrganizer-Plugins/main/directory/plugins/pluginfinder.json"
+    "identifier": "pluginfinder",
+    "manifest": "https://raw.githubusercontent.com/Kezyma/ModOrganizer-Plugins/main/directory/plugins/pluginfinder.json"
   },
   {
-    "Identifier": "profilesync",
-    "Manifest": "https://raw.githubusercontent.com/Kezyma/ModOrganizer-Plugins/main/directory/plugins/profilesync.json"
+    "identifier": "profilesync",
+    "manifest": "https://raw.githubusercontent.com/Kezyma/ModOrganizer-Plugins/main/directory/plugins/profilesync.json"
   },
   {
-    "Identifier": "openmwplayer",
-    "Manifest": "https://raw.githubusercontent.com/Kezyma/ModOrganizer-Plugins/main/directory/plugins/openmwplayer.json"
+    "identifier": "openmwplayer",
+    "manifest": "https://raw.githubusercontent.com/Kezyma/ModOrganizer-Plugins/main/directory/plugins/openmwplayer.json"
   },
   {
-    "Identifier": "grassprecacher",
-    "Manifest": "https://raw.githubusercontent.com/Al12rs/modorganizer-GrassPrecacher/master/manifest.json"
+    "identifier": "grassprecacher",
+    "manifest": "https://raw.githubusercontent.com/Al12rs/modorganizer-GrassPrecacher/master/manifest.json"
   },
   {
-    "Identifier": "autoactivator",
-    "Manifest": "https://raw.githubusercontent.com/JonathanFeenstra/modorganizer-auto-activator/main/manifest.json"
+    "identifier": "autoactivator",
+    "manifest": "https://raw.githubusercontent.com/JonathanFeenstra/modorganizer-auto-activator/main/manifest.json"
   },
   {
-    "Identifier": "fomod-plus",
-    "Manifest": "https://raw.githubusercontent.com/aglowinthefield/mo2-fomod-plus/refs/heads/main/plugindefinition.json"
+    "identifier": "fomod-plus",
+    "manifest": "https://raw.githubusercontent.com/aglowinthefield/mo2-fomod-plus/refs/heads/main/plugindefinition.json"
   },
   {
-    "Identifier": "nxm-collection-dl",
-    "Manifest": "https://raw.githubusercontent.com/Furglitch/modorganizer2-nxm-collection-dl/main/plugindefinition.json"
+    "identifier": "nxm-collection-dl",
+    "manifest": "https://raw.githubusercontent.com/Furglitch/modorganizer2-nxm-collection-dl/main/plugindefinition.json"
   }
 ]

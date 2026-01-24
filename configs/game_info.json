@@ -1,42 +1,42 @@
 {
   "cyberpunk2077": {
-    "display": "Cyberpunk 2077",
+    "display_name": "Cyberpunk 2077",
     "nexus_id": "cyberpunk2077",
     "steam_id": 1091500,
     "gog_id": 1423049311,
     "epic_id": "Ginger",
-    "steam_subdirectory": "Cyberpunk 2077",
+    "subdirectory": "Cyberpunk 2077",
     "executable": "REDprelauncher.exe",
-    "protontricks_args": [
+    "tricks": [
       "xaudio2_7=native",
       "d3dcompiler_47",
       "vcrun2022"
     ],
-    "script_extender": null
+    "script_extenders": null
   },
   "fallout4": {
-    "display": "Fallout 4",
+    "display_name": "Fallout 4",
     "nexus_id": "fallout4",
     "steam_id": 377160,
     "gog_id": 1998527297,
     "epic_id": "61d52ce4d09d41e48800c22784d13ae8",
-    "steam_subdirectory": "Fallout 4",
+    "subdirectory": "Fallout 4",
     "executable": "Fallout4Launcher.exe",
-    "protontricks_args": [
+    "tricks": [
       "xaudio2_7=native",
       "grabfullscreen=y"
     ],
-    "script_extender": {
+    "script_extenders": {
       "epic": null,
       "gog": [
         {
           "version": "0.6.23",
           "runtime": "1.10.163",
-          "url": "https://f4se.silverlock.org/beta/f4se_0_06_23.7z",
-          "mod_id": 42147,
-          "file_id": 253313,
+          "download_url": "https://f4se.silverlock.org/beta/f4se_0_06_23.7z",
+          "nexus_mod_id": 42147,
+          "nexus_file_id": 253313,
           "checksum": "39575bbb688fc40598496e28afafb5270a6e44c00656a160a30f467efbade21c",
-          "files": [
+          "file_whitelist": [
             "f4se_0_06_23/Data",
             "f4se_0_06_23/CustomControlMap.txt",
             "f4se_0_06_23/f4se_1_10_163.dll",
@@ -49,10 +49,10 @@
         {
           "version": "0.7.7",
           "runtime": "1.11.191",
-          "mod_id": 42147,
-          "file_id": 377611,
+          "nexus_mod_id": 42147,
+          "nexus_file_id": 377611,
           "checksum": "d1747dfefa28e2de37468d0de4b2458eb7c5224e30fca24ed328cfc1b40d8a08",
-          "files": [
+          "file_whitelist": [
             "f4se_0_07_07/Data",
             "f4se_0_07_07/CustomControlMap.txt",
             "f4se_0_07_07/f4se_1_11_191.dll",
@@ -62,10 +62,10 @@
         {
           "version": "0.7.6",
           "runtime": "1.11.169",
-          "mod_id": 42147,
-          "file_id": 374185,
+          "nexus_mod_id": 42147,
+          "nexus_file_id": 374185,
           "checksum": "41e7acf12688f640658b593172cb6d806b83643ad76facf27fbbfb3641025e0b",
-          "files": [
+          "file_whitelist": [
             "f4se_0_07_06/Data",
             "f4se_0_07_06/CustomControlMap.txt",
             "f4se_0_07_06/f4se_1_11_169.dll",
@@ -75,10 +75,10 @@
         {
           "version": "0.7.5",
           "runtime": "1.11.159",
-          "mod_id": 42147,
-          "file_id": 375407,
+          "nexus_mod_id": 42147,
+          "nexus_file_id": 375407,
           "checksum": "f1b3171e8e7e7658128839e72b81b43419956e479728d54589c0ba123b439b08",
-          "files": [
+          "file_whitelist": [
             "f4se_0_07_05/Data",
             "f4se_0_07_05/CustomControlMap.txt",
             "f4se_0_07_05/f4se_1_11_159.dll",
@@ -88,10 +88,10 @@
         {
           "version": "0.7.2",
           "runtime": "1.10.984",
-          "mod_id": 42147,
-          "file_id": 316287,
+          "nexus_mod_id": 42147,
+          "nexus_file_id": 316287,
           "checksum": "f81b1a7530c7c483043050121145a4bb625d183dd0b4c11287ab11ae395af790",
-          "files": [
+          "file_whitelist": [
             "f4se_0_07_02/Data",
             "f4se_0_07_02/CustomControlMap.txt",
             "f4se_0_07_02/f4se_1_10_984.dll",
@@ -101,11 +101,11 @@
         {
           "version": "0.6.23",
           "runtime": "1.10.163",
-          "url": "https://f4se.silverlock.org/beta/f4se_0_06_23.7z",
-          "mod_id": 42147,
-          "file_id": 253313,
+          "download_url": "https://f4se.silverlock.org/beta/f4se_0_06_23.7z",
+          "nexus_mod_id": 42147,
+          "nexus_file_id": 253313,
           "checksum": "39575bbb688fc40598496e28afafb5270a6e44c00656a160a30f467efbade21c",
-          "files": [
+          "file_whitelist": [
             "f4se_0_06_23/Data",
             "f4se_0_06_23/CustomControlMap.txt",
             "f4se_0_06_23/f4se_1_10_163.dll",
@@ -117,26 +117,26 @@
     }
   },
   "oblivion": {
-    "display": "Oblivion",
+    "display_name": "Oblivion",
     "nexus_id": "oblivion",
     "steam_id": 22330,
     "gog_id": 1458058109,
     "epic_id": "",
-    "steam_subdirectory": "Oblivion",
+    "subdirectory": "Oblivion",
     "executable": "OblivionLauncher.exe",
-    "protontricks_args": [
+    "tricks": [
       "d3dcompiler_43",
       "d3dx9"
     ],
-    "script_extender": {
+    "script_extenders": {
       "epic": null,
       "gog": [
         {
           "version": "22.13",
           "runtime": "1.10.163",
-          "url": "https://github.com/llde/xOBSE/releases/download/22.13/xOBSE-22.13.zip",
+          "download_url": "https://github.com/llde/xOBSE/releases/download/22.13/xOBSE-22.13.zip",
           "checksum": "92d18411a9da803ffaac8c0b005cb6b37c4f9ce2f1571215f39363760d832bf2",
-          "files": [
+          "file_whitelist": [
             "Data",
             "obse_1_2_416.dll",
             "obse_editor_1_2.dll",
@@ -148,9 +148,9 @@
         {
           "version": "22.13",
           "runtime": "1.10.163",
-          "url": "https://github.com/llde/xOBSE/releases/download/22.13/xOBSE-22.13.zip",
+          "download_url": "https://github.com/llde/xOBSE/releases/download/22.13/xOBSE-22.13.zip",
           "checksum": "92d18411a9da803ffaac8c0b005cb6b37c4f9ce2f1571215f39363760d832bf2",
-          "files": [
+          "file_whitelist": [
             "Data",
             "obse_1_2_416.dll",
             "obse_editor_1_2.dll",
@@ -162,26 +162,26 @@
     }
   },
   "skyrimspecialedition": {
-    "display": "Skyrim: Special Edition",
+    "display_name": "Skyrim: Special Edition",
     "nexus_id": "skyrimspecialedition",
     "steam_id": 489830,
     "gog_id": 1711230643,
     "epic_id": "",
-    "steam_subdirectory": "Skyrim Special Edition",
+    "subdirectory": "Skyrim Special Edition",
     "executable": "SkyrimSELauncher.exe",
-    "protontricks": [
+    "tricks": [
       "xaudio2_7=native",
       "xact",
       "d3dcompiler_43",
       "vcrun2022"
     ],
-    "script_extender": {
+    "script_extenders": {
       "steam": [
         {
           "version": "2.2.6",
-          "url": "https://skse.silverlock.org/beta/skse64_2_02_06.7z",
+          "download_url": "https://skse.silverlock.org/beta/skse64_2_02_06.7z",
           "checksum": "d7297f1a1d613e5265e1af4dbbfe8bd37a32719c1ccef363fc6187fa6eba0848",
-          "files": [
+          "file_whitelist": [
             "skse64_2_02_06/Data",
             "skse64_2_02_06/skse64_1_6_1170.dll",
             "skse64_2_02_06/skse64_loader.exe"

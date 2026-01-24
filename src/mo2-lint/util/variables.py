@@ -1,71 +1,463 @@
 #!/usr/bin/env python3
 
-from pydantic_core import from_json
-from pathlib import Path
+from dataclasses import dataclass, field
 from loguru import logger
-
-version = "7.0.0"
-
-parameters: dict = None
-game_info: dict = None
-resource_info: dict = None
-launcher: str = None
-prefix: Path = None
-heroic_runner: str = None
-heroic_config: list = None
-game_install_path: Path = None
-archived_prefix: Path = None
+from pathlib import Path
+from pydantic_core import from_json
+from typing import Final
+from typing import Optional, Tuple
+from util.internal_file import internal_file as internal
 
 
-def internal_file(*parts):
-    import sys
-
-    path = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve()))
-    return path.joinpath(*parts)
+# --- #
 
 
-def internal_path(file: str):
-    if not Path("~/.config/mo2-lint/", file).expanduser().exists():
-        path = internal_file("cfg", file)
-    else:
-        path = Path("~/.config/mo2-lint/", file).expanduser()
-    logger.trace(f"{file} path: {path}")
-    return path
+@dataclass
+class Input:
+    """
+    Stores command-line parameters
+
+    Parameters
+    -----------
+    game: str
+        Identifier for the game to set up MO2 for.
+    directory: Path
+        Path to the MO2 installation directory.
+    log_level: str, optional
+        Terminal log level.
+    script_extender: bool, optional
+        Whether to install a script extender.
+    plugins: Tuple[str, ...], optional
+        Plugin identifiers to install.
+
+    Raises
+    -------
+    ValueError
+        If required parameters [game, directory] are not provided
+    """
+
+    game: str = None
+    directory: Path = None
+    log_level: Optional[str] = "INFO"
+    script_extender: Optional[bool] = None
+    plugins: Optional[Tuple[str, ...]] = field(default_factory=tuple)
+
+    def __post_init__(self):
+        if not self.game:
+            raise ValueError("Input game must be provided.")
+        if not self.directory:
+            raise ValueError("Input directory must be provided.")
 
 
-def load_gameinfo_file(path: Path):
-    with open(path, "r", encoding="utf-8") as file:
-        json = from_json(file.read())
-    logger.trace(f"Loaded game info file: {json}")
-    return json
+input: Input = None
 
 
-def load_gameinfo(gamekey: str, path: str = None):
+def set_parameters(args: Input | dict):
+    """
+    Stores the command-line arguments for the application.
+
+    Parameters
+    -----------
+    args: Input | dict
+        Command-line arguments.
+    """
+    logger.debug(f"Setting input parameters: {args}")
+    global input
+    if isinstance(args, dict):
+        input = Input(**args)
+    elif isinstance(args, Input):
+        input = args
+
+
+# --- #
+
+
+@dataclass
+class ScriptExtender:
+    """
+    Stores information about a specific script extender version.
+
+    Parameters
+    -----------
+    version: str
+        Version of the script extender.
+    runtime: str, optional
+        Target game runtime version required for this script extender.
+    download_url: str, optional
+        Direct download URL for the script extender.
+    nexus_mod_id: int, optional
+        Nexus Mods mod ID for the script extender.
+    nexus_file_id: int, optional
+        Nexus Mods file ID for the script extender.
+    checksum: str, optional
+        SHA-256 checksum of the script extender file.
+    file_whitelist: Tuple[str, ...], optional
+        File paths that should be included when installing the script extender. If not provided, all files will be installed.
+
+    Raises
+    -------
+    ValueError
+        If required parameters [version, (download_url or [nexus_mod_id, nexus_file_id])] are not provided
+    """
+
+    version: str = None
+    runtime: Optional[str] = None
+    download_url: Optional[str] = None
+    nexus_mod_id: Optional[int] = None
+    nexus_file_id: Optional[int] = None
+    checksum: Optional[str] = None
+    file_whitelist: Optional[Tuple[str, ...]] = field(default_factory=tuple)
+
+    @classmethod
+    def from_dict(cls, data: Optional[dict[str, any]]):
+        if not data:
+            return None
+        return cls(
+            version=data.get("version"),
+            runtime=data.get("runtime"),
+            download_url=data.get("download_url"),
+            nexus_mod_id=data.get("nexus_mod_id"),
+            nexus_file_id=data.get("nexus_file_id"),
+            checksum=data.get("checksum"),
+            file_whitelist=tuple(data.get("file_whitelist", ())),
+        )
+
+    def __post_init__(self):
+        if not self.version:
+            raise ValueError("Script extender version must be provided.")
+        if not (self.download_url or (self.nexus_mod_id and self.nexus_file_id)):
+            raise ValueError(
+                "Either download_url or both nexus_mod_id and nexus_file_id must be provided."
+            )
+
+
+@dataclass
+class ScriptExtenders:
+    """
+    Stores ScriptExtender instances for different storefronts.
+
+    Parameters
+    -----------
+    epic: Tuple[ScriptExtender, ...], optional
+        ScriptExtender instances for the Epic Games Store version.
+    gog: Tuple[ScriptExtender, ...], optional
+        ScriptExtender instances for the GOG.com version.
+    steam: Tuple[ScriptExtender, ...], optional
+        ScriptExtender instances for the Steam version.
+
+    Raises
+    -------
+    ValueError
+        If required parameters [(epic, gog, or steam)] are not provided
+    """
+
+    epic: Optional[Tuple[ScriptExtender, ...]] = None
+    gog: Optional[Tuple[ScriptExtender, ...]] = None
+    steam: Optional[Tuple[ScriptExtender, ...]] = None
+
+    @classmethod
+    def from_dict(cls, data: Optional[dict[str, any]]):
+        if not data:
+            return None
+
+        def make_tuple(key: str):
+            if key is None:
+                return tuple()
+            if isinstance(key, dict):
+                return (ScriptExtender.from_dict(key),)
+            elif isinstance(key, list):
+                return tuple(ScriptExtender.from_dict(item) for item in key)
+
+        return cls(
+            epic=make_tuple(data.get("epic")),
+            gog=make_tuple(data.get("gog")),
+            steam=make_tuple(data.get("steam")),
+        )
+
+    def __post_init__(self):
+        if not (self.epic or self.gog or self.steam):
+            raise ValueError("Either epic, gog, or steam must be provided.")
+
+
+@dataclass
+class GameInfo:
+    """
+    Stores data from the game_info.json file.
+
+    Parameters
+    -----------
+    display_name: str
+        Display name of the game, for use in logs and messages.
+    nexus_id: str
+        Nexus Mods ID for the game.
+    steam_id: int, optional
+        Steam App ID for the game.
+    gog_id: int, optional
+        GOG.com ID for the game.
+    epic_id: str, optional
+        Epic Games Store ID for the game.
+    subdirectory: str, optional
+        Root directory for the game, relative to Steam library folder.
+    executable: str, optional
+        Game executable filename.
+    tricks: Tuple[str, ...], optional
+        List of tricks to apply for the game.
+    script_extenders: ScriptExtenders, optional
+        Contains information about script extenders for the game.
+
+    Raises
+    -------
+    ValueError
+        If required parameters [display_name, nexus_id, (steam_id, gog_id, or epic_id)] are not provided
+    """
+
+    display_name: str = None
+    nexus_id: str = None
+    steam_id: Optional[int] = None
+    gog_id: Optional[int] = None
+    epic_id: Optional[str] = None
+    subdirectory: Optional[str] = None
+    executable: Optional[str] = None
+    tricks: Optional[Tuple[str, ...]] = field(default_factory=tuple)
+    script_extenders: Optional[ScriptExtenders] = None
+
+    @classmethod
+    def from_dict(cls, data: dict[str, any]):
+        if not data:
+            return None
+        return cls(
+            display_name=data.get("display_name"),
+            nexus_id=data.get("nexus_id"),
+            steam_id=data.get("steam_id"),
+            gog_id=data.get("gog_id"),
+            epic_id=data.get("epic_id"),
+            subdirectory=data.get("subdirectory"),
+            executable=data.get("executable"),
+            tricks=tuple(data.get("tricks", ())) if "tricks" in data else (),
+            script_extenders=ScriptExtenders.from_dict(data.get("script_extenders"))
+            if "script_extenders" in data
+            else None,
+        )
+
+    def __post_init__(self):
+        if not self.display_name:
+            raise ValueError("Game display_name must be provided.")
+        if not self.nexus_id:
+            raise ValueError("Game nexus_id must be provided.")
+        if not (self.steam_id or self.gog_id or self.epic_id):
+            raise ValueError("At least one game ID must be provided.")
+
+
+game_info: dict[str, GameInfo] = {}
+
+
+def load_game_info(path: Optional[Path] = None):
+    """
+    Loads information from a game_info.json file into the global game_info variable.
+
+    Parameters
+    -----------
+    path: Path, optional
+        Path to game_info JSON file. If not provided, defaults to the internal cfg/game_info.json file.
+    """
+
     global game_info
     if not path:
-        path = internal_path("game_info.json")
-    game_info = load_gameinfo_file(Path(path)).get(gamekey)
-    logger.trace(f"Loaded game info for {gamekey}: {game_info}")
-    return game_info
+        path = internal("cfg/game_info.json")
+    logger.debug(f"Loading game info from path: {path}")
+    with open(path, "r", encoding="utf-8") as file:
+        json = from_json(file.read())
+    for key, value in json.items():
+        game_info[key] = GameInfo.from_dict(value)
 
 
-def load_resourceinfo():
+# --- #
+
+
+@dataclass
+class Resource:
+    """
+    Stores information about a downloadable resource.
+
+    @param download_url: The direct download URL for the resource.
+    @param checksum: The SHA-256 checksum of the resource file.
+    @param version: An optional version string for the resource.
+
+    Parameters
+    -----------
+    download_url: str
+        Direct download URL for the resource.
+    checksum: str
+        SHA-256 checksum of the resource file.
+    version: str, optional
+        Version string for the resource.
+
+    Raises
+    -------
+    ValueError
+        If required parameters [download_url, checksum] are not provided
+    """
+
+    download_url: str = None
+    checksum: str = None
+    version: Optional[str] = None
+
+    @classmethod
+    def from_dict(cls, data: dict[str, any]):
+        if not data:
+            return None
+        return cls(
+            download_url=data.get("download_url"),
+            version=data.get("version"),
+            checksum=data.get("checksum"),
+        )
+
+    def __post_init__(self):
+        if not self.download_url:
+            raise ValueError("Resource download_url must be provided.")
+        if not self.checksum:
+            raise ValueError("Resource checksum must be provided.")
+
+
+@dataclass
+class ResourceInfo:
+    """
+    Stores download information for various resources.
+
+    Parameters
+    -----------
+    mod_organizer: Resource
+        Resource instance for Mod Organizer.
+    winetricks: Resource
+        Resource instance for Winetricks.
+    java: Resource, optional
+        Resource instance for Java.
+
+    Raises
+    -------
+    ValueError
+        If required parameters [mod_organizer, winetricks] are not provided
+    """
+
+    mod_organizer: Resource = None
+    winetricks: Resource = None
+    java: Optional[Resource] = None
+
+    @classmethod
+    def from_dict(cls, data: dict[str, any]):
+        if not data:
+            return None
+        return cls(
+            mod_organizer=Resource.from_dict(data.get("mod_organizer")),
+            winetricks=Resource.from_dict(data.get("winetricks")),
+            java=Resource.from_dict(data.get("java")),
+        )
+
+    def __post_init__(self):
+        if not self.mod_organizer:
+            raise ValueError("Mod Organizer resource info must be provided.")
+        if not self.winetricks:
+            raise ValueError("Winetricks resource info must be provided.")
+
+
+resource_info: dict[str, ResourceInfo] = {}
+
+
+def load_resource_info(path: Optional[Path] = None):
+    """
+    Loads information from a resource_info.json file into global resource_info variable.
+
+    Parameters
+    -----------
+    path: Path, optional
+        Path to resource_info JSON file. If not provided, defaults to the internal cfg/resource_info.json file.
+    """
+
     global resource_info
-    with open(internal_path("resource_info.json"), "r", encoding="utf-8") as file:
-        resource_info = from_json(file.read())
-    logger.trace(f"Loaded resource info: {resource_info}")
-    return resource_info
+    if not path:
+        path = internal("cfg/resource_info.json")
+    logger.debug(f"Loading resource info from path: {path}")
+    with open(path, "r", encoding="utf-8") as file:
+        json = from_json(file.read())
+    for key, value in json.items():
+        resource_info[key] = Resource.from_dict(value)
 
 
-def load_plugininfo():
+# --- #
+
+
+@dataclass
+class Plugin:
+    """
+    Stores information about a plugin
+
+    Parameters
+    -----------
+    manifest: str
+        Direct URL to plugin manifest file.\n
+        Manifest is formatted using the Kezyma plugin manifest schema. More info: https://github.com/Kezyma/ModOrganizer-Plugins/blob/main/docs/pluginfinder.md#adding-your-plugin
+
+    Raises
+    -------
+    ValueError
+        If required parameters [manifest] are not provided
+    """
+
+    manifest: str = None
+
+    def __post_init__(self):
+        if not self.manifest:
+            raise ValueError("Plugin manifest must be provided.")
+
+
+plugin_info: dict[str, Plugin] = {}
+
+
+def load_plugin_info(path: Optional[Path] = None):
+    """
+    Loads information from a plugin_info.json file into the global plugin_info variable.
+
+    Parameters
+    -----------
+    path: Path, optional
+        Path to plugin_info JSON file. If not provided, defaults to the internal cfg/plugin_info.json file.
+    """
+
     global plugin_info
-    with open(internal_path("plugin_info.json"), "r", encoding="utf-8") as file:
-        plugin_info = from_json(file.read())
-    logger.trace(f"Loaded plugin info file: {plugin_info}")
-    return plugin_info
+    if not path:
+        path = internal("cfg/plugin_info.json")
+    logger.debug(f"Loading plugin info from path: {path}")
+    with open(path, "r", encoding="utf-8") as file:
+        json = from_json(file.read())  # type: list[dict]
+    for value in json:
+        plugin_info[value.get("identifier")] = Plugin(manifest=value.get("manifest"))
 
 
-def set_parameters(params: dict):
-    global parameters
-    parameters = params
-    logger.debug(f"Parameters have been set to: {parameters}")
+# --- #
+
+version: Final = "7.0.0"
+"""
+Current version of mo2-lint.
+"""
+
+prefix: Path = None
+"""
+Path to game's Wine/Proton prefix directory.
+"""
+
+archived_prefixes: list[Path] = []
+"""
+List of previously archived Wine/Proton prefix directories.
+"""
+
+heroic_runner: str = None
+"""
+Targeted Heroic Games Launcher runner [epic, gog].
+"""
+
+heroic_config: list[str] = []
+
+game_install_path: Path = None
+"""
+Path to the game's installation directory.
+"""
