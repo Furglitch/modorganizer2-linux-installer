@@ -10,7 +10,6 @@ _message_time_placeholder = "{time:YYYY-MM-DD_HH-mm-ss}"
 
 
 def remove_loggers():
-    print("Removing all loggers")
     handler_ids = list(logger._core.handlers.keys())
     for hid in handler_ids:
         logger.remove(hid)
@@ -24,15 +23,11 @@ def _ensure_filename_timestamp() -> str:
 
 
 def add_loggers(log_level: str = "INFO", process: str = None, console_sink=None):
-    print(f"Setting up loggers with level: {log_level}")
-    if process:
-        print(f"Process identifier: {process}")
-
     filename_ts = _ensure_filename_timestamp()
 
     format_str = (
         f"<green>{_message_time_placeholder}</green> | "
-        "<level>{level: <8}</level> | "
+        + "<level>{level: <8}</level> | "
         + (f"{process.upper()} | " if process else "")
         + "{message}"
     )
@@ -45,9 +40,10 @@ def add_loggers(log_level: str = "INFO", process: str = None, console_sink=None)
     logger.add(
         sink=Path(f"~/.cache/mo2-lint/logs/install.{filename_ts}.log").expanduser(),
         format=f"{_message_time_placeholder} | "
-        " {level: <8} | "
-        " {module}:{function}:{line} - "
-        " {message} ",
+        + " {level: <8} | "
+        + (f"{process.upper()} | " if process else "")
+        + " {module}:{function}:{line} - "
+        + " {message} ",
         level="TRACE",
         rotation="10 MB",
         retention="7 days",

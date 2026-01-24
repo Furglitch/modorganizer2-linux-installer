@@ -9,6 +9,7 @@ from util.logger import remove_loggers, add_loggers
 from util.variables import parameters
 from protontricks.cli.main import main as pt
 from typing import List
+import re
 import threading
 
 
@@ -17,7 +18,6 @@ def run(command: list) -> List[str]:
 
     with redirect_output_to_logger() as output_lines:
         try:
-            logger.debug(f"Running protontricks command: {' '.join(args)}")
             pt(args)
         except SystemExit as e:
             if e.code != 0:
@@ -59,6 +59,48 @@ def get_prefix(id: int):
     return prefix
 
 
+def log_translation(input: str = None):
+    if not input:
+        return
+
+    reg1 = re.search(
+        r"Attempting to run command\s+(.*)", input
+    )  # "Running: '[command]'"
+    reg2 = re.search(
+        r"Executing w_do_call\s+(.*)", input
+    )  # "Applying trick: '[trick]'"
+    reg3 = re.search(
+        r"Using native override for following DLLs:\s+(.*)", input
+    )  # "Setting native DLLs: '[DLLs]'"
+    reg4 = re.search(
+        r"Terminating launcher process\s+(.*)", input
+    )  # "End of protontricks process (PID: [pid])"
+
+    if reg1:
+        cmd = reg1.group(1).strip()
+        if cmd.startswith("[") and cmd.endswith("]"):
+            cmd = cmd[1:-1].strip()
+            cmd = cmd.replace("'", "").replace(",", "")
+        translated = f"Running: '{cmd}'"
+        logger.info(translated)
+        return
+    if reg2:
+        trick = reg2.group(1).strip()
+        translated = f"Applying trick: '{trick}'"
+        logger.info(translated)
+        return
+    if reg3:
+        dlls = reg3.group(1).strip()
+        translated = f"Setting native DLLs: '{dlls}'"
+        logger.info(translated)
+        return
+    if reg4:
+        pid_info = reg4.group(1).strip()
+        translated = f"End of protontricks process (PID: {pid_info})"
+        logger.info(translated)
+        return
+
+
 @contextmanager
 def redirect_output_to_logger():
     read_fd, write_fd = os.pipe()
@@ -79,6 +121,7 @@ def redirect_output_to_logger():
                 if line := line.rstrip("\n"):
                     output_lines.append(line)
                     logger.trace(line)
+                    log_translation(line)
 
     threading.Thread(target=reader_thread, daemon=True).start()
 
