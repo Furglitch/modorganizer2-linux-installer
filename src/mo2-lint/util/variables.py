@@ -23,6 +23,8 @@ class Input:
         Identifier for the game to set up MO2 for.
     directory: Path
         Path to the MO2 installation directory.
+    game_info_path: Path, optional
+        Path to custom game_info JSON file.
     log_level: str, optional
         Terminal log level.
     script_extender: bool, optional
@@ -38,6 +40,7 @@ class Input:
 
     game: str = None
     directory: Path = None
+    game_info_path: Optional[Path] = None
     log_level: Optional[str] = "INFO"
     script_extender: Optional[bool] = None
     plugins: Optional[Tuple[str, ...]] = field(default_factory=tuple)
@@ -59,7 +62,7 @@ def set_parameters(args: Input | dict):
     Parameters
     -----------
     args: Input | dict
-        Command-line arguments.
+        Command-line arguments. See Input class for keys.
     """
     logger.debug(f"Setting input parameters: {args}")
     global input
@@ -438,6 +441,11 @@ def load_plugin_info(path: Optional[Path] = None):
 version: Final = "7.0.0"
 """
 Current version of mo2-lint.
+"""
+
+launcher: str = None
+"""
+Targeted launcher [steam, epic, gog].
 """
 
 prefix: Path = None
