@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
 from dataclasses import dataclass, field
+from loguru import logger
 from pathlib import Path
 from typing import Optional
-from loguru import logger
+from util.variables import LauncherIDs
 from uuid import UUID
 import json
-from util.variables import LauncherIDs
 
 
 @dataclass
@@ -300,6 +300,9 @@ def set_index(index: Optional[int] = None):
 
 
 def remove_instance(index: int):
+    """
+    Removes an instance from the state_file by its index.
+    """
     global state_file
     state_file.instances = [
         inst for inst in state_file.instances if inst.index != index
@@ -307,7 +310,6 @@ def remove_instance(index: int):
     logger.debug(
         f"Removed instance with index {index}. Remaining instances: {len(state_file.instances)}"
     )
-    write_state(add_current=False)
 
 
 def write_state(add_current: bool = True):
@@ -316,7 +318,51 @@ def write_state(add_current: bool = True):
         state_file.instances.remove({})
     if add_current and current_instance not in state_file.instances:
         state_file.instances.append(current_instance)
+    elif add_current and current_instance in state_file.instances:
+        for i, inst in enumerate(state_file.instances):
+            if inst.index == current_instance.index:
+                state_file.instances[i] = current_instance
 
     with filepath.open("w", encoding="utf-8") as f:
         json.dump(StateFile.to_dict(state_file), f, indent=2)
     logger.debug(f"Wrote state file with {len(state_file.instances)} instances.")
+
+
+def match_instances(game: Optional[str], directory: Optional[Path]) -> dict:
+    """
+    Matches instances in the state_file based on the provided game or directory.
+
+    Parameters
+    ----------
+    game : str, optional
+        Nexus Mods slug identifier for the game to match.
+    directory : Path, optional
+        Directory path to match instances against.
+
+    Returns
+    -------
+    dict
+        A dictionary of matched instances.
+    """
+
+    global state_file
+
+    process = "Matching" if (game or directory) else "Existing"
+    print(f"{process} Mod Organizer 2 Instances:")
+    if not state_file.instances:
+        print("No instances found.")
+        return
+
+    matched = []
+    for instance in state_file.instances:
+        if game and instance.nexus_slug != game:
+            continue
+        if directory and not str(instance.instance_path).startswith(str(directory)):
+            continue
+
+        if (game == instance.nexus_slug) or (
+            str(instance.instance_path).startswith(str(directory))
+        ):
+            matched.append(instance)
+
+    return matched
