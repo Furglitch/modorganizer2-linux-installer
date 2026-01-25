@@ -9,23 +9,30 @@ steam_directories = [
     "${HOME}/.steam/root",
     "${HOME}/.var/app/com.valvesoftware.Steam/.local/share/Steam",
 ]
-libraries = []
 
 
-def get_libraries():
+def get_libraries() -> list[Path]:
+    """
+    Returns a list of Steam library paths found on the system.
+
+    Returns
+    -------
+    list[Path]
+        A list of Path objects representing the Steam library directories.
+    """
+
+    libraries = []
     for dir in steam_directories:
         dir = Path(os.path.expandvars(dir)).resolve()
         if dir.exists():
             logger.debug(f"Found Steam library at: {dir}")
-            if Path(dir / "steamapps").exists():
-                logger.debug(f"Found steamapps directory at: {dir / 'steamapps'}")
-                library = dir
-            else:
-                library = dir / "steam"
-            global libraries
-            with open(
-                library / "steamapps" / "libraryfolders.vdf", "r", encoding="utf-8"
-            ) as file:
+            library = dir if Path(dir / "steamapps").exists() else dir / "steam"
+            library_list = library / "steamapps" / "libraryfolders.vdf"
+            if not library_list.exists():
+                continue
+            with open(library_list, "r", encoding="utf-8") as file:
                 libraries = re.findall(r'/[^"]+', file.read())
+                for i in range(len(libraries)):
+                    libraries[i] = Path(libraries[i])
                 logger.debug(f"Discovered Steam libraries: {libraries}")
     return libraries
