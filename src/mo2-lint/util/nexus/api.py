@@ -1,70 +1,67 @@
 #!/usr/bin/env python3
 
-from loguru import logger
-import uuid
 import json
+from util.state_file import state_file as state
+from uuid import UUID, uuid4 as new_uuid
 import websockets.sync.client as websockets
-import webbrowser
-from ..state import state_file as state
-
-api_info = {}
 
 
-def load_state() -> dict:
-    global api_info
-    state.load_state()
-    api_info = state.nexus_api
+def id() -> UUID:
+    """
+    Checks for an existing Nexus UUID in the state.\n
+    If none exists, generates a new UUID and stores it in the state.
 
+    Returns
+    -------
+    UUID
+        The Nexus API UUID.
+    """
 
-def nexus_uuid() -> uuid.UUID:
-    id_str = api_info.get("uuid", "")
-    if id_str:
-        id = uuid.UUID(id_str)
-        logger.trace(f"Loaded existing Nexus UUID: {id}")
-    else:
-        id = uuid.uuid4()
-        logger.trace(f"Created new Nexus UUID: {id}")
-
-    if id:
-        api_info["uuid"] = str(id)
-        state.set_nexus_uuid(id)
-        return id
-    else:
-        raise Exception("Failed to generate or load Nexus UUID.")
+    id = state.nexus_api.uuid
+    if not id:
+        id = new_uuid()
+    state.nexus_api.uuid = id
+    return id
 
 
 def connection_token() -> str:
-    token = api_info.get("connection_token", "")
+    """
+    Checks for an existing connection token in the state.\n
+    If none exists, requests a new connection token via WebSocket and stores it in the state.
+
+    Returns
+    -------
+    str
+        The Nexus connection token.
+    """
+
+    token = state.nexus_api.connection_token
     if not token:
-        try:
-            token = request_connection_token()
-            logger.trace(f"Requested connection token: {token}")
-        except Exception as e:
-            logger.error(f"Error requesting connection token: {e}")
-    else:
-        logger.trace(f"Loaded existing connection token: {token}")
-    if token:
-        api_info["connection_token"] = token
-        state.set_nexus_connection_token(token)
-        return token
-    else:
-        raise Exception("Failed to generate or load connection token.")
+        token = request_connection_token()
+    state.nexus_api.connection_token = token
+    return token
 
 
 def request_connection_token() -> str:
-    id = api_info.get("uuid", "") if api_info.get("uuid") else nexus_uuid()
+    """
+    Requests a new connection token from the Nexus SSO WebSocket server.
+
+    Returns
+    -------
+    str
+        The requested Nexus connection token.
+    """
+
+    uuid = state.nexus_api.uuid if state.nexus_api.uuid else id()
     with websockets.connect("wss://sso.nexusmods.com") as socket:
         socket.send(
-            json.dumps(
-                {
-                    "id": id,
-                    "protocol": 2,
-                }
-            )
+            {
+                "id": str(uuid),
+                "protocol": 2,
+            }
         )
         for message in socket:
-            logger.trace(f"Message: {message}")
-            response = json.loads(message)
+            response = message
             token = response.get("data", {}).get("connection_token")
             if token:
                 socket.close()
@@ -72,62 +69,52 @@ def request_connection_token() -> str:
     return token
 
 
-def nexus_key() -> str:
-    token = api_info.get("api_key", "")
-    if not token:
-        try:
-            token = request_nexus_key()
-            logger.trace(f"Requested api token: {token}")
-        except Exception as e:
-            logger.error(f"Error requesting api token: {e}")
-    else:
-        logger.trace(f"Loaded existing api token: {token}")
-    if token:
-        api_info["api_key"] = token
-        state.set_nexus_api_key(token)
-        return token
-    else:
-        raise Exception("Failed to grab api token.")
+def api_key() -> str:
+    """
+    Checks for an existing API key in the state.\n
+    If none exists, requests a new API key via WebSocket and stores it in the state.
 
+    Returns
+    -------
+    str
+        The Nexus API key.
+    """
 
-def request_nexus_key() -> str:
-    key = None
-    id = api_info.get("uuid") if api_info.get("uuid") else nexus_uuid()
-    token = (
-        api_info.get("connection_token")
-        if api_info.get("connection_token")
-        else connection_token()
-    )
-    url = f"https://www.nexusmods.com/sso?id={str(id)}&application=mo2lint"
-    webbrowser.open_new_tab(url)
-    try:
-        with websockets.connect("wss://sso.nexusmods.com") as socket:
-            socket.send(
-                json.dumps(
-                    {
-                        "id": str(id),
-                        "token": token,
-                        "protocol": 2,
-                    }
-                )
-            )
-            logger.info("Waiting for user to authorize in the browser...")
-            for message in socket:
-                response = json.loads(message)
-                data = response.get("data", {})
-                key = data.get("api_key")
-                if key:
-                    socket.close()
-                    break
-    except Exception as e:
-        logger.error(f"WebSocket error during SSO: {e}")
-    api_info["api_key"] = key
-    print("Key obtained:", key)
+    key = state.nexus_api.api_key
+    if not key:
+        key = request_api_key()
+    state.nexus_api.api_key = key
     return key
 
 
-def main():
-    load_state()
-    api_key = api_info.get("api_key") if api_info.get("api_key") else nexus_key()
-    print(api_info)
-    return api_key
+def request_api_key() -> str:
+    """
+    Requests a new API key from the Nexus SSO WebSocket server.
+
+    Returns
+    -------
+    str
+        The requested Nexus API key.
+    """
+
+    uuid = state.nexus_api.uuid if state.nexus_api.uuid else id()
+    token = (
+        state.nexus_api.connection_token
+        if state.nexus_api.connection_token
+        else request_connection_token()
+    )
+    with websockets.connect("wss://sso.nexusmods.com") as socket:
+        socket.send(
+            {
+                "id": str(uuid),
+                "token": token,
+                "protocol": 2,
+            }
+        )
+        for message in socket:
+            response = json.loads(message)
+            key = response.get("data", {}).get("api_key") or None
+            if key:
+                socket.close()
+                break
+    return key
