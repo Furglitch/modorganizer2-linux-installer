@@ -1,10 +1,12 @@
 {
   "cyberpunk2077": {
     "display_name": "Cyberpunk 2077",
-    "nexus_id": "cyberpunk2077",
-    "steam_id": 1091500,
-    "gog_id": 1423049311,
-    "epic_id": "Ginger",
+    "nexus_slug": "cyberpunk2077",
+    "launcher_ids": {
+      "steam": 1091500,
+      "gog": 1423049311,
+      "epic": "Ginger"
+    },
     "subdirectory": "Cyberpunk 2077",
     "executable": "REDprelauncher.exe",
     "tricks": [
@@ -16,10 +18,12 @@
   },
   "fallout4": {
     "display_name": "Fallout 4",
-    "nexus_id": "fallout4",
-    "steam_id": 377160,
-    "gog_id": 1998527297,
-    "epic_id": "61d52ce4d09d41e48800c22784d13ae8",
+    "nexus_slug": "fallout4",
+    "launcher_ids": {
+      "steam": 377160,
+      "gog": 1998527297,
+      "epic": "61d52ce4d09d41e48800c22784d13ae8"
+    },
     "subdirectory": "Fallout 4",
     "executable": "Fallout4Launcher.exe",
     "tricks": [
@@ -118,10 +122,11 @@
   },
   "oblivion": {
     "display_name": "Oblivion",
-    "nexus_id": "oblivion",
-    "steam_id": 22330,
-    "gog_id": 1458058109,
-    "epic_id": "",
+    "nexus_slug": "oblivion",
+    "launcher_ids": {
+      "steam": 22330,
+      "gog": 1458058109
+    },
     "subdirectory": "Oblivion",
     "executable": "OblivionLauncher.exe",
     "tricks": [
@@ -163,10 +168,11 @@
   },
   "skyrimspecialedition": {
     "display_name": "Skyrim: Special Edition",
-    "nexus_id": "skyrimspecialedition",
-    "steam_id": 489830,
-    "gog_id": 1711230643,
-    "epic_id": "",
+    "nexus_slug": "skyrimspecialedition",
+    "launcher_ids": {
+      "steam": 489830,
+      "gog": 1711230643
+    },
     "subdirectory": "Skyrim Special Edition",
     "executable": "SkyrimSELauncher.exe",
     "tricks": [

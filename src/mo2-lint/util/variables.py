@@ -117,12 +117,12 @@ class ScriptExtender:
             return None
         return cls(
             version=data.get("version"),
-            runtime=data.get("runtime"),
-            download_url=data.get("download_url"),
-            nexus_mod_id=data.get("nexus_mod_id"),
-            nexus_file_id=data.get("nexus_file_id"),
-            checksum=data.get("checksum"),
-            file_whitelist=tuple(data.get("file_whitelist", ())),
+            runtime=data.get("runtime") or None,
+            download_url=data.get("download_url") or None,
+            nexus_mod_id=data.get("nexus_mod_id") or None,
+            nexus_file_id=data.get("nexus_file_id") or None,
+            checksum=data.get("checksum") or None,
+            file_whitelist=tuple(data.get("file_whitelist") or ()),
         )
 
     def __post_init__(self):
@@ -172,14 +172,63 @@ class ScriptExtenders:
                 return tuple(ScriptExtender.from_dict(item) for item in key)
 
         return cls(
-            epic=make_tuple(data.get("epic")),
-            gog=make_tuple(data.get("gog")),
-            steam=make_tuple(data.get("steam")),
+            epic=make_tuple(data.get("epic")) if data.get("epic") else tuple(),
+            gog=make_tuple(data.get("gog")) if data.get("gog") else tuple(),
+            steam=make_tuple(data.get("steam")) if data.get("steam") else tuple(),
         )
 
     def __post_init__(self):
         if not (self.epic or self.gog or self.steam):
             raise ValueError("Either epic, gog, or steam must be provided.")
+
+
+@dataclass
+class LauncherIDs:
+    """
+    Stores launcher-specific IDs for a game.
+
+    Parameters
+    -----------
+    steam: int, optional
+        Steam app ID for the game.
+    gog: int, optional
+        GOG ID for the game.
+    epic: str, optional
+        Epic Games Store ID for the game.
+
+    Raises
+    -------
+    ValueError
+        If none of the parameters [steam, gog, epic] are provided
+    """
+
+    steam: Optional[int] = None
+    gog: Optional[int] = None
+    epic: Optional[str] = None
+
+    @classmethod
+    def from_dict(cls, data: Optional[any]):
+        if not data:
+            return None
+        if isinstance(data, LauncherIDs):
+            return data
+        return cls(
+            steam=data.get("steam") or None,
+            gog=data.get("gog") or None,
+            epic=data.get("epic") or None,
+        )
+
+    @classmethod
+    def to_dict(cls, data: "LauncherIDs") -> dict[str, any]:
+        return {
+            "steam": data.steam,
+            "gog": data.gog,
+            "epic": data.epic,
+        }
+
+    def __post_init__(self):
+        if not (self.steam or self.gog or self.epic):
+            raise ValueError("At least one game ID must be provided.")
 
 
 @dataclass
@@ -191,14 +240,10 @@ class GameInfo:
     -----------
     display_name: str
         Display name of the game, for use in logs and messages.
-    nexus_id: str
+    nexus_slug: str
         Nexus Mods ID for the game.
-    steam_id: int, optional
-        Steam App ID for the game.
-    gog_id: int, optional
-        GOG.com ID for the game.
-    epic_id: str, optional
-        Epic Games Store ID for the game.
+    launcher_ids: LauncherIDs
+        Contains launcher-specific IDs for the game.
     subdirectory: str, optional
         Root directory for the game, relative to Steam library folder.
     executable: str, optional
@@ -211,14 +256,12 @@ class GameInfo:
     Raises
     -------
     ValueError
-        If required parameters [display_name, nexus_id, (steam_id, gog_id, or epic_id)] are not provided
+        If required parameters [display_name, nexus_slug, launcher_ids] are not provided
     """
 
     display_name: str = None
-    nexus_id: str = None
-    steam_id: Optional[int] = None
-    gog_id: Optional[int] = None
-    epic_id: Optional[str] = None
+    nexus_slug: str = None
+    launcher_ids: LauncherIDs = None
     subdirectory: Optional[str] = None
     executable: Optional[str] = None
     tricks: Optional[Tuple[str, ...]] = field(default_factory=tuple)
@@ -230,25 +273,23 @@ class GameInfo:
             return None
         return cls(
             display_name=data.get("display_name"),
-            nexus_id=data.get("nexus_id"),
-            steam_id=data.get("steam_id"),
-            gog_id=data.get("gog_id"),
-            epic_id=data.get("epic_id"),
-            subdirectory=data.get("subdirectory"),
-            executable=data.get("executable"),
-            tricks=tuple(data.get("tricks", ())) if "tricks" in data else (),
+            nexus_slug=data.get("nexus_slug"),
+            launcher_ids=LauncherIDs.from_dict(data.get("launcher_ids")),
+            subdirectory=data.get("subdirectory") or None,
+            executable=data.get("executable") or None,
+            tricks=tuple(data.get("tricks") or ()),
             script_extenders=ScriptExtenders.from_dict(data.get("script_extenders"))
-            if "script_extenders" in data
+            if data.get("script_extenders")
             else None,
         )
 
     def __post_init__(self):
         if not self.display_name:
             raise ValueError("Game display_name must be provided.")
-        if not self.nexus_id:
-            raise ValueError("Game nexus_id must be provided.")
-        if not (self.steam_id or self.gog_id or self.epic_id):
-            raise ValueError("At least one game ID must be provided.")
+        if not self.nexus_slug:
+            raise ValueError("Game nexus_slug must be provided.")
+        if not self.launcher_ids:
+            raise ValueError("Game launcher_ids must be provided.")
 
 
 game_info: dict[str, GameInfo] = {}
@@ -311,7 +352,7 @@ class Resource:
             return None
         return cls(
             download_url=data.get("download_url"),
-            version=data.get("version"),
+            version=data.get("version") if "version" in data else None,
             checksum=data.get("checksum"),
         )
 
@@ -353,7 +394,7 @@ class ResourceInfo:
         return cls(
             mod_organizer=Resource.from_dict(data.get("mod_organizer")),
             winetricks=Resource.from_dict(data.get("winetricks")),
-            java=Resource.from_dict(data.get("java")),
+            java=Resource.from_dict(data.get("java")) if data.get("java") else None,
         )
 
     def __post_init__(self):
@@ -383,7 +424,7 @@ def load_resource_info(path: Optional[Path] = None):
     with open(path, "r", encoding="utf-8") as file:
         json = from_json(file.read())
     for key, value in json.items():
-        resource_info[key] = Resource.from_dict(value)
+        resource_info[key] = ResourceInfo.from_dict(value)
 
 
 # --- #

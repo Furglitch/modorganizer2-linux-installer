@@ -11,8 +11,8 @@ _build: venv/bin/activate
 	./venv/bin/pyinstaller --onefile --name nxm_handler \
 		--paths src \
 		--hidden-import find_heroic_install \
-		--hidden-import pydantic_core \
 		--hidden-import protontricks \
+		--hidden-import pydantic_core \
 		--add-data "src/nxm-handler:src" \
 		--runtime-hook "build/runtime_hooks.py" \
 		--additional-hooks-dir "build/hooks" \
@@ -20,9 +20,10 @@ _build: venv/bin/activate
 	./venv/bin/pyinstaller --onefile --name mo2_lint \
 		--paths src \
 		--hidden-import patoolib \
+		--hidden-import protontricks \
+		--hidden-import pydantic_core \
 		--hidden-import requests \
 		--hidden-import send2trash \
-		--hidden-import protontricks \
 		--add-data "src/mo2-lint:src" \
 		--add-data "configs:cfg" \
 		--add-data "dist:dist" \

@@ -6,6 +6,7 @@ from step import configure_prefix, external_resources
 from util.nexus import install_handler
 from util.redirector import install as install_redirector
 from util.state import state_file as state, state_list
+from util.state.state_file import current_instance as instance
 from util.variables import (
     set_parameters,
     load_game_info,
@@ -13,6 +14,7 @@ from util.variables import (
     version,
     game_info,
     plugin_info,
+    LauncherIDs,
 )
 from util.logger import add_loggers, remove_loggers
 from loguru import logger
@@ -235,7 +237,7 @@ def main(
             f"Invalid game specified: {game}. Available games are: {game_list}"
         )
 
-    state.load_state()
+    state.load_state_file()
 
     # Handle --list
     if list_instances:
@@ -270,11 +272,16 @@ def main(
     )
     Path(directory).mkdir(parents=True, exist_ok=True)
 
-    state.check_existing_instances(directory, game)
-    state.select_index()
-    state.set_nexus_id(game)
-    state.set_instance_path(directory)
-    state.set_plugins(list(plugin))
+    if state.check_instance(game, directory):
+        state.choose_instance()
+    state.set_index()
+    instance.nexus_slug = game
+    instance.instance_path = directory
+    if script_extender:
+        instance.script_extender = True
+    if plugin:
+        instance.plugins = list(plugin)
+    instance.launcher_ids = LauncherIDs.from_dict(game_info[game].launcher_ids)
 
     configure_prefix.main()
     external_resources.main()
