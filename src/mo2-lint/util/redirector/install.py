@@ -1,58 +1,82 @@
 #!/usr/bin/env python3
 
 from loguru import logger
+from os import stat
 from pathlib import Path
+from shutil import copy2
 import util.variables as var
+from util.checksum import compare_checksum
+
+redirector_build = var.internal_file("dist", "redirector.exe")
 
 
 def create_path_entry():
-    game_path = Path(var.game_install_path)
-    if str(game_path).endswith(".exe"):
-        game_path = game_path.parent
+    """
+    Creates the path entry file for the redirector.
+    """
+    game_install_path = (
+        var.game_install_path
+        if var.game_install_path.is_dir()
+        else var.game_install_path.parent
+    )
 
-    redir_path = Path(game_path) / "modorganizer2" / "instance_path.txt"
-    mo2_path = Path(var.parameters.get("directory")) / "ModOrganizer.exe"
-    logger.info(f"Creating instance path entry at {redir_path}...")
-
-    redir_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(redir_path, "w", encoding="utf-8") as file:
-        file.write(str(mo2_path))
-    logger.debug(f"Wrote MO2 path '{mo2_path}' to '{redir_path}'.")
+    redirect_file = game_install_path / "modorganizer2" / "instance_path.txt"
+    instance_directory = var.input.directory / "ModOrganizer.exe"
+    redirect_file.parent.mkdir(parents=True, exist_ok=True)
+    with open(redirect_file, "w", encoding="utf-8") as file:
+        file.write(str(instance_directory))
+    logger.debug(f"Wrote MO2 path '{instance_directory}' to '{redirect_file}'.")
 
 
 def install():
-    from shutil import copy2
-    import stat
+    """
+    Installs the internal redirector executable to the game's installation directory.
+    """
 
-    logger.info("Installing Redirector...")
+    logger.info("Starting Redirector installation...")
 
-    game_path = (
-        Path(var.game_install_path)
-        if not Path(var.game_install_path).is_file()
-        else Path(var.game_install_path).parent
+    game_install_path = (
+        var.game_install_path
+        if var.game_install_path.is_dir()
+        else var.game_install_path.parent
     )
-    from .validation import validate_redirector as validate
 
-    if validate(game_path):
+    if not game_install_path / "modorganizer2" / "instance_path.txt".exists():
+        create_path_entry()
+
+    exec_path = game_install_path / var.game_info.get("executable")
+    exec_backup = Path(str(exec_path) + ".bak")
+
+    if validate(exec_path):
         logger.info("Redirector is already installed and up to date.")
         return
-
-    exec_path = game_path / var.game_info.get("executable")
-    logger.debug(f"Game executable path: {exec_path}")
-
-    exec_backup = exec_path.with_suffix(".exe.bak")
-    logger.debug(f"Game executable backup path: {exec_backup}")
 
     if not exec_backup.exists():
         logger.info(f"Creating backup of original executable at {exec_backup}...")
         copy2(exec_path, exec_backup)
 
     logger.info(f"Installing Redirector executable to {exec_path}...")
-    copy2(var.internal_file("dist", "redirector.exe"), exec_path)
+    copy2(redirector_build, exec_path)
     exec_path.chmod(exec_path.stat().st_mode | stat.S_IEXEC)
 
 
-def main():
-    create_path_entry()
-    install()
-    logger.success("Redirector installed successfully.")
+def validate(exec_path: Path) -> bool:
+    """
+    Validates if the redirector is installed and up to date.
+
+    Parameters
+    ----------
+    exec_path : Path
+        The path to the game's executable.
+
+    Returns
+    -------
+    bool
+        True if the redirector is installed and up to date, False otherwise.
+    """
+
+    if not exec_path.exists():
+        return False
+    if not compare_checksum(redirector_build, exec_path):
+        return False
+    return True
