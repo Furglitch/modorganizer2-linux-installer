@@ -14,6 +14,20 @@ import threading
 
 
 def run(command: list) -> List[str]:
+    """
+    Runs a protontricks command and captures its output.
+
+    Parameters
+    ----------
+    command : list
+        The command arguments to pass to protontricks.
+
+    Returns
+    -------
+    List[str]
+        The output log lines from the protontricks command.
+    """
+
     args = ["--verbose"] + [str(c) for c in command]
 
     with redirect_output_to_logger() as output_lines:
@@ -27,11 +41,35 @@ def run(command: list) -> List[str]:
 
 
 def apply(id: int, command: list):
+    """
+    Applies tricks to the specified prefix.
+
+    Parameters
+    ----------
+    id : int
+        The Proton prefix ID.
+    command : list
+        The list of tricks to apply
+    """
+
     logger.info(f"Applying tricks to prefix: {command}")
     run([f"{id}", "-q", "--force"] + command)
 
 
 def check_prefix(id: int) -> bool:
+    """
+    Checks if a Proton prefix exists for the given ID.
+
+    Parameters
+    ----------
+    id : int
+        The Proton prefix ID.
+
+    Returns
+    -------
+    bool
+        True if the prefix exists, False otherwise.
+    """
     listing = run(["-l"]) or []
     exists = any(str(id) in line for line in listing)
     if exists:
@@ -41,7 +79,20 @@ def check_prefix(id: int) -> bool:
     return exists
 
 
-def get_prefix(id: int):
+def get_prefix(id: int) -> str | None:
+    """
+    Retrieves the Proton prefix path for the given ID if it exists.
+
+    Parameters
+    ----------
+    id : int
+        The Proton prefix ID.
+
+    Returns
+    -------
+    str
+        The path to the Proton prefix if it exists, otherwise None.
+    """
     if not check_prefix(id):
         return None
 
@@ -60,6 +111,14 @@ def get_prefix(id: int):
 
 
 def log_translation(input: str = None):
+    """
+    Translates protontricks log lines into more user-friendly messages and logs them.
+
+    Parameters
+    ----------
+    input : str
+        The log line to translate.
+    """
     if not input:
         return
 
@@ -103,6 +162,10 @@ def log_translation(input: str = None):
 
 @contextmanager
 def redirect_output_to_logger():
+    """
+    Context manager to redirect stdout and stderr to the logger.
+    """
+
     read_fd, write_fd = os.pipe()
     output_lines = []
 
