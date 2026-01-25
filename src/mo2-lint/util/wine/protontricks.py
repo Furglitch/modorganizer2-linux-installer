@@ -30,6 +30,8 @@ def run(command: list) -> List[str]:
 
     args = ["--verbose"] + [str(c) for c in command]
 
+    logger.debug(f"Running protontricks command: {' '.join(args)}")
+
     with redirect_output_to_logger() as output_lines:
         try:
             pt(args)
@@ -40,7 +42,7 @@ def run(command: list) -> List[str]:
     return output_lines
 
 
-def apply(id: int, command: list):
+def apply(id: int, tricks: list):
     """
     Applies tricks to the specified prefix.
 
@@ -48,12 +50,12 @@ def apply(id: int, command: list):
     ----------
     id : int
         The Proton prefix ID.
-    command : list
+    tricks : list
         The list of tricks to apply
     """
 
-    logger.info(f"Applying tricks to prefix: {command}")
-    run([f"{id}", "-q", "--force"] + command)
+    logger.info(f"Applying tricks to prefix: {tricks}")
+    run([f"{id}", "-q", "--force"] + tricks)
 
 
 def check_prefix(id: int) -> bool:
