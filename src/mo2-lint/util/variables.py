@@ -137,7 +137,7 @@ class ScriptExtender:
 @dataclass
 class ScriptExtenders:
     """
-    Stores ScriptExtender instances for different storefronts.
+    Stores ScriptExtender instances for different launchers.
 
     Parameters
     -----------
