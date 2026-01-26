@@ -366,3 +366,37 @@ def match_instances(game: Optional[str], directory: Optional[Path]) -> dict:
             matched.append(instance)
 
     return matched
+
+
+def symlink_instance():
+    """
+    Creates a symbolic link for the current instance's Mod Organizer 2 directory.
+    """
+    source = current_instance.instance_path
+    target = Path("~/.config/mo2-lint/instances").expanduser()
+    link = target / current_instance.index
+    if not link.exists():
+        link.mkdir(parents=True, exist_ok=True)
+
+    if not source.exists():
+        logger.error(f"Source path {source} does not exist. Cannot create symlink.")
+        return
+
+    if link.exists() and link.is_symlink():
+        symlink_correct = link.resolve() == source.resolve()
+        if symlink_correct:
+            logger.info(f"Symlink {link} already exists. Skipping creation.")
+            return
+        elif not symlink_correct:
+            logger.warning(
+                f"Symlink {link} points to a different location. Updating link."
+            )
+            link.unlink()
+    elif link.exists() and not link.is_symlink():
+        logger.warning(f"Path {link} exists and is not a symlink. Skipping creation.")
+        logger.warning(
+            "Please remove or relocate the existing path to create the symlink."
+        )
+        return
+
+    link.symlink_to(source, target_is_directory=True)

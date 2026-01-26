@@ -24,6 +24,7 @@ _build: venv/bin/activate
 		--hidden-import pydantic_core \
 		--hidden-import requests \
 		--hidden-import send2trash \
+		--hidden-import websockets \
 		--add-data "src/mo2-lint:src" \
 		--add-data "configs:cfg" \
 		--add-data "dist:dist" \

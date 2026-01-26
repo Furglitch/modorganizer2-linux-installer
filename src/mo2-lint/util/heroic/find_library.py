@@ -26,6 +26,12 @@ def get_data() -> tuple[str, str, str, str, str]:
     tuple[str, str, str, str, str]
         A tuple containing the launcher type, game ID, install path, Wine path, and Wine prefix.
     """
+    launcher: str = None
+    display: str = None
+    game_id: str | int = None
+    install_path: Path = None
+    wine_path: Path = None
+    wine_prefix: Path = None
     for i, dir in enumerate(config_directories):
         release = release_type[i]
         dir = dir.resolve()
@@ -38,13 +44,13 @@ def get_data() -> tuple[str, str, str, str, str]:
                 launcher = "gog"
                 display = "GOG"
                 game_id = gog_data["game_id"]
-                install_path = gog_data["install_path"]
+                install_path = Path(gog_data["install_path"])
                 wine_path, wine_prefix = get_wine_variables(gog_data["game_id"], dir)
             elif epic_data and not gog_data:
                 launcher = "epic"
                 display = "Epic"
                 game_id = epic_data["game_id"]
-                install_path = epic_data["install_path"]
+                install_path = Path(epic_data["install_path"])
                 wine_path, wine_prefix = get_wine_variables(epic_data["game_id"], dir)
             elif epic_data and gog_data:
                 logger.error(
@@ -79,7 +85,9 @@ def get_data() -> tuple[str, str, str, str, str]:
         else:
             logger.warning(f"Unable to find Heroic config at {dir}")
 
-    return tuple(launcher, game_id, install_path, wine_path, wine_prefix)
+    global heroic_config
+    heroic_config = (launcher, game_id, install_path, wine_path, wine_prefix)
+    return heroic_config
 
 
 def get_libraries(config_directory: Path) -> tuple[Path | None, Path | None]:
@@ -207,6 +215,7 @@ def get_wine_variables(
     if not wine_path:
         logger.warning(f"Wine path not found in both {config_json} and global config.")
         return None
+    wine_path = Path(wine_path)
 
     logger.debug(f"Found wine path: {wine_path}")
 
@@ -217,5 +226,6 @@ def get_wine_variables(
     if not wine_prefix:
         logger.warning(f"Wine prefix not found in {config_json}.")
         return None
+    wine_prefix = Path(wine_prefix)
 
     return wine_path, wine_prefix

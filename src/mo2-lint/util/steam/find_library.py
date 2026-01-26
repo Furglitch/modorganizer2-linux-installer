@@ -4,11 +4,28 @@ from loguru import logger
 import os
 import re
 from pathlib import Path
+from util.variables import input, game_info
 
 steam_directories = [
     "${HOME}/.steam/root",
     "${HOME}/.var/app/com.valvesoftware.Steam/.local/share/Steam",
 ]
+
+
+def get_data() -> tuple[int, str, str]:
+    """
+    Returns
+    -------
+    tuple[int, str, str]
+        A tuple containing the Steam ID, subdirectory, and executable.
+    """
+
+    chosen_game = game_info.get(input.game)
+    id = chosen_game.launcher_ids.steam
+    subdir = chosen_game.subdirectory
+    exe = chosen_game.executable
+
+    return tuple(id, subdir, exe)
 
 
 def get_libraries() -> list[Path]:

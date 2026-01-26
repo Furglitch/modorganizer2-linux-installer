@@ -8,8 +8,8 @@ from typing import List
 from loguru import logger
 
 exec = (
-    shutil.which("protontricks")
-    or Path("~/.cache/mo2-lint/downloads/protontricks").expanduser()
+    shutil.which("winetricks")
+    or Path("~/.cache/mo2-lint/downloads/winetricks").expanduser()
 )
 
 

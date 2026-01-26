@@ -494,6 +494,11 @@ prefix: Path = None
 Path to game's Wine/Proton prefix directory.
 """
 
+archived_prefix: Path = None
+"""
+Path to archived Wine/Proton prefix directory.
+"""
+
 archived_prefixes: list[Path] = []
 """
 List of previously archived Wine/Proton prefix directories.
@@ -504,7 +509,7 @@ heroic_runner: str = None
 Targeted Heroic Games Launcher runner [epic, gog].
 """
 
-heroic_config: list[str] = []
+heroic_config: tuple[str, str | int, Path, Path, Path] = ()
 
 game_install_path: Path = None
 """

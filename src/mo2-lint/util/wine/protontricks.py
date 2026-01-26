@@ -81,7 +81,7 @@ def check_prefix(id: int) -> bool:
     return exists
 
 
-def get_prefix(id: int) -> str | None:
+def get_prefix(id: int) -> Path | None:
     """
     Retrieves the Proton prefix path for the given ID if it exists.
 
@@ -102,10 +102,10 @@ def get_prefix(id: int) -> str | None:
     prefix = None
     for line in out_lines:
         if str(id) in line and "compatdata" in line:
-            prefix = line.strip()
+            prefix = Path(line.strip())
             break
 
-    if prefix and Path(prefix).exists():
+    if prefix and prefix.exists():
         logger.debug(f"Prefix for {id}: {prefix}")
     else:
         logger.error(f"Could not find a valid prefix directory for {id}.")

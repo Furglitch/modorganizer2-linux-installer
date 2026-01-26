@@ -5,9 +5,10 @@ from os import stat
 from pathlib import Path
 from shutil import copy2
 import util.variables as var
+from util.internal_file import internal_file
 from util.checksum import compare_checksum
 
-redirector_build = var.internal_file("dist", "redirector.exe")
+redirector_build = internal_file("dist", "redirector.exe")
 
 
 def create_path_entry():
@@ -26,6 +27,28 @@ def create_path_entry():
     with open(redirect_file, "w", encoding="utf-8") as file:
         file.write(str(instance_directory))
     logger.debug(f"Wrote MO2 path '{instance_directory}' to '{redirect_file}'.")
+
+
+def validate(exec_path: Path) -> bool:
+    """
+    Validates if the redirector is installed and up to date.
+
+    Parameters
+    ----------
+    exec_path : Path
+        The path to the game's executable.
+
+    Returns
+    -------
+    bool
+        True if the redirector is installed and up to date, False otherwise.
+    """
+
+    if not exec_path.exists():
+        return False
+    if not compare_checksum(redirector_build, exec_path):
+        return False
+    return True
 
 
 def install():
@@ -58,25 +81,3 @@ def install():
     logger.info(f"Installing Redirector executable to {exec_path}...")
     copy2(redirector_build, exec_path)
     exec_path.chmod(exec_path.stat().st_mode | stat.S_IEXEC)
-
-
-def validate(exec_path: Path) -> bool:
-    """
-    Validates if the redirector is installed and up to date.
-
-    Parameters
-    ----------
-    exec_path : Path
-        The path to the game's executable.
-
-    Returns
-    -------
-    bool
-        True if the redirector is installed and up to date, False otherwise.
-    """
-
-    if not exec_path.exists():
-        return False
-    if not compare_checksum(redirector_build, exec_path):
-        return False
-    return True

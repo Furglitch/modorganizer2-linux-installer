@@ -2,11 +2,12 @@
 
 import click
 from pathlib import Path
-from step import configure_prefix, external_resources
-from util.nexus import install_handler
-from util.redirector import install as install_redirector
-from util.state import state_file as state, state_list
-from util.state.state_file import current_instance as instance
+from step.configure_prefix import prompt as prompt_prefix, configure as configure_prefix
+from step.external_resources import download
+from util.nexus.install_handler import install as install_handler
+from util.redirector.install import install as install_redirector
+from util import state_file as state, uninstall as _uninstall
+from util.state_file import current_instance as instance, match_instances
 from util.variables import (
     set_parameters,
     load_game_info,
@@ -71,17 +72,17 @@ def pull_config() -> None:
             copy2(src, dest)
             logger.debug(f"Copied default {config} to ~/.config/mo2-lint/")
 
-        try:
-            from urllib.request import urlretrieve
+        # try:
+        #     from urllib.request import urlretrieve
 
-            Path("~/.config/mo2-lint/").expanduser().mkdir(parents=True, exist_ok=True)
-            urlretrieve(
-                f"https://raw.githubusercontent.com/Furglitch/modorganizer2-linux-installer/refs/heads/rewrite/configs/{config}",
-                Path("~/.config/mo2-lint/", config).expanduser(),
-            )
-            logger.debug(f"Downloaded latest {config} from GitHub.")
-        except Exception as e:
-            logger.error(f"Failed to download {config}: {e}")
+        #     Path("~/.config/mo2-lint/").expanduser().mkdir(parents=True, exist_ok=True)
+        #     urlretrieve(
+        #         f"https://raw.githubusercontent.com/Furglitch/modorganizer2-linux-installer/refs/heads/rewrite/configs/{config}",
+        #         Path("~/.config/mo2-lint/", config).expanduser(),
+        #     )
+        #     logger.debug(f"Downloaded latest {config} from GitHub.")
+        # except Exception as e:
+        #     logger.error(f"Failed to download {config}: {e}")
 
 
 def get_valid_games() -> dict:
@@ -127,7 +128,7 @@ class CustomCommand(click.Command):
 @click.help_option("-h", "--help", help="Show this message.")
 @click.option(
     "--uninstall",
-    "-U",
+    "-u",
     "uninstall",
     is_flag=True,
     default=False,
@@ -241,13 +242,15 @@ def main(
 
     # Handle --list
     if list_instances:
-        state_list.main()
+        list = match_instances()
+        for idx, inst in enumerate(list, start=1):
+            print(
+                f"[{idx}] Game: {inst.game}, Path: {inst.instance_path}, Script Extender: {'Yes' if inst.script_extender else 'No'}, Plugins: {', '.join(inst.plugins) if inst.plugins else 'None'}"
+            )
         return
 
     # Handle --uninstall
     if uninstall:
-        from util import _uninstall
-
         _uninstall.main(game, directory)
         return
 
@@ -283,10 +286,11 @@ def main(
         instance.plugins = list(plugin)
     instance.launcher_ids = LauncherIDs.from_dict(game_info[game].launcher_ids)
 
-    configure_prefix.main()
-    external_resources.main()
-    install_handler.main()
-    install_redirector.main()
+    prompt_prefix()
+    configure_prefix()
+    download()
+    install_handler()
+    install_redirector()
 
     state.write_state()
 

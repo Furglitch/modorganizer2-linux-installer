@@ -30,16 +30,16 @@ def get_checksum(target: Path) -> str:
     return digest
 
 
-def compare_checksum(source: str | Path, target: Path) -> bool:
+def compare_checksum(target_a: str | Path, target_b: str | Path) -> bool:
     """
     Compares the checksum of the target file against the source.
 
     Parameters
     ----------
-    source : str | Path
-        The source checksum as a string, or a Path to a file to calculate the checksum from.
-    target : Path
-        The target file to calculate the checksum from.
+    target_a : str | Path
+        The first checksum as a string, or a Path to a file to calculate the checksum from.
+    target_b : str | Path
+        The second checksum as a string, or a Path to a file to calculate the checksum from.
 
     Returns
     -------
@@ -47,11 +47,11 @@ def compare_checksum(source: str | Path, target: Path) -> bool:
         True if the checksums match, False otherwise.
     """
 
-    logger.trace(f"Calculating checksum for: {target}")
+    logger.trace(f"Calculating checksum for: {target_a} and {target_b}")
 
-    source_checksum = source if isinstance(source, str) else get_checksum(source)
-    target_checksum = get_checksum(target)
-    check_pass = source_checksum == target_checksum
+    checksum_a = target_a if isinstance(target_a, str) else get_checksum(target_a)
+    checksum_b = target_b if isinstance(target_b, str) else get_checksum(target_b)
+    check_pass = checksum_a == checksum_b
     if check_pass:
         logger.trace("Checksum verification passed")
     else:

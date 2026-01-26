@@ -67,7 +67,7 @@ def get_filename(response: requests.Response) -> str:
 
 def nexus_download(
     game_slug: str, mod_id: str, file_id: str, dest: Path, filename: Optional[str]
-):
+) -> str:
     """
     Downloads a mod file from Nexus Mods to the specified destination.
 
@@ -101,3 +101,5 @@ def nexus_download(
         download = requests.get(download_url, headers=header(), stream=True)
         for chunk in download.iter_content(chunk_size=8192):
             f.write(chunk)
+
+    return filename
