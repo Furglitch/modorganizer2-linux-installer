@@ -111,7 +111,10 @@ def restore_archived_prefix(prefix: Path):
     logger.debug(f"Restoring personal data from {src} to {dst}...")
 
     copytree(src, dst.with_suffix(".bak"))
-    move(dst.with_suffix(".bak"), dst)
+    logger.debug(f"Backed up current data at {dst.with_suffix('.bak')}.")
+    copytree(src, dst.with_suffix(".old"))
+    move(dst.with_suffix(".old"), dst)
+    logger.debug(f"Restored personal data to new prefix at {dst}.")
 
 
 def prompt():
@@ -129,6 +132,8 @@ def prompt():
     for suffix in ["users", "drive_c", "pfx"]:
         if prefix.name == suffix:
             prefix = prefix.parent
+    logger.debug(f"Determined game prefix for archiving: {prefix}")
+    logger.debug("Prompting user to archive existing prefix...")
     print(prompt_archive)
     if (
         input(
@@ -138,12 +143,14 @@ def prompt():
         .lower()
         in yes
     ):
+        logger.debug("User agreed to archive the prefix.")
         archive_prefix(prefix)
     else:
         var.archive = None
         logger.debug("User refused to archive the prefix.")
 
     # Prompt user to create a clean prefix
+    logger.debug("Prompting user to create a clean Steam prefix...")
     match var.launcher:
         case "steam":
             print(prompt_clean_steam)
@@ -154,13 +161,15 @@ def prompt():
         input("Have you completed these instructions? [y/N]: ").strip().lower()
         not in yes
     ):
-        logger.critical("Aborting operation...")
+        logger.critical(
+            "User declined to create a clean prefix. Aborting installation."
+        )
         raise SystemExit(1)
     else:
+        logger.debug("User confirmed clean prefix setup.")
         if var.archive is not None:
             restore_archived_prefix(prefix)
         print(prompt_archive_done.format(directory=var.archive))
-        logger.debug("User confirmed clean prefix setup.")
 
 
 def configure():
@@ -168,6 +177,7 @@ def configure():
     Run the necessary winetricks/protontricks for the selected game launcher.
     """
     tricks = default_tricks + list(var.game_info.get(var.input_params.game).tricks)
+    logger.debug(f"Applying the following tricks: {tricks}")
     match var.launcher:
         case "steam":
             protontricks.apply(

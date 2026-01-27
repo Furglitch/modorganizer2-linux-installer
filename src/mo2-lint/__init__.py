@@ -29,21 +29,31 @@ CRITICAL: Fatal error
 def check_update() -> None:
     import requests
 
+    logger.trace("Starting update check for mo2-lint.")
     try:
+        logger.trace("Sending request to GitHub releases API.")
         response = requests.get(
             "https://api.github.com/repos/Furglitch/modorganizer2-linux-installer/releases/latest"
         ).json()
         latest = response["tag_name"]
+        logger.trace(
+            f"Latest version from GitHub: {latest}, current version: {var.version}"
+        )
         if latest != str(var.version):
             version_parts = list(map(int, str(var.version).split(".")))
             latest_parts = list(map(int, latest.split(".")))
+            logger.trace(
+                f"Parsed version parts: current={version_parts}, latest={latest_parts}"
+            )
             if latest_parts > version_parts:
                 logger.warning(
                     f"A new version of mo2-lint is available: {latest} (current: {var.version}). Please update to the latest version."
                 )
                 return
     except Exception as e:
-        logger.error(f"Failed to check for updates: {e}")
+        logger.exception(
+            f"Failed to check for updates: {e}", backtrace=True, diagnose=True
+        )
         return
     logger.debug("mo2-lint is up to date.")
 
@@ -54,29 +64,39 @@ def pull_config() -> None:
 
     Before that, copies default configuration files from internal storage if not already present.
     """
+    logger.trace("Starting pull_config process.")
     for config in {"game_info.json", "resource_info.json", "plugin_info.json"}:
-        if not Path("~/.config/mo2-lint/", config).expanduser().exists():
+        logger.trace(f"Processing config file: {config}")
+        config_path = Path("~/.config/mo2-lint/", config).expanduser()
+        dest = None
+        if not config_path.exists():
             logger.debug(f"{config} not found in ~/.config/mo2-lint/")
+            logger.trace(f"Copying default {config} from internal storage.")
             from shutil import copy2
             from util.internal_file import internal_file
 
             src = internal_file("cfg", config)
-            dest = Path("~/.config/mo2-lint/", config).expanduser()
+            dest = config_path
             dest.parent.mkdir(parents=True, exist_ok=True)
             copy2(src, dest)
             logger.debug(f"Copied default {config} to ~/.config/mo2-lint/")
+        else:
+            logger.trace(f"{config} already exists in ~/.config/mo2-lint/")
 
-        # try:
-        #     from urllib.request import urlretrieve
+        try:
+            from urllib.request import urlretrieve
 
-        #     Path("~/.config/mo2-lint/").expanduser().mkdir(parents=True, exist_ok=True)
-        #     urlretrieve(
-        #         f"https://raw.githubusercontent.com/Furglitch/modorganizer2-linux-installer/refs/heads/rewrite/configs/{config}",
-        #         Path("~/.config/mo2-lint/", config).expanduser(),
-        #     )
-        #     logger.debug(f"Downloaded latest {config} from GitHub.")
-        # except Exception as e:
-        #     logger.error(f"Failed to download {config}: {e}")
+            logger.trace(f"Attempting to download latest {config} from GitHub.")
+            config_path.parent.mkdir(parents=True, exist_ok=True)
+            urlretrieve(
+                f"https://raw.githubusercontent.com/Furglitch/modorganizer2-linux-installer/refs/heads/rewrite/configs/{config}",
+                config_path,
+            )
+            logger.debug(f"Downloaded latest {config} from GitHub.")
+        except Exception as e:
+            logger.exception(
+                f"Failed to download {config}: {e}", backtrace=True, diagnose=True
+            )
 
 
 def get_valid_games() -> dict:
@@ -85,7 +105,9 @@ def get_valid_games() -> dict:
     -------
     dict: Nexus IDs of supported games.
     """
-    return var.game_info.keys()
+    keys = var.game_info.keys()
+    logger.trace(f"Valid games retrieved: {keys}")
+    return keys
 
 
 game_list = None
@@ -203,17 +225,15 @@ def main(
     logger.info("Starting mo2-lint")
     check_update()
     pull_config()
-    if isinstance(directory, str):
-        directory = Path(directory)
-    if isinstance(game_info_path, str):
-        game_info_path = Path(game_info_path)
+    directory = Path(directory) if isinstance(directory, str) else directory
+    game_info_path = (
+        Path(game_info_path) if isinstance(game_info_path, str) else game_info_path
+    )
 
     # Game info loading and selection validation
     if game_info_path:
         if not game_info_path.exists():
-            raise FileNotFoundError(
-                f"Custom game_info file not found: {game_info_path}"
-            )
+            logger.error(f"Custom game_info file not found: {game_info_path}")
     else:
         game_info_path = None
     var.load_game_info(game_info_path)
@@ -221,10 +241,16 @@ def main(
     if list_instances or uninstall:
         pass
     elif not game or not directory:
+        logger.error(
+            "GAME and DIRECTORY arguments are required unless --list or --uninstall is used."
+        )
         raise click.BadArgumentUsage(
             "GAME and DIRECTORY arguments are required unless --list or --uninstall is used."
         )
     elif game not in game_list:
+        logger.error(
+            f"Invalid game specified: {game}. Available games are: {game_list}"
+        )
         raise click.BadArgumentUsage(
             f"Invalid game specified: {game}. Available games are: {game_list}"
         )
@@ -234,9 +260,12 @@ def main(
     # Handle --list
     if list_instances:
         list = match_instances()
+        if game or directory:
+            matched = "matching "
+        print(f"Found {len(list)} {matched}Mod Organizer 2 instance(s):")
         for idx, inst in enumerate(list, start=1):
             print(
-                f"[{idx}] Game: {inst.game}, Path: {inst.instance_path}, Script Extender: {'Yes' if inst.script_extender else 'No'}, Plugins: {', '.join(inst.plugins) if inst.plugins else 'None'}"
+                f"    - [{idx}] Game: {inst.game}, Path: {inst.instance_path}, Script Extender: {'Yes' if inst.script_extender else 'No'}, Plugins: {', '.join(inst.plugins) if inst.plugins else 'None'}"
             )
         return
 
@@ -251,6 +280,9 @@ def main(
         var.load_plugin_info()
         for p in plugin:
             if p not in var.plugin_info:
+                logger.error(
+                    f"Invalid plugin specified: {p}. Available plugins are: {plugin_list}"
+                )
                 raise click.BadArgumentUsage(
                     f"Invalid plugin specified: {p}. Available plugins are: {plugin_list}"
                 )

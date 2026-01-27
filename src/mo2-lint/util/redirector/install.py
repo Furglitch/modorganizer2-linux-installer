@@ -65,6 +65,7 @@ def install():
     )
 
     if not (game_install_path / "modorganizer2" / "instance_path.txt").exists():
+        logger.debug("Creating path entry for Redirector...")
         create_path_entry()
 
     exec_path = game_install_path / var.game_info[var.input_params.game].executable

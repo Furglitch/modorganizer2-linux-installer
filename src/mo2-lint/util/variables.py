@@ -6,7 +6,6 @@ from pathlib import Path
 from pydantic_core import from_json
 from typing import Final
 from typing import Optional, Tuple
-from util.internal_file import internal_file as internal
 
 
 # --- #
@@ -304,10 +303,11 @@ def load_game_info(path: Optional[Path] = None):
 
     global game_info
     if not path:
-        path = internal("cfg/game_info.json")
+        path = Path("~/.config/mo2-lint/game_info.json").expanduser()
     logger.debug(f"Loading game info from path: {path}")
     with open(path, "r", encoding="utf-8") as file:
         json = from_json(file.read())
+    logger.trace(f"Game info JSON content: {json}")
     for key, value in json.items():
         game_info[key] = GameInfo.from_dict(value)
 
@@ -355,9 +355,9 @@ class Resource:
 
     def __post_init__(self):
         if not self.download_url:
-            logger.warning("Resource download_url is missing.")
+            raise ValueError("Resource download_url is missing.")
         if not self.checksum:
-            logger.warning("Resource checksum is missing.")
+            raise ValueError("Resource checksum is missing.")
 
 
 @dataclass
@@ -416,14 +416,12 @@ def load_resource_info(path: Optional[Path] = None):
 
     global resource_info
     if not path:
-        path = internal("cfg/resource_info.json")
+        path = Path("~/.config/mo2-lint/resource_info.json").expanduser()
     logger.debug(f"Loading resource info from path: {path}")
     with open(path, "r", encoding="utf-8") as file:
         json = from_json(file.read())
+    logger.trace(f"Resource info JSON content: {json}")
     resource_info = ResourceInfo.from_dict(json)
-    # for key, value in json.items():
-    #     print(key, value)
-    #     resource_info = ResourceInfo.from_dict(value)
 
 
 # --- #
@@ -468,10 +466,11 @@ def load_plugin_info(path: Optional[Path] = None):
 
     global plugin_info
     if not path:
-        path = internal("cfg/plugin_info.json")
+        path = Path("~/.config/mo2-lint/plugin_info.json").expanduser()
     logger.debug(f"Loading plugin info from path: {path}")
     with open(path, "r", encoding="utf-8") as file:
         json = from_json(file.read())  # type: list[dict]
+    logger.trace(f"Plugin info JSON content: {json}")
     for value in json:
         plugin_info[value.get("identifier")] = Plugin(manifest=value.get("manifest"))
 

@@ -2,6 +2,7 @@
 
 import sys
 from pathlib import Path
+from loguru import logger
 
 
 def internal_file(*parts) -> Path:
@@ -12,4 +13,5 @@ def internal_file(*parts) -> Path:
     """
 
     path = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve()))
+    logger.trace(f"Resolving internal file. base={path}, parts={parts}")
     return path.joinpath(*parts)

@@ -37,7 +37,17 @@ def run(command: list) -> List[str]:
             pt(args)
         except SystemExit as e:
             if e.code != 0:
-                logger.error(f"Protontricks command failed with exit code {e.code}")
+                logger.exception(f"Protontricks command failed with exit code {e.code}")
+        except Exception as e:
+            logger.exception(
+                f"Unexpected exception while running protontricks: {e}",
+                backtrace=True,
+                diagnose=True,
+            )
+        finally:
+            logger.debug(
+                f"Protontricks finished, collected {len(output_lines)} output lines"
+            )
 
     return output_lines
 
@@ -186,7 +196,14 @@ def redirect_output_to_logger():
                 if line := line.rstrip("\n"):
                     output_lines.append(line)
                     logger.trace(line)
-                    log_translation(line)
+                    try:
+                        log_translation(line)
+                    except Exception:
+                        logger.exception(
+                            "Error translating protontricks log line",
+                            backtrace=True,
+                            diagnose=True,
+                        )
 
     threading.Thread(target=reader_thread, daemon=True).start()
 

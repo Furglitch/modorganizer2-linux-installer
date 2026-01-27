@@ -17,6 +17,7 @@ def get_launcher() -> str | None:
         The launcher type ("steam", "gog", "epic"), or None if not found.
     """
 
+    logger.debug("Detecting available launchers")
     steam_libraries = get_steam_libraries()
     heroic_data = get_heroic_data()
     var.launcher = None
@@ -46,6 +47,7 @@ def get_library() -> Path | None:
         Path representing the game's installation directory, or None if not found.
     """
 
+    logger.debug(f"Looking up library for game={var.input_params.game}")
     chosen_game = var.game_info.get(var.input_params.game)
     subdirectory = chosen_game.subdirectory
     executable = chosen_game.executable

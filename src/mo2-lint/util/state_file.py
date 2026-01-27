@@ -80,6 +80,11 @@ class InstanceData:
         Executable filename for the game.
     plugins : list[str], optional
         List of plugins enabled for this MO2 instance.
+
+    Raises
+    ------
+    TypeError
+        If launcher_ids is not of type LauncherIDs.
     """
 
     index: int = None
@@ -110,6 +115,7 @@ class InstanceData:
     @classmethod
     def to_dict(cls, data: "InstanceData") -> dict[str, any]:
         if isinstance(data.launcher_ids, dict):
+            logger.error("launcher_ids must be of type LauncherIDs, not dict.")
             raise TypeError("launcher_ids must be of type LauncherIDs, not dict.")
         return {
             "index": data.index,
@@ -191,7 +197,9 @@ def load_state_file():
             with filepath.open("r", encoding="utf-8") as f:
                 data = json.load(f)
         except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse state file JSON: {e}")
+            logger.exception(
+                f"Failed to parse state file JSON: {e}", backtrace=True, diagnose=True
+            )
             logger.error("State file may be corrupted. Please validate or delete it.")
         logger.trace(f"Loaded state file: {data}")
         state_file = StateFile.from_dict(data)
@@ -226,6 +234,7 @@ def check_instance(
         If both game and directory are not provided.
     """
     if game is None and directory is None:
+        logger.error("Either game or directory must be provided to check_instance.")
         raise ValueError("Either game or directory must be provided to check_instance.")
     logger.debug(
         f"Checking for instances with nexus slug: {game} or directory: {directory}"
@@ -234,7 +243,7 @@ def check_instance(
     existing_indexes = []
     for instance in state_file.instances:
         if instance.instance_path == directory or instance.nexus_slug == game:
-            logger.info(
+            logger.debug(
                 f"Found matching instance at index {instance.index}: {instance}"
             )
             existing_indexes.append(instance)
@@ -253,6 +262,7 @@ def choose_instance():
     available_indexes = []
     if existing_indexes:
         quantifier = "the" if len(existing_indexes) == 1 else "an"
+        logger.debug("Prompting user to choose existing or new instance.")
         choice = (
             input(
                 f"Would you like to use {quantifier} existing instance [e] or create a new one? [n]: "
@@ -261,21 +271,23 @@ def choose_instance():
             .lower()
         )
         if choice == "e":
+            logger.debug("User chose to use an existing instance.")
             if len(existing_indexes) == 1:
                 current_instance = existing_indexes[0]
             elif len(existing_indexes) > 1:
-                for i, inst in enumerate(existing_indexes, start=1):
+                for idx, inst in enumerate(existing_indexes, start=1):
                     print(
-                        f"{i}: index {inst.index} - {inst.nexus_slug} @ {inst.instance_path}"
+                        f"    - [{idx}] Game: {inst.game}, Path: {inst.instance_path}, Script Extender: {'Yes' if inst.script_extender else 'No'}, Plugins: {', '.join(inst.plugins) if inst.plugins else 'None'}"
                     )
                 selected = int(
                     input("Select the number of the instance you want to use: ")
                 )
                 current_instance = existing_indexes[selected - 1]
         elif choice != "n":
+            logger.error("User made an invalid choice when selecting instance.")
             raise ValueError("Invalid choice made when selecting instance.")
         return
-    set_index(None)
+    set_index()
 
 
 def set_index(index: Optional[int] = None):
@@ -294,10 +306,13 @@ def set_index(index: Optional[int] = None):
             if inst.index and inst.index > max:
                 max = inst.index
         set = max + 1
+        logger.debug(f"Assigned new index {set} to current instance.")
     else:
         if index not in [inst.index for inst in state_file.instances]:
             set = index
+            logger.debug(f"Set current instance index to {set}.")
         else:
+            logger.error(f"Index {index} is already in use.")
             raise ValueError(f"Index {index} is already in use.")
     current_instance.index = set
 
@@ -381,10 +396,15 @@ def remove_instance(instance: InstanceData, types: list[str] = ["symlink", "stat
 def write_state(add_current: bool = True):
     global state_file, current_instance
     if {} in state_file.instances:
+        logger.info("Removing empty instance entries from state file.")
         state_file.instances.remove({})
     if add_current and current_instance not in state_file.instances:
+        logger.info(f"Adding current instance {current_instance.index} to state file.")
         state_file.instances.append(state.InstanceData.from_dict(current_instance))
     elif add_current and current_instance in state_file.instances:
+        logger.info(
+            f"Updating current instance {current_instance.index} in state file."
+        )
         for i, inst in enumerate(state_file.instances):
             if inst.index == current_instance.index:
                 state_file.instances[i] = state.InstanceData.from_dict(current_instance)
@@ -415,9 +435,9 @@ def match_instances(game: Optional[str], directory: Optional[Path]) -> dict:
     matched: list[InstanceData] = []
 
     process = "Matching" if (game or directory) else "Existing"
-    print(f"{process} Mod Organizer 2 Instances:")
+    logger.debug(f"{process} Mod Organizer 2 Instances:")
     if not state_file.instances:
-        print("No instances found.")
+        logger.warning("No instances found that match the criteria.")
         return
 
     for instance in state_file.instances:
@@ -433,7 +453,7 @@ def match_instances(game: Optional[str], directory: Optional[Path]) -> dict:
         if (game == instance.nexus_slug) or (
             str(instance.instance_path).startswith(str(directory))
         ):
-            logger.debug(f"Matched instance at index {instance.index}: {instance}")
+            logger.trace(f"Matched instance at index {instance.index}: {instance}")
             matched.append(instance)
             continue
 

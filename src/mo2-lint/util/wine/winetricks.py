@@ -11,6 +11,7 @@ exec = (
     shutil.which("winetricks")
     or Path("~/.cache/mo2-lint/downloads/winetricks").expanduser()
 )
+logger.debug(f"winetricks exec resolved to: {exec}")
 
 
 def run(prefix: Path, command: List[str]) -> List[str]:
@@ -34,6 +35,7 @@ def run(prefix: Path, command: List[str]) -> List[str]:
     env = os.environ.copy()
     env.setdefault("WINEPREFIX", str(prefix))
 
+    logger.debug(f"Using WINEPREFIX: {env['WINEPREFIX']}")
     logger.debug(f"Running winetricks command: {' '.join(cmd)}")
 
     proc = subprocess.Popen(
@@ -49,7 +51,6 @@ def run(prefix: Path, command: List[str]) -> List[str]:
         for line in proc.stdout:
             line = line.strip()
             out_lines.append(line)
-            logger.trace(line)
 
     exit_code = proc.wait()
     if exit_code == 0:

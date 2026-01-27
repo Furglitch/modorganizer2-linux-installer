@@ -56,7 +56,13 @@ def download(
                 logger.debug(f"Successfully downloaded {export}")
                 return export
         except Exception as e:
-            logger.error(f"Error downloading {url} on attempt {i + 1}/{attempts}: {e}")
+            logger.exception(
+                f"Error downloading {url} on attempt {i + 1}/{attempts}: {e}",
+                backtrace=True,
+                diagnose=True,
+            )
+    logger.error(f"Failed to download {url} after {attempts} attempts.")
+    return None
 
 
 def download_nexus(
@@ -113,7 +119,13 @@ def download_nexus(
                 logger.debug(f"Successfully downloaded {export}")
                 return export
         except Exception as e:
-            logger.error(
-                f"Error downloading Nexus Mods file {mod_id}:{file_id} on attempt {i + 1}/{attempts}: {e}"
+            logger.exception(
+                f"Error downloading Nexus Mods file {mod_id}:{file_id} on attempt {i + 1}/{attempts}: {e}",
+                backtrace=True,
+                diagnose=True,
             )
             continue
+    logger.error(
+        f"Failed to download Nexus Mods file {mod_id}:{file_id} after {attempts} attempts."
+    )
+    return None

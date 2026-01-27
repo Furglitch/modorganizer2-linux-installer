@@ -6,6 +6,7 @@ from click import Path
 from .api import api_key
 from util import variables as var
 import requests
+from loguru import logger
 
 
 def header() -> dict:
@@ -19,6 +20,7 @@ def header() -> dict:
     """
 
     key = api_key()
+    logger.debug(f"Building Nexus Mods API headers (Application-Version={var.version})")
     header = {
         "apikey": f"{key}",
         "Application-Name": "mo2lint",
@@ -43,7 +45,11 @@ def nexus_request(url: str) -> requests.Response:
     """
 
     headers = header()
+    logger.debug(f"Performing Nexus GET request to: {url}")
     response = requests.get(url, headers=headers)
+    logger.debug(
+        f"Nexus request returned status: {response.status_code} for URL: {url}"
+    )
     return response
 
 
@@ -86,20 +92,26 @@ def nexus_download(
     """
 
     url = f"https://api.nexusmods.com/v1/games/{game_slug}/mods/{mod_id}/files/{file_id}/download_link.json"
+    logger.info(
+        f"Requesting Nexus download metadata for {game_slug} mod {mod_id} file {file_id}"
+    )
     response = nexus_request(url)
     filename = filename if filename else get_filename(response)
     path = dest / filename
+    logger.debug(f"Resolved filename '{filename}', target path: {path}")
+    download_url = None
     for item in response.json():
-        download_url = (
-            item.get("URI", "").replace("\\u0026", "&")
-            if item.get("short_name") == "Nexus CDN"
-            else None
-        )
+        if item.get("short_name") == "Nexus CDN":
+            download_url = item.get("URI", "").replace("\\u0026", "&")
+            break
     if not download_url:
-        raise Exception("Nexus CDN download URL not found.")
+        logger.error("No valid Nexus CDN download URL found in response.")
+        raise ValueError("No valid download URL found for the specified file.")
+    logger.debug(f"Beginning download from {download_url} to {path}")
     with open(path, "wb") as f:
         download = requests.get(download_url, headers=header(), stream=True)
         for chunk in download.iter_content(chunk_size=8192):
-            f.write(chunk)
-
+            if chunk:
+                f.write(chunk)
+    logger.info(f"Completed download to {path}")
     return filename

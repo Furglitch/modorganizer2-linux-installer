@@ -4,6 +4,7 @@ import json
 from util import state_file as state
 from uuid import UUID, uuid4 as new_uuid
 import websockets.sync.client as websockets
+from loguru import logger
 
 
 def id() -> UUID:
@@ -19,6 +20,7 @@ def id() -> UUID:
 
     id = state.state_file.nexus_api.uuid if state.state_file.nexus_api else None
     if not id:
+        logger.trace("No existing Nexus UUID found. Generating a new one.")
         id = new_uuid()
     state.state_file.nexus_api.uuid = id
     return id
@@ -37,6 +39,7 @@ def connection_token() -> str:
 
     token = state.state_file.nexus_api.connection_token
     if not token:
+        logger.trace("No existing Nexus connection token found. Requesting a new one.")
         token = request_connection_token()
     state.state_file.nexus_api.connection_token = token
     return token
@@ -82,6 +85,7 @@ def api_key() -> str:
 
     key = state.state_file.nexus_api.api_key
     if not key:
+        logger.trace("No existing Nexus API key found. Requesting a new one.")
         key = request_api_key()
     state.state_file.nexus_api.api_key = key
     return key

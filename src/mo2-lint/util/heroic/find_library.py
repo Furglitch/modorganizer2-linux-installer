@@ -32,6 +32,7 @@ def get_data() -> tuple[str, str, str, str, str]:
     install_path: Path = None
     wine_path: Path = None
     wine_prefix: Path = None
+    logger.debug(f"Checking Heroic config directories: {config_directories}")
     for i, dir in enumerate(config_directories):
         release = release_type[i]
         dir = dir.resolve()
@@ -87,6 +88,7 @@ def get_data() -> tuple[str, str, str, str, str]:
 
     global heroic_config
     heroic_config = (launcher, game_id, install_path, wine_path, wine_prefix)
+    logger.debug(f"Heroic data: {heroic_config}")
     return heroic_config
 
 
@@ -104,6 +106,7 @@ def get_libraries(config_directory: Path) -> tuple[Path | None, Path | None]:
     """
     gog_available = True
     epic_available = True
+    logger.debug(f"Checking Heroic config directory: {config_directory}")
 
     def valid():
         if not gog_available and not epic_available:
@@ -172,7 +175,12 @@ def get_libraries(config_directory: Path) -> tuple[Path | None, Path | None]:
             epic_available = False
 
     if not valid():
+        logger.debug("No valid Heroic libraries found")
         return None
+
+    logger.debug(
+        f"Install paths: epic={epic_data.get('install_path')}, gog={gog_data.get('install_path')}"
+    )
     return epic_data.get("install_path"), gog_data.get("install_path")
 
 

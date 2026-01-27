@@ -55,6 +55,7 @@ def compare_checksum(target_a: str | Path, target_b: str | Path) -> bool:
     if check_pass:
         logger.trace("Checksum verification passed")
     else:
+        logger.debug(f"Checksum mismatch. a={checksum_a}, b={checksum_b}")
         logger.trace("Checksum verification failed")
 
     return check_pass
