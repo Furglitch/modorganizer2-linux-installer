@@ -4,7 +4,7 @@ from typing import Optional
 
 from click import Path
 from .api import api_key
-from util.variables import version
+from util import variables as var
 import requests
 
 
@@ -22,7 +22,7 @@ def header() -> dict:
     header = {
         "apikey": f"{key}",
         "Application-Name": "mo2lint",
-        "Application-Version": version,
+        "Application-Version": var.version,
     }
     return header
 

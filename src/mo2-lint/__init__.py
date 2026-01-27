@@ -2,21 +2,15 @@
 
 import click
 from pathlib import Path
+import re
+from step.load_game_info import get_launcher, get_library
 from step.configure_prefix import prompt as prompt_prefix, configure as configure_prefix
 from step.external_resources import download
 from util.nexus.install_handler import install as install_handler
 from util.redirector.install import install as install_redirector
-from util import state_file as state, uninstall as _uninstall
-from util.state_file import current_instance as instance, match_instances
-from util.variables import (
-    set_parameters,
-    load_game_info,
-    load_plugin_info,
-    version,
-    game_info,
-    plugin_info,
-    LauncherIDs,
-)
+from util.uninstall import uninstall as _uninstall
+from util import state_file as state, variables as var
+from util.state_file import match_instances, set_index, InstanceData
 from util.logger import add_loggers, remove_loggers
 from loguru import logger
 
@@ -40,12 +34,12 @@ def check_update() -> None:
             "https://api.github.com/repos/Furglitch/modorganizer2-linux-installer/releases/latest"
         ).json()
         latest = response["tag_name"]
-        if latest != str(version):
-            version_parts = list(map(int, str(version).split(".")))
+        if latest != str(var.version):
+            version_parts = list(map(int, str(var.version).split(".")))
             latest_parts = list(map(int, latest.split(".")))
             if latest_parts > version_parts:
                 logger.warning(
-                    f"A new version of mo2-lint is available: {latest} (current: {version}). Please update to the latest version."
+                    f"A new version of mo2-lint is available: {latest} (current: {var.version}). Please update to the latest version."
                 )
                 return
     except Exception as e:
@@ -91,7 +85,7 @@ def get_valid_games() -> dict:
     -------
     dict: Nexus IDs of supported games.
     """
-    return game_info.keys()
+    return var.game_info.keys()
 
 
 game_list = None
@@ -104,11 +98,12 @@ def preload_lists():
     """
 
     remove_loggers()
-    load_game_info()
-    load_plugin_info()
+    var.load_game_info()
+    var.load_resource_info()
+    var.load_plugin_info()
     global game_list, plugin_list
     game_list = ", ".join(get_valid_games())
-    plugin_list = ", ".join(plugin_info.keys())
+    plugin_list = ", ".join(var.plugin_info.keys())
 
 
 preload_lists()
@@ -116,15 +111,13 @@ preload_lists()
 
 class CustomCommand(click.Command):
     def get_help(self, ctx):
-        import re
-
         help_text = super().get_help(ctx)
         help_text = re.sub(r"\.\n\n(\W+)\[", r".\n\1CHOICES: [", help_text)
         help_text = re.sub(r"\nOptions:\s*\n", "\n  [OPTIONS]\n\n", help_text)
         return help_text
 
 
-@click.version_option(version=version, prog_name="mo2-lint")
+@click.version_option(version=var.version, prog_name="mo2-lint")
 @click.help_option("-h", "--help", help="Show this message.")
 @click.option(
     "--uninstall",
@@ -206,9 +199,7 @@ def main(
 ):
     # Pre-init setup
     remove_loggers()
-    add_loggers(log_level, "MO2-LINT") if not (
-        list_instances or uninstall
-    ) else add_loggers("ERROR", "MO2-LINT")
+    add_loggers(log_level, "MO2-LINT")
     logger.info("Starting mo2-lint")
     check_update()
     pull_config()
@@ -225,7 +216,7 @@ def main(
             )
     else:
         game_info_path = None
-    load_game_info(game_info_path)
+    var.load_game_info(game_info_path)
 
     if list_instances or uninstall:
         pass
@@ -251,19 +242,20 @@ def main(
 
     # Handle --uninstall
     if uninstall:
-        _uninstall.main(game, directory)
+        _uninstall(game, directory)
+        state.write_state(False)
         return
 
     # Plugin validation
     if plugin:
-        load_plugin_info()
+        var.load_plugin_info()
         for p in plugin:
-            if p not in plugin_info:
+            if p not in var.plugin_info:
                 raise click.BadArgumentUsage(
                     f"Invalid plugin specified: {p}. Available plugins are: {plugin_list}"
                 )
 
-    set_parameters(
+    var.set_parameters(
         {
             "game": game,
             "directory": directory,
@@ -277,14 +269,19 @@ def main(
 
     if state.check_instance(game, directory):
         state.choose_instance()
-    state.set_index()
-    instance.nexus_slug = game
-    instance.instance_path = directory
-    if script_extender:
-        instance.script_extender = True
-    if plugin:
-        instance.plugins = list(plugin)
-    instance.launcher_ids = LauncherIDs.from_dict(game_info[game].launcher_ids)
+
+    state.current_instance = InstanceData(
+        index=-1,
+        nexus_slug=game,
+        instance_path=directory,
+        launcher=get_launcher(),
+        launcher_ids=var.LauncherIDs.from_dict(var.game_info[game].launcher_ids),
+        game_path=get_library(),
+        game_executable=var.game_info[game].executable,
+        script_extender=script_extender,
+        plugins=list(plugin) if plugin else [],
+    )
+    set_index()
 
     prompt_prefix()
     configure_prefix()
@@ -293,10 +290,7 @@ def main(
     install_redirector()
 
     state.write_state()
-
     logger.success("mo2-lint completed successfully.")
-
-    pass
 
 
 if __name__ == "__main__":

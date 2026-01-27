@@ -4,7 +4,7 @@ from loguru import logger
 import os
 import re
 from pathlib import Path
-from util.variables import input, game_info
+from util import variables as var
 
 steam_directories = [
     "${HOME}/.steam/root",
@@ -20,7 +20,7 @@ def get_data() -> tuple[int, str, str]:
         A tuple containing the Steam ID, subdirectory, and executable.
     """
 
-    chosen_game = game_info.get(input.game)
+    chosen_game = var.game_info.get(var.input_params.game)
     id = chosen_game.launcher_ids.steam
     subdir = chosen_game.subdirectory
     exe = chosen_game.executable

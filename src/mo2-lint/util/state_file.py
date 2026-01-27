@@ -4,9 +4,11 @@ from dataclasses import dataclass, field
 from loguru import logger
 from pathlib import Path
 from typing import Optional
-from util.variables import LauncherIDs
+from util import variables as var, state_file as state
 from uuid import UUID
 import json
+from shutil import move, rmtree
+from send2trash import send2trash
 
 
 @dataclass
@@ -29,13 +31,15 @@ class NexusAPIData:
     api_key: str = None
 
     @classmethod
-    def from_dict(cls, data: Optional[dict[str, any]]):
-        if not data:
-            return None
+    def from_dict(
+        cls, data: dict[str, any] | "NexusAPIData"
+    ) -> Optional["NexusAPIData"]:
+        if isinstance(data, cls):
+            return data
         return cls(
-            uuid=UUID(data["uuid"]),
-            connection_token=data["connection_token"],
-            api_key=data["api_key"],
+            uuid=UUID(data.get("uuid")),
+            connection_token=data.get("connection_token"),
+            api_key=data.get("api_key"),
         )
 
     @classmethod
@@ -78,49 +82,47 @@ class InstanceData:
         List of plugins enabled for this MO2 instance.
     """
 
-    from util.variables import LauncherIDs
-
     index: int = None
     nexus_slug: str = None
     instance_path: Path = None
     launcher: str = None
-    launcher_ids: LauncherIDs = None
+    launcher_ids: var.LauncherIDs = None
     game_path: Path = None
     game_executable: str = None
     script_extender: bool = False
     plugins: Optional[list[str]] = None
 
     @classmethod
-    def from_dict(cls, data: Optional[dict[str, any]]):
-        if not data:
-            return None
+    def from_dict(cls, data: dict[str, any] | "InstanceData") -> "InstanceData":
+        if isinstance(data, cls):
+            return data
         return cls(
-            index=data.get("index", None),
+            index=data.get("index"),
             nexus_slug=data.get("nexus_slug"),
             instance_path=Path(data.get("instance_path")),
             launcher=data.get("launcher"),
-            launcher_ids=LauncherIDs.from_dict(data.get("launcher_ids")),
+            launcher_ids=var.LauncherIDs.from_dict(data.get("launcher_ids")),
             game_path=Path(data.get("game_path")),
             game_executable=data.get("game_executable"),
-            plugins=data.get("plugins", []),
+            plugins=data.get("plugins"),
         )
 
     @classmethod
     def to_dict(cls, data: "InstanceData") -> dict[str, any]:
+        if isinstance(data.launcher_ids, dict):
+            raise TypeError("launcher_ids must be of type LauncherIDs, not dict.")
         return {
             "index": data.index,
             "nexus_slug": data.nexus_slug,
             "instance_path": str(data.instance_path),
             "launcher": data.launcher,
-            "launcher_ids": LauncherIDs.to_dict(data.launcher_ids),
+            "launcher_ids": var.LauncherIDs.to_dict(data.launcher_ids),
             "game_path": str(data.game_path),
             "game_executable": data.game_executable,
             "plugins": data.plugins,
         }
 
     def __post_init__(self):
-        from util.variables import plugin_info
-
         if not self.nexus_slug:
             logger.warning("InstanceData requires a valid nexus_slug.")
         if not self.instance_path:
@@ -137,7 +139,7 @@ class InstanceData:
             logger.warning("Game executable should be provided for InstanceData.")
         if self.plugins is None:
             self.plugins = []
-        elif any(plugin not in plugin_info for plugin in self.plugins):
+        elif any(plugin not in var.plugin_info for plugin in self.plugins):
             logger.warning("One or more plugins are not recognized in plugin_info.")
 
 
@@ -151,11 +153,13 @@ class StateFile:
     instances: list[InstanceData] = field(default_factory=list)
 
     @classmethod
-    def from_dict(cls, data: Optional[dict[str, any]]):
-        if not data:
-            return None
+    def from_dict(cls, data: dict[str, any] | "StateFile") -> "StateFile":
+        if isinstance(data, cls):
+            return data
         return cls(
-            nexus_api=NexusAPIData.from_dict(data.get("nexus_api")),
+            nexus_api=NexusAPIData.from_dict(data.get("nexus_api"))
+            if data.get("nexus_api")
+            else None,
             instances=[
                 InstanceData.from_dict(inst_data)
                 for inst_data in data.get("instances", [])
@@ -163,10 +167,12 @@ class StateFile:
         )
 
     @classmethod
-    def to_dict(cls, state_file: "StateFile") -> dict[str, any]:
+    def to_dict(cls, state: "StateFile") -> dict[str, any]:
         return {
-            "nexus_api": NexusAPIData.to_dict(state_file.nexus_api),
-            "instances": [InstanceData.to_dict(inst) for inst in state_file.instances],
+            "nexus_api": NexusAPIData.to_dict(state.nexus_api)
+            if state.nexus_api
+            else None,
+            "instances": [InstanceData.to_dict(inst) for inst in state.instances],
         }
 
 
@@ -181,10 +187,14 @@ def load_state_file():
     """
     global state_file
     if filepath.exists():
-        with filepath.open("r", encoding="utf-8") as f:
-            data = json.load(f)
-            logger.trace(f"Loaded state file: {data}")
-            state_file = StateFile.from_dict(data)
+        try:
+            with filepath.open("r", encoding="utf-8") as f:
+                data = json.load(f)
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse state file JSON: {e}")
+            logger.error("State file may be corrupted. Please validate or delete it.")
+        logger.trace(f"Loaded state file: {data}")
+        state_file = StateFile.from_dict(data)
     else:
         state_file = StateFile(None, [])
 
@@ -232,23 +242,15 @@ def check_instance(
 
 
 available_indexes: list[InstanceData] = []
-current_instance: InstanceData = InstanceData(
-    index=None,
-    nexus_slug=None,
-    instance_path=None,
-    launcher=None,
-    launcher_ids=None,
-    game_path=None,
-    game_executable=None,
-    plugins=[],
-)
+current_instance: InstanceData = None
 
 
 def choose_instance():
     """
     Prompts the user to choose between using an existing instance or creating a new one.
     """
-    global current_instance
+    global current_instance, available_indexes, existing_indexes
+    available_indexes = []
     if existing_indexes:
         quantifier = "the" if len(existing_indexes) == 1 else "an"
         choice = (
@@ -259,18 +261,17 @@ def choose_instance():
             .lower()
         )
         if choice == "e":
-            global available_indexes
-            available_indexes = []
             if len(existing_indexes) == 1:
                 current_instance = existing_indexes[0]
             elif len(existing_indexes) > 1:
-                for i, inst in enumerate(existing_indexes):
-                    available_indexes.append(inst.index)
+                for i, inst in enumerate(existing_indexes, start=1):
+                    print(
+                        f"{i}: index {inst.index} - {inst.nexus_slug} @ {inst.instance_path}"
+                    )
                 selected = int(
                     input("Select the number of the instance you want to use: ")
                 )
-                selected_index = available_indexes[selected - 1]
-                current_instance = selected_index
+                current_instance = existing_indexes[selected - 1]
         elif choice != "n":
             raise ValueError("Invalid choice made when selecting instance.")
         return
@@ -286,7 +287,7 @@ def set_index(index: Optional[int] = None):
     index : int, optional
         Specific index to set for the current instance. If None, assigns the next available index.
     """
-    global state_file
+    global state_file, current_instance
     max = 0
     if not index:
         for inst in state_file.instances:
@@ -296,20 +297,85 @@ def set_index(index: Optional[int] = None):
     else:
         if index not in [inst.index for inst in state_file.instances]:
             set = index
+        else:
+            raise ValueError(f"Index {index} is already in use.")
     current_instance.index = set
 
 
-def remove_instance(index: int):
+def remove_instance(instance: InstanceData, types: list[str] = ["symlink", "state"]):
     """
-    Removes an instance from the state_file by its index.
+    Removes an instance by its index.
+
+    Parameters
+    ----------
+    instance : InstanceData
+        The instance to be removed.
+    types : list[str], optional
+        Types of removal to perform. Options are "symlink", "install", and "state".\n
+        "symlink" removes the symlink to the instance.\n
+        "install" removes the installation of the instance.\n
+        "state" removes the state file entry for the instance.\n
     """
-    global state_file
-    state_file.instances = [
-        inst for inst in state_file.instances if inst.index != index
-    ]
-    logger.debug(
-        f"Removed instance with index {index}. Remaining instances: {len(state_file.instances)}"
-    )
+
+    if "symlink" in types:
+        symlink_path = Path("~/.config/mo2-lint/instances").expanduser() / str(
+            instance.index
+        )
+        if symlink_path.exists() or symlink_path.is_symlink():
+            symlink_path.unlink()
+            logger.debug(
+                f"Removed symlink at {symlink_path} for instance {instance.index}"
+            )
+        else:
+            if symlink_path.exists():
+                logger.warning(
+                    f"Path {symlink_path} exists but is not a symlink. Skipping removal."
+                )
+            else:
+                logger.debug(
+                    f"No symlink found at {symlink_path} for instance {instance.index}. Skipping removal."
+                )
+
+    if "install" in types:
+        instance_path = instance.instance_path
+        if instance_path.exists():
+            permanent = (
+                input("Move instance to trash [t] or delete permanently [d]? :")
+                .strip()
+                .lower()
+                == "d"
+            )
+            if permanent:
+                rmtree(instance_path)
+            else:
+                send2trash(instance_path)
+
+        # Restore game executable if it was backed up
+        game_exec = instance.game_path / instance.game_executable
+        if game_exec.exists():
+            rmtree(game_exec.parent / "modorganizer2")
+            backup_exec = game_exec.with_suffix(".exe.bak")
+            if backup_exec.exists():
+                move(backup_exec, game_exec)
+                logger.debug(
+                    f"Restored original game executable from backup for {game_exec}."
+                )
+            else:
+                logger.warning(f"No backup found for {game_exec}.")
+                logger.warning(
+                    "It may already have been restored, or you may need to manually restore the original executable ('Verify' in your game launcher)."
+                )
+
+        logger.debug(
+            f"Removed installation at {instance_path} for instance {instance.index}"
+        )
+
+    if "state" in types:
+        global state_file
+        state_file.instances = [
+            inst for inst in state_file.instances if inst.index != instance.index
+        ]
+        logger.debug(f"Removed instance {instance.index} from state file.")
 
 
 def write_state(add_current: bool = True):
@@ -317,11 +383,11 @@ def write_state(add_current: bool = True):
     if {} in state_file.instances:
         state_file.instances.remove({})
     if add_current and current_instance not in state_file.instances:
-        state_file.instances.append(current_instance)
+        state_file.instances.append(state.InstanceData.from_dict(current_instance))
     elif add_current and current_instance in state_file.instances:
         for i, inst in enumerate(state_file.instances):
             if inst.index == current_instance.index:
-                state_file.instances[i] = current_instance
+                state_file.instances[i] = state.InstanceData.from_dict(current_instance)
 
     with filepath.open("w", encoding="utf-8") as f:
         json.dump(StateFile.to_dict(state_file), f, indent=2)
@@ -346,6 +412,7 @@ def match_instances(game: Optional[str], directory: Optional[Path]) -> dict:
     """
 
     global state_file
+    matched: list[InstanceData] = []
 
     process = "Matching" if (game or directory) else "Existing"
     print(f"{process} Mod Organizer 2 Instances:")
@@ -353,17 +420,22 @@ def match_instances(game: Optional[str], directory: Optional[Path]) -> dict:
         print("No instances found.")
         return
 
-    matched = []
     for instance in state_file.instances:
         if game and instance.nexus_slug != game:
+            logger.trace(f"Nexus slug {instance.nexus_slug} does not match {game}.")
             continue
         if directory and not str(instance.instance_path).startswith(str(directory)):
+            logger.trace(
+                f"Instance path {instance.instance_path} does not start with {directory}."
+            )
             continue
 
         if (game == instance.nexus_slug) or (
             str(instance.instance_path).startswith(str(directory))
         ):
+            logger.debug(f"Matched instance at index {instance.index}: {instance}")
             matched.append(instance)
+            continue
 
     return matched
 
@@ -373,30 +445,29 @@ def symlink_instance():
     Creates a symbolic link for the current instance's Mod Organizer 2 directory.
     """
     source = current_instance.instance_path
-    target = Path("~/.config/mo2-lint/instances").expanduser()
-    link = target / current_instance.index
-    if not link.exists():
-        link.mkdir(parents=True, exist_ok=True)
+    target = Path("~/.config/mo2-lint/instances").expanduser() / str(
+        current_instance.index
+    )
 
     if not source.exists():
         logger.error(f"Source path {source} does not exist. Cannot create symlink.")
         return
 
-    if link.exists() and link.is_symlink():
-        symlink_correct = link.resolve() == source.resolve()
+    if target.exists() and target.is_symlink():
+        symlink_correct = target.resolve() == source.resolve()
         if symlink_correct:
-            logger.info(f"Symlink {link} already exists. Skipping creation.")
+            logger.info(f"Symlink {target} already exists. Skipping creation.")
             return
         elif not symlink_correct:
             logger.warning(
-                f"Symlink {link} points to a different location. Updating link."
+                f"Symlink {target} points to a different location. Updating link."
             )
-            link.unlink()
-    elif link.exists() and not link.is_symlink():
-        logger.warning(f"Path {link} exists and is not a symlink. Skipping creation.")
+            target.unlink()
+    elif target.exists() and not target.is_symlink():
+        logger.warning(f"Path {target} exists and is not a symlink. Skipping creation.")
         logger.warning(
             "Please remove or relocate the existing path to create the symlink."
         )
         return
 
-    link.symlink_to(source, target_is_directory=True)
+    target.symlink_to(source, target_is_directory=True)

@@ -11,7 +11,6 @@
   },
   "winetricks": {
     "download_url": "https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks",
-    "version": "latest",
-    "checksum": "ae6f98e9fe58410f7103e7a3142d988ee114a76d842d16029c0884be4e0523e4"
+    "version": "latest"
   }
 }

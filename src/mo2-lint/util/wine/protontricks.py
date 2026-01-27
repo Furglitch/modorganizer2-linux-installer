@@ -6,7 +6,7 @@ from pathlib import Path
 import sys
 from loguru import logger
 from util.logger import remove_loggers, add_loggers
-from util.variables import input
+from util import variables as var
 from protontricks.cli.main import main as pt
 from typing import List
 import re
@@ -176,14 +176,15 @@ def redirect_output_to_logger():
     original_stdout_file = os.fdopen(original_stdout_fd, "w", buffering=1)
 
     remove_loggers()
-    add_loggers(input.log_level, "protontricks", console_sink=original_stdout_file)
+    add_loggers(
+        var.input_params.log_level, "protontricks", console_sink=original_stdout_file
+    )
 
     def reader_thread():
         with os.fdopen(read_fd, "r", buffering=1) as reader:
             for line in reader:
                 if line := line.rstrip("\n"):
                     output_lines.append(line)
-                    print(line)
                     logger.trace(line)
                     log_translation(line)
 
@@ -203,4 +204,4 @@ def redirect_output_to_logger():
 
         remove_loggers()
         original_stdout_file.close()
-        add_loggers(input.log_level, "MO2-LINT")
+        add_loggers(var.input_params.log_level, "MO2-LINT")

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import json
-from util.state_file import state_file as state
+from util import state_file as state
 from uuid import UUID, uuid4 as new_uuid
 import websockets.sync.client as websockets
 
@@ -17,10 +17,10 @@ def id() -> UUID:
         The Nexus API UUID.
     """
 
-    id = state.nexus_api.uuid
+    id = state.state_file.nexus_api.uuid if state.state_file.nexus_api else None
     if not id:
         id = new_uuid()
-    state.nexus_api.uuid = id
+    state.state_file.nexus_api.uuid = id
     return id
 
 
@@ -35,10 +35,10 @@ def connection_token() -> str:
         The Nexus connection token.
     """
 
-    token = state.nexus_api.connection_token
+    token = state.state_file.nexus_api.connection_token
     if not token:
         token = request_connection_token()
-    state.nexus_api.connection_token = token
+    state.state_file.nexus_api.connection_token = token
     return token
 
 
@@ -52,7 +52,7 @@ def request_connection_token() -> str:
         The requested Nexus connection token.
     """
 
-    uuid = state.nexus_api.uuid if state.nexus_api.uuid else id()
+    uuid = state.state_file.nexus_api.uuid if state.state_file.nexus_api.uuid else id()
     with websockets.connect("wss://sso.nexusmods.com") as socket:
         socket.send(
             {
@@ -80,10 +80,10 @@ def api_key() -> str:
         The Nexus API key.
     """
 
-    key = state.nexus_api.api_key
+    key = state.state_file.nexus_api.api_key
     if not key:
         key = request_api_key()
-    state.nexus_api.api_key = key
+    state.state_file.nexus_api.api_key = key
     return key
 
 
@@ -97,10 +97,10 @@ def request_api_key() -> str:
         The requested Nexus API key.
     """
 
-    uuid = state.nexus_api.uuid if state.nexus_api.uuid else id()
+    uuid = state.state_file.nexus_api.uuid if state.state_file.nexus_api.uuid else id()
     token = (
-        state.nexus_api.connection_token
-        if state.nexus_api.connection_token
+        state.state_file.nexus_api.connection_token
+        if state.state_file.nexus_api.connection_token
         else request_connection_token()
     )
     with websockets.connect("wss://sso.nexusmods.com") as socket:

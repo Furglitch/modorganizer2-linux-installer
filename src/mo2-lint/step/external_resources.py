@@ -8,45 +8,45 @@ from typing import Optional
 from urllib.request import urlretrieve as request
 from util.download import download as dl, download_nexus as nexus_dl
 from util.state_file import symlink_instance
-from util.variables import game_info, resource_info, input, launcher
+from util import variables as var
 import json
 
 cache_dir: Path = Path("~/.cache/mo2-lint").expanduser()
 download_dir = cache_dir / "downloads"
+extract_dir = download_dir / "extracted"
 
 
 def download_mod_organizer():
-    url = resource_info.get("mod_organizer", {}).get("download_url")
-    checksum = resource_info.get("mod_organizer", {}).get("checksum")
+    url = var.resource_info.mod_organizer.download_url
+    checksum = var.resource_info.mod_organizer.checksum
     downloaded = dl(url, download_dir, checksum=checksum)
-    extract(downloaded, cache_dir / "mod_organizer")
+    extract(downloaded, extract_dir / "mod_organizer")
     if downloaded.exists():
-        destination = Path(input.directory).expanduser()
+        destination = Path(var.input_params.directory).expanduser()
         destination.mkdir(parents=True, exist_ok=True)
-        copytree(cache_dir / "mod_organizer", destination, dirs_exist_ok=True)
+        copytree(extract_dir / "mod_organizer", destination, dirs_exist_ok=True)
         logger.debug(f"Mod Organizer 2 installed to {destination}")
 
 
 def download_winetricks():
-    url = resource_info.get("winetricks", {}).get("download_url")
-    checksum = resource_info.get("winetricks", {}).get("checksum")
+    url = var.resource_info.winetricks.download_url
+    checksum = var.resource_info.winetricks.checksum
     dl(url, download_dir, "winetricks", checksum=checksum)
 
 
 def download_java():
-    url = resource_info.get("java", {}).get("download_url")
-    checksum = resource_info.get("java", {}).get("checksum")
+    url = var.resource_info.java.download_url
+    checksum = var.resource_info.java.checksum
     downloaded = dl(url, download_dir, checksum=checksum)
-    extract(downloaded, cache_dir / "java")
-    if downloaded.exists():
-        destination = cache_dir / "java_installation"
-        destination.mkdir(parents=True, exist_ok=True)
-        copytree(cache_dir / "java", destination, dirs_exist_ok=True)
-        logger.debug(f"Java installed to {destination}")
+    extract(downloaded, extract_dir / "java")
 
 
 def download_scriptextender():
-    entries = game_info.get(input.game).get("script_extender", {}).get(launcher)
+    entries = (
+        var.game_info.get(var.input_params.game)
+        .get("script_extender", {})
+        .get(var.launcher)
+    )
 
     index = 0
     if len(entries) > 1:
@@ -92,25 +92,23 @@ def download_scriptextender():
         downloaded = dl(src, download_dir, checksum=checksum)
     elif src.startswith("nexus"):
         downloaded = nexus_dl(
-            game_info.get(input.game).get("nexus_id"),
+            var.game_info.get(var.input_params.game).get("nexus_id"),
             entry.get("mod_id"),
             entry.get("file_id"),
             download_dir,
             checksum=checksum,
         )
-    extract(downloaded, cache_dir / "scriptextender" / downloaded.name)
+    extract(downloaded, extract_dir / "scriptextender" / downloaded.name)
     install(
-        cache_dir / "scriptextender" / downloaded.name,
-        Path(input.directory) / "script_extender",
+        extract_dir / "scriptextender" / downloaded.name,
+        Path(var.input_params.directory),
         files,
     )
 
 
 def download_plugin(plugin: str):
-    from util.variables import plugin_info
-
     manifest = {}
-    for entry in plugin_info:
+    for entry in var.plugin_info:
         if entry.get("Identifier") == plugin:
             manifest[plugin] = entry.get("Manifest")
             break
@@ -130,7 +128,7 @@ def download_plugin(plugin: str):
         destination = cache_dir / "plugins" / plugin
         extract(downloaded, destination / downloaded.name)
 
-        install(destination, Path(input.directory / "plugins"), file_path)
+        install(destination, Path(var.input_params.directory) / "plugins", file_path)
 
 
 def extract(target: Path, destination: Path):
@@ -145,15 +143,16 @@ def extract(target: Path, destination: Path):
 def download():
     cache_dir.mkdir(parents=True, exist_ok=True)
     if (
-        input.script_extender is True
-        and game_info.get(input.game).script_extenders.get(launcher) is not None
+        var.input_params.script_extender is True
+        and var.game_info.get(var.input_params.game).script_extenders.get(var.launcher)
+        is not None
     ):
         download_scriptextender()
     download_mod_organizer()
     download_winetricks()
-    # ! Java Download
-    if input.plugins:
-        for plugin in input.plugins:
+    download_java()  # ! Specify only for required games
+    if var.input_params.plugins:
+        for plugin in var.input_params.plugins:
             download_plugin(plugin)
     symlink_instance()
 

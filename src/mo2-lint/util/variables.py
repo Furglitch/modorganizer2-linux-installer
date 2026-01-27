@@ -52,7 +52,7 @@ class Input:
             raise ValueError("Input directory must be provided.")
 
 
-input: Input = None
+input_params: Input = None
 
 
 def set_parameters(args: Input | dict):
@@ -65,11 +65,11 @@ def set_parameters(args: Input | dict):
         Command-line arguments. See Input class for keys.
     """
     logger.debug(f"Setting input parameters: {args}")
-    global input
+    global input_params
     if isinstance(args, dict):
-        input = Input(**args)
+        input_params = Input(**args)
     elif isinstance(args, Input):
-        input = args
+        input_params = args
 
 
 # --- #
@@ -112,9 +112,9 @@ class ScriptExtender:
     file_whitelist: Optional[Tuple[str, ...]] = field(default_factory=tuple)
 
     @classmethod
-    def from_dict(cls, data: Optional[dict[str, any]]):
-        if not data:
-            return None
+    def from_dict(cls, data: dict[str, any] | "ScriptExtender") -> "ScriptExtender":
+        if isinstance(data, cls):
+            return data
         return cls(
             version=data.get("version"),
             runtime=data.get("runtime") or None,
@@ -159,10 +159,7 @@ class ScriptExtenders:
     steam: Optional[Tuple[ScriptExtender, ...]] = None
 
     @classmethod
-    def from_dict(cls, data: Optional[dict[str, any]]):
-        if not data:
-            return None
-
+    def from_dict(cls, data: dict[str, any] | "ScriptExtenders") -> "ScriptExtenders":
         def make_tuple(key: str):
             if key is None:
                 return tuple()
@@ -171,6 +168,8 @@ class ScriptExtenders:
             elif isinstance(key, list):
                 return tuple(ScriptExtender.from_dict(item) for item in key)
 
+        if isinstance(data, cls):
+            return data
         return cls(
             epic=make_tuple(data.get("epic")) if data.get("epic") else tuple(),
             gog=make_tuple(data.get("gog")) if data.get("gog") else tuple(),
@@ -207,10 +206,8 @@ class LauncherIDs:
     epic: Optional[str] = None
 
     @classmethod
-    def from_dict(cls, data: Optional[any]):
-        if not data:
-            return None
-        if isinstance(data, LauncherIDs):
+    def from_dict(cls, data: dict | "LauncherIDs") -> "LauncherIDs":
+        if isinstance(data, cls):
             return data
         return cls(
             steam=data.get("steam") or None,
@@ -268,9 +265,9 @@ class GameInfo:
     script_extenders: Optional[ScriptExtenders] = None
 
     @classmethod
-    def from_dict(cls, data: dict[str, any]):
-        if not data:
-            return None
+    def from_dict(cls, data: dict[str, any] | "GameInfo") -> "GameInfo":
+        if isinstance(data, cls):
+            return data
         return cls(
             display_name=data.get("display_name"),
             nexus_slug=data.get("nexus_slug"),
@@ -347,9 +344,9 @@ class Resource:
     version: Optional[str] = None
 
     @classmethod
-    def from_dict(cls, data: dict[str, any]):
-        if not data:
-            return None
+    def from_dict(cls, data: dict[str, any] | "Resource") -> "Resource":
+        if isinstance(data, cls):
+            return data
         return cls(
             download_url=data.get("download_url"),
             version=data.get("version") if "version" in data else None,
@@ -358,9 +355,9 @@ class Resource:
 
     def __post_init__(self):
         if not self.download_url:
-            raise ValueError("Resource download_url must be provided.")
+            logger.warning("Resource download_url is missing.")
         if not self.checksum:
-            raise ValueError("Resource checksum must be provided.")
+            logger.warning("Resource checksum is missing.")
 
 
 @dataclass
@@ -388,9 +385,9 @@ class ResourceInfo:
     java: Optional[Resource] = None
 
     @classmethod
-    def from_dict(cls, data: dict[str, any]):
-        if not data:
-            return None
+    def from_dict(cls, data: dict[str, any] | "ResourceInfo") -> "ResourceInfo":
+        if isinstance(data, cls):
+            return data
         return cls(
             mod_organizer=Resource.from_dict(data.get("mod_organizer")),
             winetricks=Resource.from_dict(data.get("winetricks")),
@@ -404,7 +401,7 @@ class ResourceInfo:
             raise ValueError("Winetricks resource info must be provided.")
 
 
-resource_info: dict[str, ResourceInfo] = {}
+resource_info: ResourceInfo = None
 
 
 def load_resource_info(path: Optional[Path] = None):
@@ -423,8 +420,10 @@ def load_resource_info(path: Optional[Path] = None):
     logger.debug(f"Loading resource info from path: {path}")
     with open(path, "r", encoding="utf-8") as file:
         json = from_json(file.read())
-    for key, value in json.items():
-        resource_info[key] = ResourceInfo.from_dict(value)
+    resource_info = ResourceInfo.from_dict(json)
+    # for key, value in json.items():
+    #     print(key, value)
+    #     resource_info = ResourceInfo.from_dict(value)
 
 
 # --- #
@@ -502,11 +501,6 @@ Path to archived Wine/Proton prefix directory.
 archived_prefixes: list[Path] = []
 """
 List of previously archived Wine/Proton prefix directories.
-"""
-
-heroic_runner: str = None
-"""
-Targeted Heroic Games Launcher runner [epic, gog].
 """
 
 heroic_config: tuple[str, str | int, Path, Path, Path] = ()

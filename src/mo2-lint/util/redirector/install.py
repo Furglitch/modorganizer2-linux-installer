@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
 from loguru import logger
-from os import stat
+import stat
 from pathlib import Path
 from shutil import copy2
-import util.variables as var
+from util import variables as var
 from util.internal_file import internal_file
 from util.checksum import compare_checksum
 
@@ -22,7 +22,7 @@ def create_path_entry():
     )
 
     redirect_file = game_install_path / "modorganizer2" / "instance_path.txt"
-    instance_directory = var.input.directory / "ModOrganizer.exe"
+    instance_directory = var.input_params.directory / "ModOrganizer.exe"
     redirect_file.parent.mkdir(parents=True, exist_ok=True)
     with open(redirect_file, "w", encoding="utf-8") as file:
         file.write(str(instance_directory))
@@ -64,10 +64,10 @@ def install():
         else var.game_install_path.parent
     )
 
-    if not game_install_path / "modorganizer2" / "instance_path.txt".exists():
+    if not (game_install_path / "modorganizer2" / "instance_path.txt").exists():
         create_path_entry()
 
-    exec_path = game_install_path / var.game_info.get("executable")
+    exec_path = game_install_path / var.game_info[var.input_params.game].executable
     exec_backup = Path(str(exec_path) + ".bak")
 
     if validate(exec_path):

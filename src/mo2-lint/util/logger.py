@@ -13,6 +13,7 @@ def remove_loggers():
     handler_ids = list(logger._core.handlers.keys())
     for hid in handler_ids:
         logger.remove(hid)
+    logger.trace("Removed all loggers.")
 
 
 def persist_timestamp() -> str:
@@ -48,3 +49,4 @@ def add_loggers(log_level: str = "INFO", process: str = None, console_sink=None)
         retention="7 days",
         compression="zip",
     )
+    logger.debug("Added loggers." + (f"Process: {process}" if process else ""))

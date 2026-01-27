@@ -2,9 +2,8 @@
 
 from loguru import logger
 from pathlib import Path
-
 from pydantic_core import from_json
-from util.variables import game_info, input
+from util import variables as var
 
 config_directories = [
     Path("~/.config/heroic").expanduser(),
@@ -26,6 +25,7 @@ def get_data() -> tuple[str, str, str, str, str]:
     tuple[str, str, str, str, str]
         A tuple containing the launcher type, game ID, install path, Wine path, and Wine prefix.
     """
+
     launcher: str = None
     display: str = None
     game_id: str | int = None
@@ -111,17 +111,19 @@ def get_libraries(config_directory: Path) -> tuple[Path | None, Path | None]:
             return False
         return True
 
-    if not game_info.get(input.game).launcher_ids.gog:
+    if not var.game_info.get(var.input_params.game).launcher_ids.gog:
         gog_available = False
         logger.warning("GOG ID is not set for game.")
     else:
-        gog_data["game_id"] = game_info.get(input.game).launcher_ids.gog
+        gog_data["game_id"] = var.game_info.get(var.input_params.game).launcher_ids.gog
         gog_data["installed_json"] = config_directory / "gog_store" / "installed.json"
-    if not game_info.get(input.game).launcher_ids.epic:
+    if not var.game_info.get(var.input_params.game).launcher_ids.epic:
         epic_available = False
         logger.warning("Epic ID is not set for game.")
     else:
-        epic_data["game_id"] = game_info.get(input.game).launcher_ids.epic
+        epic_data["game_id"] = var.game_info.get(
+            var.input_params.game
+        ).launcher_ids.epic
         epic_data["installed_json"] = (
             config_directory / "legendaryConfig" / "legendary" / "installed.json"
         )
@@ -139,17 +141,17 @@ def get_libraries(config_directory: Path) -> tuple[Path | None, Path | None]:
 
     while gog_available:
         with open(gog_data["installed_json"], "r", encoding="utf-8") as file:
-            gog_data["json"] = from_json(file.read()).get("installed", [])
-            for item in gog_data["json"]:
+            json = from_json(file.read()).get("installed", [])
+            for item in json:
                 if item.get("appName") == str(gog_data["game_id"]):
                     gog_data["json"] = item
                     break
-        if gog_data["json"]:
+        if gog_data.get("json"):
             gog_data["install_path"] = Path(gog_data["json"].get("install_path"))
         else:
             logger.warning("Game not found in installed GOG games.")
             gog_available = False
-        if not gog_data["install_path"]:
+        if not gog_data.get("install_path"):
             logger.warning(
                 f"Unable to extract install_path from {gog_data['installed_json']}"
             )
@@ -157,13 +159,13 @@ def get_libraries(config_directory: Path) -> tuple[Path | None, Path | None]:
 
     while epic_available:
         with open(epic_data["installed_json"], "r", encoding="utf-8") as file:
-            epic_data["json"] = from_json(file.read()).get(epic_data["game_id"], {})
-        if epic_data["json"]:
-            epic_data["install_path"] = Path(epic_data["json"].get("install_path"))
+            json = from_json(file.read()).get(epic_data["game_id"], {})
+        if json:
+            epic_data["install_path"] = Path(json.get("install_path"))
         else:
             logger.warning("Game not found in installed Epic games.")
             epic_available = False
-        if not epic_data["install_path"]:
+        if not epic_data.get("install_path"):
             logger.warning(
                 f"Unable to extract install_path from {epic_data['installed_json']}"
             )
@@ -171,7 +173,7 @@ def get_libraries(config_directory: Path) -> tuple[Path | None, Path | None]:
 
     if not valid():
         return None
-    return epic_data["install_path"], gog_data["install_path"]
+    return epic_data.get("install_path"), gog_data.get("install_path")
 
 
 def get_wine_variables(
