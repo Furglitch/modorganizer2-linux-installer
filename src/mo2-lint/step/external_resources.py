@@ -9,6 +9,7 @@ from urllib.request import urlretrieve as request
 from util.download import download as dl, download_nexus as nexus_dl
 from util.state_file import symlink_instance
 from util import variables as var
+from util.checksum import compare_checksum
 import json
 
 cache_dir: Path = Path("~/.cache/mo2-lint").expanduser()
@@ -24,8 +25,22 @@ def download_mod_organizer():
     extract(downloaded, extract_dir / "mod_organizer")
     if downloaded.exists():
         destination = Path(var.input_params.directory).expanduser()
-        destination.mkdir(parents=True, exist_ok=True)
-        copytree(extract_dir / "mod_organizer", destination, dirs_exist_ok=True)
+        mo2_exec = destination / "ModOrganizer.exe"
+        if (
+            destination.exists() and mo2_exec.exists()
+        ):  # if ModOrganizer.exe exists in destination
+            # check if it's the same file
+            if not compare_checksum(mo2_exec, checksum):
+                print(
+                    f"Mod Organizer 2 already exists at {mo2_exec}, but checksums do not match. There may have been an update."
+                )
+                response = input("Continue and overwrite? [Y/n]: ")
+                if not response.lower() == ("y" or "yes" or ""):
+                    logger.info(
+                        "User opted to not overwrite existing Mod Organizer 2 installation."
+                    )
+                    return
+        install(extract_dir / "mod_organizer", destination, None)
         logger.debug(f"Mod Organizer 2 installed to {destination}")
 
 
@@ -198,22 +213,27 @@ def install(source: Path, destination: Path, file_list: Optional[list[str]]):
     if not source.exists():
         logger.error(f"Source path {source} does not exist; cannot install.")
         return
-    if file_list and file_list != (["*"] or "*" or [] or None):
-        logger.debug(
-            f"Installing specified files from {source} to {destination}: {file_list}"
-        )
-        for file in file_list:
-            file = source / file
-            dest = destination / file.name
-            if dest.exists():
-                dest.unlink(missing_ok=True)
-            if file.is_dir():
-                copytree(file, dest, dirs_exist_ok=True)
-            else:
-                copy(file, dest)
-    else:
+    if source.is_file():
+        if file_list and file_list != (["*"] or "*" or [] or None):
+            logger.debug(
+                f"Installing specified files from {source} to {destination}: {file_list}"
+            )
+            for file in file_list:
+                file = source / file
+                dest = destination / file.name
+                if dest.exists():
+                    dest.unlink(missing_ok=True)
+                if file.is_dir():
+                    copytree(file, dest, dirs_exist_ok=True)
+                else:
+                    copy(file, dest)
+        else:
+            logger.debug(f"Installing all files from {source} to {destination}.")
+            if source.is_dir():
+                copytree(source, destination, dirs_exist_ok=True)
+            elif source.is_file():
+                copy(source, destination)
+    elif source.is_dir():
+        destination.mkdir(parents=True, exist_ok=True)
         logger.debug(f"Installing all files from {source} to {destination}.")
-        if source.is_dir():
-            copytree(source, destination, dirs_exist_ok=True)
-        elif source.is_file():
-            copy(source, destination)
+        copytree(source, destination, dirs_exist_ok=True)
