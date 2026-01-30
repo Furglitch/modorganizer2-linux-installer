@@ -3,11 +3,11 @@
 from loguru import logger
 from pathlib import Path
 from shutil import copy2
-import stat
-import shutil
-import subprocess
-from util.internal_file import internal_file as internal
 from util.checksum import compare_checksum
+from util.internal_file import internal_file as internal
+import shutil
+import stat
+import subprocess
 
 
 def install():

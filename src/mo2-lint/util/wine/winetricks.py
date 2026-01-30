@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
-from pathlib import Path
-import subprocess
-import shutil
-import os
-from typing import List, Optional
 from loguru import logger
+from pathlib import Path
+from typing import List, Optional
 from util.logger import remove_loggers, add_loggers
+import os
 import re
+import shutil
+import subprocess
 
 found_exec = shutil.which("winetricks") or "~/.cache/mo2-lint/downloads/winetricks"
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-from util.state_file import match_instances, remove_instance
 from loguru import logger
+from util.state_file import match_instances, remove_instance
 
 
 def uninstall(game=None, directory=None):

@@ -6,10 +6,10 @@ from patoolib import extract_archive as unzip
 from shutil import copytree, copy2 as copy
 from typing import Optional
 from urllib.request import urlretrieve as request
-from util.download import download as dl, download_nexus as nexus_dl
-from util.state_file import symlink_instance
 from util import variables as var
 from util.checksum import compare_checksum
+from util.download import download as dl, download_nexus as nexus_dl
+from util.state_file import symlink_instance
 import json
 
 cache_dir: Path = Path("~/.cache/mo2-lint").expanduser()

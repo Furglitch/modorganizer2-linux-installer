@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-from util import variables as var, state_file as state
-from util.steam.find_library import get_libraries as get_steam_libraries
-from util.heroic.find_library import get_data as get_heroic_data, gog_data, epic_data
 from loguru import logger
 from pathlib import Path
+from util import variables as var, state_file as state
+from util.heroic.find_library import get_data as get_heroic_data, gog_data, epic_data
+from util.steam.find_library import get_libraries as get_steam_libraries
 
 
 def get_launcher() -> str | None:

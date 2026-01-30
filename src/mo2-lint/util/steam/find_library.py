@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
 from loguru import logger
-import os
-import re
 from pathlib import Path
 from util import variables as var
+import os
+import re
 
 steam_directories = [
     "${HOME}/.steam/root",

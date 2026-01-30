@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-import json
+from loguru import logger
 from util import state_file as state
 from uuid import UUID, uuid4 as new_uuid
+import json
 import websockets.sync.client as websockets
-from loguru import logger
 
 
 def id() -> UUID:

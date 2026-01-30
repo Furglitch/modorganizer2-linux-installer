@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-from pathlib import Path
 from loguru import logger
+from pathlib import Path
 import hashlib
 
 

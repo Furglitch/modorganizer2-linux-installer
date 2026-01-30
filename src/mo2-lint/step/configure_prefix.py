@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
+from datetime import datetime
 from loguru import logger
 from pathlib import Path
-from datetime import datetime
-from util import variables as var
-from util.wine import protontricks, winetricks
-from util.heroic.find_library import get_data as get_heroic_data
 from shutil import copytree, move
+from util import variables as var
+from util.heroic.find_library import get_data as get_heroic_data
+from util.wine import protontricks, winetricks
 
 prompt_archive = """It is highly recommended to clean your current game prefix before starting the installation process.
 

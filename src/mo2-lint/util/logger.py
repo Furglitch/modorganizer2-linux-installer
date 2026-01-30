@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
+from datetime import datetime
 from loguru import logger
 from pathlib import Path
-import sys
-from datetime import datetime
 from util import variables as var
+import sys
 
 timestamp: str = None
 time_format = "{time:YYYY-MM-DD_HH-mm-ss}"

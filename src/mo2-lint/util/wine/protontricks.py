@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 
 from contextlib import contextmanager
-import os
-from pathlib import Path
-import sys
 from loguru import logger
-from util.logger import remove_loggers, add_loggers
+from pathlib import Path
 from protontricks.cli.main import main as pt
 from typing import List
+from util.logger import remove_loggers, add_loggers
+import os
 import re
+import sys
 import threading
 
 

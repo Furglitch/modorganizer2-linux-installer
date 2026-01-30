@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 
-import click
+from loguru import logger
 from pathlib import Path
-import re
-from step.load_game_info import get_launcher, get_library
 from step.configure_prefix import prompt as prompt_prefix, configure as configure_prefix
 from step.external_resources import download
+from step.load_game_info import get_launcher, get_library
+from util import state_file as state, variables as var
+from util.logger import add_loggers, remove_loggers
 from util.nexus.install_handler import install as install_handler
 from util.redirector.install import install as install_redirector
-from util.uninstall import uninstall as _uninstall
-from util import state_file as state, variables as var
 from util.state_file import match_instances, set_index, InstanceData
-from util.logger import add_loggers, remove_loggers
-from loguru import logger
+from util.uninstall import uninstall as _uninstall
+import click
+import re
 
 """
 Log Levels:

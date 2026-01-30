@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 
-from typing import Optional
-
 from click import Path
-from .api import api_key
-from util import variables as var
-import requests
 from loguru import logger
+from typing import Optional
+from util import variables as var
+from util.nexus.api import api_key
+import requests
 
 
 def header() -> dict:

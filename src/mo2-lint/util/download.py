@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
+from loguru import logger
 from pathlib import Path
 from typing import Optional
 from urllib.request import urlretrieve as dl
 from util.checksum import compare_checksum
 from util.nexus.download_mod import nexus_download as nexus_dl
-from loguru import logger
 
 
 def download(

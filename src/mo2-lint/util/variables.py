@@ -8,9 +8,6 @@ from typing import Final
 from typing import Optional, Tuple
 
 
-# --- #
-
-
 @dataclass
 class Input:
     """
@@ -69,9 +66,6 @@ def set_parameters(args: Input | dict):
         input_params = Input(**args)
     elif isinstance(args, Input):
         input_params = args
-
-
-# --- #
 
 
 @dataclass
@@ -311,9 +305,6 @@ def load_game_info(path: Optional[Path] = None):
         game_info[key] = GameInfo.from_dict(value)
 
 
-# --- #
-
-
 @dataclass
 class Resource:
     """
@@ -419,9 +410,6 @@ def load_resource_info(path: Optional[Path] = None):
         json = from_json(file.read())
     logger.trace(f"Resource info JSON content: {json}")
     resource_info = ResourceInfo.from_dict(json)
-
-
-# --- #
 
 
 @dataclass

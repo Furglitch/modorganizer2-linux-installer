@@ -3,12 +3,12 @@
 from dataclasses import dataclass, field
 from loguru import logger
 from pathlib import Path
+from send2trash import send2trash
+from shutil import move, rmtree
 from typing import Optional
 from util import variables as var, state_file as state
 from uuid import UUID
 import json
-from shutil import move, rmtree
-from send2trash import send2trash
 
 
 @dataclass

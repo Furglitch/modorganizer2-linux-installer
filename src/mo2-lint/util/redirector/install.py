@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
 from loguru import logger
-import stat
 from pathlib import Path
 from shutil import copy2
 from util import variables as var
-from util.internal_file import internal_file
 from util.checksum import compare_checksum
+from util.internal_file import internal_file
+import stat
 
 redirector_build = internal_file("dist", "redirector.exe")
 
