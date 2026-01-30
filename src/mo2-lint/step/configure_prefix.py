@@ -64,7 +64,7 @@ def load_prefix():
             logger.trace(f"Loaded Steam prefix: {prefix}")
         case "gog" | "epic":
             logger.debug("Loading Heroic prefix...")
-            prefix = get_heroic_data()[4]
+            prefix = get_heroic_data()[3]
             logger.trace(f"Loaded Heroic prefix: {prefix}")
         case _:
             logger.error(f"Unknown launcher: {var.launcher}")
@@ -87,7 +87,7 @@ def archive_prefix(prefix: Path):
         archive_path = prefix.with_suffix(f".{current_time}").expanduser()
         move(prefix, archive_path)
         logger.debug(f"Archived prefix from {prefix} to {archive_path}.")
-        var.archive = archive_path
+        var.archived_prefix = archive_path
 
 
 def restore_archived_prefix(prefix: Path):
@@ -103,10 +103,10 @@ def restore_archived_prefix(prefix: Path):
     match var.launcher:
         case "steam":
             subpath = Path("pfx") / "drive_c" / "users"
-            src = var.archive / subpath
+            src = var.archived_prefix / subpath
         case "gog" | "epic" | _:
             subpath = Path("drive_c") / "users"
-            src = var.archive / subpath
+            src = var.archived_prefix / subpath
     dst = prefix / subpath
     logger.debug(f"Restoring personal data from {src} to {dst}...")
 
@@ -132,6 +132,7 @@ def prompt():
     for suffix in ["users", "drive_c", "pfx"]:
         if prefix.name == suffix:
             prefix = prefix.parent
+    var.prefix = prefix
     logger.debug(f"Determined game prefix for archiving: {prefix}")
     logger.debug("Prompting user to archive existing prefix...")
     print(prompt_archive)
@@ -146,7 +147,7 @@ def prompt():
         logger.debug("User agreed to archive the prefix.")
         archive_prefix(prefix)
     else:
-        var.archive = None
+        var.archived_prefix = None
         logger.debug("User refused to archive the prefix.")
 
     # Prompt user to create a clean prefix
@@ -167,9 +168,9 @@ def prompt():
         raise SystemExit(1)
     else:
         logger.debug("User confirmed clean prefix setup.")
-        if var.archive is not None:
+        if var.archived_prefix is not None:
             restore_archived_prefix(prefix)
-        print(prompt_archive_done.format(directory=var.archive))
+        print(prompt_archive_done.format(directory=var.archived_prefix))
 
 
 def configure():
@@ -184,7 +185,7 @@ def configure():
                 var.game_info.get(var.input_params.game).launcher_ids.steam, tricks
             )
         case "gog" | "epic":
-            wine, prefix = var.heroic_config[3], var.heroic_config[4]
-            if wine.name == "proton":
-                wine = wine.parent / "files" / "bin" / "wine"
-            winetricks.apply(wine, prefix, tricks)
+            prefix = var.heroic_config[3]
+            # if wine.name == "proton":
+            #     wine = wine.parent / "files" / "bin" / "wine"
+            winetricks.apply(prefix=prefix, tricks=tricks)

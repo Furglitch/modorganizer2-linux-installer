@@ -46,11 +46,8 @@ def download_java():
 
 def download_scriptextender():
     logger.debug("Initiating script extender download...")
-    entries = (
-        var.game_info.get(var.input_params.game)
-        .get("script_extender", {})
-        .get(var.launcher)
-    )
+    gi = var.game_info.get(var.input_params.game) or None
+    entries = getattr(gi.script_extenders, var.launcher) if gi is not None else []
 
     index = 0
     if len(entries) > 1:
@@ -59,11 +56,11 @@ def download_scriptextender():
         )
         print("Multiple script extender versions are available for this game:")
         for i, entry in enumerate(entries):
-            version = entry.get("version")
-            runtime = entry.get("runtime") or None
-            src = entry.get("download_url") or (
-                f"nexus(mod={entry.get('mod_id')}, file={entry.get('file_id')})"
-                if entry.get("mod_id") and entry.get("file_id")
+            version = getattr(entry, "version", None)
+            runtime = getattr(entry, "runtime", None)
+            src = getattr(entry, "download_url", None) or (
+                f"nexus(mod={getattr(entry, 'mod_id', None)}, file={getattr(entry, 'file_id', None)})"
+                if getattr(entry, "mod_id", None) and getattr(entry, "file_id", None)
                 else None
             )
             if runtime:
@@ -89,40 +86,40 @@ def download_scriptextender():
         return None
 
     entry = entries[index]
-    version = entry.get("version")
-    runtime = entry.get("runtime") or None
+    version = getattr(entry, "version", None)
+    runtime = getattr(entry, "runtime", None)
 
-    if entry.get("download_url"):
-        if entry.get("mod_id") or entry.get("file_id"):
+    if getattr(entry, "download_url", None):
+        if getattr(entry, "mod_id", None) or getattr(entry, "file_id", None):
             logger.warning(
                 f"Both direct download URL and Nexus mod/file IDs provided for script extender version {version}. Preferring direct URL."
             )
         else:
             logger.debug("Determined download source as direct URL.")
-        src = entry.get("download_url")
-    elif entry.get("mod_id") and entry.get("file_id"):
+        src = getattr(entry, "download_url", None)
+    elif getattr(entry, "mod_id", None) and getattr(entry, "file_id", None):
         logger.debug("Determined download source as Nexus Mods.")
-        src = f"nexus(mod={entry.get('mod_id')}, file={entry.get('file_id')})"
+        src = f"nexus(mod={getattr(entry, 'mod_id', None)}, file={getattr(entry, 'file_id', None)})"
     else:
         logger.error(
             f"No valid download source found for script extender version {version}."
         )
         return
 
-    checksum = entry.get("checksum") or None
-    files = entry.get("files") or []
+    checksum = getattr(entry, "checksum", None)
+    files = getattr(entry, "files", []) or []
 
     if src.startswith("http"):
         logger.debug(f"Downloading script extender version {version} from URL: {src}")
         downloaded = dl(src, download_dir, checksum=checksum)
     elif src.startswith("nexus"):
         logger.debug(
-            f"Downloading script extender version {version} from Nexus Mods: mod_id={entry.get('mod_id')}, file_id={entry.get('file_id')}"
+            f"Downloading script extender version {version} from Nexus Mods: mod_id={getattr(entry, 'mod_id', None)}, file_id={getattr(entry, 'file_id', None)}"
         )
         downloaded = nexus_dl(
             var.game_info.get(var.input_params.game).get("nexus_id"),
-            entry.get("mod_id"),
-            entry.get("file_id"),
+            getattr(entry, "mod_id", None),
+            getattr(entry, "file_id", None),
             download_dir,
             checksum=checksum,
         )
@@ -136,12 +133,20 @@ def download_scriptextender():
 
 def download_plugin(plugin: str):
     manifest = {}
+    if plugin not in [getattr(entry, "identifier", None) for entry in var.plugin_info]:
+        logger.error(f"Plugin {plugin} not found in plugin information.")
+        return
     for entry in var.plugin_info:
-        if entry.get("Identifier") == plugin:
-            manifest[plugin] = entry.get("Manifest")
-            break
+        logger.debug(f"Checking for {plugin} manifest...")
+        if getattr(entry, "identifier", None) == plugin:
+            manifest[plugin] = getattr(entry, "manifest", None)
+
+        if not manifest.get(plugin):
+            logger.error(f"No manifest URL specified for plugin: {plugin}")
+            return
 
         file = Path(request(manifest.get(plugin))[0])
+
         with open(file, "r") as f:
             data = json(f.read())
             logger.trace(f"Downloaded plugin manifest for {plugin}: {data}")
@@ -171,9 +176,12 @@ def extract(target: Path, destination: Path):
 
 def download():
     cache_dir.mkdir(parents=True, exist_ok=True)
+    gi = var.game_info.get(var.input_params.game)
     if (
         var.input_params.script_extender is True
-        and var.game_info.get(var.input_params.game).script_extenders.get(var.launcher)
+        and (
+            getattr(gi.script_extenders, var.launcher, None) if gi is not None else None
+        )
         is not None
     ):
         download_scriptextender()

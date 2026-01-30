@@ -21,15 +21,30 @@ def get_launcher() -> str | None:
     steam_libraries = get_steam_libraries()
     heroic_data = get_heroic_data()
     var.launcher = None
-    if steam_libraries and heroic_data[0]:
+
+    steam_has_game = False
+    heroic_has_game = False
+    chosen_game = var.game_info.get(var.input_params.game)
+    subdir = chosen_game.subdirectory if chosen_game else None
+
+    if steam_libraries and subdir:
+        for lib in steam_libraries:
+            candidate = Path(lib) / "steamapps" / "common" / subdir
+            if candidate.exists():
+                steam_has_game = True
+                break
+    if heroic_data and heroic_data[2]:
+        heroic_has_game = True
+
+    if steam_has_game and heroic_has_game:
         logger.error(
             "Both Steam and Heroic launchers detected. Functionality not yet implemented."
         )  # TODO
-    elif steam_libraries:
+    elif steam_has_game:
         var.launcher = "steam"
-    elif heroic_data[0] == "gog":
+    elif heroic_has_game and heroic_data[0] == "gog":
         var.launcher = "gog"
-    elif heroic_data[0] == "epic":
+    elif heroic_has_game and heroic_data[0] == "epic":
         var.launcher = "epic"
     else:
         logger.error("No supported launchers detected.")
@@ -52,23 +67,25 @@ def get_library() -> Path | None:
     subdirectory = chosen_game.subdirectory
     executable = chosen_game.executable
 
+    library = None
     if var.launcher == "steam":
         libraries = get_steam_libraries()
         if len(libraries) == 0:
             logger.error("No Steam libraries found.")
             return None
         else:
-            for library in libraries:
-                library = library / "steamapps" / "common" / subdirectory
-                if library.exists():
+            for lib in libraries:
+                candidate = lib / "steamapps" / "common" / subdirectory
+                if candidate.exists():
+                    library = candidate
                     break
 
-    if var.launcher == ("gog" or "epic"):
+    if var.launcher == "gog" or var.launcher == "epic":
         get_heroic_data()
         library = (
-            gog_data["install_path"]
+            Path(gog_data["install_path"])
             if var.launcher == "gog"
-            else epic_data["install_path"]
+            else Path(epic_data["install_path"])
             if var.launcher == "epic"
             else None
         )

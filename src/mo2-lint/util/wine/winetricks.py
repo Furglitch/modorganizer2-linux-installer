@@ -4,17 +4,18 @@ from pathlib import Path
 import subprocess
 import shutil
 import os
-from typing import List
+from typing import List, Optional
 from loguru import logger
+from util.logger import remove_loggers, add_loggers
 
-exec = (
-    shutil.which("winetricks")
-    or Path("~/.cache/mo2-lint/downloads/winetricks").expanduser()
-)
-logger.debug(f"winetricks exec resolved to: {exec}")
+found_exec = shutil.which("winetricks") or "~/.cache/mo2-lint/downloads/winetricks"
 
 
-def run(prefix: Path, command: List[str]) -> List[str]:
+def run(
+    exec: Optional[Path | str] = found_exec,
+    prefix: Path = None,
+    command: List[str] = None,
+) -> List[str]:
     """
     Runs a winetricks command and captures its output.
 
@@ -31,13 +32,31 @@ def run(prefix: Path, command: List[str]) -> List[str]:
         The output log lines from the winetricks command.
     """
 
-    cmd = [str(exec), f"prefix={str(prefix)}"] + [str(c) for c in command]
+    # Convert executable to string, with absolute path
+    if str(exec).startswith("/usr/bin"):
+        if isinstance(exec, str):
+            exec = str(Path(exec).name)
+        elif isinstance(exec, Path):
+            exec = str(exec.name)
+    elif isinstance(exec, str):
+        if not Path(exec).exists():
+            logger.error(f"winetricks executable not found at: {exec}")
+            return []
+        exec = str(Path(exec).expanduser().resolve())
+    elif isinstance(exec, Path):
+        if not exec.exists():
+            logger.error(f"winetricks executable not found at: {exec}")
+            return []
+        exec = str(exec.expanduser().resolve())
+
+    cmd = [exec] + ["-q", "-f"] + [str(c) for c in command]
     env = os.environ.copy()
     env.setdefault("WINEPREFIX", str(prefix))
 
     logger.debug(f"Using WINEPREFIX: {env['WINEPREFIX']}")
     logger.debug(f"Running winetricks command: {' '.join(cmd)}")
 
+    remove_loggers()
     proc = subprocess.Popen(
         cmd,
         stdout=subprocess.PIPE,
@@ -45,12 +64,14 @@ def run(prefix: Path, command: List[str]) -> List[str]:
         text=True,
         env=env,
     )
+    add_loggers(process="winetricks")
 
     out_lines: List[str] = []
     if proc.stdout:
         for line in proc.stdout:
             line = line.strip()
             out_lines.append(line)
+            logger.trace(f"winetricks: {line}")
 
     exit_code = proc.wait()
     if exit_code == 0:
@@ -58,10 +79,15 @@ def run(prefix: Path, command: List[str]) -> List[str]:
     else:
         logger.warning(f"winetricks exited with non-zero status: {exit_code}")
 
+    remove_loggers()
+    add_loggers()
+
     return out_lines
 
 
-def apply(prefix: Path, tricks: list):
+def apply(
+    exec: Optional[Path | str] = found_exec, prefix: Path = None, tricks: list = None
+):
     """
     Applies tricks to the specified prefix.
 
@@ -74,7 +100,10 @@ def apply(prefix: Path, tricks: list):
     """
 
     logger.info(f"Applying tricks to prefix: {tricks}")
-    run(prefix, tricks)
+    if not tricks:
+        logger.info("No tricks to apply, skipping.")
+        return
+    run(exec, prefix, tricks)
 
 
 # TODO handle 'translation' of specific winetricks outputs

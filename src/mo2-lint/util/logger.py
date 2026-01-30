@@ -4,12 +4,14 @@ from loguru import logger
 from pathlib import Path
 import sys
 from datetime import datetime
+from util import variables as var
 
 timestamp: str = None
 time_format = "{time:YYYY-MM-DD_HH-mm-ss}"
 
 
 def remove_loggers():
+    logger.trace("Removing all loggers...")
     handler_ids = list(logger._core.handlers.keys())
     for hid in handler_ids:
         logger.remove(hid)
@@ -23,20 +25,13 @@ def persist_timestamp() -> str:
     return timestamp
 
 
-def add_loggers(log_level: str = "INFO", process: str = None, console_sink=None):
+def add_loggers(log_level: str = None, process: str = "mo2-lint", console_sink=None):
     format_str = (
         f"<green>{time_format}</green> | "
         + "<level>{level: <8}</level> | "
         + (f"{process.upper()} | " if process else "")
         + "{message}"
     )
-
-    logger.add(
-        sink=console_sink if console_sink is not None else sys.stdout,
-        format=format_str,
-        level=log_level,
-    )
-    logger.trace("Added console logger. " + (f"Process: {process}" if process else ""))
 
     logger.add(
         sink=Path(
@@ -53,4 +48,12 @@ def add_loggers(log_level: str = "INFO", process: str = None, console_sink=None)
         compression="zip",
     )
     logger.trace("Added file logger. " + (f"Process: {process}" if process else ""))
+
+    log_level = log_level or var.input_params.log_level or "DEBUG"
+    logger.add(
+        sink=console_sink if console_sink is not None else sys.stdout,
+        format=format_str,
+        level=log_level,
+    )
+    logger.trace("Added console logger. " + (f"Process: {process}" if process else ""))
     logger.debug("Loggers initialized.")

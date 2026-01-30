@@ -83,20 +83,20 @@ def pull_config() -> None:
         else:
             logger.trace(f"{config} already exists in ~/.config/mo2-lint/")
 
-        try:
-            from urllib.request import urlretrieve
+        # try:
+        #     from urllib.request import urlretrieve
 
-            logger.trace(f"Attempting to download latest {config} from GitHub.")
-            config_path.parent.mkdir(parents=True, exist_ok=True)
-            urlretrieve(
-                f"https://raw.githubusercontent.com/Furglitch/modorganizer2-linux-installer/refs/heads/rewrite/configs/{config}",
-                config_path,
-            )
-            logger.debug(f"Downloaded latest {config} from GitHub.")
-        except Exception as e:
-            logger.exception(
-                f"Failed to download {config}: {e}", backtrace=True, diagnose=True
-            )
+        #     logger.trace(f"Attempting to download latest {config} from GitHub.")
+        #     config_path.parent.mkdir(parents=True, exist_ok=True)
+        #     urlretrieve(
+        #         f"https://raw.githubusercontent.com/Furglitch/modorganizer2-linux-installer/refs/heads/rewrite/configs/{config}",
+        #         config_path,
+        #     )
+        #     logger.debug(f"Downloaded latest {config} from GitHub.")
+        # except Exception as e:
+        #     logger.exception(
+        #         f"Failed to download {config}: {e}", backtrace=True, diagnose=True
+        #     )
 
 
 def get_valid_games() -> dict:
@@ -118,8 +118,8 @@ def preload_lists():
     """
     Preloads game and plugin lists for --help text.
     """
-
     remove_loggers()
+    pull_config()
     var.load_game_info()
     var.load_resource_info()
     var.load_plugin_info()
@@ -221,10 +221,9 @@ def main(
 ):
     # Pre-init setup
     remove_loggers()
-    add_loggers(log_level, "MO2-LINT")
+    add_loggers(log_level)
     logger.info("Starting mo2-lint")
     check_update()
-    pull_config()
     directory = Path(directory) if isinstance(directory, str) else directory
     game_info_path = (
         Path(game_info_path) if isinstance(game_info_path, str) else game_info_path
@@ -311,7 +310,7 @@ def main(
         game_path=get_library(),
         game_executable=var.game_info[game].executable,
         script_extender=script_extender,
-        plugins=list(plugin) if plugin else [],
+        plugins=plugin or [],
     )
     set_index()
 

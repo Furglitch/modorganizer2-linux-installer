@@ -300,7 +300,6 @@ def load_game_info(path: Optional[Path] = None):
     path: Path, optional
         Path to game_info JSON file. If not provided, defaults to the internal cfg/game_info.json file.
     """
-
     global game_info
     if not path:
         path = Path("~/.config/mo2-lint/game_info.json").expanduser()
@@ -328,7 +327,7 @@ class Resource:
     -----------
     download_url: str
         Direct download URL for the resource.
-    checksum: str
+    checksum: str, optional
         SHA-256 checksum of the resource file.
     version: str, optional
         Version string for the resource.
@@ -340,7 +339,7 @@ class Resource:
     """
 
     download_url: str = None
-    checksum: str = None
+    checksum: Optional[str] = None
     version: Optional[str] = None
 
     @classmethod
@@ -356,8 +355,6 @@ class Resource:
     def __post_init__(self):
         if not self.download_url:
             raise ValueError("Resource download_url is missing.")
-        if not self.checksum:
-            raise ValueError("Resource checksum is missing.")
 
 
 @dataclass

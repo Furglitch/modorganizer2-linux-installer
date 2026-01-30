@@ -8,7 +8,7 @@ def uninstall(game=None, directory=None):
     def list_instances(list):
         for idx, inst in enumerate(list, start=1):
             print(
-                f"    - [{idx}] Game: {inst.game}, Path: {inst.instance_path}, Script Extender: {'Yes' if inst.script_extender else 'No'}, Plugins: {', '.join(inst.plugins) if inst.plugins else 'None'}"
+                f"    - [{idx}] Game: {inst.nexus_slug}, Path: {inst.instance_path}, Script Extender: {'Yes' if inst.script_extender else 'No'}, Plugins: {', '.join(inst.plugins) if inst.plugins else 'None'}"
             )
 
     matched = match_instances(game, directory)

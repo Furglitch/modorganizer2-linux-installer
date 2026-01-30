@@ -22,15 +22,14 @@ def get_data() -> tuple[str, str, str, str, str]:
     """
     Returns
     -------
-    tuple[str, str, str, str, str]
-        A tuple containing the launcher type, game ID, install path, Wine path, and Wine prefix.
+    tuple[str, str, str, str]
+        A tuple containing the launcher type, game ID, install path, and Wine prefix.
     """
 
     launcher: str = None
     display: str = None
     game_id: str | int = None
     install_path: Path = None
-    wine_path: Path = None
     wine_prefix: Path = None
     logger.debug(f"Checking Heroic config directories: {config_directories}")
     for i, dir in enumerate(config_directories):
@@ -46,18 +45,18 @@ def get_data() -> tuple[str, str, str, str, str]:
                 display = "GOG"
                 game_id = gog_data["game_id"]
                 install_path = Path(gog_data["install_path"])
-                wine_path, wine_prefix = get_wine_variables(gog_data["game_id"], dir)
+                wine_prefix = get_wine_prefix(gog_data["game_id"], dir)
             elif epic_data and not gog_data:
                 launcher = "epic"
                 display = "Epic"
                 game_id = epic_data["game_id"]
                 install_path = Path(epic_data["install_path"])
-                wine_path, wine_prefix = get_wine_variables(epic_data["game_id"], dir)
+                wine_prefix = get_wine_prefix(epic_data["game_id"], dir)
             elif epic_data and gog_data:
                 logger.error(
                     "Both GOG and Epic libraries found. Functionality not yet implemented."  # TODO
                 )
-                launcher, game_id, install_path, wine_path, wine_prefix = (
+                launcher, game_id, install_path, wine_prefix = (
                     None,
                     None,
                     None,
@@ -65,17 +64,18 @@ def get_data() -> tuple[str, str, str, str, str]:
                     None,
                 )
             else:
-                launcher, game_id, install_path, wine_path, wine_prefix = (
-                    None,
+                launcher, game_id, install_path, wine_prefix = (
                     None,
                     None,
                     None,
                     None,
                 )
 
-            if not all(
-                v is None
-                for v in (install_path, launcher, game_id, wine_path, wine_prefix)
+            # If some values are present but others are missing, treat as incomplete
+            if any(
+                v is None for v in (install_path, launcher, game_id, wine_prefix)
+            ) and not all(
+                v is None for v in (install_path, launcher, game_id, wine_prefix)
             ):
                 logger.warning(
                     f"Incomplete library information detected for {display}."
@@ -87,8 +87,9 @@ def get_data() -> tuple[str, str, str, str, str]:
             logger.warning(f"Unable to find Heroic config at {dir}")
 
     global heroic_config
-    heroic_config = (launcher, game_id, install_path, wine_path, wine_prefix)
+    heroic_config = (launcher, game_id, install_path, wine_prefix)
     logger.debug(f"Heroic data: {heroic_config}")
+    var.heroic_config = heroic_config
     return heroic_config
 
 
@@ -142,7 +143,7 @@ def get_libraries(config_directory: Path) -> tuple[Path | None, Path | None]:
     if not valid():
         return None
 
-    while gog_available:
+    if gog_available:
         with open(gog_data["installed_json"], "r", encoding="utf-8") as file:
             json = from_json(file.read()).get("installed", [])
             for item in json:
@@ -160,7 +161,7 @@ def get_libraries(config_directory: Path) -> tuple[Path | None, Path | None]:
             )
             gog_available = False
 
-    while epic_available:
+    if epic_available:
         with open(epic_data["installed_json"], "r", encoding="utf-8") as file:
             json = from_json(file.read()).get(epic_data["game_id"], {})
         if json:
@@ -184,9 +185,7 @@ def get_libraries(config_directory: Path) -> tuple[Path | None, Path | None]:
     return epic_data.get("install_path"), gog_data.get("install_path")
 
 
-def get_wine_variables(
-    game_id: str | int, config_directory: Path
-) -> tuple[str | None, str | None]:
+def get_wine_prefix(game_id: str | int, config_directory: Path) -> Path:
     """
     Parameters
     ----------
@@ -197,37 +196,14 @@ def get_wine_variables(
 
     Returns
     -------
-    tuple[str | None, str | None]
-        A tuple containing the Wine binary path and Wine prefix, or None if not found.
+    Path
+        The Wine prefix path, or None if not found.
     """
 
     config_json = config_directory / "GamesConfig" / f"{game_id}.json"
     if not config_json.exists():
         logger.warning(f'Config JSON not found at "{config_json}"')
-    else:
-        with open(config_json, "r", encoding="utf-8") as file:
-            data = from_json(file.read())
-    wine_path = data.get(str(game_id), {}).get("wineVersion", {}).get("bin") or None
-
-    if not wine_path:
-        logger.warning(f"Wine path not found in {config_json}, checking global config.")
-        config_json = config_directory / "config.json"
-        if not config_json.exists():
-            logger.warning(f'Global config JSON not found at "{config_json}"')
-            return None
-        with open(config_json, "r", encoding="utf-8") as file:
-            data = from_json(file.read())
-            wine_path = (
-                data.get("defaultSettings", {}).get("wineVersion", {}).get("bin")
-                or None
-            )
-
-    if not wine_path:
-        logger.warning(f"Wine path not found in both {config_json} and global config.")
         return None
-    wine_path = Path(wine_path)
-
-    logger.debug(f"Found wine path: {wine_path}")
 
     with open(config_json, "r", encoding="utf-8") as file:
         data = from_json(file.read())
@@ -238,4 +214,4 @@ def get_wine_variables(
         return None
     wine_prefix = Path(wine_prefix)
 
-    return wine_path, wine_prefix
+    return wine_prefix
