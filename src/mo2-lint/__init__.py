@@ -2,6 +2,7 @@
 
 from loguru import logger
 from pathlib import Path
+from pydantic_core import from_json
 from step.configure_prefix import prompt as prompt_prefix, configure as configure_prefix
 from step.external_resources import download
 from step.load_game_info import get_launcher, get_library
@@ -32,9 +33,11 @@ def check_update() -> None:
     logger.trace("Starting update check for mo2-lint.")
     try:
         logger.trace("Sending request to GitHub releases API.")
-        response = requests.get(
-            "https://api.github.com/repos/Furglitch/modorganizer2-linux-installer/releases/latest"
-        ).json()
+        response = from_json(
+            requests.get(
+                "https://api.github.com/repos/Furglitch/modorganizer2-linux-installer/releases/latest"
+            ).text
+        )
         latest = response["tag_name"]
         logger.trace(
             f"Latest version from GitHub: {latest}, current version: {var.version}"
@@ -45,9 +48,9 @@ def check_update() -> None:
             logger.trace(
                 f"Parsed version parts: current={version_parts}, latest={latest_parts}"
             )
-            if latest_parts > version_parts:
+            if tuple(latest_parts) > tuple(version_parts):
                 logger.warning(
-                    f"A new version of mo2-lint is available: {latest} (current: {var.version}). Please update to the latest version."
+                    f"A new version of mo2-lint is available: {latest} (current: {var.version})."
                 )
                 return
     except Exception as e:

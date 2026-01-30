@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 from loguru import logger
+from pydantic_core import from_json
 from util import state_file as state
 from uuid import UUID, uuid4 as new_uuid
-import json
 import websockets.sync.client as websockets
 
 
@@ -116,7 +116,7 @@ def request_api_key() -> str:
             }
         )
         for message in socket:
-            response = json.loads(message)
+            response = from_json(message)
             key = response.get("data", {}).get("api_key") or None
             if key:
                 socket.close()

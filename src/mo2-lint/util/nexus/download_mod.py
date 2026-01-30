@@ -2,6 +2,7 @@
 
 from click import Path
 from loguru import logger
+from pydantic_core import from_json
 from typing import Optional
 from util import variables as var
 from util.nexus.api import api_key
@@ -67,7 +68,7 @@ def get_filename(response: requests.Response) -> str:
         The filename of the specified mod file.
     """
 
-    return str(response.json().get("file_name", ""))
+    return str(from_json(response).get("file_name", ""))
 
 
 def nexus_download(
@@ -99,7 +100,7 @@ def nexus_download(
     path = dest / filename
     logger.debug(f"Resolved filename '{filename}', target path: {path}")
     download_url = None
-    for item in response.json():
+    for item in from_json(response):
         if item.get("short_name") == "Nexus CDN":
             download_url = item.get("URI", "").replace("\\u0026", "&")
             break
