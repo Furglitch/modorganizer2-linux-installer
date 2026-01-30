@@ -233,6 +233,8 @@ def check_instance(
     ValueError
         If both game and directory are not provided.
     """
+    game = var.input_params.game if not game else game
+    directory = var.input_params.directory if not directory else directory
     if game is None and directory is None:
         logger.error("Either game or directory must be provided to check_instance.")
         raise ValueError("Either game or directory must be provided to check_instance.")
@@ -241,13 +243,29 @@ def check_instance(
     )
     global state_file, existing_indexes
     existing_indexes = []
+    found_conflict = False
     for instance in state_file.instances:
-        if instance.instance_path == directory or instance.nexus_slug == game:
+        if (
+            instance.instance_path == directory
+            and instance.nexus_slug != game
+            and not found_conflict
+        ):
+            found_conflict = True
+            logger.warning(
+                f"We've found an instance that matches this directory, but is not for the game {game}."
+            )
+            logger.warning(
+                "Using this instance may lead to unexpected behavior. It is not recommended, and not supported."
+            )
+            logger.warning(
+                "You have been warned. The script will proceed, but please be cautious when choosing this instance."
+            )
+        elif instance.instance_path == directory or instance.nexus_slug == game:
             logger.debug(
                 f"Found matching instance at index {instance.index}: {instance}"
             )
-            existing_indexes.append(instance)
-    return existing_indexes
+        existing_indexes.append(instance)
+    return None if existing_indexes == [] else existing_indexes
 
 
 available_indexes: list[InstanceData] = []
@@ -258,34 +276,44 @@ def choose_instance():
     """
     Prompts the user to choose between using an existing instance or creating a new one.
     """
-    global current_instance, available_indexes, existing_indexes
-    available_indexes = []
+    global current_instance, existing_indexes
     if existing_indexes:
         quantifier = "the" if len(existing_indexes) == 1 else "an"
         logger.debug("Prompting user to choose existing or new instance.")
         choice = (
             input(
-                f"Would you like to use {quantifier} existing instance [e] or create a new one? [n]: "
+                f"Would you like to use {quantifier} existing instance [e] or create a new one? [N]: "
             )
             .strip()
             .lower()
         )
-        if choice == "e":
+        if choice.lower() == "e":
             logger.debug("User chose to use an existing instance.")
             if len(existing_indexes) == 1:
+                logger.info(
+                    "Only one existing instance found, selecting it automatically."
+                )
                 current_instance = existing_indexes[0]
             elif len(existing_indexes) > 1:
                 for idx, inst in enumerate(existing_indexes, start=1):
                     print(
-                        f"    - [{idx}] Game: {inst.game}, Path: {inst.instance_path}, Script Extender: {'Yes' if inst.script_extender else 'No'}, Plugins: {', '.join(inst.plugins) if inst.plugins else 'None'}"
+                        f"    - [{idx}] Game: {inst.nexus_slug}, Path: {inst.instance_path}, Script Extender: {'Yes' if inst.script_extender else 'No'}, Plugins: {', '.join(inst.plugins) if inst.plugins else 'None'}"
                     )
                 selected = int(
                     input("Select the number of the instance you want to use: ")
                 )
                 current_instance = existing_indexes[selected - 1]
-        elif choice != "n":
-            logger.error("User made an invalid choice when selecting instance.")
-            raise ValueError("Invalid choice made when selecting instance.")
+
+            if (
+                current_instance.instance_path == var.input_params.directory
+                and current_instance.nexus_slug != var.input_params.game
+            ):
+                (var.input_params.directory / ".conflict").touch(
+                    exist_ok=True
+                )  # if choice is a conflicting directory, put an empty file within to identify it
+                logger.trace(
+                    f"Created conflict file in {var.input_params.directory} to identify conflicting instance."
+                )
         return
     set_index()
 
