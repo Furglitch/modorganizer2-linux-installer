@@ -32,7 +32,6 @@ def add_loggers(log_level: str = None, process: str = "mo2-lint", console_sink=N
         + (f"{process.upper()} | " if process else "")
         + "{message}"
     )
-
     logger.add(
         sink=Path(
             f"~/.cache/mo2-lint/logs/install.{persist_timestamp()}.log"
@@ -47,7 +46,6 @@ def add_loggers(log_level: str = None, process: str = "mo2-lint", console_sink=N
         retention="7 days",
         compression="zip",
     )
-    logger.trace("Added file logger. " + (f"Process: {process}" if process else ""))
 
     log_level = log_level or var.input_params.log_level or "DEBUG"
     logger.add(
@@ -55,5 +53,4 @@ def add_loggers(log_level: str = None, process: str = "mo2-lint", console_sink=N
         format=format_str,
         level=log_level,
     )
-    logger.trace("Added console logger. " + (f"Process: {process}" if process else ""))
-    logger.debug("Loggers initialized.")
+    logger.trace("Added loggers. " + (f"Process: {process}" if process else ""))

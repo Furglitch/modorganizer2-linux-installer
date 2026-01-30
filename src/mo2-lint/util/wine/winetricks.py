@@ -7,6 +7,7 @@ import os
 from typing import List, Optional
 from loguru import logger
 from util.logger import remove_loggers, add_loggers
+import re
 
 found_exec = shutil.which("winetricks") or "~/.cache/mo2-lint/downloads/winetricks"
 
@@ -72,6 +73,7 @@ def run(
             line = line.strip()
             out_lines.append(line)
             logger.trace(f"winetricks: {line}")
+            log_translation(line)
 
     exit_code = proc.wait()
     if exit_code == 0:
@@ -106,4 +108,32 @@ def apply(
     run(exec, prefix, tricks)
 
 
-# TODO handle 'translation' of specific winetricks outputs
+def log_translation(input: str = None):
+    """
+    Translates protontricks log lines into more user-friendly messages and logs them.
+
+    Parameters
+    ----------
+    input : str
+        The log line to translate.
+    """
+    if not input:
+        return
+
+    reg1 = re.search(
+        r"Executing w_do_call\s+(.*)", input
+    )  # "Applying trick: '[trick]'"
+    reg2 = re.search(
+        r"Using native override for following DLLs:\s+(.*)", input
+    )  # "Setting native DLLs: '[DLLs]'"
+
+    if reg1:
+        trick = reg1.group(1).strip()
+        translated = f"Applying trick: '{trick}'"
+        logger.info(translated)
+        return
+    if reg2:
+        dlls = reg2.group(1).strip()
+        translated = f"Setting native DLLs: '{dlls}'"
+        logger.info(translated)
+        return
