@@ -12,12 +12,12 @@ def uninstall(game=None, directory=None):
             )
 
     matched = match_instances(game, directory)
-    if matched is None:
-        logger.error("No instances found to uninstall.")
-        return
-
     length = len(matched)
     choice = []
+
+    if not length or length == 0:
+        logger.error("No matching instances found for uninstallation.")
+        return
 
     if length == 1:
         logger.info("Only one instance found. Proceeding to uninstall...")
