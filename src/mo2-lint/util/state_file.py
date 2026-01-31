@@ -210,7 +210,7 @@ def load_state_file():
         state_file = StateFile(None, [])
 
 
-existing_indexes: list[InstanceData] = []
+matching_instances: list[InstanceData] = []
 
 
 def check_instance(
@@ -244,8 +244,8 @@ def check_instance(
     logger.debug(
         f"Checking for instances with nexus slug: {game} or directory: {directory}"
     )
-    global state_file, existing_indexes
-    existing_indexes = []
+    global state_file, matching_instances
+    matching_instances = []
     found_conflict = False
     for instance in state_file.instances:
         if (
@@ -267,11 +267,12 @@ def check_instance(
             logger.debug(
                 f"Found matching instance at index {instance.index}: {instance}"
             )
-        existing_indexes.append(instance)
-    return None if existing_indexes == [] else existing_indexes
+        else:
+            continue
+        matching_instances.append(instance)
+    return None if matching_instances == [] else matching_instances
 
 
-available_indexes: list[InstanceData] = []
 current_instance: InstanceData = None
 
 
@@ -279,9 +280,11 @@ def choose_instance():
     """
     Prompts the user to choose between using an existing instance or creating a new one.
     """
-    global current_instance, existing_indexes
-    if existing_indexes:
-        quantifier = "the" if len(existing_indexes) == 1 else "an"
+    global current_instance, matching_instances
+    print(matching_instances)
+    instance_count = len(matching_instances) if matching_instances else 0
+    if instance_count > 0:
+        quantifier = "the" if instance_count == 1 else "an"
         logger.debug("Prompting user to choose existing or new instance.")
         choice = (
             input(
@@ -292,20 +295,20 @@ def choose_instance():
         )
         if choice.lower() == "e":
             logger.debug("User chose to use an existing instance.")
-            if len(existing_indexes) == 1:
+            if instance_count == 1:
                 logger.info(
                     "Only one existing instance found, selecting it automatically."
                 )
-                current_instance = existing_indexes[0]
-            elif len(existing_indexes) > 1:
-                for idx, inst in enumerate(existing_indexes, start=1):
+                current_instance = matching_instances[0]
+            elif instance_count > 1:
+                for idx, inst in enumerate(matching_instances, start=1):
                     print(
                         f"    - [{idx}] Game: {inst.nexus_slug}, Path: {inst.instance_path}, Script Extender: {'Yes' if inst.script_extender else 'No'}, Plugins: {', '.join(inst.plugins) if inst.plugins else 'None'}"
                     )
                 selected = int(
                     input("Select the number of the instance you want to use: ")
                 )
-                current_instance = existing_indexes[selected - 1]
+                current_instance = matching_instances[selected - 1]
 
             if (
                 current_instance.instance_path == var.input_params.directory
