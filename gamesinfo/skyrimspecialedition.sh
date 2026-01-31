@@ -4,7 +4,7 @@ game_gog_id=1711230643
 game_epic_id=""
 game_steam_subdirectory="Skyrim Special Edition"
 game_executable="SkyrimSELauncher.exe"
-game_protontricks=("xaudio2_7=native" "xact" "d3dcompiler_43" "vcrun2022")
+game_protontricks=("xaudio2_7=native" "xact" "d3dcompiler_43" "d3dcompiler_47" "vcrun2022")
 declare -A game_scriptextender_urls=(
 	["steam"]="https://skse.silverlock.org/beta/skse64_2_02_06.7z"
 	["gog"]=""
