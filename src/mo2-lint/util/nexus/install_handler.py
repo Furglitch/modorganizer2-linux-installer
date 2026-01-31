@@ -20,9 +20,8 @@ def install():
     # Install handler
     output = Path("~/.local/share/mo2-lint/nxm_handler").expanduser()
     internal_path = internal_file("dist", "nxm_handler")
-    if not compare_checksum(internal_path, output):
+    if output.exists() and compare_checksum(internal_path, output):
         logger.info("NXM:// Handler is up to date; skipping installation.")
-        return
     else:
         logger.info("Installing NXM:// Handler...")
         output.parent.mkdir(parents=True, exist_ok=True)
@@ -34,11 +33,10 @@ def install():
         "~/.local/share/applications/mo2lint_nxm_handler.desktop"
     ).expanduser()
     internal_path = internal_file("cfg", "nxm_handler.desktop")
-    if not compare_checksum(internal_path, output):
+    if output.exists() and compare_checksum(internal_path, output):
         logger.info(
             "NXM:// Handler desktop entry is up to date; skipping installation."
         )
-        return
     else:
         logger.info("Installing NXM:// Handler desktop entry...")
         output.parent.mkdir(parents=True, exist_ok=True)

@@ -258,6 +258,7 @@ def install(source: Path, destination: Path, file_list: Optional[list[str]]):
     if not source.exists():
         logger.error(f"Source path {source} does not exist; cannot install.")
         return
+    destination.mkdir(parents=True, exist_ok=True)
     if source.is_file():
         if file_list and file_list != (["*"] or "*" or [] or None):
             logger.debug(
@@ -279,6 +280,5 @@ def install(source: Path, destination: Path, file_list: Optional[list[str]]):
             elif source.is_file():
                 copy(source, destination)
     elif source.is_dir():
-        destination.mkdir(parents=True, exist_ok=True)
         logger.debug(f"Installing all files from {source} to {destination}.")
         copytree(source, destination, dirs_exist_ok=True)
