@@ -15,7 +15,7 @@ class Input:
 
     Parameters
     -----------
-    game: str
+    game : str
         Identifier for the game to set up MO2 for.
     directory: Path
         Path to the MO2 installation directory.
@@ -57,7 +57,7 @@ def set_parameters(args: Input | dict):
 
     Parameters
     -----------
-    args: Input | dict
+    args : Input | dict
         Command-line arguments. See Input class for keys.
     """
     logger.debug(f"Setting input parameters: {args}")
@@ -75,19 +75,19 @@ class ScriptExtender:
 
     Parameters
     -----------
-    version: str
+    version : str
         Version of the script extender.
-    runtime: str, optional
+    runtime : str, optional
         Target game runtime version required for this script extender.
-    download_url: str, optional
+    download_url : str, optional
         Direct download URL for the script extender.
-    nexus_mod_id: int, optional
+    nexus_mod_id : int, optional
         Nexus Mods mod ID for the script extender.
-    nexus_file_id: int, optional
+    nexus_file_id : int, optional
         Nexus Mods file ID for the script extender.
-    checksum: str, optional
+    checksum : str, optional
         SHA-256 checksum of the script extender file.
-    file_whitelist: Tuple[str, ...], optional
+    file_whitelist : Tuple[str, ...], optional
         File paths that should be included when installing the script extender. If not provided, all files will be installed.
 
     Raises
@@ -134,11 +134,11 @@ class ScriptExtenders:
 
     Parameters
     -----------
-    epic: Tuple[ScriptExtender, ...], optional
+    epic : Tuple[ScriptExtender, ...], optional
         ScriptExtender instances for the Epic Games Store version.
-    gog: Tuple[ScriptExtender, ...], optional
+    gog : Tuple[ScriptExtender, ...], optional
         ScriptExtender instances for the GOG.com version.
-    steam: Tuple[ScriptExtender, ...], optional
+    steam : Tuple[ScriptExtender, ...], optional
         ScriptExtender instances for the Steam version.
 
     Raises
@@ -181,11 +181,11 @@ class LauncherIDs:
 
     Parameters
     -----------
-    steam: int, optional
+    steam : int, optional
         Steam app ID for the game.
-    gog: int, optional
+    gog : int, optional
         GOG ID for the game.
-    epic: str, optional
+    epic : str, optional
         Epic Games Store ID for the game.
 
     Raises
@@ -228,19 +228,19 @@ class GameInfo:
 
     Parameters
     -----------
-    display_name: str
+    display_name : str
         Display name of the game, for use in logs and messages.
-    nexus_slug: str
+    nexus_slug : str
         Nexus Mods ID for the game.
-    launcher_ids: LauncherIDs
+    launcher_ids : LauncherIDs
         Contains launcher-specific IDs for the game.
-    subdirectory: str, optional
+    subdirectory : str, optional
         Root directory for the game, relative to Steam library folder.
-    executable: str, optional
+    executable : str, optional
         Game executable filename.
-    tricks: Tuple[str, ...], optional
+    tricks : Tuple[str, ...], optional
         List of tricks to apply for the game.
-    script_extenders: ScriptExtenders, optional
+    script_extenders : ScriptExtenders, optional
         Contains information about script extenders for the game.
 
     Raises
@@ -291,7 +291,7 @@ def load_game_info(path: Optional[Path] = None):
 
     Parameters
     -----------
-    path: Path, optional
+    path : Path, optional
         Path to game_info JSON file. If not provided, defaults to the internal cfg/game_info.json file.
     """
     global game_info
@@ -316,11 +316,11 @@ class Resource:
 
     Parameters
     -----------
-    download_url: str
+    download_url : str
         Direct download URL for the resource.
-    checksum: str, optional
+    checksum : str, optional
         SHA-256 checksum of the resource file.
-    version: str, optional
+    version : str, optional
         Version string for the resource.
 
     Raises
@@ -355,11 +355,11 @@ class ResourceInfo:
 
     Parameters
     -----------
-    mod_organizer: Resource
+    mod_organizer : Resource
         Resource instance for Mod Organizer.
-    winetricks: Resource
+    winetricks : Resource
         Resource instance for Winetricks.
-    java: Resource, optional
+    java : Resource, optional
         Resource instance for Java.
 
     Raises
@@ -398,7 +398,7 @@ def load_resource_info(path: Optional[Path] = None):
 
     Parameters
     -----------
-    path: Path, optional
+    path : Path, optional
         Path to resource_info JSON file. If not provided, defaults to the internal cfg/resource_info.json file.
     """
 
@@ -419,7 +419,7 @@ class Plugin:
 
     Parameters
     -----------
-    manifest: str
+    manifest : str
         Direct URL to plugin manifest file.\n
         Manifest is formatted using the Kezyma plugin manifest schema. More info: https://github.com/Kezyma/ModOrganizer-Plugins/blob/main/docs/pluginfinder.md#adding-your-plugin
 
@@ -445,7 +445,7 @@ def load_plugin_info(path: Optional[Path] = None):
 
     Parameters
     -----------
-    path: Path, optional
+    path : Path, optional
         Path to plugin_info JSON file. If not provided, defaults to the internal cfg/plugin_info.json file.
     """
 

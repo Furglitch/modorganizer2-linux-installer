@@ -20,6 +20,8 @@ epic_data = {}
 
 def get_data() -> tuple[str, str, str, str, str]:
     """
+    Gets Heroic game data from config directories.
+
     Returns
     -------
     tuple[str, str, str, str]
@@ -93,8 +95,10 @@ def get_data() -> tuple[str, str, str, str, str]:
     return heroic_config
 
 
-def get_libraries(config_directory: Path) -> tuple[Path | None, Path | None]:
+def get_libraries(config_directory: Path) -> tuple[Path, Path]:
     """
+    Gets Heroic game library directories from the configuration directory.
+
     Parameters
     ----------
     config_directory : Path
@@ -102,8 +106,8 @@ def get_libraries(config_directory: Path) -> tuple[Path | None, Path | None]:
 
     Returns
     -------
-    tuple[Path | None, Path | None]
-        A tuple containing the install paths for Epic and GOG games, or None if not found
+    tuple[Path, Path]
+        A tuple containing the install paths for Epic and GOG games, respectively.
     """
     gog_available = True
     epic_available = True
@@ -187,6 +191,8 @@ def get_libraries(config_directory: Path) -> tuple[Path | None, Path | None]:
 
 def get_wine_prefix(game_id: str | int, config_directory: Path) -> Path:
     """
+    Gets the Wine prefix for a Heroic game from its configuration JSON.
+
     Parameters
     ----------
     game_id : str | int
@@ -197,7 +203,7 @@ def get_wine_prefix(game_id: str | int, config_directory: Path) -> Path:
     Returns
     -------
     Path
-        The Wine prefix path, or None if not found.
+        The Wine prefix path.
     """
 
     config_json = config_directory / "GamesConfig" / f"{game_id}.json"

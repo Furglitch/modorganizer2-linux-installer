@@ -6,10 +6,18 @@ import sys
 
 
 def internal_file(*parts) -> Path:
-    """Get the path to an internal file within the package.
+    """
+    Get the path to an internal file within the package.
 
-    @param path: Relative path to the internal file.
-    @return: Full path to the internal file.
+    Parameters
+    ----------
+    parts : str
+        Relative path components to the internal file. (i.e. `"dist", "file.exe"`)
+
+    Returns
+    -------
+    Path
+        The full path to the internal file's temporary location.
     """
 
     path = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve()))

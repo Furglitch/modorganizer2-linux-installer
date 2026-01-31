@@ -12,46 +12,45 @@ import sys
 import threading
 
 
-def run(command: list) -> List[str]:
+def run(command: List[str]):
     """
     Runs a protontricks command and captures its output.
 
     Parameters
     ----------
-    command : list
+    command : List[str]
         The command arguments to pass to protontricks.
-
-    Returns
-    -------
-    List[str]
-        The output log lines from the protontricks command.
     """
 
-    args = ["--verbose"] + [str(c) for c in command]
+    args = ["--verbose"] + command
 
     logger.debug(f"Running protontricks command: {' '.join(args)}")
 
-    with redirect_output_to_logger() as output_lines:
-        try:
-            pt(args)
-        except SystemExit as e:
-            if e.code != 0:
-                logger.exception(f"Protontricks command failed with exit code {e.code}")
-        except Exception as e:
-            logger.exception(
-                f"Unexpected exception while running protontricks: {e}",
-                backtrace=True,
-                diagnose=True,
-            )
-        finally:
-            logger.debug(
-                f"Protontricks finished, collected {len(output_lines)} output lines"
-            )
+    if args != ["--verbose"]:
+        with redirect_output_to_logger():
+            try:
+                pt(args)
+            except SystemExit as e:
+                if e.code != 0:
+                    logger.exception(
+                        f"Protontricks command failed with exit code {e.code}"
+                    )
+            except Exception as e:
+                logger.exception(
+                    f"Unexpected exception while running protontricks: {e}",
+                    backtrace=True,
+                    diagnose=True,
+                )
+            finally:
+                logger.success(
+                    f"Protontricks completed successfully with command: {' '.join(args)}"
+                )
+    else:
+        logger.warning("No protontricks command provided, skipping.")
+        return
 
-    return output_lines
 
-
-def apply(id: int, tricks: list):
+def apply(id: int, tricks: List[str]):
     """
     Applies tricks to the specified prefix.
 
@@ -59,7 +58,7 @@ def apply(id: int, tricks: list):
     ----------
     id : int
         The Proton prefix ID.
-    tricks : list
+    tricks : List[str]
         The list of tricks to apply
     """
 
@@ -90,7 +89,7 @@ def check_prefix(id: int) -> bool:
     return exists
 
 
-def get_prefix(id: int) -> Path | None:
+def get_prefix(id: int) -> Path:
     """
     Retrieves the Proton prefix path for the given ID if it exists.
 

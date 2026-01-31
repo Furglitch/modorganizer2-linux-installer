@@ -5,6 +5,17 @@ from util.state_file import match_instances, remove_instance
 
 
 def uninstall(game=None, directory=None):
+    """
+    Matches existing instances based on game and/or directory, prompts the user to select which to uninstall, and proceeds with uninstallation after confirmation.
+
+    Parameters
+    ----------
+    game : str
+        The game nexus slug to match.
+    directory : str
+        The instance directory to match.
+    """
+
     def list_instances(list):
         for idx, inst in enumerate(list, start=1):
             print(
@@ -13,7 +24,7 @@ def uninstall(game=None, directory=None):
 
     matched = match_instances(game, directory)
     length = len(matched)
-    choice = []
+    choice = {}
 
     if not length or length == 0:
         logger.error("No matching instances found for uninstallation.")
@@ -44,6 +55,14 @@ def uninstall(game=None, directory=None):
 
 
 def confirm_uninstall(choice):
+    """
+    Prompts the user for confirmation before uninstalling instances.
+
+    Parameters
+    ----------
+    choice : dict[int, Instance]
+        The instances selected for uninstallation.
+    """
     confirm = input(
         "Are you sure you want to uninstall the selected instance(s)? This action cannot be undone. [y/N]: "
     )

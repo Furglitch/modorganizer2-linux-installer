@@ -24,6 +24,7 @@ def download(
         The name to save the file as. If None, uses the name from the URL.
     checksum : str, optional
         The expected checksum of the file for verification. If None, no verification is performed.
+
     Returns
     -------
     Path

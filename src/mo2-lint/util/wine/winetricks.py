@@ -16,7 +16,7 @@ def run(
     exec: Optional[Path | str] = found_exec,
     prefix: Path = None,
     command: List[str] = None,
-) -> List[str]:
+):
     """
     Runs a winetricks command and captures its output.
 
@@ -26,11 +26,6 @@ def run(
         The Wine prefix to use.
     command : List[str]
         The command arguments to pass to winetricks.
-
-    Returns
-    -------
-    List[str]
-        The output log lines from the winetricks command.
     """
 
     # Convert executable to string, with absolute path
@@ -50,7 +45,8 @@ def run(
             return []
         exec = str(exec.expanduser().resolve())
 
-    cmd = [exec] + ["-q", "-f"] + [str(c) for c in command]
+    command = ["-q", "-f"] + command  # -q for unattended, -f to force
+    cmd = [exec] + command
     env = os.environ.copy()
     env.setdefault("WINEPREFIX", str(prefix))
 
@@ -58,37 +54,42 @@ def run(
     logger.debug(f"Running winetricks command: {' '.join(cmd)}")
 
     remove_loggers()
-    proc = subprocess.Popen(
-        cmd,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-        env=env,
-    )
     add_loggers(process="winetricks")
 
-    out_lines: List[str] = []
+    if not cmd == [exec, "-q", "-f"]:
+        proc = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            env=env,
+        )
+    else:
+        logger.info("No winetricks command provided, skipping.")
+        return
+
     if proc.stdout:
         for line in proc.stdout:
             line = line.strip()
-            out_lines.append(line)
             logger.trace(f"winetricks: {line}")
             log_translation(line)
 
     exit_code = proc.wait()
     if exit_code == 0:
-        logger.success("winetricks completed successfully.")
+        logger.success(
+            f"winetricks completed successfully with command: {' '.join(command)}"
+        )
     else:
         logger.warning(f"winetricks exited with non-zero status: {exit_code}")
 
     remove_loggers()
     add_loggers()
 
-    return out_lines
-
 
 def apply(
-    exec: Optional[Path | str] = found_exec, prefix: Path = None, tricks: list = None
+    exec: Optional[Path | str] = found_exec,
+    prefix: Path = None,
+    tricks: List[str] = None,
 ):
     """
     Applies tricks to the specified prefix.
@@ -97,7 +98,7 @@ def apply(
     ----------
     prefix : Path
         The Wine prefix to use.
-    tricks : list
+    tricks : List[str]
         The list of tricks to apply
     """
 

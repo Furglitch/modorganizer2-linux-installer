@@ -52,7 +52,15 @@ yes = ("", "y", "yes")
 current_time = datetime.now().strftime("%Y%m%d-%H%M%S")
 
 
-def load_prefix():
+def load_prefix() -> Path:
+    """
+    Determines the game's wine prefix, based on the relevant launcher.
+
+    Returns
+    -------
+    Path
+        The path to the game's wine prefix.
+    """
     logger.debug("Loading game prefix path...")
     prefix = None
     match var.launcher:
@@ -68,8 +76,13 @@ def load_prefix():
             logger.trace(f"Loaded Heroic prefix: {prefix}")
         case _:
             logger.error(f"Unknown launcher: {var.launcher}")
+
     if prefix is None:
         logger.error("Could not determine game prefix path.")
+    elif isinstance(prefix, str):
+        prefix = Path(prefix).expanduser()
+    elif isinstance(prefix, Path):
+        prefix = prefix.expanduser()
     return prefix
 
 
@@ -128,7 +141,7 @@ def prompt():
     """
 
     # Prompt user to archive prefix
-    prefix: Path = load_prefix()
+    prefix = load_prefix()
     for suffix in ["users", "drive_c", "pfx"]:
         if prefix.name == suffix:
             prefix = prefix.parent
@@ -186,6 +199,4 @@ def configure():
             )
         case "gog" | "epic":
             prefix = var.heroic_config[3]
-            # if wine.name == "proton":
-            #     wine = wine.parent / "files" / "bin" / "wine"
             winetricks.apply(prefix=prefix, tricks=tricks)

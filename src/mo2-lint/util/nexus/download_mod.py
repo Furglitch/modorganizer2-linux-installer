@@ -41,11 +41,11 @@ def nexus_request(url: str) -> requests.Response:
     Returns
     -------
     Response
-        The response from the GET request.
+        The response from the GET request. Use pydantic_core.from_json() to parse the JSON content.
     """
 
     headers = header()
-    logger.debug(f"Performing Nexus GET request to: {url}")
+    logger.debug(f"Performing Nexus request to: {url}")
     response = requests.get(url, headers=headers)
     logger.debug(
         f"Nexus request returned status: {response.status_code} for URL: {url}"
@@ -89,6 +89,11 @@ def nexus_download(
         The destination path to save the downloaded file.
     filename : str, optional
         The name to save the file as. If not provided, the original filename will be used.
+
+    Returns
+    -------
+    str
+        The filename of the downloaded file.
     """
 
     url = f"https://api.nexusmods.com/v1/games/{game_slug}/mods/{mod_id}/files/{file_id}/download_link.json"

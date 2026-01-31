@@ -18,6 +18,9 @@ extract_dir = download_dir / "extracted"
 
 
 def download_mod_organizer():
+    """
+    Runs the download and installation process for Mod Organizer 2.
+    """
     logger.debug("Initiating Mod Organizer 2 download...")
     url = var.resource_info.mod_organizer.download_url
     checksum = var.resource_info.mod_organizer.checksum
@@ -45,6 +48,9 @@ def download_mod_organizer():
 
 
 def download_winetricks():
+    """
+    Runs the download process for Winetricks.
+    """
     logger.debug("Initiating Winetricks download...")
     url = var.resource_info.winetricks.download_url
     checksum = var.resource_info.winetricks.checksum
@@ -52,6 +58,9 @@ def download_winetricks():
 
 
 def download_java():
+    """
+    Runs the download process for Java.
+    """
     logger.debug("Initiating Java download...")
     url = var.resource_info.java.download_url
     checksum = var.resource_info.java.checksum
@@ -60,6 +69,9 @@ def download_java():
 
 
 def download_scriptextender():
+    """
+    Runs the download and installation process for the game's script extender.
+    """
     logger.debug("Initiating script extender download...")
     gi = var.game_info.get(var.input_params.game) or None
     entries = getattr(gi.script_extenders, var.launcher) if gi is not None else []
@@ -141,12 +153,20 @@ def download_scriptextender():
     extract(downloaded, extract_dir / "scriptextender" / downloaded.name)
     install(
         extract_dir / "scriptextender" / downloaded.name,
-        Path(var.input_params.directory),
+        Path(var.game_install_path),
         files,
     )
 
 
 def download_plugin(plugin: str):
+    """
+    Downloads and installs the specified plugin from its manifest.
+
+    Parameters
+    ----------
+    plugin : str
+        The identifier of the plugin to download.
+    """
     manifest = {}
     if plugin not in [getattr(entry, "identifier", None) for entry in var.plugin_info]:
         logger.error(f"Plugin {plugin} not found in plugin information.")
@@ -180,6 +200,16 @@ def download_plugin(plugin: str):
 
 
 def extract(target: Path, destination: Path):
+    """
+    Extracts the specified archive to the given destination.
+
+    Parameters
+    ----------
+    target : Path
+        The archive file to extract.
+    destination : Path
+        The directory to extract the archive into.
+    """
     if destination.exists():
         logger.debug(
             f"Extraction destination {destination} already exists; skipping extraction."
@@ -190,6 +220,9 @@ def extract(target: Path, destination: Path):
 
 
 def download():
+    """
+    Runs the download process for all required external resources.
+    """
     cache_dir.mkdir(parents=True, exist_ok=True)
     gi = var.game_info.get(var.input_params.game)
     if (
@@ -210,6 +243,18 @@ def download():
 
 
 def install(source: Path, destination: Path, file_list: Optional[list[str]]):
+    """
+    Copies files from source to destination.
+
+    Parameters
+    ----------
+    source : Path
+        The source path to copy files from.
+    destination : Path
+        The destination path to copy files to.
+    file_list : list[str], optional
+        A list of specific files to copy. If None, empty, or wildcard, all files are copied.
+    """
     if not source.exists():
         logger.error(f"Source path {source} does not exist; cannot install.")
         return

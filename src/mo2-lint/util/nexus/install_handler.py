@@ -4,7 +4,7 @@ from loguru import logger
 from pathlib import Path
 from shutil import copy2
 from util.checksum import compare_checksum
-from util.internal_file import internal_file as internal
+from util.internal_file import internal_file
 import shutil
 import stat
 import subprocess
@@ -12,14 +12,14 @@ import subprocess
 
 def install():
     """
-    Install handlers for Nexus Mods (nxm://) links.
+    Install nxm_handler and its desktop entry.
     """
 
     logger.info("Installing NXM:// Handlers...")
 
     # Install handler
     output = Path("~/.local/share/mo2-lint/nxm_handler").expanduser()
-    internal_path = internal("dist", "nxm_handler")
+    internal_path = internal_file("dist", "nxm_handler")
     if not compare_checksum(internal_path, output):
         logger.info("NXM:// Handler is up to date; skipping installation.")
         return
@@ -33,7 +33,7 @@ def install():
     output = Path(
         "~/.local/share/applications/mo2lint_nxm_handler.desktop"
     ).expanduser()
-    internal_path = internal("cfg", "nxm_handler.desktop")
+    internal_path = internal_file("cfg", "nxm_handler.desktop")
     if not compare_checksum(internal_path, output):
         logger.info(
             "NXM:// Handler desktop entry is up to date; skipping installation."

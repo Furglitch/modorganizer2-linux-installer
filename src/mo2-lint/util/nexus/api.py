@@ -29,7 +29,7 @@ def id() -> UUID:
 def connection_token() -> str:
     """
     Checks for an existing connection token in the state.\n
-    If none exists, requests a new connection token via WebSocket and stores it in the state.
+    If none exists, initiates a request for a new one.
 
     Returns
     -------
@@ -39,7 +39,6 @@ def connection_token() -> str:
 
     token = state.state_file.nexus_api.connection_token
     if not token:
-        logger.trace("No existing Nexus connection token found. Requesting a new one.")
         token = request_connection_token()
     state.state_file.nexus_api.connection_token = token
     return token
@@ -47,7 +46,7 @@ def connection_token() -> str:
 
 def request_connection_token() -> str:
     """
-    Requests a new connection token from the Nexus SSO WebSocket server.
+    Connects to the Nexus SSO WebSocket server to request a new connection token.
 
     Returns
     -------
@@ -56,6 +55,7 @@ def request_connection_token() -> str:
     """
 
     uuid = state.state_file.nexus_api.uuid if state.state_file.nexus_api.uuid else id()
+    logger.debug("Requesting new Nexus connection token via WebSocket...")
     with websockets.connect("wss://sso.nexusmods.com") as socket:
         socket.send(
             {
@@ -64,7 +64,7 @@ def request_connection_token() -> str:
             }
         )
         for message in socket:
-            response = message
+            response = from_json(message)
             token = response.get("data", {}).get("connection_token")
             if token:
                 socket.close()
@@ -75,7 +75,7 @@ def request_connection_token() -> str:
 def api_key() -> str:
     """
     Checks for an existing API key in the state.\n
-    If none exists, requests a new API key via WebSocket and stores it in the state.
+    If none exists, initiates a request for a new one.
 
     Returns
     -------
@@ -85,7 +85,6 @@ def api_key() -> str:
 
     key = state.state_file.nexus_api.api_key
     if not key:
-        logger.trace("No existing Nexus API key found. Requesting a new one.")
         key = request_api_key()
     state.state_file.nexus_api.api_key = key
     return key
@@ -93,7 +92,7 @@ def api_key() -> str:
 
 def request_api_key() -> str:
     """
-    Requests a new API key from the Nexus SSO WebSocket server.
+    Connects to the Nexus SSO WebSocket server to request a new API key.
 
     Returns
     -------
@@ -107,6 +106,8 @@ def request_api_key() -> str:
         if state.state_file.nexus_api.connection_token
         else request_connection_token()
     )
+    logger.debug("Requesting new Nexus API key via WebSocket...")
+    key = ""
     with websockets.connect("wss://sso.nexusmods.com") as socket:
         socket.send(
             {

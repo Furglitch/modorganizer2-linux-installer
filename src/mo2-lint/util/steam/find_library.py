@@ -14,6 +14,8 @@ steam_directories = [
 
 def get_data() -> tuple[int, str, str]:
     """
+    Gets Steam game data from the variable configuration.
+
     Returns
     -------
     tuple[int, str, str]
@@ -33,7 +35,7 @@ def get_data() -> tuple[int, str, str]:
 
 def get_libraries() -> list[Path]:
     """
-    Returns a list of Steam library paths found on the system.
+    Gets Steam game library directories from the Steam configuration files.
 
     Returns
     -------

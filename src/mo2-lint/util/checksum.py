@@ -13,6 +13,7 @@ def get_checksum(target: Path) -> str:
     ----------
     target : Path
         The file path to calculate the checksum for.
+
     Returns
     -------
     str

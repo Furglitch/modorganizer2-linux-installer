@@ -7,7 +7,7 @@ from util.heroic.find_library import get_data as get_heroic_data, gog_data, epic
 from util.steam.find_library import get_libraries as get_steam_libraries
 
 
-def get_launcher() -> str | None:
+def get_launcher() -> str:
     """
     Determines the launcher being used based on detected libraries.
 
@@ -39,7 +39,9 @@ def get_launcher() -> str | None:
     if steam_has_game and heroic_has_game:
         logger.error(
             "Both Steam and Heroic launchers detected. Functionality not yet implemented."
-        )  # TODO
+        )
+        return None
+        # TODO
     elif steam_has_game:
         var.launcher = "steam"
     elif heroic_has_game and heroic_data[0] == "gog":
@@ -48,11 +50,12 @@ def get_launcher() -> str | None:
         var.launcher = "epic"
     else:
         logger.error("No supported launchers detected.")
+        return None
     logger.debug(f"Determined launcher: {var.launcher}")
     return var.launcher
 
 
-def get_library() -> Path | None:
+def get_library() -> Path:
     """
     Determines the installation path of the selected game based on the detected launcher.
 
