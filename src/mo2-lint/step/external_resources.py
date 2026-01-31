@@ -168,35 +168,38 @@ def download_plugin(plugin: str):
         The identifier of the plugin to download.
     """
     manifest = {}
-    if plugin not in [getattr(entry, "identifier", None) for entry in var.plugin_info]:
+    if plugin not in [entry for entry in var.plugin_info]:
         logger.error(f"Plugin {plugin} not found in plugin information.")
         return
-    for entry in var.plugin_info:
-        logger.debug(f"Checking for {plugin} manifest...")
-        if getattr(entry, "identifier", None) == plugin:
-            manifest[plugin] = getattr(entry, "manifest", None)
+    logger.debug(f"Checking for {plugin} manifest...")
+    manifest[plugin] = var.plugin_info[plugin].manifest
 
-        if not manifest.get(plugin):
-            logger.error(f"No manifest URL specified for plugin: {plugin}")
-            return
+    if not manifest[plugin]:
+        logger.error(f"No manifest URL specified for plugin: {plugin}")
+        return
+    logger.trace(f"Plugin manifest URL for {plugin}: {manifest[plugin]}")
 
-        file = Path(request(manifest.get(plugin))[0])
+    file = Path(request(manifest[plugin])[0])
+    with open(file, "r") as f:
+        data = json.loads(f.read())
+        logger.trace(f"Downloaded plugin manifest for {plugin}: {data}")
 
-        with open(file, "r") as f:
-            data = json(f.read())
-            logger.trace(f"Downloaded plugin manifest for {plugin}: {data}")
+    if not data:
+        logger.error(f"Failed to download or parse manifest for plugin: {plugin}")
+        return
 
-        latest = data.get("Versions", [])[-1]
-        file_path = latest.get("PluginPath")
-        url = latest.get("DownloadUrl")
+    latest = data.get("Versions", [])[-1]
+    file_path = latest.get("PluginPath")
+    url = latest.get("DownloadUrl")
 
-        destination = download_dir / "plugins" / plugin
-        downloaded = dl(url, destination, url.split("/")[-1])
+    destination = download_dir / "plugins" / plugin
+    downloaded = dl(url, destination, url.split("/")[-1])
+    extract_dest = extract_dir / "plugins" / plugin / downloaded.name
 
-        destination = cache_dir / "plugins" / plugin
-        extract(downloaded, destination / downloaded.name)
-
-        install(destination, Path(var.input_params.directory) / "plugins", file_path)
+    destination = cache_dir / "plugins" / plugin
+    extract(downloaded, extract_dest)
+    install(extract_dest, Path(var.input_params.directory) / "plugins", file_path)
+    logger.debug(f"Plugin {plugin} installed to plugins directory.")
 
 
 def extract(target: Path, destination: Path):
