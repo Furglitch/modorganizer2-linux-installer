@@ -3,7 +3,6 @@
 from loguru import logger
 from pathlib import Path
 from patoolib import extract_archive as unzip
-from pydantic_core import from_json
 from shutil import copytree, copy2 as copy
 from typing import Optional
 from urllib.request import urlretrieve as request
@@ -11,6 +10,7 @@ from util import variables as var
 from util.checksum import compare_checksum
 from util.download import download as dl, download_nexus as nexus_dl
 from util.state_file import symlink_instance
+import json
 
 cache_dir: Path = Path("~/.cache/mo2-lint").expanduser()
 download_dir = cache_dir / "downloads"
@@ -163,7 +163,7 @@ def download_plugin(plugin: str):
         file = Path(request(manifest.get(plugin))[0])
 
         with open(file, "r") as f:
-            data = from_json(f.read())
+            data = json(f.read())
             logger.trace(f"Downloaded plugin manifest for {plugin}: {data}")
 
         latest = data.get("Versions", [])[-1]

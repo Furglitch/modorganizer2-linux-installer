@@ -3,12 +3,13 @@
 from dataclasses import dataclass, field
 from loguru import logger
 from pathlib import Path
-from pydantic_core import from_json, to_json
+from pydantic_core import to_json
 from send2trash import send2trash
 from shutil import move, rmtree
 from typing import Optional
 from util import variables as var, state_file as state
 from uuid import UUID
+import json
 
 
 @dataclass
@@ -195,14 +196,14 @@ def load_state_file():
     if filepath.exists():
         try:
             with filepath.open("r", encoding="utf-8") as f:
-                data = from_json(f.read())
+                data = json.load(f)
         except Exception as e:
             logger.exception(
                 f"Failed to parse state file JSON: {e}", backtrace=True, diagnose=True
             )
             logger.error("State file may be corrupted. Please validate or delete it.")
             logger.critical("Aborting...")
-            SystemExit(1)
+            raise SystemExit(1)
         logger.trace(f"Loaded state file: {data}")
         state_file = StateFile.from_dict(data)
     else:
@@ -439,7 +440,7 @@ def write_state(add_current: bool = True):
             if inst.index == current_instance.index:
                 state_file.instances[i] = state.InstanceData.from_dict(current_instance)
 
-    json = to_json(StateFile.to_dict(state_file), indent=2)
+    json = to_json(StateFile.to_dict(state_file), indent=2).decode("utf-8")
     with filepath.open("w", encoding="utf-8") as f:
         f.write(json)
     logger.debug(f"Wrote state file with {len(state_file.instances)} instances.")
