@@ -16,7 +16,7 @@ def run(
     exec: Optional[Path | str] = found_exec,
     prefix: Path = None,
     command: List[str] = None,
-):
+) -> List[str]:
     """
     Runs a winetricks command and captures its output.
 
@@ -26,6 +26,11 @@ def run(
         The Wine prefix to use.
     command : List[str]
         The command arguments to pass to winetricks.
+
+    Returns
+    -------
+    List[str]
+        The output lines from the winetricks command.
     """
 
     # Convert executable to string, with absolute path
@@ -55,6 +60,7 @@ def run(
 
     remove_loggers()
     add_loggers(process="winetricks")
+    output_lines = []
 
     if not cmd == [exec, "-q", "-f"]:
         proc = subprocess.Popen(
@@ -66,13 +72,14 @@ def run(
         )
     else:
         logger.info("No winetricks command provided, skipping.")
-        return
+        return output_lines
 
     if proc.stdout:
         for line in proc.stdout:
             line = line.strip()
             logger.trace(f"winetricks: {line}")
             log_translation(line)
+            output_lines.append(line)
 
     exit_code = proc.wait()
     if exit_code == 0:
@@ -84,6 +91,7 @@ def run(
 
     remove_loggers()
     add_loggers()
+    return output_lines
 
 
 def apply(

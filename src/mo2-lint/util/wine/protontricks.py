@@ -12,7 +12,7 @@ import sys
 import threading
 
 
-def run(command: List[str]):
+def run(command: List[str]) -> List[str]:
     """
     Runs a protontricks command and captures its output.
 
@@ -20,14 +20,20 @@ def run(command: List[str]):
     ----------
     command : List[str]
         The command arguments to pass to protontricks.
+
+    Returns
+    -------
+    List[str]
+        The output lines from the protontricks command.
     """
 
     args = ["--verbose"] + command
 
     logger.debug(f"Running protontricks command: {' '.join(args)}")
 
+    output_lines = []
     if args != ["--verbose"]:
-        with redirect_output_to_logger():
+        with redirect_output_to_logger() as output_lines:
             try:
                 pt(args)
             except SystemExit as e:
@@ -47,7 +53,7 @@ def run(command: List[str]):
                 )
     else:
         logger.warning("No protontricks command provided, skipping.")
-        return
+    return output_lines
 
 
 def apply(id: int, tricks: List[str]):
