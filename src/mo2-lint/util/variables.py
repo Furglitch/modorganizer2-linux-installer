@@ -310,16 +310,14 @@ class Resource:
     """
     Stores information about a downloadable resource.
 
-    @param download_url: The direct download URL for the resource.
-    @param checksum: The SHA-256 checksum of the resource file.
-    @param version: An optional version string for the resource.
-
     Parameters
     -----------
     download_url : str
         Direct download URL for the resource.
     checksum : str, optional
         SHA-256 checksum of the resource file.
+    internal_checksum : str, optional
+        SHA-256 checksum of an internal file within the resource archive.
     version : str, optional
         Version string for the resource.
 
@@ -331,6 +329,7 @@ class Resource:
 
     download_url: str = None
     checksum: Optional[str] = None
+    internal_checksum: Optional[str] = None
     version: Optional[str] = None
 
     @classmethod
@@ -341,6 +340,7 @@ class Resource:
             download_url=data.get("download_url"),
             version=data.get("version") if "version" in data else None,
             checksum=data.get("checksum"),
+            internal_checksum=data.get("internal_checksum"),
         )
 
     def __post_init__(self):

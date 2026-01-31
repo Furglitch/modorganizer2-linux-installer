@@ -23,7 +23,7 @@ def download_mod_organizer():
     """
     logger.debug("Initiating Mod Organizer 2 download...")
     url = var.resource_info.mod_organizer.download_url
-    checksum = var.resource_info.mod_organizer.checksum
+    checksum = var.resource_info.mod_organizer.internal_checksum
     downloaded = dl(url, download_dir, checksum=checksum)
     extract(downloaded, extract_dir / "mod_organizer")
     if downloaded.exists():
@@ -63,7 +63,7 @@ def download_java():
     """
     logger.debug("Initiating Java download...")
     url = var.resource_info.java.download_url
-    checksum = var.resource_info.java.checksum
+    checksum = var.resource_info.java.internal_checksum
     downloaded = dl(url, download_dir, checksum=checksum)
     extract(downloaded, extract_dir / "java")
 
