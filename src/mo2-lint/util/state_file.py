@@ -440,7 +440,7 @@ def write_state(add_current: bool = True):
             if inst.index == current_instance.index:
                 state_file.instances[i] = state.InstanceData.from_dict(current_instance)
 
-    json = to_json(StateFile.to_dict(state_file), indent=2)
+    json = to_json(StateFile.to_dict(state_file), indent=2).decode("utf-8")
     with filepath.open("w", encoding="utf-8") as f:
         f.write(json)
     logger.debug(f"Wrote state file with {len(state_file.instances)} instances.")
