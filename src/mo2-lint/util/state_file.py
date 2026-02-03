@@ -493,6 +493,11 @@ def match_instances(game: Optional[str], directory: Optional[Path]) -> dict:
             logger.trace(f"Matched instance at index {instance.index}: {instance}")
             matched.append(instance)
             continue
+        elif not (game or directory):
+            logger.trace(
+                f"Found existing instance at index {instance.index}: {instance}"
+            )
+            matched.append(instance)
 
     return matched
 
