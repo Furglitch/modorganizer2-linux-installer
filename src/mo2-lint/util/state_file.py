@@ -281,7 +281,6 @@ def choose_instance():
     Prompts the user to choose between using an existing instance or creating a new one.
     """
     global current_instance, matching_instances
-    print(matching_instances)
     instance_count = len(matching_instances) if matching_instances else 0
     if instance_count > 0:
         quantifier = "the" if instance_count == 1 else "an"
@@ -389,7 +388,7 @@ def remove_instance(instance: InstanceData, types: list[str] = ["symlink", "stat
         instance_path = instance.instance_path
         if instance_path.exists():
             permanent = (
-                input("Move instance to trash [t] or delete permanently [d]? :")
+                input("Move instance to trash [t] or delete permanently [d]? : ")
                 .strip()
                 .lower()
                 == "d"
@@ -402,7 +401,10 @@ def remove_instance(instance: InstanceData, types: list[str] = ["symlink", "stat
         # Restore game executable if it was backed up
         game_exec = instance.game_path / instance.game_executable
         if game_exec.exists():
-            rmtree(game_exec.parent / "modorganizer2")
+            data_dir = game_exec.parent / "modorganizer2"
+            if data_dir.exists() and data_dir.is_dir():
+                rmtree(data_dir)
+
             backup_exec = game_exec.with_suffix(".exe.bak")
             if backup_exec.exists():
                 move(backup_exec, game_exec)

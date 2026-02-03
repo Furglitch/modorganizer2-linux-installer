@@ -4,6 +4,8 @@ from loguru import logger
 from pydantic_core import from_json
 from util import state_file as state
 from uuid import UUID, uuid4 as new_uuid
+import json
+import webbrowser
 import websockets.sync.client as websockets
 
 
@@ -18,12 +20,19 @@ def id() -> UUID:
         The Nexus API UUID.
     """
 
-    id = state.state_file.nexus_api.uuid if state.state_file.nexus_api else None
-    if not id:
-        logger.trace("No existing Nexus UUID found. Generating a new one.")
-        id = new_uuid()
-    state.state_file.nexus_api.uuid = id
-    return id
+    if state.state_file.nexus_api:
+        if state.state_file.nexus_api.uuid:
+            uuid = state.state_file.nexus_api.uuid
+            return uuid
+    else:
+        state.state_file.nexus_api = state.NexusAPIData()
+        logger.warning(
+            " !!! Ignore those warnings about missing Nexus API data... It's on purpose."
+        )
+
+    uuid = new_uuid()
+    state.state_file.nexus_api.uuid = uuid
+    return uuid
 
 
 def connection_token() -> str:
@@ -37,11 +46,14 @@ def connection_token() -> str:
         The Nexus connection token.
     """
 
-    token = state.state_file.nexus_api.connection_token
-    if not token:
-        token = request_connection_token()
-    state.state_file.nexus_api.connection_token = token
-    return token
+    if state.state_file.nexus_api:
+        if state.state_file.nexus_api.connection_token:
+            connection_token = state.state_file.nexus_api.connection_token
+            return connection_token
+
+    connection_token = request_connection_token()
+    state.state_file.nexus_api.connection_token = connection_token
+    return connection_token
 
 
 def request_connection_token() -> str:
@@ -54,21 +66,24 @@ def request_connection_token() -> str:
         The requested Nexus connection token.
     """
 
-    uuid = state.state_file.nexus_api.uuid if state.state_file.nexus_api.uuid else id()
+    uuid = id()
     logger.debug("Requesting new Nexus connection token via WebSocket...")
     with websockets.connect("wss://sso.nexusmods.com") as socket:
+        logger.debug("Sending connection token request...")
         socket.send(
-            {
-                "id": str(uuid),
-                "protocol": 2,
-            }
+            json.dumps(
+                {
+                    "id": str(uuid),
+                    "protocol": 2,
+                }
+            )
         )
-        for message in socket:
-            response = from_json(message)
-            token = response.get("data", {}).get("connection_token")
-            if token:
-                socket.close()
-                break
+        message = socket.recv()
+        socket.close()
+    response = from_json(message)
+    token = response.get("data", {}).get("connection_token") or None
+    if token:
+        logger.success("Successfully obtained Nexus connection token.")
     return token
 
 
@@ -83,11 +98,15 @@ def api_key() -> str:
         The Nexus API key.
     """
 
-    key = state.state_file.nexus_api.api_key
-    if not key:
-        key = request_api_key()
-    state.state_file.nexus_api.api_key = key
-    return key
+    if state.state_file.nexus_api:
+        if state.state_file.nexus_api.api_key:
+            api_key = state.state_file.nexus_api.api_key
+            return api_key
+
+    api_key = request_api_key()
+    state.state_file.nexus_api.api_key = api_key
+    state.write_state(False)
+    return api_key
 
 
 def request_api_key() -> str:
@@ -100,26 +119,29 @@ def request_api_key() -> str:
         The requested Nexus API key.
     """
 
-    uuid = state.state_file.nexus_api.uuid if state.state_file.nexus_api.uuid else id()
-    token = (
-        state.state_file.nexus_api.connection_token
-        if state.state_file.nexus_api.connection_token
-        else request_connection_token()
-    )
-    logger.debug("Requesting new Nexus API key via WebSocket...")
+    uuid = str(id())
+    token = connection_token()
+    logger.info("Requesting new Nexus API key via WebSocket...")
     key = ""
     with websockets.connect("wss://sso.nexusmods.com") as socket:
+        logger.debug("Sending API key request...")
         socket.send(
-            {
-                "id": str(uuid),
-                "token": token,
-                "protocol": 2,
-            }
+            json.dumps(
+                {
+                    "id": uuid,
+                    "token": token,
+                    "protocol": 2,
+                }
+            )
         )
-        for message in socket:
-            response = from_json(message)
-            key = response.get("data", {}).get("api_key") or None
-            if key:
-                socket.close()
-                break
+        logger.debug("Opening web browser for Nexus Mods SSO authorization...")
+        webbrowser.open(
+            "https://www.nexusmods.com/sso?id=" + uuid + "&application=mo2lint"
+        )
+        message = socket.recv()
+        socket.close()
+    response = from_json(message)
+    key = response.get("data", {}).get("api_key") or None
+    if key:
+        logger.success("Successfully obtained Nexus API key.")
     return key

@@ -53,14 +53,18 @@ def nexus_request(url: str) -> requests.Response:
     return response
 
 
-def get_filename(response: requests.Response) -> str:
+def get_filename(game_slug: str, mod_id: str, file_id: str) -> str:
     """
     Retrieves the filename for a specific mod file from Nexus Mods.
 
     Parameters
     ----------
-    response : requests.Response
-        The response containing file information.
+    game_slug : str
+        The Nexus Mods game slug.
+    mod_id : str
+        The ID of the mod.
+    file_id : str
+        The ID of the file.
 
     Returns
     -------
@@ -68,11 +72,18 @@ def get_filename(response: requests.Response) -> str:
         The filename of the specified mod file.
     """
 
-    return str(from_json(response).get("file_name", ""))
+    url = f"https://api.nexusmods.com/v1/games/{game_slug}/mods/{mod_id}/files/{file_id}.json"
+    response = nexus_request(url)
+    filename = from_json(response.content).get("file_name", "")
+    return filename
 
 
 def nexus_download(
-    game_slug: str, mod_id: str, file_id: str, dest: Path, filename: Optional[str]
+    game_slug: str,
+    mod_id: str,
+    file_id: str,
+    dest: Path,
+    filename: Optional[str] = None,
 ) -> str:
     """
     Downloads a mod file from Nexus Mods to the specified destination.
@@ -101,11 +112,12 @@ def nexus_download(
         f"Requesting Nexus download metadata for {game_slug} mod {mod_id} file {file_id}"
     )
     response = nexus_request(url)
-    filename = filename if filename else get_filename(response)
+    if not filename:
+        filename = get_filename(game_slug, mod_id, file_id)
     path = dest / filename
     logger.debug(f"Resolved filename '{filename}', target path: {path}")
     download_url = None
-    for item in from_json(response):
+    for item in from_json(response.content):
         if item.get("short_name") == "Nexus CDN":
             download_url = item.get("URI", "").replace("\\u0026", "&")
             break

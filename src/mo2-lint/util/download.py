@@ -98,35 +98,28 @@ def download_nexus(
         The path to the downloaded file.
     """
 
-    attempts = 3
     dest.mkdir(parents=True, exist_ok=True)
-    for i in range(attempts):
-        logger.debug(
-            f"Attempting to download Nexus Mods file {file_id} for mod {mod_id} (Attempt {i + 1}/{attempts})"
-        )
-        try:
-            filename = nexus_dl(game, str(mod_id), str(file_id), dest, filename or None)
-            export = dest / filename
-            if export.exists() and checksum:
-                if compare_checksum(export, checksum):
-                    logger.debug(f"Successfully downloaded and verified {export}")
-                    return export
-                else:
-                    logger.warning(
-                        f"Checksum verification failed for {export}. Retrying..."
-                    )
-                    export.unlink(missing_ok=True)
-            elif export.exists():
-                logger.debug(f"Successfully downloaded {export}")
+    logger.debug(f"Attempting to download Nexus Mods file {file_id} for mod {mod_id}")
+    try:
+        filename = nexus_dl(game, str(mod_id), str(file_id), dest, filename or None)
+        export = dest / filename
+        if export.exists() and checksum:
+            if compare_checksum(export, checksum):
+                logger.debug(f"Successfully downloaded and verified {export}")
                 return export
-        except Exception as e:
-            logger.exception(
-                f"Error downloading Nexus Mods file {mod_id}:{file_id} on attempt {i + 1}/{attempts}: {e}",
-                backtrace=True,
-                diagnose=True,
-            )
-            continue
-    logger.error(
-        f"Failed to download Nexus Mods file {mod_id}:{file_id} after {attempts} attempts."
-    )
+            else:
+                logger.warning(
+                    f"Checksum verification failed for {export}. Retrying..."
+                )
+                export.unlink(missing_ok=True)
+        elif export.exists():
+            logger.debug(f"Successfully downloaded {export}")
+            return export
+    except Exception as e:
+        logger.exception(
+            f"Error downloading Nexus Mods file {mod_id}:{file_id}: {e}",
+            backtrace=True,
+            diagnose=True,
+        )
+    logger.error(f"Failed to download Nexus Mods file {mod_id}:{file_id}")
     return None

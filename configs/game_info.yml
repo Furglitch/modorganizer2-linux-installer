@@ -1,0 +1,485 @@
+schema: 7.0.0 # Earliest compatible MO2-LINT Version
+
+games:
+
+  cyberpunk2077:
+    display_name: Cyberpunk 2077
+    nexus_slug: cyberpunk2077
+    launcher_ids:
+      steam: 1091500
+      gog: 1423049311
+      epic: Ginger
+    subdirectory: Cyberpunk 2077
+    executable: REDprelauncher.exe
+    tricks:
+      - "xaudio2_7=native"
+      - "d3dcompiler_47"
+      - "vcrun2022"
+
+  dragonage:
+    display_name: 'Dragon Age: Origins - Ultimate Edition'
+    nexus_slug: dragonage
+    launcher_ids:
+      steam: 47810
+      gog: 1949616134
+    subdirectory: Dragon Age Ultimate Edition
+    executable: DAOriginsLauncher.exe
+    tricks:
+      - "xaudio2_7=native"
+      - "d3dcompiler_43"
+      - "d3dx9"
+
+  enderal:
+    display_name: 'Enderal: Forgotten Stories'
+    nexus_slug: enderal
+    launcher_ids:
+      steam: 933480
+      gog: 1708684988
+    subdirectory: Enderal
+    executable: Enderal Launcher.exe
+    tricks:
+      - "d3dcompiler_43"
+      - "d3dx9"
+
+  enderal_se:
+    display_name: 'Enderal: Forgotten Stories - Special Edition'
+    nexus_slug: enderalspecialedition
+    launcher_ids:
+      steam: 976620
+    subdirectory: Enderal Special Edition
+    executable: Enderal Launcher.exe
+    tricks:
+      - "xaudio2_7=native"
+      - "xact"
+      - "d3dcompiler_43"
+      - "vcrun2022"
+
+  fallout3:
+    display_name: Fallout 3
+    nexus_slug: fallout3
+    launcher_ids:
+      steam: 22300
+    subdirectory: Fallout 3
+    executable: Fallout3Launcher.exe
+    tricks:
+      - "d3dcompiler_43"
+      - "d3dx9"
+      - "vcrun2022"
+    script_extenders:
+      - version: "1.2-b2"
+        runtime:
+          steam:
+            - "1.0.0.15"
+            - "1.1.0.35"
+            - "1.4.0.6"
+            - "1.5.0.22"
+            - "1.6.0.3"
+            - "1.7.0.3"
+        download:
+          checksum: 77670a08aebabb5c5c6ace66acfb45c65a6d54cd076477c82c5d788dc591795e
+          direct: "http://fose.silverlock.org/beta/fose_v1_2_beta2.7z"
+          nexus:
+            mod: 8606
+            file: 1000023625
+        file_whitelist:
+          - "fose_v1_2_beta2/fose_1_0.dll"
+          - "fose_v1_2_beta2/fose_1_1.dll"
+          - "fose_v1_2_beta2/fose_1_4.dll"
+          - "fose_v1_2_beta2/fose_1_4b.dll"
+          - "fose_v1_2_beta2/fose_1_5.dll"
+          - "fose_v1_2_beta2/fose_1_6.dll"
+          - "fose_v1_2_beta2/fose_1_7.dll"
+          - "fose_v1_2_beta2/fose_1_7ng.dll"
+          - "fose_v1_2_beta2/fose_editor_1_1.dll"
+          - "fose_v1_2_beta2/fose_editor_1_5.dll"
+          - "fose_v1_2_beta2/fose_loader.exe"
+      - version: "1.3-b2"
+        runtime:
+          steam: "1.7.0.3" # Unclear if previous versions are supported, only 'not 1.0.0.12' is mentioned
+        download:
+          checksum: 67be7d78fac301acac0491d34020ed2a0b98b9b06ce0b4f5ea26d9da21351e04
+          direct: "http://fose.silverlock.org/beta/fose_v1_3_beta.7z"
+          nexus:
+            mod: 8606
+            file: 1000023643
+        file_whitelist:
+          - "fose_1_7.dll"
+          - "fose_1_7ng.dll"
+          - "fose_editor_1_5.dll"
+          - "fose_loader.exe"
+
+  fallout3_goty:
+    display_name: Fallout 3 - GotY Edition
+    nexus_slug: fallout3
+    launcher_ids:
+      steam: 22370
+      gog: 1454315831
+    subdirectory: Fallout 3 goty
+    executable: Fallout3Launcher.exe
+    tricks:
+      - "d3dcompiler_43"
+      - "d3dx9"
+      - "vcrun2022"
+    script_extenders:
+      - version: "1.2-b2"
+        runtime:
+          steam:
+            - "1.0.0.15"
+            - "1.1.0.35"
+            - "1.4.0.6"
+            - "1.5.0.22"
+            - "1.6.0.3"
+            - "1.7.0.3"
+          gog: "1.7.0.3"
+        download:
+          checksum: 77670a08aebabb5c5c6ace66acfb45c65a6d54cd076477c82c5d788dc591795e
+          direct: "http://fose.silverlock.org/beta/fose_v1_2_beta2.7z"
+          nexus:
+            mod: 8606
+            file: 1000023625
+        file_whitelist:
+          - "fose_v1_2_beta2/fose_1_0.dll"
+          - "fose_v1_2_beta2/fose_1_1.dll"
+          - "fose_v1_2_beta2/fose_1_4.dll"
+          - "fose_v1_2_beta2/fose_1_4b.dll"
+          - "fose_v1_2_beta2/fose_1_5.dll"
+          - "fose_v1_2_beta2/fose_1_6.dll"
+          - "fose_v1_2_beta2/fose_1_7.dll"
+          - "fose_v1_2_beta2/fose_1_7ng.dll"
+          - "fose_v1_2_beta2/fose_editor_1_1.dll"
+          - "fose_v1_2_beta2/fose_editor_1_5.dll"
+          - "fose_v1_2_beta2/fose_loader.exe"
+      - version: "1.3-b2"
+        runtime:
+          steam: "1.7.0.3" # Unclear if previous versions are supported, only 'not 1.0.0.12' is mentioned
+          gog: "1.7.0.3"
+        download:
+          checksum: 67be7d78fac301acac0491d34020ed2a0b98b9b06ce0b4f5ea26d9da21351e04
+          direct: "http://fose.silverlock.org/beta/fose_v1_3_beta2.7z"
+          nexus:
+            mod: 8606
+            file: 1000023626
+        file_whitelist:
+          - "fose_1_7.dll"
+          - "fose_1_7ng.dll"
+          - "fose_editor_1_5.dll"
+          - "fose_loader.exe"
+
+  fallout4:
+    display_name: Fallout 4
+    nexus_slug: fallout4
+    launcher_ids:
+      steam: 377160
+      gog: 1998527297
+      epic: 61d52ce4d09d41e48800c22784d13ae8
+    subdirectory: Fallout 4
+    executable: Fallout4Launcher.exe
+    tricks:
+      - "xaudio2_7=native"
+      - "grabfullscreen=y"
+    script_extenders:
+      - version: "0.6.23"
+        runtime:
+          steam: "1.10.163"
+          gog: "1.10.163"
+        download:
+          checksum: 39575bbb688fc40598496e28afafb5270a6e44c00656a160a30f467efbade21c
+          direct: "https://f4se.silverlock.org/beta/f4se_0_06_23.7z"
+          nexus:
+            mod: 42147
+            file: 253313
+        file_whitelist:
+          - "f4se_0_06_23/Data"
+          - "f4se_0_06_23/CustomControlMap.txt"
+          - "f4se_0_06_23/f4se_1_10_163.dll"
+          - "f4se_0_06_23/f4se_loader.exe"
+          - "f4se_0_06_23/f4se_steam_loader.dll"
+      - version: "0.7.2"
+        runtime:
+          steam: "1.10.984"
+        download:
+          checksum: f81b1a7530c7c483043050121145a4bb625d183dd0b4c11287ab11ae395af790
+          nexus:
+            mod: 42147
+            file: 316287
+        file_whitelist:
+          - "f4se_0_07_02/Data"
+          - "f4se_0_07_02/CustomControlMap.txt"
+          - "f4se_0_07_02/f4se_1_10_984.dll"
+          - "f4se_0_07_02/f4se_loader.exe"
+      - version: "0.7.5"
+        runtime:
+          steam: "1.11.159"
+        download:
+          checksum: f1b3171e8e7e7658128839e72b81b43419956e479728d54589c0ba123b439b08
+          nexus:
+            mod: 42147
+            file: 375407
+        file_whitelist:
+          - "f4se_0_07_05/Data"
+          - "f4se_0_07_05/CustomControlMap.txt"
+          - "f4se_0_07_05/f4se_1_11_159.dll"
+          - "f4se_0_07_05/f4se_loader.exe"
+      - version: "0.7.6"
+        runtime:
+          steam: "1.11.169"
+        download:
+          checksum: 41e7acf12688f640658b593172cb6d806b83643ad76facf27fbbfb3641025e0b
+          nexus:
+            mod: 42147
+            file: 374185
+        file_whitelist:
+          - "f4se_0_07_06/Data"
+          - "f4se_0_07_06/CustomControlMap.txt"
+          - "f4se_0_07_06/f4se_1_11_169.dll"
+          - "f4se_0_07_06/f4se_loader.exe"
+      - version: "0.7.7"
+        runtime:
+          steam: "1.11.191"
+        download:
+          checksum: d1747dfefa28e2de37468d0de4b2458eb7c5224e30fca24ed328cfc1b40d8a08
+          nexus:
+            mod: 42147
+            file: 377611
+        file_whitelist:
+          - "f4se_0_07_07/Data"
+          - "f4se_0_07_07/CustomControlMap.txt"
+          - "f4se_0_07_07/f4se_1_11_191.dll"
+          - "f4se_0_07_07/f4se_loader.exe"
+
+  fallout4_vr:
+    display_name: Fallout 4 VR
+    nexus_slug: fallout4
+    launcher_ids:
+      steam: 611660
+    subdirectory: Fallout 4 VR
+    executable: Fallout4VR.exe
+    tricks:
+      - "xaudio2_7=native"
+      - "xact"
+      - "d3dcompiler_43"
+      - "vcrun2022"
+    script_extenders:
+      - version: "0.6.21"
+        runtime:
+          steam: "1.2.72"
+        download:
+          checksum: df5b27b29007052ccee236304ffe9b029b9d2fcf8e2ee2118205a6d0be700fb3
+          direct: "https://f4se.silverlock.org/beta/f4sevr_0_6_21.7z"
+        file_whitelist:
+          - "f4sevr_0_6_21/Data"
+          - "f4sevr_0_6_21/f4sevr_1_2_72.dll"
+          - "f4sevr_0_6_21/f4sevr_loader.exe"
+          - "f4sevr_0_6_21/f4sevr_steam_loader.dll"
+
+  falloutnv:
+    display_name: 'Fallout: New Vegas'
+    nexus_slug: newvegas
+    launcher_ids:
+      steam: 22380
+      gog: 1454587428
+      epic: 5daeb974a22a435988892319b3a4f476
+    subdirectory: Fallout New Vegas
+    executable: FalloutNVLauncher.exe
+    tricks:
+      - "d3dcompiler_43"
+      - "d3dx9"
+      - "vcrun2022"
+    script_extenders:
+      - version: "6.4.4"
+        runtime:
+          steam: "1.4.0.525"
+          gog: "1.4.0.525"
+          epic: "1.4.0.525"
+        download:
+          checksum: 854b506349a39ba1d472e82def4f465d989692cea5593e626685ac128fd164a6
+          direct: "https://github.com/xNVSE/NVSE/releases/download/6.4.4/nvse_6_4_4.7z"
+        file_whitelist:
+          - "Data"
+          - "nvse_1_4.dll"
+          - "nvse_editor_1_4.dll"
+          - "nvse_loader.exe"
+          - "nvse_steam_loader.dll"
+
+  falloutnv_ru:
+    display_name: 'Fallout: New Vegas (Russian)'
+    nexus_slug: newvegas
+    launcher_ids:
+      steam: 22490
+    subdirectory: Fallout New Vegas enplczru
+    executable: FalloutNVLauncher.exe
+    tricks:
+      - "d3dcompiler_43"
+      - "d3dx9"
+      - "vcrun2022"
+    script_extenders:
+      - version: "6.4.4"
+        runtime:
+          steam: "1.4.0.525"
+        download:
+          checksum: 854b506349a39ba1d472e82def4f465d989692cea5593e626685ac128fd164a6
+          direct: "https://github.com/xNVSE/NVSE/releases/download/6.4.4/nvse_6_4_4.7z"
+        file_whitelist:
+          - "Data"
+          - "nvse_1_4.dll"
+          - "nvse_editor_1_4.dll"
+          - "nvse_loader.exe"
+          - "nvse_steam_loader.dll"
+
+  morrowind:
+    display_name: 'The Elder Scrolls III: Morrowind'
+    nexus_slug: morrowind
+    launcher_ids:
+      steam: 22320
+      gog: 1435828767
+    subdirectory: Morrowind
+    executable: Morrowind Launcher.exe
+    tricks:
+      - "d3dcompiler_43"
+      - "d3dx9"
+    script_extenders:
+      - version: "latest"
+        download:
+          direct: "https://github.com/MWSE/MWSE/releases/download/build-automatic/mwse.zip"
+
+  oblivion:
+    display_name: 'The Elder Scrolls IV: Oblivion'
+    nexus_slug: oblivion
+    launcher_ids:
+      steam: 22330
+      gog: 1458058109
+    subdirectory: Oblivion
+    executable: OblivionLauncher.exe
+    tricks:
+      - "d3dcompiler_43"
+      - "d3dx9"
+    script_extenders:
+      - version: "22.13"
+        runtime:
+          steam: "1.2.0416"
+          gog: "1.2.0416"
+        download:
+          checksum: 92d18411a9da803ffaac8c0b005cb6b37c4f9ce2f1571215f39363760d832bf2
+          direct: "http://www.uesp.net/downloads/files/obse/obse_22_13.zip"
+        file_whitelist:
+          - "Data"
+          - "obse_1_2_416.dll"
+          - "obse_editor_1_2.dll"
+          - "obse_loader.exe"
+          - "obse_steam_loader.dll"
+
+  skyrim:
+    display_name: 'The Elder Scrolls V: Skyrim'
+    nexus_slug: skyrim
+    launcher_ids:
+      steam: 72850
+    subdirectory: Skyrim
+    executable: SkyrimLauncher.exe
+    tricks:
+      - "d3dcompiler_43"
+      - "d3dx9"
+    script_extenders:
+      - version: "1.7.3"
+        download:
+          checksum: 1825024212a20a6a197bbcd308073b497e516139ad48d60685d5b18ab4bbe76d
+          direct: "https://skse.silverlock.org/beta/skse_1_07_03.7z"
+        file_whitelist:
+          - "skse_1_07_03/Data"
+          - "skse_1_07_03/skse_1_9_32.dll"
+          - "skse_1_07_03/skse_loader.exe"
+          - "skse_1_07_03/skse_steam_loader.dll"
+
+  skyrim_se:
+    display_name: 'The Elder Scrolls V: Skyrim - Special Edition'
+    nexus_slug: skyrimspecialedition
+    launcher_ids:
+      steam: 489830
+      gog: 1711230643
+    subdirectory: Skyrim Special Edition
+    executable: SkyrimSELauncher.exe
+    tricks:
+      - "xaudio2_7=native"
+      - "xact"
+      - "d3dcompiler_43"
+      - "vcrun2022"
+    script_extenders:
+      - version: "2.0.20"
+        runtime:
+          steam: "1.5.97"
+          gog: "1.5.97"
+        download:
+          checksum: 46f70b963b22e3c242bac45e1716c39349798fba5b74c978419a10d604b542d7
+          direct: "https://skse.silverlock.org/beta/skse64_2_00_20.7z"
+        file_whitelist:
+          - "skse64_2_00_20/Data"
+          - "skse64_2_00_20/skse64_1_5_97.dll"
+          - "skse64_2_00_20/skse64_loader.exe"
+          - "skse64_2_00_20/skse64_steam_loader.dll"
+      - version: "2.2.6"
+        runtime:
+          steam: "1.6.1170"
+        download:
+          checksum: d7297f1a1d613e5265e1af4dbbfe8bd37a32719c1ccef363fc6187fa6eba0848
+          direct: "https://skse.silverlock.org/beta/skse64_2_02_06.7z"
+        file_whitelist:
+          - "skse64_2_02_06/Data"
+          - "skse64_2_02_06/skse64_1_6_1170.dll"
+          - "skse64_2_02_06/skse64_loader.exe"
+      - version: "2.2.6" # For GOG
+        runtime:
+          gog: "1.6.1179"
+        download:
+          checksum: 25d161cc82f7048458af442c8accc3c97bde86288dbc75cf622afa317791d654
+          direct: "https://skse.silverlock.org/beta/skse64_2_02_06_gog.7z"
+        file_whitelist:
+          - "skse64_2_02_06_gog/Data"
+          - "skse64_2_02_06_gog/skse64_1_6_1179.dll"
+          - "skse64_2_02_06_gog/skse64_loader.exe"
+
+  skyrim_vr:
+    display_name: 'The Elder Scrolls V: Skyrim VR'
+    nexus_slug: skyrimspecialedition
+    launcher_ids:
+      steam: 611670
+    subdirectory: SkyrimVR
+    executable: SkyrimVR.exe
+    tricks:
+      - "xaudio2_7=native"
+      - "xact"
+      - "d3dcompiler_43"
+      - "vcrun2022"
+    script_extenders:
+      - version: "2.0.12"
+        runtime:
+          steam: "1.4.15"
+        download:
+          checksum: f03df5d8663f2c9a781f830fb0809c63a9a0e3b626d6d1a96e38493f81a3c9ad
+          direct: "https://skse.silverlock.org/beta/sksevr_2_00_12.7z"
+        file_whitelist:
+          - "sksevr_2_00_12/bindings"
+          - "sksevr_2_00_12/Data"
+          - "sksevr_2_00_12/sksevr_1_4_15.dll"
+          - "sksevr_2_00_12/sksevr_loader.exe"
+          - "sksevr_2_00_12/sksevr_steam_loader.dll"
+
+  starfield:
+    display_name: Starfield
+    nexus_slug: starfield
+    launcher_ids:
+      steam: 1716740
+    subdirectory: Starfield
+    executable: Starfield.exe
+    tricks:
+      - "xaudio2_7=native"
+    script_extenders:
+      - version: "0.2.18"
+        runtime:
+          steam: "1.15.222"
+        download:
+          checksum: 0e3441807c5ac00c1a4b8d96f154eb8f4d001451dc2a845b3dd1ef50c2981ee5
+          nexus:
+            mod: 106
+            file: 55300
+        file_whitelist:
+          - "sfse_0_2_18/sfse_1_15_222.dll"
+          - "sfse_0_2_18/sfse_loader.exe"

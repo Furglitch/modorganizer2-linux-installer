@@ -183,7 +183,7 @@ def prompt():
         logger.debug("User confirmed clean prefix setup.")
         if var.archived_prefix is not None:
             restore_archived_prefix(prefix)
-        print(prompt_archive_done.format(directory=var.archived_prefix))
+            print(prompt_archive_done.format(directory=var.archived_prefix))
 
 
 def configure():

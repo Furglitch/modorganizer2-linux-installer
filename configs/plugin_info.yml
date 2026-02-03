@@ -1,0 +1,17 @@
+schema: 7.0.0 # Earliest compatible MO2-LINT Version
+
+plugins:
+
+  # <plugin-name>: "<url-to-plugin-manifest.json>"
+  root-builder: "https://raw.githubusercontent.com/Kezyma/ModOrganizer-Plugins/main/directory/plugins/rootbuilder.json"
+  reinstaller: "https://raw.githubusercontent.com/Kezyma/ModOrganizer-Plugins/main/directory/plugins/reinstaller.json"
+  shortcutter: "https://raw.githubusercontent.com/Kezyma/ModOrganizer-Plugins/main/directory/plugins/shortcutter.json"
+  plugin-finder: "https://raw.githubusercontent.com/Kezyma/ModOrganizer-Plugins/main/directory/plugins/pluginfinder.json"
+  profile-sync: "https://raw.githubusercontent.com/Kezyma/ModOrganizer-Plugins/main/directory/plugins/profilesync.json"
+  openmw-player: "https://raw.githubusercontent.com/Kezyma/ModOrganizer-Plugins/main/directory/plugins/openmwplayer.json"
+  grass-precacher: "https://raw.githubusercontent.com/Al12rs/modorganizer-GrassPrecacher/master/manifest.json"
+  auto-activator: "https://raw.githubusercontent.com/JonathanFeenstra/modorganizer-auto-activator/main/manifest.json"
+  fomod-plus: "https://raw.githubusercontent.com/aglowinthefield/mo2-fomod-plus/refs/heads/main/plugindefinition.json"
+  nxm-collection-dl: "https://raw.githubusercontent.com/Furglitch/modorganizer2-nxm-collection-dl/main/plugindefinition.json"
+
+  # These links lead to manifest files that use the pluginfinder format - https://github.com/Kezyma/ModOrganizer-Plugins/blob/main/docs/pluginfinder.md#adding-your-plugin

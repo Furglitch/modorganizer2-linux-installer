@@ -40,7 +40,7 @@ def get_data() -> tuple[str, str, str, str, str]:
         if dir.exists():
             logger.debug(f"Found {release} release. Heroic config located at {dir}")
             if not get_libraries(dir):
-                logger.error("No valid Heroic libraries found.")
+                logger.warning("No valid Heroic libraries found.")
                 continue
             elif gog_data and not epic_data:
                 launcher = "gog"
@@ -55,7 +55,7 @@ def get_data() -> tuple[str, str, str, str, str]:
                 install_path = Path(epic_data["install_path"])
                 wine_prefix = get_wine_prefix(epic_data["game_id"], dir)
             elif epic_data and gog_data:
-                logger.error(
+                logger.warning(
                     "Both GOG and Epic libraries found. Functionality not yet implemented."  # TODO
                 )
                 launcher, game_id, install_path, wine_prefix = (
@@ -180,7 +180,7 @@ def get_libraries(config_directory: Path) -> tuple[Path, Path]:
             epic_available = False
 
     if not valid():
-        logger.debug("No valid Heroic libraries found")
+        logger.warning("No valid Heroic libraries found")
         return None
 
     logger.debug(

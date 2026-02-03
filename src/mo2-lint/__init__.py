@@ -14,6 +14,7 @@ from util.state_file import match_instances, set_index, InstanceData
 from util.uninstall import uninstall as _uninstall
 import click
 import re
+import yaml
 
 """
 Log Levels:
@@ -68,7 +69,7 @@ def pull_config() -> None:
     Before that, copies default configuration files from internal storage if not already present.
     """
     logger.trace("Starting pull_config process.")
-    for config in {"game_info.json", "resource_info.json", "plugin_info.json"}:
+    for config in {"game_info.yml", "resource_info.yml", "plugin_info.yml"}:
         logger.trace(f"Processing config file: {config}")
         config_path = Path("~/.config/mo2-lint/", config).expanduser()
         dest = None
@@ -86,20 +87,40 @@ def pull_config() -> None:
         else:
             logger.trace(f"{config} already exists in ~/.config/mo2-lint/")
 
-        # try:
-        #     from urllib.request import urlretrieve
+        # Check if yml schema version is incompatbile (remote yaml has higher version number than local script)
+        remote_raw = f"https://raw.githubusercontent.com/Furglitch/modorganizer2-linux-installer/refs/heads/rewrite/configs/{config}"
 
-        #     logger.trace(f"Attempting to download latest {config} from GitHub.")
-        #     config_path.parent.mkdir(parents=True, exist_ok=True)
-        #     urlretrieve(
-        #         f"https://raw.githubusercontent.com/Furglitch/modorganizer2-linux-installer/refs/heads/rewrite/configs/{config}",
-        #         config_path,
-        #     )
-        #     logger.debug(f"Downloaded latest {config} from GitHub.")
-        # except Exception as e:
-        #     logger.exception(
-        #         f"Failed to download {config}: {e}", backtrace=True, diagnose=True
-        #     )
+        try:
+            from urllib.request import urlretrieve
+            from requests import get
+
+            # Check remote schema version
+            logger.trace(f"Checking remote schema version for {config}.")
+            response = get(remote_raw)
+            remote_yml = yaml.load(response.text, Loader=yaml.SafeLoader)
+            remote_schema_version = remote_yml.get("schema", 0)
+            remote_schema_parts = list(map(int, str(remote_schema_version).split(".")))
+            local_version_parts = list(map(int, str(var.version).split(".")))
+            logger.trace(
+                f"Remote schema version: {remote_schema_version}, local version: {var.version}"
+            )
+            if tuple(remote_schema_parts) > tuple(local_version_parts):
+                logger.warning(
+                    f"There has been a schema update {config} which is incompatible with this version of mo2-lint."
+                    "The latest configuration files will not be downloaded. Please update mo2-lint to the latest version to continue receiving updates."
+                )
+            else:
+                logger.trace(f"Attempting to download latest {config} from GitHub.")
+                config_path.parent.mkdir(parents=True, exist_ok=True)
+                urlretrieve(
+                    remote_raw,
+                    config_path,
+                )
+                logger.debug(f"Downloaded latest {config} from GitHub.")
+        except Exception as e:
+            logger.exception(
+                f"Failed to download {config}: {e}", backtrace=True, diagnose=True
+            )
 
 
 def get_valid_games() -> dict:
@@ -180,7 +201,7 @@ class CustomCommand(click.Command):
     "game_info_path",
     type=click.Path(file_okay=True, dir_okay=False, path_type=Path),
     help=(
-        "Use a custom game_info file to install for any game. Follow with '/path/to/game_info.json'. "
+        "Use a custom game_info file to install for any game. Follow with '/path/to/game_info.yml'. "
         "Requires [GAME], [DIRECTORY] arguments. MO2 installs for custom games unsupported"
     ),
 )

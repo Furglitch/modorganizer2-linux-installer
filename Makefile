@@ -22,6 +22,7 @@ _build: venv/bin/activate
 		--hidden-import patoolib \
 		--hidden-import protontricks \
 		--hidden-import pydantic_core \
+		--hidden-import yaml \
 		--hidden-import requests \
 		--hidden-import send2trash \
 		--hidden-import websockets \
