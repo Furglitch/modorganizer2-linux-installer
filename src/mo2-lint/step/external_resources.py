@@ -60,7 +60,9 @@ def download_winetricks():
 def download_java():
     """
     Runs the download process for Java.
+    <!-- Called in step.workarounds.apply_workarounds if needed -->
     """
+
     logger.debug("Initiating Java download...")
     url = var.resource_info.java.download_url
     checksum = var.resource_info.java.internal_checksum
@@ -270,7 +272,6 @@ def download():
         for plugin in params.plugins:
             download_plugin(plugin)
     download_winetricks()
-    download_java()  # ! Specify only for required games
     if params.script_extender:
         for entry in script_extenders or []:
             runtime = getattr(entry, "runtime", None)

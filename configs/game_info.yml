@@ -41,6 +41,7 @@ games:
       - "d3dcompiler_43"
       - "d3dx9"
     workarounds:
+      - needs_java: true
       - directories:
         - "Data/FNIS"
         - "Data/SkyProc Patchers/Automatic Variants"
@@ -401,6 +402,7 @@ games:
           - "skse_1_07_03/skse_loader.exe"
           - "skse_1_07_03/skse_steam_loader.dll"
     workarounds:
+      - needs_java: true
       - directories:
         - "Data/FNIS"
         - "Data/SkyProc Patchers/Automatic Variants"
