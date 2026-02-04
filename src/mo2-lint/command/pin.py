@@ -5,7 +5,7 @@ from util import state_file as state
 from loguru import logger
 
 
-def pin(directory: Path):
+def pin(directory: Path, pin: bool = True):
     """
     Pins the current MO2 version for the instance located at the given directory.
     """
@@ -24,5 +24,5 @@ def pin(directory: Path):
         raise ValueError(f"Multiple instances found for directory: {directory}")
     state.current_instance = matched[0]
     logger.info(f"Pinning MO2 version for instance at {directory}")
-    state.current_instance.pin = True
+    state.current_instance.pin = pin
     state.write_state(add_current=True)

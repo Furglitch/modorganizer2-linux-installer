@@ -48,8 +48,9 @@ mo2_lint list <game> <directory> [options]
 > Given `<game>`, the script will filter and display only MO2 instances associated with that game.<br>
 > If `<directory>` is provided, it will specifically look for MO2 instances located at that path. You can also use higher level directories to search for instances within it's subdirectories.
 
-## `pin`
+## `pin` and `unpin`
 The `pin` command allows you to prevent an MO2 instance from having it's Mod Organizer 2 version updated. This is useful if you want to maintain a specific version for compatibility reasons.
+To reverse this, you can use the `unpin` command. The same parameters apply, just switching the command name.
 
 ```bash
 mo2_lint pin <directory> [options]
@@ -57,7 +58,7 @@ mo2_lint pin <directory> [options]
 
 > #### Parameters
 > `<directory>` is a required parameter.<br>
-> Where `<directory>` is the path of the MO2 instance you want to pin. You must provide the exact path to the instance you wish to pin. Higher level directories will not work for this command.
+> Where `<directory>` is the path of the MO2 instance you want to pin/unpin. You must provide the exact path to the instance you wish to adjust. Higher level directories will not work for this command.
 
 ## `update`
 The `update` command updates the Mod Organizer 2 install and Redirector of an existing instance, as well as the NXM handler to the latest version.<br>

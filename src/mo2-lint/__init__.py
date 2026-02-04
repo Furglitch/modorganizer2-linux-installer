@@ -344,7 +344,17 @@ def list(game: Optional[str], directory: Optional[Path], log_level):
 @click_arg_directory(required=True)
 def pin(directory: Path, log_level):
     start(directory=directory, log_level=log_level)
-    _pin(directory)
+    _pin(directory, pin=True)
+
+
+@cli.command(help=help_pin)
+@click_version
+@click_help
+@click_log_level
+@click_arg_directory(required=True)
+def unpin(directory: Path, log_level):
+    start(directory=directory, log_level=log_level)
+    _pin(directory, pin=False)
 
 
 @cli.command(help=help_pin)
