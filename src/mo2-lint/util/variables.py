@@ -239,6 +239,8 @@ class GameInfo:
 
     Parameters
     -----------
+    parent: str, optional
+        Key identifier for the parent GameInfo entry, if any.
     display_name : str
         Display name of the game, for use in logs and messages.
     nexus_slug : str
@@ -262,9 +264,10 @@ class GameInfo:
         If required parameters [display_name, nexus_slug, launcher_ids] are not provided
     """
 
-    display_name: str = None
-    nexus_slug: str = None
-    launcher_ids: LauncherIDs = None
+    parent: Optional[str] = None
+    display_name: Optional[str] = None
+    nexus_slug: Optional[str] = None
+    launcher_ids: Optional[LauncherIDs] = None
     subdirectory: Optional[str | dict[str, str]] = None
     executable: Optional[str | dict[str, str]] = None
     tricks: Optional[Tuple[str, ...]] = field(default_factory=tuple)
@@ -276,9 +279,12 @@ class GameInfo:
         if isinstance(data, cls):
             return data
         return cls(
-            display_name=data.get("display_name"),
-            nexus_slug=data.get("nexus_slug"),
-            launcher_ids=LauncherIDs.from_dict(data.get("launcher_ids")),
+            parent=data.get("parent") or None,
+            display_name=data.get("display_name") or None,
+            nexus_slug=data.get("nexus_slug") or None,
+            launcher_ids=LauncherIDs.from_dict(data.get("launcher_ids"))
+            if data.get("launcher_ids")
+            else None,
             subdirectory=data.get("subdirectory") or None,
             executable=data.get("executable") or None,
             tricks=tuple(data.get("tricks") or ()),
@@ -291,12 +297,15 @@ class GameInfo:
         )
 
     def __post_init__(self):
-        if not self.display_name:
-            raise ValueError("Game display_name must be provided.")
-        if not self.nexus_slug:
-            raise ValueError("Game nexus_slug must be provided.")
-        if not self.launcher_ids:
-            raise ValueError("Game launcher_ids must be provided.")
+        if not self.parent:
+            if not self.display_name:
+                raise ValueError("Game display_name must be provided.")
+            if not self.nexus_slug:
+                raise ValueError("Game nexus_slug must be provided.")
+            if not self.launcher_ids:
+                raise ValueError("Game launcher_ids must be provided.")
+        if self.parent and self.parent not in games_info:
+            raise ValueError(f"Parent game '{self.parent}' not found in games_info.")
 
 
 games_info: dict[str, GameInfo] = {}
@@ -339,7 +348,34 @@ def load_game_info(game_key: str):
     """
     global game_info
     game_info = games_info[game_key]
+    if game_info.parent and game_info.parent in games_info:
+        # Backup child values
+        child_info = game_info
+
+        # Load parent info
+        game_info = games_info[game_info.parent]
+
+        # Override with child values
+        for field_name in child_info.__dataclass_fields__:
+            if field_name == "parent":
+                continue
+
+            child_value = getattr(child_info, field_name)
+            if child_value in (None, (), [], {}):
+                continue
+
+            parent_value = getattr(game_info, field_name)
+            if isinstance(parent_value, dict) and isinstance(child_value, dict):
+                merged = dict(parent_value)
+                merged.update(child_value)
+                setattr(game_info, field_name, merged)
+                child_value = merged
+            else:
+                setattr(game_info, field_name, child_value)
+            logger.trace(f"Set field '{field_name}' to: {child_value}")
+
     logger.trace(f"Loaded game info for '{game_key}': {game_info}")
+    raise SystemExit("Debug Testing")
 
 
 @dataclass
