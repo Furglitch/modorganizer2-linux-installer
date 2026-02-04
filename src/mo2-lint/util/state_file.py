@@ -405,6 +405,9 @@ def remove_instance(instance: InstanceData, types: list[str] = ["symlink", "stat
             if data_dir.exists() and data_dir.is_dir():
                 rmtree(data_dir)
 
+            if not var.game_info:
+                var.load_game_info(instance.nexus_slug)
+
             backup_exec = (
                 Path(str(game_exec.with_suffix("")) + ".bak.exe")
                 if var.game_info.workarounds
@@ -479,8 +482,6 @@ def match_instances(game: Optional[str], directory: Optional[Path]) -> dict:
     global state_file
     matched: list[InstanceData] = []
 
-    process = "Matching" if (game or directory) else "Existing"
-    logger.debug(f"{process} Mod Organizer 2 Instances:")
     if not state_file.instances:
         logger.warning("No instances found that match the criteria.")
         return

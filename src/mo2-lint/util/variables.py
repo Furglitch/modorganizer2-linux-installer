@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from loguru import logger
 from pathlib import Path
 from typing import Final, Optional, Tuple, List
+from util.internal_file import internal_file
 import yaml
 
 
@@ -314,12 +315,16 @@ def load_games_info(path: Optional[Path] = None):
     global games_info
     if not path:
         path = Path("~/.config/mo2-lint/game_info.yml").expanduser()
+        if not path.exists():
+            logger.warning(f"Default game_info file not found: {path}")
+            logger.warning("Using built-in game_info data.")
+            path = internal_file("cfg", "game_info.yml")
     logger.debug(f"Loading game info from path: {path}")
+
     with open(path, "r", encoding="utf-8") as file:
         yml = yaml.load(file.read(), Loader=yaml.SafeLoader)
     logger.trace(f"Game info YAML content: {yml}")
     for key, value in yml.get("games", {}).items():
-        print(value)
         games_info[key] = GameInfo.from_dict(value)
 
 

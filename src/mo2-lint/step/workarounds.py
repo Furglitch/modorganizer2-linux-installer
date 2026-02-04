@@ -24,7 +24,6 @@ def apply_workarounds():
                 if t == "files":
                     logger.debug("Creating workaround files...")
                     for f in w:
-                        print(f)
                         for src, dest in f.items():
                             src = internal_file("cfg", "workarounds", src)
                             dest = Path(var.game_install_path) / dest
