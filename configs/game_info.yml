@@ -8,7 +8,7 @@ games:
     launcher_ids:
       steam: 1091500
       gog: 1423049311
-      epic: Ginger
+      epic: 77f2b98e2cef40c8a7437518bf420e47
     subdirectory: Cyberpunk 2077
     executable: REDprelauncher.exe
     tricks:
@@ -123,6 +123,7 @@ games:
     launcher_ids:
       steam: 22370
       gog: 1454315831
+      epic: adeae8bbfc94427db57c7dfecce3f1d4
     subdirectory: Fallout 3 goty
     executable: Fallout3Launcher.exe
     tricks:
@@ -345,6 +346,7 @@ games:
     launcher_ids:
       steam: 22320
       gog: 1435828767
+      # epic: ???
     subdirectory: Morrowind
     executable: Morrowind Launcher.exe
     tricks:
@@ -418,6 +420,7 @@ games:
     launcher_ids:
       steam: 489830
       gog: 1711230643
+      epic: ac82db5035584c7f8a2c548d98c86b2c
     subdirectory: Skyrim Special Edition
     executable: SkyrimSELauncher.exe
     tricks:
