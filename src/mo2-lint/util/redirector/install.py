@@ -11,14 +11,18 @@ import stat
 redirector_build = internal_file("dist", "redirector.exe")
 
 
-def create_path_entry():
+def create_path_entry(game_install_path: Path):
     """
     Creates the path entry file for the redirector.
     """
     game_install_path = (
-        state.current_instance.game_path
-        if state.current_instance.game_path.is_dir()
-        else state.current_instance.game_path.parent
+        (
+            state.current_instance.game_path
+            if state.current_instance.game_path.is_dir()
+            else state.current_instance.game_path.parent
+        )
+        if not game_install_path
+        else game_install_path
     )
 
     redirect_file = game_install_path / "modorganizer2" / "instance_path.txt"
@@ -64,11 +68,26 @@ def install():
         else state.current_instance.game_path.parent
     )
 
+    subdirectory = (
+        var.game_info.subdirectory
+        if isinstance(var.game_info.subdirectory, str)
+        else var.game_info.subdirectory.get(state.current_instance.launcher)
+    )
+    if game_install_path.name is not subdirectory:
+        game_install_path = game_install_path.parent / subdirectory
+        state.current_instance.game_path = game_install_path
+
     if not (game_install_path / "modorganizer2" / "instance_path.txt").exists():
         logger.debug("Creating path entry for Redirector...")
-        create_path_entry()
+        create_path_entry(game_install_path)
 
-    exec_path = game_install_path / var.game_info.executable
+    exec = (
+        var.game_info.executable.get(state.current_instance.launcher)
+        if isinstance(var.game_info.executable, dict)
+        else var.game_info.executable
+    )
+    state.current_instance.game_executable = exec
+    exec_path = game_install_path / exec
     exec_backup = (
         Path(str(exec_path.with_suffix("")) + ".bak.exe")
         if var.game_info.workarounds

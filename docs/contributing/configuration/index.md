@@ -41,11 +41,25 @@ games:
   - `steam`: The Steam App ID for the game. *(Integer)*
   - `gog`: The GOG Galaxy ID for the game. *(Integer)*
   - `epic`: The Epic Games Store ID for the game. *(String)*
-- `subdirectory`: The subdirectory name for the game's installation in the launcher library.
-- `executable`: The name of the game's executable file.
+- `subdirectory`: The subdirectory name(s) for the game's installation in the launcher library.
+- `executable`: The filename(s) of the game's executable file.
 - `tricks`: A list of compatibility tricks to apply with proton-/winetricks during installation.
 - `script_extenders`: A list of script extenders associated with the game. *([See below][script_extenders] for details)*
 - `workarounds`: A list of workarounds to apply for the game. *([See below][workarounds] for details)*
+
+### `subdirectory` and `executable` for different launcher paths
+Some games may have different installation paths or executable names depending on the launcher used. In such cases, you can specify these fields as mappings for each launcher, rather than a single string.:
+
+```yaml
+    subdirectory:
+      steam: <steam_subdirectory>
+      gog: <gog_subdirectory>
+      epic: <epic_subdirectory>
+    executable:
+      steam: <steam_executable>
+      gog: <gog_executable>
+      epic: <epic_executable>
+```
 
 ### `script_extenders`
 The `script_extenders` section allows you to define script extenders associated with the game. Each script extender can have its own set of properties, such as download URLs and installation instructions.

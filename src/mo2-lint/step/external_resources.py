@@ -23,7 +23,10 @@ def download_mod_organizer():
     """
     logger.debug("Initiating Mod Organizer 2 download...")
     url = var.resource_info.mod_organizer.download_url
-    checksum = var.resource_info.mod_organizer.internal_checksum
+    checksum = var.resource_info.mod_organizer.checksum
+    checksum_internal = var.resource_info.mod_organizer.checksum_internal
+    print(checksum)
+    print(checksum_internal)
     downloaded = dl(url, download_dir, checksum=checksum)
     extracted = extract(downloaded, extract_dir / "mod_organizer")
     pinned = (
@@ -37,7 +40,8 @@ def download_mod_organizer():
         if (  # if ModOrganizer.exe exists in destination check if it's the same file
             destination.exists() and mo2_exec.exists()
         ) and not pinned:
-            if not compare_checksum(mo2_exec, checksum):
+            print(checksum_internal)
+            if not compare_checksum(mo2_exec, checksum_internal):
                 print(
                     f"Mod Organizer 2 already exists at {mo2_exec}, but checksums do not match. There may have been an update."
                 )
@@ -47,13 +51,13 @@ def download_mod_organizer():
                         "User opted to not overwrite existing Mod Organizer 2 installation."
                     )
                     return
+        elif not destination.exists():
+            destination.mkdir(parents=True, exist_ok=True)
         elif pinned:
             logger.info(
                 f"Mod Organizer 2 installation at {mo2_exec} is pinned; skipping update."
             )
             return
-        elif not destination.exists():
-            destination.mkdir(parents=True, exist_ok=True)
         install(extract_dir / "mod_organizer", destination, None)
         logger.debug(f"Mod Organizer 2 installed to {destination}")
 
@@ -76,7 +80,7 @@ def download_java():
 
     logger.debug("Initiating Java download...")
     url = var.resource_info.java.download_url
-    checksum = var.resource_info.java.internal_checksum
+    checksum = var.resource_info.java.checksum_internal
     downloaded = dl(url, download_dir, checksum=checksum)
     extract(downloaded, extract_dir / "java")
 

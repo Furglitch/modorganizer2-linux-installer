@@ -427,7 +427,12 @@ def remove_instance(instance: InstanceData, types: list[str] = ["symlink", "stat
                 send2trash(instance_path)
 
         # Restore game executable if it was backed up
-        game_exec = instance.game_path / instance.game_executable
+        exec = (
+            instance.game_executable.get(instance.launcher)
+            if isinstance(instance.game_executable, dict)
+            else instance.game_executable
+        )
+        game_exec = instance.game_path / exec
         if game_exec.exists():
             data_dir = game_exec.parent / "modorganizer2"
             if data_dir.exists() and data_dir.is_dir():
@@ -466,6 +471,8 @@ def remove_instance(instance: InstanceData, types: list[str] = ["symlink", "stat
             inst for inst in state_file.instances if inst.index != instance.index
         ]
         logger.debug(f"Removed instance {instance.index} from state file.")
+
+    write_state(False)
 
 
 def write_state(add_current: bool = True):

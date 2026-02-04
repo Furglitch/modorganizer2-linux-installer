@@ -20,17 +20,19 @@ def get_launcher() -> str:
     logger.debug("Detecting available launchers")
     steam_libraries = get_steam_libraries()
     heroic_data = get_heroic_data()
-    var.launcher = None
-    print(f"Steam: {steam_libraries}, Heroic: {heroic_data}")
 
     steam_has_game = False
     heroic_has_game = False
-    chosen_game = var.game_info
-    subdir = chosen_game.subdirectory if chosen_game else None
+    steam_install_path = None
     heroic_install_path = None
 
-    if steam_libraries and subdir:
+    if steam_libraries:
         for lib in steam_libraries:
+            subdir = (
+                var.game_info.subdirectory.get("steam")
+                if isinstance(var.game_info.subdirectory, dict)
+                else var.game_info.subdirectory
+            )
             steam_install_path = Path(lib) / "steamapps" / "common" / subdir
             if steam_install_path.exists():
                 steam_has_game = True
@@ -43,6 +45,7 @@ def get_launcher() -> str:
         gog_install_path = heroic_data[2].get("gog")
         epic_install_path = heroic_data[2].get("epic")
 
+    var.launcher = None
     if steam_has_game and heroic_has_game:
         print("Installs on both Steam and Heroic have been detected.")
         print("Please choose which launcher to use for this instance:")
@@ -93,7 +96,11 @@ def get_library() -> Path:
 
     logger.debug(f"Looking up library for game={var.input_params.game}")
     chosen_game = var.game_info
-    subdirectory = chosen_game.subdirectory
+    subdir = (
+        chosen_game.subdirectory.get(var.launcher)
+        if isinstance(chosen_game.subdirectory, dict)
+        else chosen_game.subdirectory
+    )
     executable = chosen_game.executable
 
     library = None
@@ -104,7 +111,7 @@ def get_library() -> Path:
             return None
         else:
             for lib in libraries:
-                candidate = lib / "steamapps" / "common" / subdirectory
+                candidate = lib / "steamapps" / "common" / subdir
                 if candidate.exists():
                     library = candidate
                     break

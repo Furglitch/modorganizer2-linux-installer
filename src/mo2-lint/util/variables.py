@@ -245,9 +245,9 @@ class GameInfo:
         Nexus Mods ID for the game.
     launcher_ids : LauncherIDs
         Contains launcher-specific IDs for the game.
-    subdirectory : str, optional
+    subdirectory : str | dict[str, str], optional
         Root directory for the game, relative to Steam library folder.
-    executable : str, optional
+    executable : str | dict[str, str], optional
         Game executable filename.
     tricks : Tuple[str, ...], optional
         List of tricks to apply for the game.
@@ -265,8 +265,8 @@ class GameInfo:
     display_name: str = None
     nexus_slug: str = None
     launcher_ids: LauncherIDs = None
-    subdirectory: Optional[str] = None
-    executable: Optional[str] = None
+    subdirectory: Optional[str | dict[str, str]] = None
+    executable: Optional[str | dict[str, str]] = None
     tricks: Optional[Tuple[str, ...]] = field(default_factory=tuple)
     script_extenders: Optional[List[ScriptExtender]] = None
     workarounds: Optional[dict] = field(default_factory=dict)
@@ -353,7 +353,7 @@ class Resource:
         Direct download URL for the resource.
     checksum : str, optional
         SHA-256 checksum of the resource file.
-    internal_checksum : str, optional
+    checksum_internal : str, optional
         SHA-256 checksum of an internal file within the resource archive.
     version : str, optional
         Version string for the resource.
@@ -366,7 +366,7 @@ class Resource:
 
     download_url: str = None
     checksum: Optional[str] = None
-    internal_checksum: Optional[str] = None
+    checksum_internal: Optional[str] = None
     version: Optional[str] = None
 
     @classmethod
@@ -377,7 +377,7 @@ class Resource:
             download_url=data.get("download_url"),
             version=data.get("version") if "version" in data else None,
             checksum=data.get("checksum"),
-            internal_checksum=data.get("internal_checksum"),
+            checksum_internal=data.get("checksum_internal"),
         )
 
     def __post_init__(self):

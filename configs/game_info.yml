@@ -364,7 +364,10 @@ games:
       steam: 22330
       gog: 1458058109
       epic: 0d0c62755e5a45c7a07fd9cc0b61c39c
-    subdirectory: Oblivion
+    subdirectory:
+      steam: Oblivion
+      gog: Oblivion
+      epic: Oblivion/Oblivion GOTY English # ! MO2 installs proper, but game won't launch
     executable: OblivionLauncher.exe
     tricks:
       - "d3dcompiler_43"
