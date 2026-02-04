@@ -24,7 +24,7 @@ def get_launcher() -> str:
 
     steam_has_game = False
     heroic_has_game = False
-    chosen_game = var.game_info.get(var.input_params.game)
+    chosen_game = var.game_info
     subdir = chosen_game.subdirectory if chosen_game else None
 
     if steam_libraries and subdir:
@@ -66,7 +66,7 @@ def get_library() -> Path:
     """
 
     logger.debug(f"Looking up library for game={var.input_params.game}")
-    chosen_game = var.game_info.get(var.input_params.game)
+    chosen_game = var.game_info
     subdirectory = chosen_game.subdirectory
     executable = chosen_game.executable
 

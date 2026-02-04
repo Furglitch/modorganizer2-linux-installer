@@ -119,19 +119,17 @@ def get_libraries(config_directory: Path) -> tuple[Path, Path]:
             return False
         return True
 
-    if not var.game_info.get(var.input_params.game).launcher_ids.gog:
+    if not var.game_info.launcher_ids.gog:
         gog_available = False
         logger.warning("GOG ID is not set for game.")
     else:
-        gog_data["game_id"] = var.game_info.get(var.input_params.game).launcher_ids.gog
+        gog_data["game_id"] = var.game_info.launcher_ids.gog
         gog_data["installed_json"] = config_directory / "gog_store" / "installed.json"
-    if not var.game_info.get(var.input_params.game).launcher_ids.epic:
+    if not var.game_info.launcher_ids.epic:
         epic_available = False
         logger.warning("Epic ID is not set for game.")
     else:
-        epic_data["game_id"] = var.game_info.get(
-            var.input_params.game
-        ).launcher_ids.epic
+        epic_data["game_id"] = var.game_info.launcher_ids.epic
         epic_data["installed_json"] = (
             config_directory / "legendaryConfig" / "legendary" / "installed.json"
         )

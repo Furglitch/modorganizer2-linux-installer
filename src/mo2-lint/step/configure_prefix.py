@@ -66,9 +66,7 @@ def load_prefix() -> Path:
     match var.launcher:
         case "steam":
             logger.debug("Loading Steam prefix...")
-            prefix = protontricks.get_prefix(
-                var.game_info.get(var.input_params.game).launcher_ids.steam
-            )
+            prefix = protontricks.get_prefix(var.game_info.launcher_ids.steam)
             logger.trace(f"Loaded Steam prefix: {prefix}")
         case "gog" | "epic":
             logger.debug("Loading Heroic prefix...")
@@ -190,13 +188,11 @@ def configure():
     """
     Run the necessary winetricks/protontricks for the selected game launcher.
     """
-    tricks = default_tricks + list(var.game_info.get(var.input_params.game).tricks)
+    tricks = default_tricks + list(var.game_info.tricks)
     logger.debug(f"Applying the following tricks: {tricks}")
     match var.launcher:
         case "steam":
-            protontricks.apply(
-                var.game_info.get(var.input_params.game).launcher_ids.steam, tricks
-            )
+            protontricks.apply(var.game_info.launcher_ids.steam, tricks)
         case "gog" | "epic":
             prefix = var.heroic_config[3]
             winetricks.apply(prefix=prefix, tricks=tricks)

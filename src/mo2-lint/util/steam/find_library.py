@@ -22,7 +22,7 @@ def get_data() -> tuple[int, str, str]:
         A tuple containing the Steam ID, subdirectory, and executable.
     """
 
-    chosen_game = var.game_info.get(var.input_params.game)
+    chosen_game = var.game_info
     id = chosen_game.launcher_ids.steam
     subdir = chosen_game.subdirectory
     exe = chosen_game.executable

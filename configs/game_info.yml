@@ -40,6 +40,14 @@ games:
     tricks:
       - "d3dcompiler_43"
       - "d3dx9"
+    workarounds:
+      - directories:
+        - "Data/FNIS"
+        - "Data/SkyProc Patchers/Automatic Variants"
+        - "Data/SkyProc Patchers/Requiem"
+        - "Data/tools/GenerateFNIS_for_Users"
+      - files:
+        - "dxvk.conf": "dxvk.conf"
 
   enderal_se:
     display_name: 'Enderal: Forgotten Stories - Special Edition'
@@ -271,6 +279,10 @@ games:
           - "f4sevr_0_6_21/f4sevr_1_2_72.dll"
           - "f4sevr_0_6_21/f4sevr_loader.exe"
           - "f4sevr_0_6_21/f4sevr_steam_loader.dll"
+    workarounds:
+      - single_executable: true
+      - files:
+        - "F4SEVR.ini": "Data/F4SE/F4SEVR.ini"
 
   falloutnv:
     display_name: 'Fallout: New Vegas'
@@ -388,6 +400,14 @@ games:
           - "skse_1_07_03/skse_1_9_32.dll"
           - "skse_1_07_03/skse_loader.exe"
           - "skse_1_07_03/skse_steam_loader.dll"
+    workarounds:
+      - directories:
+        - "Data/FNIS"
+        - "Data/SkyProc Patchers/Automatic Variants"
+        - "Data/SkyProc Patchers/Requiem"
+        - "Data/tools/GenerateFNIS_for_Users"
+      - files:
+        - "dxvk.conf": "dxvk.conf"
 
   skyrim_se:
     display_name: 'The Elder Scrolls V: Skyrim - Special Edition'
@@ -461,6 +481,10 @@ games:
           - "sksevr_2_00_12/sksevr_1_4_15.dll"
           - "sksevr_2_00_12/sksevr_loader.exe"
           - "sksevr_2_00_12/sksevr_steam_loader.dll"
+    workarounds:
+      - single_executable: true
+      - files:
+        - "SKSEVR.ini": "Data/SKSE/SKSE.ini"
 
   starfield:
     display_name: Starfield
@@ -483,3 +507,7 @@ games:
         file_whitelist:
           - "sfse_0_2_18/sfse_1_15_222.dll"
           - "sfse_0_2_18/sfse_loader.exe"
+    workarounds:
+      - single_executable: true
+      - files:
+        - "SFSE.ini": "Data/SFSE/SFSE.ini"

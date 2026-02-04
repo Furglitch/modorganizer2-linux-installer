@@ -252,6 +252,8 @@ class GameInfo:
         List of tricks to apply for the game.
     script_extenders : ScriptExtenders, optional
         Contains information about script extenders for the game.
+    workarounds: List[bool | dict], optional
+        List of workarounds to apply for the game.
 
     Raises
     -------
@@ -266,6 +268,7 @@ class GameInfo:
     executable: Optional[str] = None
     tricks: Optional[Tuple[str, ...]] = field(default_factory=tuple)
     script_extenders: Optional[List[ScriptExtender]] = None
+    workarounds: Optional[dict] = field(default_factory=dict)
 
     @classmethod
     def from_dict(cls, data: dict[str, any] | "GameInfo") -> "GameInfo":
@@ -283,6 +286,7 @@ class GameInfo:
             ]
             if data.get("script_extenders")
             else None,
+            workarounds=data.get("workarounds") or {},
         )
 
     def __post_init__(self):
@@ -294,19 +298,20 @@ class GameInfo:
             raise ValueError("Game launcher_ids must be provided.")
 
 
-game_info: dict[str, GameInfo] = {}
+games_info: dict[str, GameInfo] = {}
+game_info: GameInfo = None
 
 
-def load_game_info(path: Optional[Path] = None):
+def load_games_info(path: Optional[Path] = None):
     """
-    Loads information from a game_info.yml file into the global game_info variable.
+    Loads information from a game_info.yml file into the global games_info variable.
 
     Parameters
     -----------
     path : Path, optional
         Path to game_info YAML file. If not provided, defaults to the ~/.config/mo2-lint/game_info.yml file.
     """
-    global game_info
+    global games_info
     if not path:
         path = Path("~/.config/mo2-lint/game_info.yml").expanduser()
     logger.debug(f"Loading game info from path: {path}")
@@ -314,7 +319,22 @@ def load_game_info(path: Optional[Path] = None):
         yml = yaml.load(file.read(), Loader=yaml.SafeLoader)
     logger.trace(f"Game info YAML content: {yml}")
     for key, value in yml.get("games", {}).items():
-        game_info[key] = GameInfo.from_dict(value)
+        print(value)
+        games_info[key] = GameInfo.from_dict(value)
+
+
+def load_game_info(game_key: str):
+    """
+    Loads information for a specific game into the global game_info variable.
+
+    Parameters
+    -----------
+    game_key : str
+        Key identifier for the game in the games_info dictionary.
+    """
+    global game_info
+    game_info = games_info[game_key]
+    logger.trace(f"Loaded game info for '{game_key}': {game_info}")
 
 
 @dataclass

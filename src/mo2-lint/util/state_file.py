@@ -405,7 +405,15 @@ def remove_instance(instance: InstanceData, types: list[str] = ["symlink", "stat
             if data_dir.exists() and data_dir.is_dir():
                 rmtree(data_dir)
 
-            backup_exec = game_exec.with_suffix(".exe.bak")
+            backup_exec = (
+                Path(str(game_exec.with_suffix("")) + ".bak.exe")
+                if var.game_info.workarounds
+                and any(
+                    isinstance(w, dict) and w.get("single_executable") is True
+                    for w in var.game_info.workarounds
+                )
+                else Path(str(game_exec) + ".bak")
+            )
             if backup_exec.exists():
                 move(backup_exec, game_exec)
                 logger.debug(

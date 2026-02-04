@@ -68,8 +68,16 @@ def install():
         logger.debug("Creating path entry for Redirector...")
         create_path_entry()
 
-    exec_path = game_install_path / var.game_info[var.input_params.game].executable
-    exec_backup = Path(str(exec_path) + ".bak")
+    exec_path = game_install_path / var.game_info.executable
+    exec_backup = (
+        Path(str(exec_path.with_suffix("")) + ".bak.exe")
+        if var.game_info.workarounds
+        and any(
+            isinstance(w, dict) and w.get("single_executable") is True
+            for w in var.game_info.workarounds
+        )
+        else Path(str(exec_path) + ".bak")
+    )
 
     if validate(exec_path):
         logger.info("Redirector is already installed and up to date.")

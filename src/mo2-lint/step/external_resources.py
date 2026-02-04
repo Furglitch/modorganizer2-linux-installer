@@ -73,8 +73,7 @@ def download_scriptextender():
     Runs the download and installation process for the game's script extender.
     """
     logger.debug("Initiating script extender download...")
-    params = var.input_params
-    game_info = var.game_info.get(params.game)
+    game_info = var.game_info
     script_extenders = game_info.script_extenders if game_info is not None else None
     matches = {}
     choice = None
@@ -178,7 +177,7 @@ def download_scriptextender():
                 f"Downloading script extender version {getattr(choice, 'version', None)} from Nexus Mods: mod_id={mod_id}, file_id={file_id}"
             )
             downloaded = nexus_dl(
-                var.game_info.get(var.input_params.game).nexus_slug,
+                var.game_info.nexus_slug,
                 mod_id,
                 file_id,
                 download_dir,
@@ -263,7 +262,7 @@ def download():
     """
     cache_dir.mkdir(parents=True, exist_ok=True)
     params = var.input_params
-    game_info = var.game_info.get(params.game)
+    game_info = var.game_info
     script_extenders = game_info.script_extenders if game_info is not None else None
 
     download_mod_organizer()

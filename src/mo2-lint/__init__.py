@@ -6,6 +6,7 @@ from pydantic_core import from_json
 from step.configure_prefix import prompt as prompt_prefix, configure as configure_prefix
 from step.external_resources import download
 from step.load_game_info import get_launcher, get_library
+from step.workarounds import apply_workarounds
 from util import state_file as state, variables as var
 from util.logger import add_loggers, remove_loggers
 from util.nexus.install_handler import install as install_handler
@@ -129,7 +130,7 @@ def get_valid_games() -> dict:
     -------
     dict: Nexus IDs of supported games.
     """
-    keys = var.game_info.keys()
+    keys = var.games_info.keys()
     logger.trace(f"Valid games retrieved: {keys}")
     return keys
 
@@ -144,7 +145,7 @@ def preload_lists():
     """
     remove_loggers()
     pull_config()
-    var.load_game_info()
+    var.load_games_info()
     var.load_resource_info()
     var.load_plugin_info()
     global game_list, plugin_list
@@ -259,7 +260,8 @@ def main(
             logger.error(f"Custom game_info file not found: {game_info_path}")
     else:
         game_info_path = None
-    var.load_game_info(game_info_path)
+    var.load_games_info(game_info_path)
+    var.load_game_info(game)
 
     if list_instances or uninstall:
         pass
@@ -330,9 +332,9 @@ def main(
         nexus_slug=game,
         instance_path=directory,
         launcher=get_launcher(),
-        launcher_ids=var.LauncherIDs.from_dict(var.game_info[game].launcher_ids),
+        launcher_ids=var.LauncherIDs.from_dict(var.game_info.launcher_ids),
         game_path=get_library(),
-        game_executable=var.game_info[game].executable,
+        game_executable=var.game_info.executable,
         script_extender=script_extender,
         plugins=plugin or [],
     )
@@ -343,6 +345,7 @@ def main(
     download()
     install_handler()
     install_redirector()
+    apply_workarounds()
 
     state.write_state()
     logger.success("mo2-lint completed successfully.")
