@@ -1,0 +1,7 @@
+title: Mod Organizer 2 Linux Installer
+remote_theme: furglitch/furglitch.github.io
+repository: furglitch/modorganizer2-linux-installer
+baseurl: "modorganizer2-linux-installer"
+
+plugins:
+  - jekyll-remote-theme

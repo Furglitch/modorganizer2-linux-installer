@@ -1,0 +1,12 @@
+<!-- Preserve Logo -->
+{% if site.logo %}
+  <div class="site-logo" role="img" aria-label="{{ site.title }}"></div>
+{% else %}
+  <style>
+    .site-logo.custom-fallback { background-image: url('https://cdn.jsdelivr.net/gh/Furglitch/furglitch.github.io@main/assets/images/custom/icons/furglitch_logo_square.svg'); background-size: contain; background-repeat: no-repeat; background-position: left center; display: inline-block; margin-right: 0.5rem; }
+    @media (max-width: 767.98px) { .site-logo.custom-fallback { width: 2.25rem; height: 2.25rem; min-width: 2.25rem; min-height: 2.25rem; } }
+    @media (min-width: 768px) { .site-logo.custom-fallback { width: 2.7rem; height: 2.7rem; min-width: 2.7rem; min-height: 2.7rem; } }
+  </style>
+  <div class="site-logo custom-fallback" role="img" aria-label="{{ site.title }}"></div>
+  <span class="sr-only">{{ site.title }}</span>
+{% endif %}
