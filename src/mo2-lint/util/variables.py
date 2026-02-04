@@ -375,7 +375,6 @@ def load_game_info(game_key: str):
             logger.trace(f"Set field '{field_name}' to: {child_value}")
 
     logger.trace(f"Loaded game info for '{game_key}': {game_info}")
-    raise SystemExit("Debug Testing")
 
 
 @dataclass
