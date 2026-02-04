@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from util import variables as var
+from util import variables as var, state_file as state
 from util.internal_file import internal_file
 from pathlib import Path
 from shutil import copyfile
@@ -19,14 +19,14 @@ def apply_workarounds():
                 if t == "directories":
                     logger.debug("Creating workaround directories...")
                     for d in w:
-                        dir_path = Path(var.game_install_path) / d
+                        dir_path = Path(state.current_instance.game_path) / d
                         dir_path.mkdir(parents=True, exist_ok=True)
                 if t == "files":
                     logger.debug("Creating workaround files...")
                     for f in w:
                         for src, dest in f.items():
                             src = internal_file("cfg", "workarounds", src)
-                            dest = Path(var.game_install_path) / dest
+                            dest = Path(state.current_instance.game_path) / dest
                             dest.parent.mkdir(parents=True, exist_ok=True)
                             copyfile(src, dest)
                 if t == "needs_java" and w:

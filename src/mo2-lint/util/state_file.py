@@ -71,6 +71,8 @@ class InstanceData:
         The Nexus Mods slug identifier for the game associated with this MO2 instance.
     instance_path : Path
         Directory path where this MO2 instance is installed.
+    pin : bool
+        Whether this instance is pinned to a specific MO2 version.
     launcher : str
         Name of the game launcher for this instance.
     launcher_ids : LauncherIDs
@@ -91,6 +93,7 @@ class InstanceData:
     index: int = None
     nexus_slug: str = None
     instance_path: Path = None
+    pin: bool = False
     launcher: str = None
     launcher_ids: var.LauncherIDs = None
     game_path: Path = None
@@ -106,6 +109,7 @@ class InstanceData:
             index=data.get("index"),
             nexus_slug=data.get("nexus_slug"),
             instance_path=Path(data.get("instance_path")),
+            pin=data.get("pin", False),
             launcher=data.get("launcher"),
             launcher_ids=var.LauncherIDs.from_dict(data.get("launcher_ids")),
             game_path=Path(data.get("game_path")),
@@ -122,6 +126,7 @@ class InstanceData:
             "index": data.index,
             "nexus_slug": data.nexus_slug,
             "instance_path": str(data.instance_path),
+            "pin": data.pin,
             "launcher": data.launcher,
             "launcher_ids": var.LauncherIDs.to_dict(data.launcher_ids),
             "game_path": str(data.game_path),
@@ -445,10 +450,14 @@ def write_state(add_current: bool = True):
     if {} in state_file.instances:
         logger.info("Removing empty instance entries from state file.")
         state_file.instances.remove({})
-    if add_current and current_instance not in state_file.instances:
+    if add_current and current_instance.index not in [
+        inst.index for inst in state_file.instances
+    ]:
         logger.info(f"Adding current instance {current_instance.index} to state file.")
         state_file.instances.append(state.InstanceData.from_dict(current_instance))
-    elif add_current and current_instance in state_file.instances:
+    elif add_current and current_instance.index in [
+        inst.index for inst in state_file.instances
+    ]:
         logger.info(
             f"Updating current instance {current_instance.index} in state file."
         )
@@ -462,7 +471,9 @@ def write_state(add_current: bool = True):
     logger.debug(f"Wrote state file with {len(state_file.instances)} instances.")
 
 
-def match_instances(game: Optional[str], directory: Optional[Path]) -> dict:
+def match_instances(
+    game: Optional[str] = None, directory: Optional[Path] = None
+) -> dict[InstanceData]:
     """
     Matches instances in the state_file based on the provided game or directory.
 

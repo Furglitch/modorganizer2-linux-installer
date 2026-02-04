@@ -4,7 +4,7 @@ from datetime import datetime
 from loguru import logger
 from pathlib import Path
 from shutil import copytree, move
-from util import variables as var
+from util import variables as var, state_file as state
 from util.heroic.find_library import get_data as get_heroic_data
 from util.wine import protontricks, winetricks
 
@@ -63,7 +63,7 @@ def load_prefix() -> Path:
     """
     logger.debug("Loading game prefix path...")
     prefix = None
-    match var.launcher:
+    match state.current_instance.launcher:
         case "steam":
             logger.debug("Loading Steam prefix...")
             prefix = protontricks.get_prefix(var.game_info.launcher_ids.steam)
@@ -73,7 +73,7 @@ def load_prefix() -> Path:
             prefix = get_heroic_data()[3]
             logger.trace(f"Loaded Heroic prefix: {prefix}")
         case _:
-            logger.error(f"Unknown launcher: {var.launcher}")
+            logger.error(f"Unknown launcher: {state.current_instance.launcher}")
 
     if prefix is None:
         logger.error("Could not determine game prefix path.")
@@ -111,7 +111,7 @@ def restore_archived_prefix(prefix: Path):
     prefix : Path
         Path to the new game prefix where personal data will be restored.
     """
-    match var.launcher:
+    match state.current_instance.launcher:
         case "steam":
             subpath = Path("pfx") / "drive_c" / "users"
             src = var.archived_prefix / subpath
@@ -163,7 +163,7 @@ def prompt():
 
     # Prompt user to create a clean prefix
     logger.debug("Prompting user to create a clean Steam prefix...")
-    match var.launcher:
+    match state.current_instance.launcher:
         case "steam":
             print(prompt_clean_steam)
         case "gog" | "epic":

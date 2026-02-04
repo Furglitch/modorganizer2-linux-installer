@@ -6,7 +6,7 @@ from patoolib import extract_archive as unzip
 from shutil import copytree, copy2 as copy
 from typing import Optional
 from urllib.request import urlretrieve as request
-from util import variables as var
+from util import variables as var, state_file as state
 from util.checksum import compare_checksum
 from util.download import download as dl, download_nexus as nexus_dl
 from util.state_file import symlink_instance
@@ -26,23 +26,29 @@ def download_mod_organizer():
     checksum = var.resource_info.mod_organizer.internal_checksum
     downloaded = dl(url, download_dir, checksum=checksum)
     extract(downloaded, extract_dir / "mod_organizer")
+    pinned = (
+        state.current_instance.pin
+        if state.current_instance and hasattr(state.current_instance, "pin")
+        else False
+    )
     if downloaded.exists():
         destination = Path(var.input_params.directory).expanduser()
         mo2_exec = destination / "ModOrganizer.exe"
-        if (
+        if (  # if ModOrganizer.exe exists in destination check if it's the same file
             destination.exists() and mo2_exec.exists()
-        ):  # if ModOrganizer.exe exists in destination
-            # check if it's the same file
+        ) and not pinned:
             if not compare_checksum(mo2_exec, checksum):
                 print(
                     f"Mod Organizer 2 already exists at {mo2_exec}, but checksums do not match. There may have been an update."
                 )
                 response = input("Continue and overwrite? [Y/n]: ")
-                if not response.lower() == ("y" or "yes" or ""):
+                if response.lower() not in ("y", "yes", ""):
                     logger.info(
                         "User opted to not overwrite existing Mod Organizer 2 installation."
                     )
                     return
+        elif not destination.exists():
+            destination.mkdir(parents=True, exist_ok=True)
         install(extract_dir / "mod_organizer", destination, None)
         logger.debug(f"Mod Organizer 2 installed to {destination}")
 

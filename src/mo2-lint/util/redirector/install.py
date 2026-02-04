@@ -3,7 +3,7 @@
 from loguru import logger
 from pathlib import Path
 from shutil import copy2
-from util import variables as var
+from util import variables as var, state_file as state
 from util.checksum import compare_checksum
 from util.internal_file import internal_file
 import stat
@@ -16,9 +16,9 @@ def create_path_entry():
     Creates the path entry file for the redirector.
     """
     game_install_path = (
-        var.game_install_path
-        if var.game_install_path.is_dir()
-        else var.game_install_path.parent
+        state.current_instance.game_path
+        if state.current_instance.game_path.is_dir()
+        else state.current_instance.game_path.parent
     )
 
     redirect_file = game_install_path / "modorganizer2" / "instance_path.txt"
@@ -59,9 +59,9 @@ def install():
     logger.info("Starting Redirector installation...")
 
     game_install_path = (
-        var.game_install_path
-        if var.game_install_path.is_dir()
-        else var.game_install_path.parent
+        state.current_instance.game_path
+        if state.current_instance.game_path.is_dir()
+        else state.current_instance.game_path.parent
     )
 
     if not (game_install_path / "modorganizer2" / "instance_path.txt").exists():

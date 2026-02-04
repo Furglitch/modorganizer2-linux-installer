@@ -9,6 +9,7 @@ from util.logger import add_loggers, remove_loggers
 from command.install import install as _install
 from command.uninstall import uninstall as _uninstall
 from command.list import list as _list
+from command.pin import pin as _pin
 import click
 import re
 import yaml
@@ -135,8 +136,8 @@ pre_init()
 
 
 def start(
-    directory: Path | str,
-    game: str,
+    game: Optional[str] = None,
+    directory: Optional[Path | str] = None,
     game_info_path: Optional[Path | str] = None,
     log_level: Optional[str] = "INFO",
 ):
@@ -146,10 +147,10 @@ def start(
 
     Parameters:
     -----------
-    directory : Path | str
-        The target directory for the Mod Organizer 2 instance.
-    game : str
+    game : str, optional
         The target game for the Mod Organizer 2 instance.
+    directory : Path | str, optional
+        The target directory for the Mod Organizer 2 instance.
     game_info_path : Path | str, optional
         Path to a custom game_info.yml file.
     log_level : str, optional
@@ -175,6 +176,8 @@ help_install = f"""Create a new Mod Organizer 2 instance.
 
 DIRECTORY                       Path for the Mod Organizer 2 instance."""
 help_uninstall = """Uninstall an existing Mod Organizer 2 instance."""
+help_list = """List existing Mod Organizer 2 instances."""
+help_pin = """Pin the Mod Organizer 2 installation in the specified directory, preventing updates."""
 
 
 # Helper Functions
@@ -296,7 +299,7 @@ def install(
     log_level,
 ):
     directory = Path(directory)
-    start(directory, game, game_info_path, log_level)
+    start(game, directory, game_info_path, log_level)
     _install(
         game,
         directory,
@@ -309,7 +312,7 @@ def install(
     state.write_state()
 
 
-@cli.command()
+@cli.command(help=help_uninstall)
 @click_version
 @click_help
 @click_log_level
@@ -317,20 +320,30 @@ def install(
 @click_opt_directory
 @click_opt_game
 def uninstall(game: str, directory: Path, game_info_path: Optional[Path], log_level):
-    start(directory, game, game_info_path, log_level)
+    start(game, directory, game_info_path, log_level)
     _uninstall(game, directory)
     state.write_state(False)
 
 
-@cli.command()
+@cli.command(help=help_list)
 @click_version
 @click_help
 @click_log_level
 @click_opt_directory
 @click_opt_game
 def list(game: Optional[str], directory: Optional[Path], log_level):
-    start(directory, game, log_level=log_level)
+    start(game, directory, log_level=log_level)
     _list(game, directory)
+
+
+@cli.command(help=help_pin)
+@click_version
+@click_help
+@click_log_level
+@click_arg_directory(required=True)
+def pin(directory: Path, log_level):
+    start(directory=directory, log_level=log_level)
+    _pin(directory)
 
 
 if __name__ == "__main__":
