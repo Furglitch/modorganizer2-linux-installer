@@ -44,10 +44,10 @@ def get_libraries() -> list[Path]:
     """
 
     libraries = []
-    logger.debug(f"Scanning {len(steam_directories)} candidate Steam directories")
+    logger.debug(f"Scanning {len(steam_directories)} Steam directories")
     for dir in steam_directories:
         dir = Path(os.path.expandvars(dir)).resolve()
-        logger.trace(f"Checking candidate Steam dir: {dir}")
+        logger.trace(f"Checking Steam dir: {dir}")
         if dir.exists():
             logger.debug(f"Found Steam library at: {dir}")
             library = dir if Path(dir / "steamapps").exists() else dir / "steam"

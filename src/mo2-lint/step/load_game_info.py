@@ -21,27 +21,53 @@ def get_launcher() -> str:
     steam_libraries = get_steam_libraries()
     heroic_data = get_heroic_data()
     var.launcher = None
+    print(f"Steam: {steam_libraries}, Heroic: {heroic_data}")
 
     steam_has_game = False
     heroic_has_game = False
     chosen_game = var.game_info
     subdir = chosen_game.subdirectory if chosen_game else None
+    heroic_install_path = None
 
     if steam_libraries and subdir:
         for lib in steam_libraries:
-            candidate = Path(lib) / "steamapps" / "common" / subdir
-            if candidate.exists():
+            steam_install_path = Path(lib) / "steamapps" / "common" / subdir
+            if steam_install_path.exists():
                 steam_has_game = True
                 break
-    if heroic_data and heroic_data[2]:
+    if heroic_data and isinstance(heroic_data[2], Path):
         heroic_has_game = True
+        heroic_install_path = heroic_data[2]
+    elif heroic_data and isinstance(heroic_data[2], dict):
+        heroic_has_game = True
+        gog_install_path = heroic_data[2].get("gog")
+        epic_install_path = heroic_data[2].get("epic")
 
     if steam_has_game and heroic_has_game:
-        logger.error(
-            "Both Steam and Heroic launchers detected. Functionality not yet implemented."
-        )
-        return None
-        # TODO
+        print("Installs on both Steam and Heroic have been detected.")
+        print("Please choose which launcher to use for this instance:")
+
+        print(f"- Steam: {steam_install_path}")
+        if heroic_install_path:
+            runner = "GOG" if heroic_data[0] == "gog" else "Epic"
+            print(f"- Heroic {runner}: {heroic_install_path}")
+            input_choice = (
+                input(f"Choose launcher [steam/{heroic_data[0]}]: ").strip().lower()
+            )
+        elif gog_install_path and epic_install_path:
+            print(f"- Heroic GOG: {gog_install_path}")
+            print(f"- Heroic Epic: {epic_install_path}")
+            input_choice = input("Choose launcher [steam/gog/epic]: ").strip().lower()
+
+        if input_choice == "steam":
+            var.launcher = "steam"
+        elif input_choice == "gog":
+            var.launcher = "gog"
+        elif input_choice == "epic":
+            var.launcher = "epic"
+        else:
+            logger.error("Invalid launcher choice.")
+            return None
     elif steam_has_game:
         var.launcher = "steam"
     elif heroic_has_game and heroic_data[0] == "gog":

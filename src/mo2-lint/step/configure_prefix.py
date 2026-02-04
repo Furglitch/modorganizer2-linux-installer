@@ -4,6 +4,7 @@ from datetime import datetime
 from loguru import logger
 from pathlib import Path
 from shutil import copytree, move
+from step.load_game_info import get_launcher
 from util import variables as var, state_file as state
 from util.heroic.find_library import get_data as get_heroic_data
 from util.wine import protontricks, winetricks
@@ -63,17 +64,32 @@ def load_prefix() -> Path:
     """
     logger.debug("Loading game prefix path...")
     prefix = None
-    match state.current_instance.launcher:
+    launcher = (
+        get_launcher()
+        if not state.current_instance
+        else state.current_instance.launcher
+    )
+    match launcher:
         case "steam":
             logger.debug("Loading Steam prefix...")
             prefix = protontricks.get_prefix(var.game_info.launcher_ids.steam)
             logger.trace(f"Loaded Steam prefix: {prefix}")
-        case "gog" | "epic":
-            logger.debug("Loading Heroic prefix...")
-            prefix = get_heroic_data()[3]
-            logger.trace(f"Loaded Heroic prefix: {prefix}")
+        case "gog":
+            data = get_heroic_data()
+            logger.debug("Loading GOG prefix...")
+            prefix = data[3]
+            if isinstance(prefix, dict):
+                prefix = prefix.get("gog")
+            logger.trace(f"Loaded GOG prefix: {prefix}")
+        case "epic":
+            data = get_heroic_data()
+            logger.debug("Loading Epic Games prefix...")
+            prefix = data[3]
+            if isinstance(prefix, dict):
+                prefix = prefix.get("epic")
+            logger.trace(f"Loaded Epic Games prefix: {prefix}")
         case _:
-            logger.error(f"Unknown launcher: {state.current_instance.launcher}")
+            logger.error(f"Unknown launcher: {launcher}")
 
     if prefix is None:
         logger.error("Could not determine game prefix path.")

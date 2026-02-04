@@ -361,6 +361,7 @@ games:
     launcher_ids:
       steam: 22330
       gog: 1458058109
+      epic: 0d0c62755e5a45c7a07fd9cc0b61c39c
     subdirectory: Oblivion
     executable: OblivionLauncher.exe
     tricks:

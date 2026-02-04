@@ -25,13 +25,13 @@ def download_mod_organizer():
     url = var.resource_info.mod_organizer.download_url
     checksum = var.resource_info.mod_organizer.internal_checksum
     downloaded = dl(url, download_dir, checksum=checksum)
-    extract(downloaded, extract_dir / "mod_organizer")
+    extracted = extract(downloaded, extract_dir / "mod_organizer")
     pinned = (
         state.current_instance.pin
         if state.current_instance and hasattr(state.current_instance, "pin")
         else False
     )
-    if downloaded.exists():
+    if extracted and extracted.exists():
         destination = Path(var.input_params.directory).expanduser()
         mo2_exec = destination / "ModOrganizer.exe"
         if (  # if ModOrganizer.exe exists in destination check if it's the same file
@@ -249,7 +249,7 @@ def download_plugin(plugin: str):
     logger.debug(f"Plugin {plugin} installed to plugins directory.")
 
 
-def extract(target: Path, destination: Path):
+def extract(target: Path, destination: Path) -> Path:
     """
     Extracts the specified archive to the given destination.
 
@@ -259,14 +259,23 @@ def extract(target: Path, destination: Path):
         The archive file to extract.
     destination : Path
         The directory to extract the archive into.
+
+    Returns
+    -------
+    Path
+        The path to the extraction destination.
     """
+    if not target.exists():
+        logger.error(f"Target archive {target} does not exist; cannot extract.")
+        return None
     if destination.exists():
         logger.debug(
             f"Extraction destination {destination} already exists; skipping extraction."
         )
-        return
+        return destination
     logger.debug(f"Extracting {target} to {destination}...")
     unzip(str(target), outdir=destination)
+    return destination
 
 
 def download():
@@ -293,7 +302,9 @@ def download():
     symlink_instance()
 
 
-def install(source: Path, destination: Path, file_list: Optional[list[str] | str]):
+def install(
+    source: Path, destination: Path, file_list: Optional[list[str] | str]
+) -> Path:
     """
     Copies files from source to destination.
 
@@ -305,10 +316,15 @@ def install(source: Path, destination: Path, file_list: Optional[list[str] | str
         The destination path to copy files to.
     file_list : list[str] | str, optional
         A list of specific files to copy. If None, empty, or wildcard, all files are copied.
+
+    Returns
+    -------
+    Path
+        The path to the destination where files were copied.
     """
     if not source.exists():
         logger.error(f"Source path {source} does not exist; cannot install.")
-        return
+        return None
     destination.mkdir(parents=True, exist_ok=True)
     if not file_list or file_list in (["*"], "*", []):
         logger.debug(f"Installing all files from {source} to {destination}.")
@@ -328,3 +344,4 @@ def install(source: Path, destination: Path, file_list: Optional[list[str] | str
             else:
                 copy(file, dest)
             logger.trace(f"Installed {file} to {dest}.")
+    return destination

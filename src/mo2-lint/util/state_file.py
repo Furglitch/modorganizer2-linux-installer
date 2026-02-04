@@ -6,6 +6,7 @@ from pathlib import Path
 from pydantic_core import to_json
 from send2trash import send2trash
 from shutil import move, rmtree
+from step.load_game_info import get_launcher, get_library
 from typing import Optional
 from util import variables as var, state_file as state
 from uuid import UUID
@@ -290,7 +291,13 @@ def choose_instance():
     if instance_count > 0:
         quantifier = "the" if instance_count == 1 else "an"
         logger.debug("Prompting user to choose existing or new instance.")
-        direct_instance = (current_instance.instance_path / "ModOrganizer.exe").exists()
+        direct_instance = False
+        if current_instance:
+            direct_instance = (
+                (current_instance.instance_path / "ModOrganizer.exe").exists()
+                if current_instance.instance_path
+                else False
+            )
         if not direct_instance:
             choice = (
                 input(
@@ -327,7 +334,20 @@ def choose_instance():
                 logger.trace(
                     f"Created conflict file in {var.input_params.directory} to identify conflicting instance."
                 )
-        return
+            return
+        elif not choice.lower() == "e":
+            logger.debug("User chose to create a new instance.")
+            state.current_instance = InstanceData(
+                index=-1,
+                nexus_slug=var.input_params.game,
+                instance_path=var.input_params.directory,
+                launcher=get_launcher(),
+                launcher_ids=var.LauncherIDs.from_dict(var.game_info.launcher_ids),
+                game_path=get_library(),
+                game_executable=var.game_info.executable,
+                script_extender=var.game_info.script_extenders or False,
+                plugins=list(var.input_params.plugins or []),
+            )
     set_index()
 
 

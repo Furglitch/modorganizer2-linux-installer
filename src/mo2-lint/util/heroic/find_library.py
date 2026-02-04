@@ -18,14 +18,26 @@ gog_data = {}
 epic_data = {}
 
 
-def get_data() -> tuple[str, str, str, str, str]:
+def get_data() -> tuple[
+    str | dict[str | str],
+    str | int | dict[str, str | int],
+    Path | dict[str, Path],
+    Path | dict[str, Path],
+]:
     """
     Gets Heroic game data from config directories.
 
     Returns
     -------
-    tuple[str, str, str, str]
+    tuple[str, str| int, Path, Path]
         A tuple containing the launcher type, game ID, install path, and Wine prefix.
+
+    tuple[dict[str,str], dict[str, str|int], dict[str, Path], dict[str, Path]]
+        A tuple containing entries for launcher type, game ID, install path, and Wine prefix
+        for both GOG and Epic launchers.
+        First str is "gog" or "epic".
+
+    Values are: launcher, game_id, install_path, wine_prefix
     """
 
     launcher: str = None
@@ -55,15 +67,32 @@ def get_data() -> tuple[str, str, str, str, str]:
                 install_path = Path(epic_data["install_path"])
                 wine_prefix = get_wine_prefix(epic_data["game_id"], dir)
             elif epic_data and gog_data:
-                logger.warning(
-                    "Both GOG and Epic libraries found. Functionality not yet implemented."  # TODO
+                launcher: dict[str, str] = {}
+                display = "GOG and Epic"
+                game_id: dict[str, str] = {}
+                install_path: dict[str, Path] = {}
+                wine_prefix: dict[str, Path] = {}
+                (
+                    launcher["epic"],
+                    game_id["epic"],
+                    install_path["epic"],
+                    wine_prefix["epic"],
+                ) = (
+                    "epic",
+                    epic_data["game_id"],
+                    Path(epic_data["install_path"]),
+                    get_wine_prefix(epic_data["game_id"], dir),
                 )
-                launcher, game_id, install_path, wine_prefix = (
-                    None,
-                    None,
-                    None,
-                    None,
-                    None,
+                (
+                    launcher["gog"],
+                    game_id["gog"],
+                    install_path["gog"],
+                    wine_prefix["gog"],
+                ) = (
+                    "gog",
+                    gog_data["game_id"],
+                    Path(gog_data["install_path"]),
+                    get_wine_prefix(gog_data["game_id"], dir),
                 )
             else:
                 launcher, game_id, install_path, wine_prefix = (
