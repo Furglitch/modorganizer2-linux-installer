@@ -51,6 +51,15 @@ mo2_lint pin <directory> [options]
 `<directory>` is a required parameter.<br>
 Where `<directory>` is the path of the MO2 instance you want to pin. You must provide the exact path to the instance you wish to pin. Higher level directories will not work for this command.
 
+## `update`
+The `update` command updates the executables of an existing Mod Organizer 2 instance to the latest version. This includes updating MO2 itself and the redirector.
+```bash
+mo2_lint update <directory> [options]
+```
+
+`<directory>` is a required parameter.<br>
+Where `<directory>` is the path of the MO2 instance you want to update. Like the `pin` command, you must provide the exact path to the instance you wish to update. Higher level directories will not work for this command.
+
 ## The Instance State File
 MO2-LINT maintains a state file that keeps track of all Mod Organizer 2 instances it manages. This file is located at `~/.config/mo2-lint/instance_state.json`.
 

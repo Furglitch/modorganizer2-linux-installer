@@ -10,6 +10,7 @@ from command.install import install as _install
 from command.uninstall import uninstall as _uninstall
 from command.list import list as _list
 from command.pin import pin as _pin
+from command.update import update as _update
 import click
 import re
 import yaml
@@ -344,6 +345,16 @@ def list(game: Optional[str], directory: Optional[Path], log_level):
 def pin(directory: Path, log_level):
     start(directory=directory, log_level=log_level)
     _pin(directory)
+
+
+@cli.command(help=help_pin)
+@click_version
+@click_help
+@click_log_level
+@click_arg_directory(required=True)
+def update(directory: Path, log_level):
+    start(directory=directory, log_level=log_level)
+    _update(directory)
 
 
 if __name__ == "__main__":

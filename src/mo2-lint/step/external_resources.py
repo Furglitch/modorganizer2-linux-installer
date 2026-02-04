@@ -47,6 +47,11 @@ def download_mod_organizer():
                         "User opted to not overwrite existing Mod Organizer 2 installation."
                     )
                     return
+        elif pinned:
+            logger.info(
+                f"Mod Organizer 2 installation at {mo2_exec} is pinned; skipping update."
+            )
+            return
         elif not destination.exists():
             destination.mkdir(parents=True, exist_ok=True)
         install(extract_dir / "mod_organizer", destination, None)
