@@ -290,15 +290,18 @@ def choose_instance():
     if instance_count > 0:
         quantifier = "the" if instance_count == 1 else "an"
         logger.debug("Prompting user to choose existing or new instance.")
-        choice = (
-            input(
-                f"Would you like to use {quantifier} existing instance [e] or create a new one? [N]: "
+        direct_instance = (current_instance.instance_path / "ModOrganizer.exe").exists()
+        if not direct_instance:
+            choice = (
+                input(
+                    f"Would you like to use {quantifier} existing instance [e] or create a new one? [N]: "
+                )
+                .strip()
+                .lower()
             )
-            .strip()
-            .lower()
-        )
-        if choice.lower() == "e":
-            logger.debug("User chose to use an existing instance.")
+        if direct_instance or choice.lower() == "e":
+            if not direct_instance:
+                logger.debug("Using the existing instance.")
             if instance_count == 1:
                 logger.info(
                     "Only one existing instance found, selecting it automatically."
