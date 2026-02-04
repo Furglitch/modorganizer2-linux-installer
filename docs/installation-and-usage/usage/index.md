@@ -11,54 +11,65 @@ Below are some of the key commands and features available in MO2-LINT.
 
 ## `install`
 The `install` command allows you to create a new Mod Organizer 2 instance. You can specify the game and directory for the installation.
+
 ```bash
 mo2_lint install <game> <directory> [options]
 ```
 
-`<game>` and `<directory>` are required parameters.<br>
-Where `<game>` is the game you want to install MO2 for (e.g., `skyrim`, `fallout4`), and `<directory>` is the path where you want the MO2 instance to be created.<br>
-Supported games can be seen by running:
+> #### Parameters
+> `<game>` and `<directory>` are required parameters.<br>
+> Where `<game>` is the game you want to install MO2 for (e.g., `skyrim`, `fallout4`), and `<directory>` is the path where you want the MO2 instance to be created.<br>
+> Supported games can be seen by running:
 ```bash
 mo2_lint install --help
 ```
 
 ## `uninstall`
 The `uninstall` command removes an existing Mod Organizer 2 instance. Specifying the game and/or directory is not required, but can help target the correct instance.
+
 ```bash
 mo2_lint uninstall <game> <directory> [options]
 ```
 
-`<game>` and `<directory>` are optional parameters.<br>
-Given `<game>`, the script will look for MO2 instances associated with that game.<br>
-If `<directory>` is provided, it will specifically target the MO2 instance located at that path. You can also use higher level directories to search for instances within it's subdirectories.
+> #### Parameters
+> `<game>` and `<directory>` are optional parameters.<br>
+> Given `<game>`, the script will look for MO2 instances associated with that game.<br>
+> If `<directory>` is provided, it will specifically target the MO2 instance located at that path. You can also use higher level directories to search for instances within it's subdirectories.
 
 ## `list`
 The `list` command displays all Mod Organizer 2 instances currently managed by MO2-LINT. Specifying the game and/or directory is not required, but can help target the correct instance.
+
 ```bash
 mo2_lint list <game> <directory> [options]
 ```
 
-`<game>` and `<directory>` are optional parameters.<br>
-Given `<game>`, the script will filter and display only MO2 instances associated with that game.<br>
-If `<directory>` is provided, it will specifically look for MO2 instances located at that path. You can also use higher level directories to search for instances within it's subdirectories.
+> #### Parameters
+> `<game>` and `<directory>` are optional parameters.<br>
+> Given `<game>`, the script will filter and display only MO2 instances associated with that game.<br>
+> If `<directory>` is provided, it will specifically look for MO2 instances located at that path. You can also use higher level directories to search for instances within it's subdirectories.
 
 ## `pin`
 The `pin` command allows you to prevent an MO2 instance from having it's Mod Organizer 2 version updated. This is useful if you want to maintain a specific version for compatibility reasons.
+
 ```bash
 mo2_lint pin <directory> [options]
 ```
 
-`<directory>` is a required parameter.<br>
-Where `<directory>` is the path of the MO2 instance you want to pin. You must provide the exact path to the instance you wish to pin. Higher level directories will not work for this command.
+> #### Parameters
+> `<directory>` is a required parameter.<br>
+> Where `<directory>` is the path of the MO2 instance you want to pin. You must provide the exact path to the instance you wish to pin. Higher level directories will not work for this command.
 
 ## `update`
-The `update` command updates the executables of an existing Mod Organizer 2 instance to the latest version. This includes updating MO2 itself and the redirector.
+The `update` command updates the Mod Organizer 2 install and Redirector of an existing instance, as well as the NXM handler to the latest version.<br>
+<sub>If the instance is pinned, the Mod Organizer 2 version will not be updated.</sub>
+
 ```bash
 mo2_lint update <directory> [options]
 ```
 
-`<directory>` is a required parameter.<br>
-Where `<directory>` is the path of the MO2 instance you want to update. Like the `pin` command, you must provide the exact path to the instance you wish to update. Higher level directories will not work for this command.
+> #### Parameters
+> `<directory>` is a required parameter.<br>
+> Where `<directory>` is the path of the MO2 instance you want to update. Like the `pin` command, you must provide the exact path to the instance you wish to update. Higher level directories will not work for this command.
 
 ## The Instance State File
 MO2-LINT maintains a state file that keeps track of all Mod Organizer 2 instances it manages. This file is located at `~/.config/mo2-lint/instance_state.json`.
