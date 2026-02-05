@@ -279,7 +279,7 @@ games:
     launcher_ids:
       steam: 22320
       gog: 1435828767
-      # epic: ???
+      # epic: ??? It's available on Epic, but I can't find the ID anywhere
     subdirectory: Morrowind
     executable: Morrowind Launcher.exe
     tricks:

@@ -39,7 +39,6 @@ def list_instances(instance_list: list) -> list:
         f"{idx}: Game: {inst.nexus_slug}, Path: {inst.instance_path}, Script Extender: {'Yes' if inst.script_extender else 'No'}, Plugins: {', '.join(inst.plugins) if inst.plugins else 'None'}"
         for idx, inst in enumerate(instance_list, start=1)
     ]
-    print(instances)
     return instances
 
 

@@ -23,6 +23,8 @@ These include:
 - Branch committing restrictions
 - Conventional commit message checks
 
+These commit checks will run when you make a pull request, in case any are missed locally (or you don't have pre-commit hooks set up)
+
 ## Setting Up Your Development Environment
 
 ### Prerequisites
