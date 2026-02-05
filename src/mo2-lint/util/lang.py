@@ -39,6 +39,7 @@ def list_instances(instance_list: list) -> list:
         f"{idx}: Game: {inst.nexus_slug}, Path: {inst.instance_path}, Script Extender: {'Yes' if inst.script_extender else 'No'}, Plugins: {', '.join(inst.plugins) if inst.plugins else 'None'}"
         for idx, inst in enumerate(instance_list, start=1)
     ]
+    print(instances)
     return instances
 
 
@@ -181,7 +182,7 @@ def prompt_install_scriptextender_choice(script_extenders: dict) -> int:
 
 def prompt_instance_choice(
     message: str = None, instance_list: list = [], additional_choices: list = []
-) -> int:
+) -> int | str:
     """
     Prompts the user to choose an instance from a list.
 
@@ -196,7 +197,7 @@ def prompt_instance_choice(
 
     Returns
     -------
-    int
+    int | str
         The index of the selected instance.
     """
     if message is None:
@@ -209,7 +210,9 @@ def prompt_instance_choice(
         "name": "instance_choice",
     }
     result = prompt([msg])
-    result = int(result["instance_choice"].split(":")[0])
+    result = result["instance_choice"].split(":")[0]
+    if result.isdigit():
+        result = int(result)
     return result
 
 
@@ -251,12 +254,12 @@ def prompt_launcher_choice(
     return result["launcher_choice"]
 
 
-def prompt_uninstall_choice(index_list: list) -> int:
+def prompt_uninstall_choice(instance_list: list) -> int | str:
     """
     Prompts the user to choose which instance to uninstall.
     """
     msg = "Enter index of instance to uninstall (or 'all'): "
-    result = prompt_instance_choice(msg, index_list, ["All"])
+    result = prompt_instance_choice(msg, instance_list, ["All"])
     return result
 
 
@@ -278,11 +281,17 @@ def prompt_uninstall_trash():
     """
     Prompts the user to choose whether to move files to trash or delete permanently.
     """
+
     msg = {
-        "type": "confirm",
-        "message": "Do you want to move the uninstalled files to trash, instead of deleting permanently?",
+        "type": "choice",
+        "message": "Please choose how to handle the deleted files:",
+        "choices": ["Move to Trash", "Delete Permanently"],
         "name": "trash_choice",
-        "default": True,
+        "default": "Move to Trash",
     }
     result = prompt([msg])
+    if not result["trash_choice"] == "Move to Trash":
+        result["trash_choice"] = True
+    else:
+        result["trash_choice"] = False
     return result["trash_choice"]

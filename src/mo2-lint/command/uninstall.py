@@ -17,7 +17,7 @@ def uninstall(game=None, directory=None):
         The instance directory to match.
     """
 
-    index_list = []
+    instance_list = []
 
     matched = match_instances(game, directory)
     length = len(matched)
@@ -32,15 +32,17 @@ def uninstall(game=None, directory=None):
         logger.info(f"Uninstalling instance at: {matched[0].instance_path}")
         choice = matched
     else:
+        for instance in matched:
+            instance_list.append(instance)
         logger.info(f"Found {length} matching instance(s) for uninstallation.")
-        index = lang.prompt_uninstall_choice(index_list)
-        if isinstance(index, int):
-            if not (0 < index < (len(matched) + 1)):
+        instance = lang.prompt_uninstall_choice(instance_list)
+        if isinstance(instance, int):
+            if not (0 < instance < (len(matched) + 1)):
                 logger.error("Invalid index. Aborting uninstallation.")
                 return
-            logger.info(f"Uninstalling instance {index}...")
-            choice.append(matched[index - 1])
-        elif index.lower() == "all" or index.lower() == "a":
+            logger.info(f"Uninstalling instance {instance}...")
+            choice.append(matched[instance - 1])
+        elif instance.lower() == "all":
             logger.info("Uninstalling all matching instances...")
             choice = matched
         else:

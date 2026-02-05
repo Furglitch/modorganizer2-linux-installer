@@ -407,9 +407,9 @@ def remove_instance(instance: InstanceData, types: list[str] = ["symlink", "stat
         if instance_path.exists():
             permanent = lang.prompt_uninstall_trash()
             if not permanent:
-                rmtree(instance_path)
-            else:
                 send2trash(instance_path)
+            else:
+                rmtree(instance_path)
 
         # Restore game executable if it was backed up
         exec = (
