@@ -33,7 +33,7 @@ def download_mod_organizer():
         else False
     )
     if extracted and extracted.exists():
-        destination = Path(var.input_params.directory).expanduser()
+        destination = var.input_params.directory
         mo2_exec = destination / "ModOrganizer.exe"
         if (  # if ModOrganizer.exe exists in destination check if it's the same file
             destination.exists() and mo2_exec.exists()
@@ -219,7 +219,7 @@ def download_plugin(plugin: str):
 
     destination = cache_dir / "plugins" / plugin
     extract(downloaded, extract_dest)
-    install(extract_dest, Path(var.input_params.directory) / "plugins", file_path)
+    install(extract_dest, var.input_params.directory / "plugins", file_path)
     logger.debug(f"Plugin {plugin} installed to plugins directory.")
 
 

@@ -487,7 +487,7 @@ def write_state(add_current: bool = True):
 
 
 def match_instances(
-    game: Optional[str] = None, directory: Optional[Path] = None
+    game: Optional[str] = None, directory: Optional[Path] = None, exact: bool = False
 ) -> dict[InstanceData]:
     """
     Matches instances in the state_file based on the provided game or directory.
@@ -516,19 +516,27 @@ def match_instances(
         if game and instance.nexus_slug != game:
             logger.trace(f"Nexus slug {instance.nexus_slug} does not match {game}.")
             continue
-        if directory and not str(instance.instance_path).startswith(str(directory)):
+
+        startswith = (
+            str(instance.instance_path).startswith(str(directory))
+            if directory
+            else False
+        )
+        if directory and not startswith:
             logger.trace(
                 f"Instance path {instance.instance_path} does not start with {directory}."
             )
             continue
 
-        if (game == instance.nexus_slug) or (
-            str(instance.instance_path).startswith(str(directory))
-        ):
+        if exact and directory and (instance.instance_path == directory):
             logger.trace(f"Matched instance at index {instance.index}: {instance}")
             matched.append(instance)
             continue
-        elif not (game or directory):
+        elif (game == instance.nexus_slug) or (not exact and directory and startswith):
+            logger.trace(f"Matched instance at index {instance.index}: {instance}")
+            matched.append(instance)
+            continue
+        elif not exact and not (game or directory):
             logger.trace(
                 f"Found existing instance at index {instance.index}: {instance}"
             )

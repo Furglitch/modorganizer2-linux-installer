@@ -158,11 +158,17 @@ def start(
         Path to a custom game_info.yml file.
     log_level : str, optional
         The logging level to set. Defaults to "INFO".
+
+    Returns:
+    --------
+    tuple[Optional[str], Optional[Path]]
+        Depending on the provided parameters, returns the game and/or directory
     """
     remove_loggers()
     add_loggers(log_level)
     if directory:
-        directory = Path(directory)
+        directory = str(directory).rstrip("/")
+        directory = Path(directory).expanduser().resolve()
     if game:
         load_game_info(game, game_info_path)
         if game not in var.games_info:
@@ -170,6 +176,7 @@ def start(
                 f"Invalid game specified: {game}. Available games are: {game_list}"
             )
     state.load_state_file()
+    return game or None, directory or None
 
 
 # Helper Functions
@@ -292,8 +299,7 @@ def install(
     plugin: tuple[str],
     log_level,
 ):
-    directory = Path(directory)
-    start(game, directory, game_info_path, log_level)
+    game, directory = start(game, directory, game_info_path, log_level)
     _install(
         game,
         directory,
@@ -314,7 +320,7 @@ def install(
 @click_opt_directory
 @click_opt_game
 def uninstall(game: str, directory: Path, game_info_path: Optional[Path], log_level):
-    start(game, directory, game_info_path, log_level)
+    game, directory = start(game, directory, game_info_path, log_level)
     _uninstall(game, directory)
     state.write_state(False)
 
@@ -326,7 +332,7 @@ def uninstall(game: str, directory: Path, game_info_path: Optional[Path], log_le
 @click_opt_directory
 @click_opt_game
 def list(game: Optional[str], directory: Optional[Path], log_level):
-    start(game, directory, log_level=log_level)
+    game, directory = start(game, directory, log_level=log_level)
     _list(game, directory)
 
 
@@ -336,7 +342,7 @@ def list(game: Optional[str], directory: Optional[Path], log_level):
 @click_log_level
 @click_arg_directory(required=True)
 def pin(directory: Path, log_level):
-    start(directory=directory, log_level=log_level)
+    waste, directory = start(directory=directory, log_level=log_level)
     _pin(directory, pin=True)
 
 
@@ -346,7 +352,7 @@ def pin(directory: Path, log_level):
 @click_log_level
 @click_arg_directory(required=True)
 def unpin(directory: Path, log_level):
-    start(directory=directory, log_level=log_level)
+    waste, directory = start(directory=directory, log_level=log_level)
     _pin(directory, pin=False)
 
 
@@ -356,7 +362,7 @@ def unpin(directory: Path, log_level):
 @click_log_level
 @click_arg_directory(required=True)
 def update(directory: Path, log_level):
-    start(directory=directory, log_level=log_level)
+    waste, directory = start(directory=directory, log_level=log_level)
     _update(directory)
 
 

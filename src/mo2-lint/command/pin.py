@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
-from util import state_file as state
+from util import lang, state_file as state
 from loguru import logger
 
 
@@ -10,7 +10,7 @@ def pin(directory: Path, pin: bool = True):
     Pins the current MO2 version for the instance located at the given directory.
     """
 
-    matched = state.match_instances(directory=directory)
+    matched = state.match_instances(directory=directory, exact=True)
     if not matched:
         raise ValueError(f"No instance found for directory: {directory}")
     elif len(matched) > 1:
@@ -18,8 +18,9 @@ def pin(directory: Path, pin: bool = True):
             f"Multiple instances found for directory: {directory}. Cannot pin."
         )
         logger.error("Matched instances:")
-        for key, value in matched.items():
-            logger.error(f"  - {key}: {value}")
+        list = lang.list_instances(matched)
+        for item in list:
+            print(f"  - {item}")
         logger.error("You should only specify directories for a single instance.")
         raise ValueError(f"Multiple instances found for directory: {directory}")
     state.current_instance = matched[0]
