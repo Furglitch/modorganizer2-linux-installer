@@ -73,7 +73,7 @@ def install():
         if isinstance(var.game_info.subdirectory, str)
         else var.game_info.subdirectory.get(state.current_instance.launcher)
     )
-    if game_install_path.name is not subdirectory:
+    if game_install_path.name != subdirectory:
         game_install_path = game_install_path.parent / subdirectory
         state.current_instance.game_path = game_install_path
 

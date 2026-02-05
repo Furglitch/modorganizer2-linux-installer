@@ -19,13 +19,14 @@ _build: venv/bin/activate
 		src/nxm-handler/__init__.py
 	./venv/bin/pyinstaller --onefile --name mo2_lint \
 		--paths src \
+		--hidden-import InquirerPy \
 		--hidden-import patoolib \
 		--hidden-import protontricks \
 		--hidden-import pydantic_core \
-		--hidden-import yaml \
 		--hidden-import requests \
 		--hidden-import send2trash \
 		--hidden-import websockets \
+		--hidden-import yaml \
 		--add-data "src/mo2-lint:src" \
 		--add-data "configs:cfg" \
 		--add-data "dist:dist" \

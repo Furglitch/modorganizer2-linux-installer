@@ -8,7 +8,7 @@ from send2trash import send2trash
 from shutil import move, rmtree
 from step.load_game_info import get_launcher, get_library
 from typing import Optional
-from util import variables as var, state_file as state
+from util import lang, variables as var, state_file as state
 from uuid import UUID
 import json
 
@@ -289,7 +289,6 @@ def choose_instance():
     global current_instance, matching_instances
     instance_count = len(matching_instances) if matching_instances else 0
     if instance_count > 0:
-        quantifier = "the" if instance_count == 1 else "an"
         logger.debug("Prompting user to choose existing or new instance.")
         direct_instance = False
         if current_instance:
@@ -299,13 +298,7 @@ def choose_instance():
                 else False
             )
         if not direct_instance:
-            choice = (
-                input(
-                    f"Would you like to use {quantifier} existing instance [e] or create a new one? [N]: "
-                )
-                .strip()
-                .lower()
-            )
+            choice = lang.prompt_instance_choice_existing()
         if direct_instance or choice.lower() == "e":
             if not direct_instance:
                 logger.debug("Using the existing instance.")
@@ -315,13 +308,10 @@ def choose_instance():
                 )
                 current_instance = matching_instances[0]
             elif instance_count > 1:
+                index_list = []
                 for idx, inst in enumerate(matching_instances, start=1):
-                    print(
-                        f"    - [{idx}] Game: {inst.nexus_slug}, Path: {inst.instance_path}, Script Extender: {'Yes' if inst.script_extender else 'No'}, Plugins: {', '.join(inst.plugins) if inst.plugins else 'None'}"
-                    )
-                selected = int(
-                    input("Select the number of the instance you want to use: ")
-                )
+                    index_list.append({idx, inst})
+                selected = lang.prompt_instance_choice(instance_list=index_list)
                 current_instance = matching_instances[selected - 1]
 
             if (
@@ -415,13 +405,8 @@ def remove_instance(instance: InstanceData, types: list[str] = ["symlink", "stat
     if "install" in types:
         instance_path = instance.instance_path
         if instance_path.exists():
-            permanent = (
-                input("Move instance to trash [t] or delete permanently [d]? : ")
-                .strip()
-                .lower()
-                == "d"
-            )
-            if permanent:
+            permanent = lang.prompt_uninstall_trash()
+            if not permanent:
                 rmtree(instance_path)
             else:
                 send2trash(instance_path)

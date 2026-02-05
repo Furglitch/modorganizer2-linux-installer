@@ -2,6 +2,7 @@
 
 from loguru import logger
 from util.state_file import match_instances, remove_instance
+from util import lang
 
 
 def uninstall(game=None, directory=None):
@@ -16,11 +17,7 @@ def uninstall(game=None, directory=None):
         The instance directory to match.
     """
 
-    def list_instances(list):
-        for idx, inst in enumerate(list, start=1):
-            print(
-                f"    - [{idx}] Game: {inst.nexus_slug}, Path: {inst.instance_path}, Script Extender: {'Yes' if inst.script_extender else 'No'}, Plugins: {', '.join(inst.plugins) if inst.plugins else 'None'}"
-            )
+    index_list = []
 
     matched = match_instances(game, directory)
     length = len(matched)
@@ -32,18 +29,17 @@ def uninstall(game=None, directory=None):
 
     if length == 1:
         logger.info("Only one instance found. Proceeding to uninstall...")
-        list_instances(matched)
+        logger.info(f"Uninstalling instance at: {matched[0].instance_path}")
         choice = matched
     else:
         logger.info(f"Found {length} matching instance(s) for uninstallation.")
-        list_instances(matched)
-        index = input("\nEnter index of instance to uninstall (or 'all'): ").strip()
-        if index.isdigit():
-            if not (index.isdigit() and (0 < int(index) < (len(matched) + 1))):
+        index = lang.prompt_uninstall_choice(index_list)
+        if isinstance(index, int):
+            if not (0 < index < (len(matched) + 1)):
                 logger.error("Invalid index. Aborting uninstallation.")
                 return
             logger.info(f"Uninstalling instance {index}...")
-            choice.append(matched[int(index) - 1])
+            choice.append(matched[index - 1])
         elif index.lower() == "all" or index.lower() == "a":
             logger.info("Uninstalling all matching instances...")
             choice = matched
@@ -63,10 +59,8 @@ def confirm_uninstall(choice):
     choice : dict[int, Instance]
         The instances selected for uninstallation.
     """
-    confirm = input(
-        "Are you sure you want to uninstall the selected instance(s)? This action cannot be undone. [y/N]: "
-    )
-    if confirm.lower() == "y":
+    confirm = lang.prompt_uninstall_confirm()
+    if confirm:
         logger.info("Proceeding with uninstallation...")
         for inst in choice:
             logger.info(f"Uninstalling instance at: {inst.instance_path}")

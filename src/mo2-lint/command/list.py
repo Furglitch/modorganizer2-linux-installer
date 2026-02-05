@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from typing import Optional
+from util import lang
 from util.state_file import match_instances
 
 
@@ -11,7 +12,6 @@ def list(game: Optional[str], directory: Optional[Path]):
     if game or directory:
         matched = "matching "
     print(f"Found {len(list)} {matched}Mod Organizer 2 instance(s):")
-    for idx, inst in enumerate(list, start=1):
-        print(
-            f"    - [{idx}] Game: {inst.nexus_slug}, Path: {inst.instance_path}, Script Extender: {'Yes' if inst.script_extender else 'No'}, Plugins: {', '.join(inst.plugins) if inst.plugins else 'None'}"
-        )
+    list = lang.list_instances(list)
+    for item in list:
+        print(f"  - {item}")

@@ -4,7 +4,7 @@ from loguru import logger
 from pathlib import Path
 from pydantic_core import from_json
 from typing import Optional
-from util import state_file as state, variables as var
+from util import lang, state_file as state, variables as var
 from util.logger import add_loggers, remove_loggers
 from command.install import install as _install
 from command.uninstall import uninstall as _uninstall
@@ -104,7 +104,9 @@ def pull_config():
                     remote_raw,
                     config_path,
                 )
-                logger.debug(f"Downloaded latest {config} from GitHub.")
+                logger.debug(
+                    f"Downloaded latest {config} from GitHub to {config_path}."
+                )
         except Exception as e:
             logger.exception(
                 f"Failed to download {config}: {e}", backtrace=True, diagnose=True
@@ -168,17 +170,6 @@ def start(
                 f"Invalid game specified: {game}. Available games are: {game_list}"
             )
     state.load_state_file()
-
-
-# Help Texts
-help_install = f"""Create a new Mod Organizer 2 instance.
-\nGAME                            Game for the Mod Organizer 2 instance.
-\n                                Options: [{game_list}]
-
-DIRECTORY                       Path for the Mod Organizer 2 instance."""
-help_uninstall = """Uninstall an existing Mod Organizer 2 instance."""
-help_list = """List existing Mod Organizer 2 instances."""
-help_pin = """Pin the Mod Organizer 2 installation in the specified directory, preventing updates."""
 
 
 # Helper Functions
@@ -270,7 +261,9 @@ def cli(ctx):
     ctx.ensure_object(dict)
 
 
-@cli.command(cls=CustomCommand.MoveOptions, help=help_install)
+@cli.command(
+    cls=CustomCommand.MoveOptions, help=lang.help_install.format(list=game_list)
+)
 @click_version
 @click_help
 @click_log_level
@@ -313,7 +306,7 @@ def install(
     state.write_state()
 
 
-@cli.command(help=help_uninstall)
+@cli.command(help=lang.help_uninstall)
 @click_version
 @click_help
 @click_log_level
@@ -326,7 +319,7 @@ def uninstall(game: str, directory: Path, game_info_path: Optional[Path], log_le
     state.write_state(False)
 
 
-@cli.command(help=help_list)
+@cli.command(help=lang.help_list)
 @click_version
 @click_help
 @click_log_level
@@ -337,7 +330,7 @@ def list(game: Optional[str], directory: Optional[Path], log_level):
     _list(game, directory)
 
 
-@cli.command(help=help_pin)
+@cli.command(help=lang.help_pin)
 @click_version
 @click_help
 @click_log_level
@@ -347,7 +340,7 @@ def pin(directory: Path, log_level):
     _pin(directory, pin=True)
 
 
-@cli.command(help=help_pin)
+@cli.command(help=lang.help_unpin)
 @click_version
 @click_help
 @click_log_level
@@ -357,7 +350,7 @@ def unpin(directory: Path, log_level):
     _pin(directory, pin=False)
 
 
-@cli.command(help=help_pin)
+@cli.command(help=lang.help_update)
 @click_version
 @click_help
 @click_log_level

@@ -33,6 +33,8 @@ def run(
         The output lines from the winetricks command.
     """
 
+    prefix = prefix.expanduser().resolve()
+
     # Convert executable to string, with absolute path
     if str(exec).startswith("/usr/bin"):
         if isinstance(exec, str):

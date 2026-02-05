@@ -9,7 +9,7 @@ from util.redirector.install import install as install_redirector
 
 def update(directory: Path):
     """
-    Updates the MO2 instance located at the given directory.
+    Updates the MO2 instance located at the given directory and the redirector for that game.
     """
 
     matched = state.match_instances(directory=directory)

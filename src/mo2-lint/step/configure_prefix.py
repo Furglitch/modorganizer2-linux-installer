@@ -5,43 +5,9 @@ from loguru import logger
 from pathlib import Path
 from shutil import copytree, move
 from step.load_game_info import get_launcher
-from util import variables as var, state_file as state
+from util import lang, variables as var, state_file as state
 from util.heroic.find_library import get_data as get_heroic_data
 from util.wine import protontricks, winetricks
-
-prompt_archive = """It is highly recommended to clean your current game prefix before starting the installation process.
-
-If you archive your existing prefix, it will be renamed with a timestamp suffix (e.g. '.20240615-123456').
-Your personal data (e.g. saved games) will be preserved and restored to the new prefix after it is created.
-"""
-
-prompt_archive_done = """Your prefix has been archived and can be found at: {directory}
-
-Personal data from the archived prefix (e.g. saved games) has been preserved and restored to the new prefix.
-Feel free to delete the archive if you no longer need it after confirming your data is intact.
-
-A list of all archived prefixes can be found at: TBD"""
-
-prompt_clean_steam = """In order to create a clean game prefix, follow the instructions below:
-
-1. In Steam: right-click the game in your library, select 'Properties', and navigate to the 'Compatibility' tab.
-2. Check the box for 'Force the use of a specific Steam Play compatibility tool' if it's not already checked.
-3. From the dropdown menu, select your preferred Proton version. 10.0 is the supported and recommended version.
-4. Close the properties window and launch the game once to allow Steam to set up the new prefix.
-5. Exit the game completely. Do not launch it until the installation process is finished.
-"""
-
-prompt_clean_heroic = """In order to create a clean game prefix, follow the instructions below:
-
-1. In Heroic: right-click the game in your library, select 'Settings', and navigate to the 'WINE' tab.
-2. Under 'Wine Version', select your preferred Wine/Proton version.
-   * Proton - Proton 10.0 is the currently supported and recommended version.
-   * If this version is not available, you will need to enable "Allow using Valve Proton builds to run games"
-     in Heroic's Settings, under the 'Advanced' tab. Ensure that Proton 10.0 is then downloaded and installed in Steam.
-3. Optional: Navigate to the 'OTHER' tab and check 'Use Steam Runtime'. This is recommended and may help with compatibility.
-4. Launch the game once to allow Heroic to set up the new prefix.
-5. Exit the game completely. Do not launch it until the installation process is finished.
-"""
 
 default_tricks = [
     "arial",
@@ -94,9 +60,10 @@ def load_prefix() -> Path:
     if prefix is None:
         logger.error("Could not determine game prefix path.")
     elif isinstance(prefix, str):
-        prefix = Path(prefix).expanduser()
+        prefix = Path(prefix).expanduser().resolve()
     elif isinstance(prefix, Path):
-        prefix = prefix.expanduser()
+        prefix = prefix.expanduser().resolve()
+    var.prefix = prefix
     return prefix
 
 
@@ -162,15 +129,7 @@ def prompt():
     var.prefix = prefix
     logger.debug(f"Determined game prefix for archiving: {prefix}")
     logger.debug("Prompting user to archive existing prefix...")
-    print(prompt_archive)
-    if (
-        input(
-            "Would you like to archive your current game prefix and create a new one? [y/N]: "
-        )
-        .strip()
-        .lower()
-        in yes
-    ):
+    if lang.prompt_archive():
         logger.debug("User agreed to archive the prefix.")
         archive_prefix(prefix)
     else:
@@ -179,16 +138,8 @@ def prompt():
 
     # Prompt user to create a clean prefix
     logger.debug("Prompting user to create a clean Steam prefix...")
-    match state.current_instance.launcher:
-        case "steam":
-            print(prompt_clean_steam)
-        case "gog" | "epic":
-            print(prompt_clean_heroic)
 
-    if (
-        input("Have you completed these instructions? [y/N]: ").strip().lower()
-        not in yes
-    ):
+    if not lang.prompt_archive_init():
         logger.critical(
             "User declined to create a clean prefix. Aborting installation."
         )
@@ -197,7 +148,7 @@ def prompt():
         logger.debug("User confirmed clean prefix setup.")
         if var.archived_prefix is not None:
             restore_archived_prefix(prefix)
-            print(prompt_archive_done.format(directory=var.archived_prefix))
+            print(lang.prompt_archive_done.format(directory=var.archived_prefix))
 
 
 def configure():
@@ -210,5 +161,5 @@ def configure():
         case "steam":
             protontricks.apply(var.game_info.launcher_ids.steam, tricks)
         case "gog" | "epic":
-            prefix = var.heroic_config[3]
+            prefix = var.prefix
             winetricks.apply(prefix=prefix, tricks=tricks)

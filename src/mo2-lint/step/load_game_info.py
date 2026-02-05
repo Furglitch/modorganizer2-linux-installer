@@ -2,7 +2,7 @@
 
 from loguru import logger
 from pathlib import Path
-from util import variables as var, state_file as state
+from util import lang, variables as var, state_file as state
 from util.heroic.find_library import get_data as get_heroic_data, gog_data, epic_data
 from util.steam.find_library import get_libraries as get_steam_libraries
 
@@ -47,26 +47,30 @@ def get_launcher() -> str:
 
     var.launcher = None
     if steam_has_game and heroic_has_game:
-        print("Installs on both Steam and Heroic have been detected.")
-        print("Please choose which launcher to use for this instance:")
+        logger.info("Multiple launchers detected with the game installed.")
 
-        print(f"- Steam: {steam_install_path}")
         if heroic_install_path:
-            runner = "GOG" if heroic_data[0] == "gog" else "Epic"
-            print(f"- Heroic {runner}: {heroic_install_path}")
-            input_choice = (
-                input(f"Choose launcher [steam/{heroic_data[0]}]: ").strip().lower()
-            )
-        elif gog_install_path and epic_install_path:
-            print(f"- Heroic GOG: {gog_install_path}")
-            print(f"- Heroic Epic: {epic_install_path}")
-            input_choice = input("Choose launcher [steam/gog/epic]: ").strip().lower()
+            if heroic_data[0] == "gog":
+                gog_install_path = heroic_install_path
+            elif heroic_data[0] == "epic":
+                epic_install_path = heroic_install_path
 
-        if input_choice == "steam":
+        choice = (
+            lang.prompt_launcher_choice(
+                steam_install_path if steam_install_path else None,
+                gog_install_path if gog_install_path else None,
+                epic_install_path if epic_install_path else None,
+            )
+            .split(":")[0]
+            .strip()
+            .lower()
+        )
+
+        if choice == "steam":
             var.launcher = "steam"
-        elif input_choice == "gog":
+        elif choice == "gog":
             var.launcher = "gog"
-        elif input_choice == "epic":
+        elif choice == "epic":
             var.launcher = "epic"
         else:
             logger.error("Invalid launcher choice.")

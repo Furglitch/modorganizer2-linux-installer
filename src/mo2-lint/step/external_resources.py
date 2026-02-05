@@ -6,7 +6,7 @@ from patoolib import extract_archive as unzip
 from shutil import copytree, copy2 as copy
 from typing import Optional
 from urllib.request import urlretrieve as request
-from util import variables as var, state_file as state
+from util import lang, variables as var, state_file as state
 from util.checksum import compare_checksum
 from util.download import download as dl, download_nexus as nexus_dl
 from util.state_file import symlink_instance
@@ -25,8 +25,6 @@ def download_mod_organizer():
     url = var.resource_info.mod_organizer.download_url
     checksum = var.resource_info.mod_organizer.checksum
     checksum_internal = var.resource_info.mod_organizer.checksum_internal
-    print(checksum)
-    print(checksum_internal)
     downloaded = dl(url, download_dir, checksum=checksum)
     extracted = extract(downloaded, extract_dir / "mod_organizer")
     pinned = (
@@ -40,13 +38,8 @@ def download_mod_organizer():
         if (  # if ModOrganizer.exe exists in destination check if it's the same file
             destination.exists() and mo2_exec.exists()
         ) and not pinned:
-            print(checksum_internal)
             if not compare_checksum(mo2_exec, checksum_internal):
-                print(
-                    f"Mod Organizer 2 already exists at {mo2_exec}, but checksums do not match. There may have been an update."
-                )
-                response = input("Continue and overwrite? [Y/n]: ")
-                if response.lower() not in ("y", "yes", ""):
+                if lang.prompt_install_mo2_checksum_fail(str(mo2_exec)):
                     logger.info(
                         "User opted to not overwrite existing Mod Organizer 2 installation."
                     )
@@ -113,34 +106,11 @@ def download_scriptextender():
             logger.debug(
                 "Multiple script extender versions found; prompting user for selection."
             )
-            print("Multiple script extender versions are available for this game:")
-            for entry in matches.values():
-                i = list(matches.values()).index(entry)
-                version = getattr(entry, "version", None)
-                runtime = getattr(entry, "runtime", None)
-                runtime = runtime.get(var.launcher) if runtime else None
-                _runtime = None
-                if isinstance(runtime, dict):
-                    for key, value in runtime.items():
-                        if isinstance(value, list):
-                            _runtime[key] = ", ".join(value)
-                        else:
-                            _runtime[key] = [value]
-                else:
-                    _runtime = runtime
-                print(f"  - {i + 1}: {version} for {_runtime}")
-            choice = input(f"Choose version [1-{match_count}] (default: 1): ").strip()
-            if not choice.isdigit():
-                logger.critical(
-                    "No valid selection made for script extender version. Aborting download."
-                )
-                return
-            else:
-                choice = int(choice) - 1
-                logger.debug(f"User selected script extender version index: {choice}")
-                index = choice if (0 <= choice < match_count) else None
-                choice = matches[index]
-                logger.trace(f"Selected entry: {choice}")
+            choice = lang.prompt_install_scriptextender_choice(matches)
+            logger.debug(f"User selected script extender version index: {choice}")
+            index = choice if (0 <= choice < match_count) else None
+            choice = matches[index]
+            logger.trace(f"Selected entry: {choice}")
     else:
         logger.warning("No matching script extender versions found for this launcher.")
         return
