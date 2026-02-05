@@ -2,7 +2,7 @@ name: GitHub Pages Deploy
 
 on:
   push:
-      branches: ["master"]
+      branches: ["rewrite"]
       paths:
           - '.github/workflows/pages.yml'
           - 'docs/**'
@@ -29,9 +29,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.14'
-
-      - name: Convert Relative Paths to Repo URLs
-        run: python .github/workflows/convert-relative.py
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
