@@ -141,6 +141,39 @@ class DownloadData:
 
 
 @dataclass
+class FileWhitelist:
+    """
+    Stores file paths that should be included when installing a resource.
+
+    Parameters
+    -----------
+    subdirectory: str, optional
+        Subdirectory within the resource archive that the file paths are relative to.
+    paths: Tuple[str, ...], optional
+        File paths to include, relative to the specified subdirectory.
+    Must contain one or both.
+    """
+
+    subdirectory: Optional[str] = None
+    paths: Tuple[str, ...] = field(default_factory=tuple)
+
+    @classmethod
+    def from_dict(cls, data: dict[str, any] | "FileWhitelist") -> "FileWhitelist":
+        if isinstance(data, cls):
+            return data
+        return cls(
+            subdirectory=data.get("subdirectory") or None,
+            paths=tuple(data.get("paths") or ()),
+        )
+
+    def __post_init__(self):
+        if not (self.paths or self.subdirectory):
+            raise ValueError(
+                "Either a file list or subdirectory must be provided for file whitelist."
+            )
+
+
+@dataclass
 class ScriptExtender:
     """
     Stores information about a specific script extender version.
@@ -149,11 +182,11 @@ class ScriptExtender:
     -----------
     version : str
         Version of the script extender.
-    runtime : dict[str, str | List[str]], optional
-        Target game runtime version required for this script extender.
+    runtime : str | dict[str, str | List[str]], optional
+        Target game runtime version required for this script extender. Can be a string ('unknown' or 'any') or a dictionary mapping launcher identifiers to runtime versions.
     download : DownloadData
         Download information for the script extender.
-    file_whitelist : Tuple[str, ...], optional
+    file_whitelist : FileWhitelist, optional
         File paths that should be included when installing the script extender. If not provided, all files will be installed.
 
     Raises
@@ -163,9 +196,9 @@ class ScriptExtender:
     """
 
     version: str = None
-    runtime: Optional[dict[str, str | List[str]]] = None
+    runtime: str | dict[str, str | List[str]] = None
     download: DownloadData = None
-    file_whitelist: Optional[Tuple[str, ...]] = field(default_factory=tuple)
+    file_whitelist: Optional[FileWhitelist] = None
 
     @classmethod
     def from_dict(cls, data: dict[str, any] | "ScriptExtender") -> "ScriptExtender":
@@ -173,9 +206,11 @@ class ScriptExtender:
             return data
         return cls(
             version=data.get("version"),
-            runtime=data.get("runtime") or None,
+            runtime=data.get("runtime"),
             download=DownloadData.from_dict(data.get("download")),
-            file_whitelist=tuple(data.get("file_whitelist") or ()),
+            file_whitelist=FileWhitelist.from_dict(data.get("file_whitelist"))
+            if "file_whitelist" in data
+            else None,
         )
 
     def __post_init__(self):
@@ -183,6 +218,10 @@ class ScriptExtender:
             raise ValueError("Script extender version must be provided.")
         if not self.download:
             raise ValueError("Script extender download data must be provided.")
+        if isinstance(self.runtime, dict):
+            for launcher, version in self.runtime.items():
+                if not isinstance(version, list):
+                    raise ValueError("Runtime version must be a list of strings.")
 
 
 @dataclass
@@ -388,10 +427,14 @@ class Resource:
         Direct download URL for the resource.
     checksum : str, optional
         SHA-256 checksum of the resource file.
+    path_internal : Path, optional
+        Internal path to the specific file within the downloaded archive that should be used for checksum verification
     checksum_internal : str, optional
         SHA-256 checksum of an internal file within the resource archive.
     version : str, optional
         Version string for the resource.
+    file_whitelist : FileWhitelist, optional
+        File paths that should be included when installing the resource. If not provided, all files will be installed.
 
     Raises
     -------
@@ -401,8 +444,10 @@ class Resource:
 
     download_url: str = None
     checksum: Optional[str] = None
+    path_internal: Optional[Path] = None
     checksum_internal: Optional[str] = None
     version: Optional[str] = None
+    file_whitelist: Optional[FileWhitelist] = None
 
     @classmethod
     def from_dict(cls, data: dict[str, any] | "Resource") -> "Resource":
@@ -411,8 +456,16 @@ class Resource:
         return cls(
             download_url=data.get("download_url"),
             version=data.get("version") if "version" in data else None,
-            checksum=data.get("checksum"),
-            checksum_internal=data.get("checksum_internal"),
+            checksum=data.get("checksum") if "checksum" in data else None,
+            path_internal=data.get("path_internal")
+            if "path_internal" in data
+            else None,
+            checksum_internal=data.get("checksum_internal")
+            if "checksum_internal" in data
+            else None,
+            file_whitelist=FileWhitelist.from_dict(data.get("file_whitelist"))
+            if "file_whitelist" in data
+            else None,
         )
 
     def __post_init__(self):
@@ -451,7 +504,7 @@ class ResourceInfo:
         return cls(
             mod_organizer=Resource.from_dict(data.get("mod_organizer")),
             winetricks=Resource.from_dict(data.get("winetricks")),
-            java=Resource.from_dict(data.get("java")) if data.get("java") else None,
+            java=Resource.from_dict(data.get("java")) if "java" in data else None,
         )
 
     def __post_init__(self):

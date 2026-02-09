@@ -9,6 +9,8 @@ parent: Contributing
 
 MO2-LINT uses YAML configuration files to define various resources for the installer, such as supported games. These configuration files are located in the [`configs/`] directory of the project.
 
+**About `schema`:** Each configuration file includes a `schema` field at the top. This field indicates the earliest version of MO2-LINT that can utilize that configuration file. This is to ensure that if we add or remove fields in the future, older versions of the installer won't attempt to use incompatible configuration files. If a configuration file has a `schema` version higher than the current installer version, the installer will skip that file and not download updates for it.
+
 ## `games_info.yml`
 
 The `games_info.yml` file contains information about the supported games, including their names, executable paths, and any specific configurations required for installation. The structure of the file is as follows:
@@ -17,6 +19,7 @@ The `games_info.yml` file contains information about the supported games, includ
 schema:
 
 games:
+
   <game_id>:
     display_name: <display_name>
     nexus_slug: <nexus_slug>
@@ -67,14 +70,14 @@ The `script_extenders` section allows you to define script extenders associated 
 ```yaml
     script_extenders:
       - version: <version>
-        runtime:
+        runtime: < any | unknown >
           steam:
-            - <runtime_version_1>
-            - <runtime_version_2>
+            - <steam_runtime_version_1>
+            - <steam_runtime_version_2>
           gog:
-            - <runtime_version_1>
+            - <gog_runtime_version_1>
           epic:
-            - <runtime_version_1>
+            - <epic_runtime_version_1>
         download: # Further details below
         file_whitelist:
           - <file_1>
@@ -85,7 +88,7 @@ The `script_extenders` section allows you to define script extenders associated 
 
 **Key Fields:**
 - `version`: The version of the script extender.
-- `runtime`: Specifies the compatible runtime versions for different launchers.
+- `runtime`: Specifies the compatible runtime versions for different launchers. This can either be a single version string (will apply to ALL launchers), or a list of per-launcher version strings.
   - `steam`: A list of compatible Steam runtime versions.
   - `gog`: A list of compatible GOG runtime versions.
   - `epic`: A list of compatible Epic Games Store runtime versions.
@@ -141,7 +144,52 @@ All workarounds defined here are optional and will only be applied if specified 
   - `<source>`: The source file name in the installer's `cfg/workarounds/` directory. ([`configs/`]`workarounds/` in the repository)
   - `<destination>`: The destination file name in the game's installation folder.
 
+
+## `resource_info.yml`
+
+The `resource_info.yml` file contains information about various resources used by the installer; currently Mod Organizer 2 itself, Java, and Winetricks. The structure of the file is as follows:
+
+```yaml
+schema:
+
+resources:
+
+  <resource>:
+    version: <version>
+    download_url: <download_url>
+    checksum: <checksum>
+    path_internal: <path_internal>
+    checksum_internal: <checksum_internal>
+```
+
+**Key Fields:**
+- `resource`: A unique identifier for the resource (e.g. `mod_organizer`, `java`, `winetricks`).
+- `version`: The version of the resource.
+- `download_url`: The direct download URL for the resource.
+- `checksum`: The SHA256 checksum of the downloaded file for verification.
+- `path_internal`: The path to the main executable or relevant file within the downloaded archive.
+- `checksum_internal`: The SHA256 checksum of the internal file specified in `path_internal` for verification after extraction.
+
+## `plugin_info.yml`
+
+The `plugin_info.yml` file contains information about the plugins used by the installer, such as their versions and download URLs. The structure of the file is as follows:
+
+```yaml
+schema:
+
+plugins:
+
+  <plugin>: <manifest_url>
+```
+
+**Key Fields:**
+- `plugin`: A unique identifier for the plugin (e.g. `root-builder`).
+- `manifest_url`: The URL to the plugin's manifest file, which contains information about the plugin's versions and download URLs. This must point directly to the raw file.
+  - The manifest file must be a JSON file following the manifest structure created by [@Kezyma] for their 'Plugin Finder' plugin. For more details on this schema, please refer to the documentation for [Kezyma's Plugin Finder].
+
 [script_extenders]: #script_extenders
 [script_extenders_download]: #download
 [workarounds]: #workarounds
 [`configs/`]: https://github.com/furglitch/modorganizer2-linux-installer/tree/rewrite/configs
+[@Kezyma]: https://github.com/Kezyma
+[Kezyma's Plugin Finder]: https://github.com/Kezyma/ModOrganizer-Plugins/blob/main/docs/pluginfinder.md

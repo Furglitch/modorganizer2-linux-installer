@@ -1,8 +1,8 @@
 #!usr/bin/env python3
 
+from loguru import logger
 from pathlib import Path
 from typing import Optional
-import click
 from util import variables as var, state_file as state
 from util.state_file import set_index, InstanceData
 from util.redirector.install import install as install_redirector
@@ -19,16 +19,8 @@ def install(
     game_info_path: Optional[Path] = None,
     log_level: str = "INFO",
     script_extender: bool = False,
-    plugin: Optional[list] = [],
-    plugin_list: Optional[str] = None,
+    plugin: Optional[tuple[str]] = (),
 ):
-    if plugin:
-        for p in plugin:
-            if p not in var.plugin_info:
-                raise click.BadArgumentUsage(
-                    f"Invalid plugin specified: {p}. Available plugins are: {plugin_list}"
-                )
-
     var.set_parameters(
         {
             "game": game,
@@ -41,12 +33,11 @@ def install(
     )
     directory.mkdir(parents=True, exist_ok=True)
 
-    if state.check_instance(game, str(directory)):
-        state.choose_instance()
-    else:
+    if not state.match_instances(directory=directory):
         state.current_instance = InstanceData(
             index=-1,
-            nexus_slug=game,
+            game=game,
+            nexus_slug=var.game_info.nexus_slug,
             instance_path=directory,
             launcher=get_launcher(),
             launcher_ids=var.LauncherIDs.from_dict(var.game_info.launcher_ids),
@@ -56,6 +47,17 @@ def install(
             plugins=list(plugin),
         )
         set_index()
+    else:
+        logger.critical(
+            "An instance with the same directory already exists. Please choose a different directory or uninstall the existing instance."
+        )
+        logger.warning(
+            "If you're trying to update an existing instance, please use the `update` command instead."
+        )
+        logger.warning(
+            "If you wish to use this path for a new instance, please `uninstall` the conflicting instance."
+        )
+        raise ValueError("Instance with the same directory already exists.")
 
     prompt_prefix()
     configure_prefix()

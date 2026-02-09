@@ -12,13 +12,17 @@ resources:
     version: "2.5.2"
     download_url: "https://github.com/ModOrganizer2/modorganizer/releases/download/v2.5.2/Mod.Organizer-2.5.2.7z"
     checksum: "e6376efd87fd5ddd95aee959405e8f067afa526ea6c2c0c5aa03c5108bf4a815"
+    path_internal: "ModOrganizer.exe"
     checksum_internal: "442b354a8f34754da0048654c44d27f51628feba54ce46c3187cf58d6c43e622" # ModOrganizer.exe
 
   java:
     version: "8u312-b07"
     download_url: "https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u312-b07/OpenJDK8U-jre_x64_windows_hotspot_8u312b07.zip"
     checksum: "a4623365d70e7bc969e84b7f29b6b2eecb6c0686863ed67651506e2b5adf43b0"
+    path_internal: "jdk8u312-b07-jre/bin/java.exe"
     checksum_internal: "4bdb429326d8ac8308a9ad2fbd4edcb19dff67e153ca81673a57cf1cd575081e" # jdk8u312-b07-jre/bin/java.exe
+    file_whitelist:
+      subdirectory: jdk8u312-b07-jre
 
   winetricks:
     version: "latest-autobuild"

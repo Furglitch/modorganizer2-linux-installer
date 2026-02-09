@@ -29,7 +29,7 @@ def apply_workarounds():
                             dest = Path(state.current_instance.game_path) / dest
                             dest.parent.mkdir(parents=True, exist_ok=True)
                             copyfile(src, dest)
-                if t == "needs_java" and w:
+                if t == "needs_java" and w is True:
                     from .external_resources import download_java
 
                     logger.debug("Downloading Java as per workaround...")

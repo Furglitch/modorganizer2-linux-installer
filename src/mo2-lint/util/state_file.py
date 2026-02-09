@@ -6,7 +6,6 @@ from pathlib import Path
 from pydantic_core import to_json
 from send2trash import send2trash
 from shutil import move, rmtree
-from step.load_game_info import get_launcher, get_library
 from typing import Optional
 from util import lang, variables as var, state_file as state
 from uuid import UUID
@@ -68,6 +67,8 @@ class InstanceData:
 
     Parameters
     ----------
+    game : str
+        The cli parameter used to identify the game associated with this MO2 instance.
     nexus_slug : str
         The Nexus Mods slug identifier for the game associated with this MO2 instance.
     instance_path : Path
@@ -92,6 +93,7 @@ class InstanceData:
     """
 
     index: int = None
+    game: str = None
     nexus_slug: str = None
     instance_path: Path = None
     pin: bool = False
@@ -108,6 +110,7 @@ class InstanceData:
             return data
         return cls(
             index=data.get("index"),
+            game=data.get("game"),
             nexus_slug=data.get("nexus_slug"),
             instance_path=Path(data.get("instance_path")),
             pin=data.get("pin", False),
@@ -125,6 +128,7 @@ class InstanceData:
             raise TypeError("launcher_ids must be of type LauncherIDs, not dict.")
         return {
             "index": data.index,
+            "game": data.game,
             "nexus_slug": data.nexus_slug,
             "instance_path": str(data.instance_path),
             "pin": data.pin,
@@ -136,6 +140,8 @@ class InstanceData:
         }
 
     def __post_init__(self):
+        if not self.game or self.game not in var.games_info.keys():
+            logger.warning("InstanceData requires a valid game identifier.")
         if not self.nexus_slug:
             logger.warning("InstanceData requires a valid nexus_slug.")
         if not self.instance_path:
@@ -216,129 +222,7 @@ def load_state_file():
         state_file = StateFile(None, [])
 
 
-matching_instances: list[InstanceData] = []
-
-
-def check_instance(
-    game: Optional[str], directory: Optional[Path]
-) -> list[InstanceData]:
-    """
-    Checks for existing MO2 instances in state_file that match the given game or directory.
-
-    Parameters
-    ----------
-    game : str, optional
-        Nexus Mods slug identifier for the game.
-    directory : Path, optional
-        Directory path to check for existing MO2 instances. Checks subdirectories as well.
-
-    Returns
-    -------
-    list[InstanceData]
-        List of InstanceData objects that match the given game and/or directory.
-
-    Raises
-    -------
-    ValueError
-        If both game and directory are not provided.
-    """
-    game = var.input_params.game if not game else game
-    directory = var.input_params.directory if not directory else directory
-    if game is None and directory is None:
-        logger.error("Either game or directory must be provided to check_instance.")
-        raise ValueError("Either game or directory must be provided to check_instance.")
-    logger.debug(
-        f"Checking for instances with nexus slug: {game} or directory: {directory}"
-    )
-    global state_file, matching_instances
-    matching_instances = []
-    found_conflict = False
-    for instance in state_file.instances:
-        if (
-            instance.instance_path == directory
-            and instance.nexus_slug != game
-            and not found_conflict
-        ):
-            found_conflict = True
-            logger.warning(
-                f"We've found an instance that matches this directory, but is not for the game {game}."
-            )
-            logger.warning(
-                "Using this instance may lead to unexpected behavior. It is not recommended, and not supported."
-            )
-            logger.warning(
-                "You have been warned. The script will proceed, but please be cautious when choosing this instance."
-            )
-        elif instance.instance_path == directory or instance.nexus_slug == game:
-            logger.debug(
-                f"Found matching instance at index {instance.index}: {instance}"
-            )
-        else:
-            continue
-        matching_instances.append(instance)
-    return None if matching_instances == [] else matching_instances
-
-
 current_instance: InstanceData = None
-
-
-def choose_instance():
-    """
-    Prompts the user to choose between using an existing instance or creating a new one.
-    """
-    global current_instance, matching_instances
-    instance_count = len(matching_instances) if matching_instances else 0
-    if instance_count > 0:
-        logger.debug("Prompting user to choose existing or new instance.")
-        direct_instance = False
-        if current_instance:
-            direct_instance = (
-                (current_instance.instance_path / "ModOrganizer.exe").exists()
-                if current_instance.instance_path
-                else False
-            )
-        if not direct_instance:
-            choice = lang.prompt_instance_choice_existing()
-        if direct_instance or choice.lower() == "e":
-            if not direct_instance:
-                logger.debug("Using the existing instance.")
-            if instance_count == 1:
-                logger.info(
-                    "Only one existing instance found, selecting it automatically."
-                )
-                current_instance = matching_instances[0]
-            elif instance_count > 1:
-                index_list = []
-                for idx, inst in enumerate(matching_instances, start=1):
-                    index_list.append({idx, inst})
-                selected = lang.prompt_instance_choice(instance_list=index_list)
-                current_instance = matching_instances[selected - 1]
-
-            if (
-                current_instance.instance_path == var.input_params.directory
-                and current_instance.nexus_slug != var.input_params.game
-            ):
-                (var.input_params.directory / ".conflict").touch(
-                    exist_ok=True
-                )  # if choice is a conflicting directory, put an empty file within to identify it
-                logger.trace(
-                    f"Created conflict file in {var.input_params.directory} to identify conflicting instance."
-                )
-            return
-        elif not choice.lower() == "e":
-            logger.debug("User chose to create a new instance.")
-            state.current_instance = InstanceData(
-                index=-1,
-                nexus_slug=var.input_params.game,
-                instance_path=var.input_params.directory,
-                launcher=get_launcher(),
-                launcher_ids=var.LauncherIDs.from_dict(var.game_info.launcher_ids),
-                game_path=get_library(),
-                game_executable=var.game_info.executable,
-                script_extender=var.game_info.script_extenders or False,
-                plugins=list(var.input_params.plugins or []),
-            )
-    set_index()
 
 
 def set_index(index: Optional[int] = None):
@@ -405,11 +289,16 @@ def remove_instance(instance: InstanceData, types: list[str] = ["symlink", "stat
     if "install" in types:
         instance_path = instance.instance_path
         if instance_path.exists():
-            permanent = lang.prompt_uninstall_trash()
-            if not permanent:
+            if not lang.prompt_uninstall_trash():
+                logger.info(f"Sending instance at {instance_path} to trash.")
                 send2trash(instance_path)
             else:
-                rmtree(instance_path)
+                if lang.prompt_uninstall_trash_confirm():
+                    logger.info(f"Permanently deleting instance at {instance_path}.")
+                    rmtree(instance_path)
+                else:
+                    logger.info(f"Instance at {instance_path} sent to trash instead.")
+                    send2trash(instance_path)
 
         # Restore game executable if it was backed up
         exec = (

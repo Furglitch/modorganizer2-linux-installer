@@ -3,7 +3,7 @@
 from loguru import logger
 from pathlib import Path
 from patoolib import extract_archive as unzip
-from shutil import copytree, copy2 as copy
+from shutil import copytree, copyfile as copy, rmtree
 from typing import Optional
 from urllib.request import urlretrieve as request
 from util import lang, variables as var, state_file as state
@@ -24,34 +24,25 @@ def download_mod_organizer():
     logger.debug("Initiating Mod Organizer 2 download...")
     url = var.resource_info.mod_organizer.download_url
     checksum = var.resource_info.mod_organizer.checksum
+    path_internal = var.resource_info.mod_organizer.path_internal
     checksum_internal = var.resource_info.mod_organizer.checksum_internal
     downloaded = dl(url, download_dir, checksum=checksum)
-    extracted = extract(downloaded, extract_dir / "mod_organizer")
-    pinned = (
-        state.current_instance.pin
-        if state.current_instance and hasattr(state.current_instance, "pin")
-        else False
-    )
+    extracted = extract(downloaded, extract_dir / downloaded.stem)
     if extracted and extracted.exists():
         destination = var.input_params.directory
-        mo2_exec = destination / "ModOrganizer.exe"
+        mo2_exec = destination / path_internal
         if (  # if ModOrganizer.exe exists in destination check if it's the same file
             destination.exists() and mo2_exec.exists()
-        ) and not pinned:
+        ):
             if not compare_checksum(mo2_exec, checksum_internal):
-                if lang.prompt_install_mo2_checksum_fail(str(mo2_exec)):
+                if not lang.prompt_install_mo2_checksum_fail(str(mo2_exec)):
                     logger.info(
                         "User opted to not overwrite existing Mod Organizer 2 installation."
                     )
                     return
         elif not destination.exists():
             destination.mkdir(parents=True, exist_ok=True)
-        elif pinned:
-            logger.info(
-                f"Mod Organizer 2 installation at {mo2_exec} is pinned; skipping update."
-            )
-            return
-        install(extract_dir / "mod_organizer", destination, None)
+        install(extracted, destination, None)
         logger.debug(f"Mod Organizer 2 installed to {destination}")
 
 
@@ -73,9 +64,37 @@ def download_java():
 
     logger.debug("Initiating Java download...")
     url = var.resource_info.java.download_url
-    checksum = var.resource_info.java.checksum_internal
+    checksum = var.resource_info.java.checksum
+    path_internal = var.resource_info.java.path_internal
+    checksum_internal = var.resource_info.java.checksum_internal
     downloaded = dl(url, download_dir, checksum=checksum)
-    extract(downloaded, extract_dir / "java")
+    extracted = extract(downloaded, extract_dir / downloaded.stem)
+    file_whitelist = (
+        var.resource_info.java.file_whitelist
+        if var.resource_info.java.file_whitelist
+        else None
+    )
+
+    if extracted and extracted.exists():
+        if not compare_checksum(extracted / path_internal, checksum_internal):
+            logger.error(
+                "Downloaded Java archive checksum does not match expected. Removing download and aborting installation."
+            )
+            downloaded.unlink(missing_ok=True)
+            extracted.rmdir()
+            return
+
+    match state.current_instance.launcher:
+        case "steam":
+            subpath = Path("pfx") / "drive_c"
+        case "gog" | "epic" | _:
+            subpath = Path("drive_c")
+
+    install_dir = var.prefix / subpath / "java"
+    if install_dir.exists():
+        rmtree(install_dir)
+
+    install(extracted, install_dir, file_whitelist)
 
 
 def download_scriptextender():
@@ -90,25 +109,29 @@ def download_scriptextender():
 
     if script_extenders:
         for i, entry in enumerate(script_extenders or []):
-            match = getattr(entry, "runtime", None).get(var.launcher)
+            match = (
+                entry.runtime.get(var.launcher)
+                if isinstance(entry.runtime, dict)
+                else entry.runtime
+            )
             if match:
                 matches[i] = entry
 
     if matches:
         match_count = len(matches)
-        if match_count <= 0 or None:
+        if match_count < 1 or None:
             logger.error("No script extender entries available for this game.")
             return
         elif match_count == 1:
             logger.debug("Single script extender version found; selecting by default.")
-            index = 0
+            choice = matches[0]
         elif match_count > 1:
             logger.debug(
                 "Multiple script extender versions found; prompting user for selection."
             )
             choice = lang.prompt_install_scriptextender_choice(matches)
             logger.debug(f"User selected script extender version index: {choice}")
-            index = choice if (0 <= choice < match_count) else None
+            index = choice if (0 < choice <= match_count) else None
             choice = matches[index]
             logger.trace(f"Selected entry: {choice}")
     else:
@@ -211,6 +234,13 @@ def download_plugin(plugin: str):
 
     latest = data.get("Versions", [])[-1]
     file_path = latest.get("PluginPath")
+    if file_path:
+        if isinstance(file_path, list):
+            file_path = tuple(file_path)
+        elif isinstance(file_path, str):
+            file_path = (file_path,)
+    file_path = var.FileWhitelist(paths=file_path) if file_path else None
+
     url = latest.get("DownloadUrl")
 
     destination = download_dir / "plugins" / plugin
@@ -252,6 +282,79 @@ def extract(target: Path, destination: Path) -> Path:
     return destination
 
 
+def install(
+    source: Path, destination: Path, file_list: Optional[var.FileWhitelist] = None
+) -> Path:
+    """
+    Copies files from source to destination.
+
+    Parameters
+    ----------
+    source : Path
+        The source path to copy files from.
+    destination : Path
+        The destination path to copy files to.
+    file_list : FileWhitelist, optional
+        A list of specific files or directories to copy from source to destination.
+
+    Returns
+    -------
+    Path
+        The path to the destination where files were copied.
+    """
+
+    if file_list and file_list.subdirectory:
+        subdirectory = file_list.subdirectory
+        source = source / subdirectory
+        logger.debug(f"Adjusted source path with subdirectory: {source}")
+        file_list = file_list.paths if file_list.paths else None
+
+    if not source.exists():
+        logger.error(f"Source path {source} does not exist; cannot install.")
+        return None
+
+    destination.mkdir(parents=True, exist_ok=True)
+
+    if not file_list or file_list in (["*"], "*", ("*",), []):
+        logger.debug(f"Installing all files from {source} to {destination}.")
+        if source.is_dir():
+            copytree(source, destination, dirs_exist_ok=True)
+        elif source.is_file():
+            copy(source, destination)
+
+    else:
+        file_list = (
+            var.FileWhitelist(paths=file_list)
+            if isinstance(file_list, tuple)
+            else var.FileWhitelist(paths=tuple(file_list))
+            if isinstance(file_list, list)
+            else var.FileWhitelist(
+                paths=tuple(
+                    file_list,
+                )
+            )
+            if isinstance(file_list, str)
+            else file_list
+            if isinstance(file_list, var.FileWhitelist)
+            else None
+        )
+        logger.debug(
+            f"Installing specified files from {source} to {destination}: {file_list.paths}"
+        )
+        for file in file_list.paths:
+            file = source / file
+            dest = destination / file.name
+            if file.is_dir():
+                copytree(file, dest, dirs_exist_ok=True)
+            else:
+                if not file.parent.exists():
+                    file.parent.mkdir(parents=True, exist_ok=True)
+                copy(file, dest)
+            logger.trace(f"Installed {file} to {dest}.")
+
+    return destination
+
+
 def download():
     """
     Runs the download process for all required external resources.
@@ -268,54 +371,16 @@ def download():
     download_winetricks()
     if params.script_extender:
         for entry in script_extenders or []:
-            runtime = getattr(entry, "runtime", None)
-            if runtime and runtime.get(var.launcher):
-                match = runtime.get(var.launcher)
+            match = False
+            if entry.runtime:
+                runtime = (
+                    entry.runtime.get(var.launcher)
+                    if isinstance(entry.runtime, dict)
+                    else entry.runtime
+                )
+                if runtime:
+                    match = True
+                    break
         if match:
             download_scriptextender()
     symlink_instance()
-
-
-def install(
-    source: Path, destination: Path, file_list: Optional[list[str] | str]
-) -> Path:
-    """
-    Copies files from source to destination.
-
-    Parameters
-    ----------
-    source : Path
-        The source path to copy files from.
-    destination : Path
-        The destination path to copy files to.
-    file_list : list[str] | str, optional
-        A list of specific files to copy. If None, empty, or wildcard, all files are copied.
-
-    Returns
-    -------
-    Path
-        The path to the destination where files were copied.
-    """
-    if not source.exists():
-        logger.error(f"Source path {source} does not exist; cannot install.")
-        return None
-    destination.mkdir(parents=True, exist_ok=True)
-    if not file_list or file_list in (["*"], "*", []):
-        logger.debug(f"Installing all files from {source} to {destination}.")
-        if source.is_dir():
-            copytree(source, destination, dirs_exist_ok=True)
-        elif source.is_file():
-            copy(source, destination)
-    else:
-        logger.debug(
-            f"Installing specified files from {source} to {destination}: {file_list}"
-        )
-        for file in file_list:
-            file = source / file
-            dest = destination / file.name
-            if file.is_dir():
-                copytree(file, dest, dirs_exist_ok=True)
-            else:
-                copy(file, dest)
-            logger.trace(f"Installed {file} to {dest}.")
-    return destination

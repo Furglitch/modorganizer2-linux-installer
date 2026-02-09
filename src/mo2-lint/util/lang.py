@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from InquirerPy import prompt
+from pathlib import Path
 from typing import Optional
 from util import state_file as state, variables as var
 
@@ -36,7 +37,7 @@ def list_instances(instance_list: list) -> list:
         List of indices corresponding to the instances.
     """
     instances = [
-        f"{idx}: Game: {inst.nexus_slug}, Path: {inst.instance_path}, Script Extender: {'Yes' if inst.script_extender else 'No'}, Plugins: {', '.join(inst.plugins) if inst.plugins else 'None'}"
+        f"{idx}: Game: {inst.nexus_slug}, Path: {inst.instance_path}, Plugins: {', '.join(inst.plugins) if inst.plugins else 'None'}"
         for idx, inst in enumerate(instance_list, start=1)
     ]
     return instances
@@ -57,7 +58,7 @@ def prompt_archive() -> bool:
   This process will maintain your personal data (save games, settings) while providing a fresh environment for proton-/winetricks to set up the necessary dependencies.
   The archived prefix will be renamed with a timestamp suffix for easy identification.
 
-  Do you want to proceed with archiving the existing prefix and creating a clean one?"""
+Do you want to proceed with archiving the existing prefix and creating a clean one?"""
 
     msg = {
         "type": "confirm",
@@ -125,7 +126,7 @@ def prompt_install_mo2_checksum_fail(mo2_path: str) -> bool:
     message = f"""Mod Organizer 2 checksum verification has failed for the installation located at: {mo2_path}
   This could indicate that an updated version is available in this installer, or that the installation is corrupted.
 
-  Do you want to proceed with the installation anyway?"""
+Do you want to proceed with the installation anyway?"""
 
     msg = {
         "type": "confirm",
@@ -154,7 +155,9 @@ def prompt_install_scriptextender_choice(script_extenders: dict) -> int:
 
     message = "Multiple script extenders are available for installation.\n  Please select one: "
     choices = []
+    idx = 0
     for se in script_extenders.values():
+        idx += 1
         version = getattr(se, "version", "Unknown Version")
         runtimes = getattr(se, "runtime", "N/A")
         runtimes = runtimes.get(var.launcher) if runtimes else None
@@ -167,7 +170,7 @@ def prompt_install_scriptextender_choice(script_extenders: dict) -> int:
                     runtime = value
         else:
             runtime = runtimes
-        choices.append(f"{se.name} (Version: {version}, Runtime: [{runtime})]")
+        choices.append(f"{idx}: Version {version} for runtime: [{runtime}]")
 
     msg = {
         "type": "list",
@@ -176,7 +179,8 @@ def prompt_install_scriptextender_choice(script_extenders: dict) -> int:
         "name": "scriptextender_choice",
     }
     result = prompt([msg])
-    return result["scriptextender_choice"]
+    index = int(result["scriptextender_choice"].split(":")[0]) - 1
+    return index
 
 
 def prompt_instance_choice(
@@ -215,18 +219,50 @@ def prompt_instance_choice(
     return result
 
 
-def prompt_instance_choice_existing():
+def prompt_instance_choice_existing(
+    existing_instances: list[state.InstanceData],
+) -> Path | str:
     """
     Prompts the user to choose between using an existing instance or creating a new one.
     """
+
+    choices = [
+        f"{inst.nexus_slug} at {inst.instance_path}" for inst in existing_instances
+    ] + ["Create new instance"]
+
     msg = {
         "type": "list",
         "message": "Multiple instances found. Choose an option: ",
-        "choices": ["Use existing instance", "Create new instance"],
+        "choices": choices,
         "name": "instance_option",
     }
     result = prompt([msg])
+    if not result["instance_option"] == "Create new instance":
+        result["instance_option"] = Path(result["instance_option"].split(" at ")[1])
     return result["instance_option"]
+
+
+def prompt_instance_choice_exact() -> bool:
+    """
+    Prompts the user to confirm using the exact instance found.
+    """
+
+    message = """The path of the chosen instance directly matches the directory you specified.
+
+  It is not recommended to create an instance where one already exists, as this can lead to conflicts and data loss.
+  NO support will be provided for instances created in this way.
+  To update the existing instance, please use the 'update' command instead.
+
+  Do you wish to continue?"""
+
+    msg = {
+        "type": "confirm",
+        "message": message,
+        "name": "use_exact_instance",
+        "default": True,
+    }
+    result = prompt([msg])
+    return result["use_exact_instance"]
 
 
 def prompt_launcher_choice(
@@ -276,21 +312,39 @@ def prompt_uninstall_confirm():
     return result["confirm_uninstall"]
 
 
-def prompt_uninstall_trash():
+def prompt_uninstall_trash() -> bool:
     """
     Prompts the user to choose whether to move files to trash or delete permanently.
+
+    Returns
+    -------
+    bool
+        True if the user chooses to delete permanently, False if moving to trash.
     """
 
     msg = {
-        "type": "choice",
+        "type": "list",
         "message": "Please choose how to handle the deleted files:",
         "choices": ["Move to Trash", "Delete Permanently"],
         "name": "trash_choice",
         "default": "Move to Trash",
     }
     result = prompt([msg])
-    if not result["trash_choice"] == "Move to Trash":
-        result["trash_choice"] = True
-    else:
-        result["trash_choice"] = False
-    return result["trash_choice"]
+    if result["trash_choice"] == "Delete Permanently":
+        return True
+    return False
+
+
+def prompt_uninstall_trash_confirm() -> bool:
+    """
+    Prompts the user to confirm permanent deletion.
+    """
+
+    msg = {
+        "type": "confirm",
+        "message": "Are you sure you want to permanently delete this? This action cannot be undone.",
+        "name": "confirm_trash_config",
+        "default": False,
+    }
+    result = prompt([msg])
+    return result["confirm_trash_config"]

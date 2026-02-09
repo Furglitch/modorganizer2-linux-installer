@@ -176,6 +176,7 @@ def start(
                 f"Invalid game specified: {game}. Available games are: {game_list}"
             )
     state.load_state_file()
+    logger.debug("Initialization complete.")
     return game or None, directory or None
 
 
@@ -300,14 +301,19 @@ def install(
     log_level,
 ):
     game, directory = start(game, directory, game_info_path, log_level)
+    if plugin:
+        for p in plugin:
+            if p not in var.plugin_info:
+                raise click.BadArgumentUsage(
+                    f"Invalid plugin specified: {p}. Available plugins are: {list(var.plugin_info.keys())}"
+                )
     _install(
         game,
         directory,
         game_info_path,
         log_level,
         script_extender,
-        list(plugin) if plugin else [],
-        plugin_list,
+        plugin,
     )
     state.write_state()
 
