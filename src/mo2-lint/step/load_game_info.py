@@ -17,7 +17,7 @@ def get_launcher() -> str:
         The launcher type ("steam", "gog", "epic"), or None if not found.
     """
 
-    logger.debug("Detecting available launchers")
+    logger.debug("Detecting game launchers.")
     steam_libraries = get_steam_libraries()
     heroic_data = get_heroic_data()
 
@@ -47,8 +47,9 @@ def get_launcher() -> str:
 
     var.launcher = None
     if steam_has_game and heroic_has_game:
-        logger.info("Multiple launchers detected with the game installed.")
-
+        logger.trace(
+            "Multiple game installations detected. Prompting user for launcher choice."
+        )
         if heroic_install_path:
             if heroic_data[0] == "gog":
                 gog_install_path = heroic_install_path
@@ -65,7 +66,6 @@ def get_launcher() -> str:
             .strip()
             .lower()
         )
-
         if choice == "steam":
             var.launcher = "steam"
         elif choice == "gog":
@@ -73,7 +73,7 @@ def get_launcher() -> str:
         elif choice == "epic":
             var.launcher = "epic"
         else:
-            logger.error("Invalid launcher choice.")
+            logger.error(f"Invalid launcher choice: {choice}")
             return None
     elif steam_has_game:
         var.launcher = "steam"
@@ -82,9 +82,11 @@ def get_launcher() -> str:
     elif heroic_has_game and heroic_data[0] == "epic":
         var.launcher = "epic"
     else:
-        logger.error("No supported launchers detected.")
+        logger.error(
+            "No supported game launchers detected. Please ensure you have the game installed through Steam, GOG, or Epic Games."
+        )
         return None
-    logger.debug(f"Determined launcher: {var.launcher}")
+    logger.trace(f"Detected launcher: {var.launcher}")
     return var.launcher
 
 
@@ -98,7 +100,7 @@ def get_library() -> Path:
         Path representing the game's installation directory, or None if not found.
     """
 
-    logger.debug(f"Looking up library for game={var.input_params.game}")
+    logger.debug(f"Determining game installation path for launcher: {var.launcher}")
     chosen_game = var.game_info
     subdir = (
         chosen_game.subdirectory.get(var.launcher)
@@ -111,7 +113,9 @@ def get_library() -> Path:
     if var.launcher == "steam":
         libraries = get_steam_libraries()
         if len(libraries) == 0:
-            logger.error("No Steam libraries found.")
+            logger.error(
+                "No Steam libraries found. Cannot determine game installation path."
+            )
             return None
         else:
             for lib in libraries:
@@ -119,8 +123,7 @@ def get_library() -> Path:
                 if candidate.exists():
                     library = candidate
                     break
-
-    if var.launcher == "gog" or var.launcher == "epic":
+    elif var.launcher == "gog" or var.launcher == "epic":
         get_heroic_data()
         library = (
             Path(gog_data["install_path"])
@@ -129,6 +132,7 @@ def get_library() -> Path:
             if var.launcher == "epic"
             else None
         )
+    logger.trace(f"Determined {var.launcher} installation path: {library}")
 
     if state.current_instance:
         state.current_instance.launcher = var.launcher
@@ -142,9 +146,9 @@ def get_library() -> Path:
             }
         )
     if library and library.exists():
-        logger.debug(f"Determined game installation path: {library}")
+        logger.trace(f"Determined game installation path: {library}")
         var.game_install_path = library
         return library
     else:
-        logger.error("Could not determine game installation path.")
+        logger.error("Failed to determine game installation path.")
         return None

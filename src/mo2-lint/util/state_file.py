@@ -53,11 +53,11 @@ class NexusAPIData:
 
     def __post_init__(self):
         if not self.uuid:
-            logger.warning("Nexus API UUID must be provided.")
+            logger.warning("NexusAPIData: UUID is not set.")
         if not self.connection_token:
-            logger.warning("Nexus API connection token must be provided.")
+            logger.warning("NexusAPIData: Connection token is not set.")
         if not self.api_key:
-            logger.warning("Nexus API key must be provided.")
+            logger.warning("NexusAPIData: API key is not set.")
 
 
 @dataclass
@@ -123,9 +123,6 @@ class InstanceData:
 
     @classmethod
     def to_dict(cls, data: "InstanceData") -> dict[str, any]:
-        if isinstance(data.launcher_ids, dict):
-            logger.error("launcher_ids must be of type LauncherIDs, not dict.")
-            raise TypeError("launcher_ids must be of type LauncherIDs, not dict.")
         return {
             "index": data.index,
             "game": data.game,
@@ -140,26 +137,28 @@ class InstanceData:
         }
 
     def __post_init__(self):
-        if not self.game or self.game not in var.games_info.keys():
-            logger.warning("InstanceData requires a valid game identifier.")
-        if not self.nexus_slug:
-            logger.warning("InstanceData requires a valid nexus_slug.")
-        if not self.instance_path:
-            logger.warning("InstanceData requires a valid instance_path.")
-        if not self.launcher:
-            logger.warning("Launcher name should be provided for InstanceData.")
-        if not self.launcher_ids:
-            logger.warning("Launcher IDs should be provided for InstanceData.")
-        if not self.game_path:
+        if not self.game:
+            logger.warning("InstanceData: Game is not set.")
+        elif self.game not in var.games_info.keys():
             logger.warning(
-                "Game installation path should be provided for InstanceData."
+                f"InstanceData: Game '{self.game}' is not a valid game identifier."
             )
+        if not self.nexus_slug:
+            logger.warning("InstanceData: Nexus slug is not set.")
+        if not self.instance_path:
+            logger.warning("InstanceData: Instance path is not set.")
+        if not self.launcher:
+            logger.warning("InstanceData: Launcher is not set.")
+        if not self.launcher_ids:
+            logger.warning("InstanceData: Launcher IDs are not set.")
+        if not self.game_path:
+            logger.warning("InstanceData: Game install path is not set.")
         if not self.game_executable:
-            logger.warning("Game executable should be provided for InstanceData.")
+            logger.warning("InstanceData: Game executable is not set.")
         if self.plugins is None:
             self.plugins = []
         elif any(plugin not in var.plugin_info for plugin in self.plugins):
-            logger.warning("One or more plugins are not recognized in plugin_info.")
+            logger.warning("InstanceData: One or more plugins are not recognized.")
 
 
 @dataclass
@@ -196,7 +195,7 @@ class StateFile:
 
 
 state_file: StateFile = None
-filepath = Path("~/.config/mo2-lint/instance_state.json").expanduser()
+filepath = Path("~/.config/mo2-lint/state.json").expanduser()
 
 
 def load_state_file():
@@ -206,19 +205,19 @@ def load_state_file():
     """
     global state_file
     if filepath.exists():
+        logger.debug("Loading state file from disk.")
         try:
             with filepath.open("r", encoding="utf-8") as f:
                 data = json.load(f)
         except Exception as e:
-            logger.exception(
-                f"Failed to parse state file JSON: {e}", backtrace=True, diagnose=True
+            logger.exception(f"Failed to load state file: {e}")
+            logger.critical(
+                "State file is corrupted or unreadable. Please validate or delete it to continue."
             )
-            logger.error("State file may be corrupted. Please validate or delete it.")
-            logger.critical("Aborting...")
             raise SystemExit(1)
-        logger.trace(f"Loaded state file: {data}")
         state_file = StateFile.from_dict(data)
     else:
+        logger.trace("State file does not exist. Initializing new state.")
         state_file = StateFile(None, [])
 
 
@@ -236,19 +235,24 @@ def set_index(index: Optional[int] = None):
     """
     global state_file, current_instance
     max = 0
-    if not index:
-        for inst in state_file.instances:
-            if inst.index and inst.index > max:
-                max = inst.index
-        set = max + 1
-        logger.debug(f"Assigned new index {set} to current instance.")
-    else:
+    logger.trace("Calculating next available instance index.")
+    for inst in state_file.instances:
+        if inst.index and inst.index > max:
+            max = inst.index
+    set = max + 1
+    logger.trace(f"Next available instance index calculated: {set}")
+    if index:
         if index not in [inst.index for inst in state_file.instances]:
             set = index
-            logger.debug(f"Set current instance index to {set}.")
+            logger.trace(f"Assigned provided index {set} to current instance.")
         else:
-            logger.error(f"Index {index} is already in use.")
-            raise ValueError(f"Index {index} is already in use.")
+            logger.warning(
+                f"Provided index {index} is already in use. Assigning next available index instead."
+            )
+    else:
+        logger.trace(
+            f"No index provided. Assigned next available index {set} to current instance."
+        )
     current_instance.index = set
 
 
@@ -273,32 +277,50 @@ def remove_instance(instance: InstanceData, types: list[str] = ["symlink", "stat
         )
         if symlink_path.exists() or symlink_path.is_symlink():
             symlink_path.unlink()
-            logger.debug(
-                f"Removed symlink at {symlink_path} for instance {instance.index}"
+            logger.success(
+                f"Symlink for instance index {instance.index} removed successfully."
             )
         else:
             if symlink_path.exists():
                 logger.warning(
-                    f"Path {symlink_path} exists but is not a symlink. Skipping removal."
+                    f"Expected symlink path exists but is not a symlink: {symlink_path}"
                 )
             else:
                 logger.debug(
-                    f"No symlink found at {symlink_path} for instance {instance.index}. Skipping removal."
+                    f"Symlink path for instance index {instance.index} does not exist, skipping removal."
                 )
 
     if "install" in types:
         instance_path = instance.instance_path
         if instance_path.exists():
             if not lang.prompt_uninstall_trash():
-                logger.info(f"Sending instance at {instance_path} to trash.")
+                logger.debug(
+                    f"User chose to send instance directory to trash: {instance_path}"
+                )
                 send2trash(instance_path)
+                logger.success(f"Instance directory sent to trash: {instance_path}")
             else:
+                logger.debug(
+                    f"User chose to permanently delete instance directory: {instance_path}"
+                )
                 if lang.prompt_uninstall_trash_confirm():
-                    logger.info(f"Permanently deleting instance at {instance_path}.")
+                    logger.debug(
+                        f"User confirmed permanent deletion of instance directory: {instance_path}"
+                    )
                     rmtree(instance_path)
+                    logger.success(
+                        f"Instance directory permanently deleted: {instance_path}"
+                    )
                 else:
-                    logger.info(f"Instance at {instance_path} sent to trash instead.")
+                    logger.debug(
+                        f"User denied confirmation for permanent deletion of instance directory: {instance_path}; Sending to trash instead."
+                    )
                     send2trash(instance_path)
+                    logger.success(f"Instance directory sent to trash: {instance_path}")
+        else:
+            logger.trace(
+                f"Instance directory for index {instance.index} does not exist, skipping removal."
+            )
 
         # Restore game executable if it was backed up
         exec = (
@@ -308,9 +330,13 @@ def remove_instance(instance: InstanceData, types: list[str] = ["symlink", "stat
         )
         game_exec = instance.game_path / exec
         if game_exec.exists():
+            logger.trace(f"Game executable exists at expected path: {game_exec}")
             data_dir = game_exec.parent / "modorganizer2"
             if data_dir.exists() and data_dir.is_dir():
                 rmtree(data_dir)
+                logger.success(
+                    f"Removed Redirector data directory from game path: {data_dir}"
+                )
 
             if not var.game_info:
                 var.load_game_info(instance.nexus_slug)
@@ -326,44 +352,37 @@ def remove_instance(instance: InstanceData, types: list[str] = ["symlink", "stat
             )
             if backup_exec.exists():
                 move(backup_exec, game_exec)
-                logger.debug(
-                    f"Restored original game executable from backup for {game_exec}."
-                )
+                logger.debug(f"Restored game executable from backup: {game_exec}")
             else:
-                logger.warning(f"No backup found for {game_exec}.")
-                logger.warning(
-                    "It may already have been restored, or you may need to manually restore the original executable ('Verify' in your game launcher)."
-                )
-
-        logger.debug(
-            f"Removed installation at {instance_path} for instance {instance.index}"
-        )
+                pass
 
     if "state" in types:
         global state_file
         state_file.instances = [
             inst for inst in state_file.instances if inst.index != instance.index
         ]
-        logger.debug(f"Removed instance {instance.index} from state file.")
+        logger.trace(f"Removed instance index {instance.index} from state file.")
 
     write_state(False)
+    logger.trace(f"State file updated after removing instance index {instance.index}.")
 
 
 def write_state(add_current: bool = True):
     global state_file, current_instance
+
     if {} in state_file.instances:
-        logger.info("Removing empty instance entries from state file.")
+        logger.trace("Found empty instance entry in state file. Removing it.")
         state_file.instances.remove({})
     if add_current and current_instance.index not in [
         inst.index for inst in state_file.instances
     ]:
-        logger.info(f"Adding current instance {current_instance.index} to state file.")
+        logger.trace(f"Adding current instance to state file: {current_instance}")
         state_file.instances.append(state.InstanceData.from_dict(current_instance))
     elif add_current and current_instance.index in [
         inst.index for inst in state_file.instances
     ]:
-        logger.info(
-            f"Updating current instance {current_instance.index} in state file."
+        logger.trace(
+            f"Updating existing instance in state file with index {current_instance.index}."
         )
         for i, inst in enumerate(state_file.instances):
             if inst.index == current_instance.index:
@@ -372,12 +391,12 @@ def write_state(add_current: bool = True):
     json = to_json(StateFile.to_dict(state_file), indent=2).decode("utf-8")
     with filepath.open("w", encoding="utf-8") as f:
         f.write(json)
-    logger.debug(f"Wrote state file with {len(state_file.instances)} instances.")
+    logger.success(f"State file written to disk at: {filepath}")
 
 
 def match_instances(
     game: Optional[str] = None, directory: Optional[Path] = None, exact: bool = False
-) -> dict[InstanceData]:
+) -> list[InstanceData]:
     """
     Matches instances in the state_file based on the provided game or directory.
 
@@ -387,23 +406,30 @@ def match_instances(
         Nexus Mods slug identifier for the game to match.
     directory : Path, optional
         Directory path to match instances against.
+    exact : bool, optional
+        If True, requires an exact match for the directory. If False, matches any instance whose directory starts with the given directory.
 
     Returns
     -------
-    dict
-        A dictionary of matched instances.
+    list[InstanceData]
+        A list of matched instances.
     """
 
     global state_file
     matched: list[InstanceData] = []
 
     if not state_file.instances:
-        logger.warning("No instances found that match the criteria.")
-        return
+        logger.debug("No instances found in state file.")
+        return []
+
+    if not (game or directory):
+        logger.debug("No game or directory criteria provided. Returning all instances.")
 
     for instance in state_file.instances:
         if game and instance.nexus_slug != game:
-            logger.trace(f"Nexus slug {instance.nexus_slug} does not match {game}.")
+            logger.trace(
+                f"Instance index {instance.index} does not match game slug '{game}'. Skipping."
+            )
             continue
 
         startswith = (
@@ -413,22 +439,24 @@ def match_instances(
         )
         if directory and not startswith:
             logger.trace(
-                f"Instance path {instance.instance_path} does not start with {directory}."
+                f"Instance index {instance.index} does not match directory '{directory}'. Skipping."
             )
             continue
 
         if exact and directory and (instance.instance_path == directory):
-            logger.trace(f"Matched instance at index {instance.index}: {instance}")
+            logger.trace(
+                f"Instance index {instance.index} matches directory '{directory}' exactly. Adding to matched list."
+            )
             matched.append(instance)
             continue
         elif (game == instance.nexus_slug) or (not exact and directory and startswith):
-            logger.trace(f"Matched instance at index {instance.index}: {instance}")
+            logger.trace(
+                f"Instance index {instance.index} matches criteria (game: '{game}', directory: '{directory}'). Adding to matched list."
+            )
             matched.append(instance)
             continue
         elif not exact and not (game or directory):
-            logger.trace(
-                f"Found existing instance at index {instance.index}: {instance}"
-            )
+            logger.trace(f"Adding instance index {instance.index} to matched list.")
             matched.append(instance)
 
     return matched
@@ -444,24 +472,30 @@ def symlink_instance():
     )
 
     if not source.exists():
-        logger.error(f"Source path {source} does not exist. Cannot create symlink.")
+        logger.error(
+            f"Cannot create symlink: Source instance path does not exist: {source}"
+        )
         return
 
     if target.exists() and target.is_symlink():
         symlink_correct = target.resolve() == source.resolve()
         if symlink_correct:
-            logger.info(f"Symlink {target} already exists. Skipping creation.")
+            logger.debug(
+                f"Symlink for instance index {current_instance.index} already exists and is correct. No action needed."
+            )
             return
         elif not symlink_correct:
             logger.warning(
-                f"Symlink {target} points to a different location. Updating link."
+                f"Symlink for instance index {current_instance.index} exists but points to a different location. Removing incorrect symlink."
             )
             target.unlink()
     elif target.exists() and not target.is_symlink():
-        logger.warning(f"Path {target} exists and is not a symlink. Skipping creation.")
         logger.warning(
-            "Please remove or relocate the existing path to create the symlink."
+            f"Expected symlink path exists but is not a symlink: {target}. Aborting symlink creation to avoid overwriting."
         )
         return
 
     target.symlink_to(source, target_is_directory=True)
+    logger.debug(
+        f"Created symlink for instance index {current_instance.index}: {target} -> {source}"
+    )

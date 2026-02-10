@@ -19,35 +19,32 @@ import yaml
 def check_update():
     import requests
 
-    logger.trace("Starting update check for mo2-lint.")
+    logger.info("Checking for updates.")
     try:
-        logger.trace("Sending request to GitHub releases API.")
+        logger.trace("Fetching latest release info from GitHub API.")
         response = from_json(
             requests.get(
                 "https://api.github.com/repos/Furglitch/modorganizer2-linux-installer/releases/latest"
             ).text
         )
         latest = response["tag_name"]
-        logger.trace(
-            f"Latest version from GitHub: {latest}, current version: {var.version}"
-        )
-        if latest != str(var.version):
-            version_parts = str(var.version).split(".")
+        current = var.version
+        logger.trace(f"Latest version: {latest}, Current version: {current}")
+        if latest != str(current):
+            version_parts = str(current).split(".")
             latest_parts = latest.split(".")
             logger.trace(
                 f"Parsed version parts: current={version_parts}, latest={latest_parts}"
             )
             if tuple(latest_parts) > tuple(version_parts):
-                logger.warning(
-                    f"A new version of mo2-lint is available: {latest} (current: {var.version})."
+                logger.critical(
+                    f"A new version of MO2-LINT is available: {latest}. Please update to the latest version."
                 )
                 return
     except Exception as e:
-        logger.exception(
-            f"Failed to check for updates: {e}", backtrace=True, diagnose=True
-        )
+        logger.exception(f"Failed to check for updates: {e}")
         return
-    logger.debug("mo2-lint is up to date.")
+    logger.info("No updates available.")
 
 
 def pull_config():
@@ -56,24 +53,34 @@ def pull_config():
 
     Before that, copies default configuration files from internal storage if not already present.
     """
-    logger.trace("Starting pull_config process.")
+    logger.info("Pulling latest configuration files from GitHub.")
     for config in {"game_info.yml", "resource_info.yml", "plugin_info.yml"}:
-        logger.trace(f"Processing config file: {config}")
+        logger.debug(f"Processing config file: {config}")
         config_path = Path("~/.config/mo2-lint/", config).expanduser()
         dest = None
         if not config_path.exists():
-            logger.debug(f"{config} not found in ~/.config/mo2-lint/")
-            logger.trace(f"Copying default {config} from internal storage.")
             from shutil import copy2
             from util.internal_file import internal_file
 
-            src = internal_file("cfg", config)
-            dest = config_path
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            copy2(src, dest)
-            logger.debug(f"Copied default {config} to ~/.config/mo2-lint/")
+            try:
+                logger.debug(
+                    f"File does not exist in .config: {config_path}, copying from internal cfg"
+                )
+                src = internal_file("cfg", config)
+                dest = config_path
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                copy2(src, dest)
+                logger.trace(f"Copied src={src} to dest={dest}")
+            except Exception as e:
+                logger.exception(
+                    f"Failed to copy internal {config} to .config folder: {e}"
+                )
+                logger.critical(
+                    f"Failed to set up config file {config}. Please ensure the application has permission to write to ~/.config/mo2-lint/ and try again."
+                )
+                raise SystemExit(1)
         else:
-            logger.trace(f"{config} already exists in ~/.config/mo2-lint/")
+            logger.trace(f"Config file already exists: {config_path}")
 
         # Check if yml schema version is incompatbile (remote yaml has higher version number than local script)
         remote_raw = f"https://raw.githubusercontent.com/Furglitch/modorganizer2-linux-installer/refs/heads/rewrite/configs/{config}"
@@ -83,34 +90,28 @@ def pull_config():
             from requests import get
 
             # Check remote schema version
-            logger.trace(f"Checking remote schema version for {config}.")
+            logger.debug(f"Fetching remote config from GitHub: {remote_raw}")
             response = get(remote_raw)
             remote_yml = yaml.load(response.text, Loader=yaml.SafeLoader)
             remote_schema_version = remote_yml.get("schema", 0)
             remote_schema_parts = str(remote_schema_version).split(".")
             local_version_parts = str(var.version).split(".")
             logger.trace(
-                f"Remote schema version: {remote_schema_version}, local version: {var.version}"
+                f"Parsed schema parts: current={local_version_parts}, latest={remote_schema_parts}"
             )
+
             if tuple(remote_schema_parts) > tuple(local_version_parts):
                 logger.warning(
-                    f"There has been a schema update {config} which is incompatible with this version of mo2-lint. "
-                    "The latest configuration files will not be downloaded. Please update mo2-lint to the latest version to continue receiving updates."
+                    f"There is a new schema version for {config}: {remote_schema_version}. It will not be downloaded to prevent incompatibility issues. Please update MO2-LINT to the latest version to get the new config."
                 )
             else:
-                logger.trace(f"Attempting to download latest {config} from GitHub.")
                 config_path.parent.mkdir(parents=True, exist_ok=True)
                 urlretrieve(
                     remote_raw,
                     config_path,
                 )
-                logger.debug(
-                    f"Downloaded latest {config} from GitHub to {config_path}."
-                )
         except Exception as e:
-            logger.exception(
-                f"Failed to download {config}: {e}", backtrace=True, diagnose=True
-            )
+            logger.exception(f"Failed to download config file {config}: {e}")
 
 
 game_list = None
@@ -124,7 +125,6 @@ def pre_init():
     """
     remove_loggers()
     add_loggers("INFO")
-    logger.info("Starting mo2-lint...")
     check_update()
     pull_config()
     var.load_games_info()
@@ -166,17 +166,19 @@ def start(
     """
     remove_loggers()
     add_loggers(log_level)
+    logger.debug(f"Starting MO2-LINT with log level: {log_level}")
     if directory:
         directory = str(directory).rstrip("/")
         directory = Path(directory).expanduser().resolve()
     if game:
-        load_game_info(game, game_info_path)
         if game not in var.games_info:
-            raise click.BadArgumentUsage(
-                f"Invalid game specified: {game}. Available games are: {game_list}"
+            logger.critical(
+                f"Game '{game}' not supported. Available games: {game_list}"
             )
+            raise SystemExit(1)
+        load_game_info(game, game_info_path)
     state.load_state_file()
-    logger.debug("Initialization complete.")
+    logger.debug(f"Initialization complete. Game: {game}, Directory: {directory}")
     return game or None, directory or None
 
 
@@ -194,11 +196,16 @@ def load_game_info(game: Optional[str], game_info_path: Optional[Path]):
     """
     if game_info_path:
         if not game_info_path.exists():
-            logger.error(f"Custom game_info file not found: {game_info_path}")
-            logger.error("Defaulting to standard game_info.")
+            logger.warning(
+                f"Provided game_info.yml path does not exist: {game_info_path}"
+            )
+            logger.debug("Defaulting to standard game_info.yml from .config folder.")
+            var.load_games_info()
         else:
-            logger.info(f"Loading custom game_info from: {game_info_path}")
-    var.load_games_info(game_info_path)
+            logger.info(f"Using custom game_info.yml from path: {game_info_path}")
+            var.load_games_info(game_info_path)
+    else:
+        var.load_games_info()
     var.load_game_info(game)
 
 
@@ -301,12 +308,16 @@ def install(
     log_level,
 ):
     game, directory = start(game, directory, game_info_path, log_level)
+    logger.trace(
+        f"Running install command with game={game}, directory={directory}, game_info_path={game_info_path}, script_extender={script_extender}, plugin={plugin}"
+    )
     if plugin:
         for p in plugin:
             if p not in var.plugin_info:
-                raise click.BadArgumentUsage(
-                    f"Invalid plugin specified: {p}. Available plugins are: {list(var.plugin_info.keys())}"
+                logger.critical(
+                    f"Plugin '{p}' not supported. Available plugins: {list(var.plugin_info.keys())}",
                 )
+                raise SystemExit(1)
     _install(
         game,
         directory,
@@ -327,6 +338,9 @@ def install(
 @click_opt_game
 def uninstall(game: str, directory: Path, game_info_path: Optional[Path], log_level):
     game, directory = start(game, directory, game_info_path, log_level)
+    logger.trace(
+        f"Running uninstall command with game={game}, directory={directory}, game_info_path={game_info_path}"
+    )
     _uninstall(game, directory)
     state.write_state(False)
 
@@ -339,6 +353,7 @@ def uninstall(game: str, directory: Path, game_info_path: Optional[Path], log_le
 @click_opt_game
 def list(game: Optional[str], directory: Optional[Path], log_level):
     game, directory = start(game, directory, log_level=log_level)
+    logger.trace(f"Running list command with game={game}, directory={directory}")
     _list(game, directory)
 
 
@@ -349,6 +364,7 @@ def list(game: Optional[str], directory: Optional[Path], log_level):
 @click_arg_directory(required=True)
 def pin(directory: Path, log_level):
     waste, directory = start(directory=directory, log_level=log_level)
+    logger.trace(f"Running pin command with directory={directory}")
     _pin(directory, pin=True)
 
 
@@ -359,6 +375,7 @@ def pin(directory: Path, log_level):
 @click_arg_directory(required=True)
 def unpin(directory: Path, log_level):
     waste, directory = start(directory=directory, log_level=log_level)
+    logger.trace(f"Running unpin command with directory={directory}")
     _pin(directory, pin=False)
 
 
@@ -369,6 +386,7 @@ def unpin(directory: Path, log_level):
 @click_arg_directory(required=True)
 def update(directory: Path, log_level):
     waste, directory = start(directory=directory, log_level=log_level)
+    logger.trace(f"Running update command with directory={directory}")
     _update(directory)
 
 

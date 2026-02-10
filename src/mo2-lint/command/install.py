@@ -10,7 +10,7 @@ from util.nexus.install_handler import install as install_handler
 from step.workarounds import apply_workarounds
 from step.load_game_info import get_launcher, get_library
 from step.external_resources import download
-from step.configure_prefix import prompt as prompt_prefix, configure as configure_prefix
+from step.configure_prefix import prompt as configure_prefix
 
 
 def install(
@@ -31,7 +31,10 @@ def install(
             "plugins": list(plugin),
         }
     )
+    logger.debug(f"Starting installation with parameters: {var.input_params}")
+
     directory.mkdir(parents=True, exist_ok=True)
+    logger.trace(f"Ensured installation directory exists: {directory}")
 
     if not state.match_instances(directory=directory):
         state.current_instance = InstanceData(
@@ -49,17 +52,13 @@ def install(
         set_index()
     else:
         logger.critical(
-            "An instance with the same directory already exists. Please choose a different directory or uninstall the existing instance."
+            "An instance with the specified directory already exists. Aborting installation to prevent conflicts."
         )
         logger.warning(
-            "If you're trying to update an existing instance, please use the `update` command instead."
+            "Please choose a different installation directory or uninstall the existing instance before proceeding."
         )
-        logger.warning(
-            "If you wish to use this path for a new instance, please `uninstall` the conflicting instance."
-        )
-        raise ValueError("Instance with the same directory already exists.")
+        raise SystemExit(1)
 
-    prompt_prefix()
     configure_prefix()
     download()
     install_handler()

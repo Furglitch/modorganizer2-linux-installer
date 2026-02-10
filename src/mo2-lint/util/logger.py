@@ -7,14 +7,13 @@ from util import variables as var
 import sys
 
 timestamp: str = None
-time_format = "{time:YYYY-MM-DD_HH-mm-ss}"
 
 
 def remove_loggers():
     """
     Removes existing loggers from loguru.
     """
-    logger.trace("Removing all loggers...")
+    logger.trace("Removing existing loggers")
     handler_ids = list(logger._core.handlers.keys())
     for hid in handler_ids:
         logger.remove(hid)
@@ -32,7 +31,6 @@ def persist_timestamp() -> str:
     global timestamp
     if not timestamp:
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    logger.trace(f"Persisted timestamp: {timestamp}")
     return timestamp
 
 
@@ -49,21 +47,29 @@ def add_loggers(log_level: str = None, process: str = "mo2-lint", console_sink=N
     console_sink : optional
         The sink for console output. If None, uses sys.stdout.
     """
-    format_str = (
+
+    time_format = "{time:YYYY-MM-DD HH:mm:ss}"
+
+    log_format_str = (  # TIMESTAMP | [LEVEL] PROCESS : MODULE.FUNCTION@LINE | MESSAGE
+        f"{time_format} | "
+        "{level: <8} | "
+        f"{process.upper()} : "
+        "{module}.{function}@{line} | "
+        "{message}"
+    )
+
+    console_format_str = (  # TIMESTAMP | [LEVEL] PROCESS | MESSAGE
         f"<green>{time_format}</green> | "
         + "<level>{level: <8}</level> | "
-        + (f"{process.upper()} | " if process else "")
+        + f"{process.upper()} | "
         + "{message}"
     )
+
     logger.add(
         sink=Path(
             f"~/.cache/mo2-lint/logs/install.{persist_timestamp()}.log"
         ).expanduser(),
-        format=f"{time_format} | "
-        + " {level: <8} | "
-        + (f"{process.upper()} | " if process else "")
-        + " {module}:{function}:{line} - "
-        + " {message} ",
+        format=log_format_str,
         level="TRACE",
         rotation="10 MB",
         retention="7 days",
@@ -73,7 +79,10 @@ def add_loggers(log_level: str = None, process: str = "mo2-lint", console_sink=N
     log_level = log_level or var.input_params.log_level or "INFO"
     logger.add(
         sink=console_sink if console_sink is not None else sys.stdout,
-        format=format_str,
+        format=console_format_str,
         level=log_level,
     )
-    logger.trace("Added loggers. " + (f"Process: {process}" if process else ""))
+
+    logger.trace(
+        f"Added loggers with level {log_level} for console and TRACE for file output"
+    )

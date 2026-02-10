@@ -33,36 +33,39 @@ def download(
 
     attempts = 3
     dest.mkdir(parents=True, exist_ok=True)
-    export = dest / (filename or url.split("/")[-1])
+    filename = filename or url.split("/")[-1]
+    export = dest / filename
 
+    logger.debug(f"Attempting to download {filename} from {url}.")
     if export.exists():
-        logger.debug(f"File already exists at {export}, skipping download.")
+        logger.trace(
+            f"{filename} already exists at destination: {export}; skipping download."
+        )
         return export
 
     for i in range(attempts):
-        logger.debug(f"Attempting to download {url} (Attempt {i + 1}/{attempts})")
-
         try:
             dl(url, export)
             if export.exists() and checksum:
                 if compare_checksum(export, checksum):
-                    logger.debug(f"Successfully downloaded and verified {export}")
+                    logger.trace(
+                        f"Successfully downloaded and verified {filename} from {url} on attempt {i + 1}."
+                    )
                     return export
                 else:
-                    logger.warning(
-                        f"Checksum verification failed for {export}. Retrying..."
+                    logger.trace(
+                        f"Checksum mismatch for {filename} downloaded from {url} on attempt {i + 1}. Retrying."
                     )
                     export.unlink(missing_ok=True)
             elif export.exists():
-                logger.debug(f"Successfully downloaded {export}")
+                logger.trace(
+                    f"Successfully downloaded {filename} from {url} on attempt {i + 1}."
+                )
                 return export
         except Exception as e:
             logger.exception(
-                f"Error downloading {url} on attempt {i + 1}/{attempts}: {e}",
-                backtrace=True,
-                diagnose=True,
+                f"Failed to download {filename} from {url} on attempt {i + 1}. {e}"
             )
-    logger.error(f"Failed to download {url} after {attempts} attempts.")
     return None
 
 
@@ -99,27 +102,30 @@ def download_nexus(
     """
 
     dest.mkdir(parents=True, exist_ok=True)
-    logger.debug(f"Attempting to download Nexus Mods file {file_id} for mod {mod_id}")
+    logger.debug(
+        f"Attempting to download file_id {file_id} from mod_id {mod_id} for game {game} from Nexus Mods."
+    )
     try:
         filename = nexus_dl(game, str(mod_id), str(file_id), dest, filename or None)
         export = dest / filename
         if export.exists() and checksum:
             if compare_checksum(export, checksum):
-                logger.debug(f"Successfully downloaded and verified {export}")
+                logger.trace(
+                    f"Successfully downloaded and verified file_id {file_id} from mod_id {mod_id} for game {game} from Nexus Mods."
+                )
                 return export
             else:
-                logger.warning(
-                    f"Checksum verification failed for {export}. Retrying..."
+                logger.trace(
+                    f"Checksum mismatch for file_id {file_id} from mod_id {mod_id} for game {game} from Nexus Mods. Retrying."
                 )
                 export.unlink(missing_ok=True)
         elif export.exists():
-            logger.debug(f"Successfully downloaded {export}")
+            logger.trace(
+                f"Successfully downloaded file_id {file_id} from mod_id {mod_id} for game {game} from Nexus Mods."
+            )
             return export
     except Exception as e:
         logger.exception(
-            f"Error downloading Nexus Mods file {mod_id}:{file_id}: {e}",
-            backtrace=True,
-            diagnose=True,
+            f"Failed to download file_id {file_id} from mod_id {mod_id} for game {game} from Nexus Mods. {e}"
         )
-    logger.error(f"Failed to download Nexus Mods file {mod_id}:{file_id}")
     return None

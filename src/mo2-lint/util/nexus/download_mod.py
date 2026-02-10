@@ -20,12 +20,12 @@ def header() -> dict:
     """
 
     key = api_key()
-    logger.debug(f"Building Nexus Mods API headers (Application-Version={var.version})")
     header = {
         "apikey": f"{key}",
         "Application-Name": "mo2lint",
         "Application-Version": var.version,
     }
+    logger.trace("Constructed Nexus API header")
     return header
 
 
@@ -45,11 +45,9 @@ def nexus_request(url: str) -> requests.Response:
     """
 
     headers = header()
-    logger.debug(f"Performing Nexus request to: {url}")
+    logger.trace(f"Making Nexus API request to URL: {url}")
     response = requests.get(url, headers=headers)
-    logger.debug(
-        f"Nexus request returned status: {response.status_code} for URL: {url}"
-    )
+    logger.trace(f"Received response with status code: {response.status_code}")
     return response
 
 
@@ -75,6 +73,7 @@ def get_filename(game_slug: str, mod_id: str, file_id: str) -> str:
     url = f"https://api.nexusmods.com/v1/games/{game_slug}/mods/{mod_id}/files/{file_id}.json"
     response = nexus_request(url)
     filename = from_json(response.content).get("file_name", "")
+    logger.debug(f"Retrieved filename from Nexus API: {filename}")
     return filename
 
 
@@ -108,27 +107,29 @@ def nexus_download(
     """
 
     url = f"https://api.nexusmods.com/v1/games/{game_slug}/mods/{mod_id}/files/{file_id}/download_link.json"
-    logger.info(
-        f"Requesting Nexus download metadata for {game_slug} mod {mod_id} file {file_id}"
+    logger.debug(
+        f"Requesting download link for {game_slug} mod id {mod_id}, file ID: {file_id}"
     )
     response = nexus_request(url)
     if not filename:
         filename = get_filename(game_slug, mod_id, file_id)
     path = dest / filename
-    logger.debug(f"Resolved filename '{filename}', target path: {path}")
     download_url = None
+    logger.trace("Parsing download link response Nexus CDN URL")
     for item in from_json(response.content):
         if item.get("short_name") == "Nexus CDN":
             download_url = item.get("URI", "").replace("\\u0026", "&")
             break
     if not download_url:
-        logger.error("No valid Nexus CDN download URL found in response.")
-        raise ValueError("No valid download URL found for the specified file.")
-    logger.debug(f"Beginning download from {download_url} to {path}")
+        logger.error(
+            f"No CDN download URL found for {game_slug} mod id {mod_id}, file ID: {file_id}"
+        )
+        return ""
+    logger.trace(f"Downloading file from Nexus CDN URL: {download_url}")
     with open(path, "wb") as f:
         download = requests.get(download_url, headers=header(), stream=True)
         for chunk in download.iter_content(chunk_size=8192):
             if chunk:
                 f.write(chunk)
-    logger.info(f"Completed download to {path}")
+    logger.success(f"Downloaded file {filename} to {path}")
     return filename

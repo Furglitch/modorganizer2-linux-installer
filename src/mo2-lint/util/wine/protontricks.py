@@ -28,8 +28,7 @@ def run(command: List[str]) -> List[str]:
     """
 
     args = ["--verbose"] + command
-
-    logger.debug(f"Running protontricks command: {' '.join(args)}")
+    logger.debug(f"Constructed protontricks command: {' '.join(args)}")
 
     output_lines = []
     if args != ["--verbose"]:
@@ -38,21 +37,15 @@ def run(command: List[str]) -> List[str]:
                 pt(args)
             except SystemExit as e:
                 if e.code != 0:
-                    logger.exception(
-                        f"Protontricks command failed with exit code {e.code}"
+                    logger.error(
+                        f"protontricks exited with code {e.code} for args: {args}"
                     )
             except Exception as e:
-                logger.exception(
-                    f"Unexpected exception while running protontricks: {e}",
-                    backtrace=True,
-                    diagnose=True,
-                )
+                logger.exception(f"Error running protontricks with args: {args} - {e}")
             finally:
-                logger.success(
-                    f"Protontricks completed successfully with command: {' '.join(args)}"
-                )
+                logger.success(f"Finished running protontricks with args: {args}")
     else:
-        logger.warning("No protontricks command provided, skipping.")
+        logger.debug("No protontricks command to run (only --verbose).")
     return output_lines
 
 
@@ -68,7 +61,7 @@ def apply(id: int, tricks: List[str]):
         The list of tricks to apply
     """
 
-    logger.info(f"Applying tricks to prefix: {tricks}")
+    logger.info(f"Applying tricks to prefix ID {id}: {tricks}")
     run([f"{id}", "-q", "--force"] + tricks)
 
 
@@ -89,9 +82,9 @@ def check_prefix(id: int) -> bool:
     listing = run(["-l"]) or []
     exists = any(str(id) in line for line in listing)
     if exists:
-        logger.debug(f"Prefix for {id} exists.")
+        logger.trace(f"Found Proton prefix with ID {id} in listing.")
     else:
-        logger.warning(f"Prefix for {id} does not exist.")
+        logger.trace(f"Proton prefix with ID {id} does not exist.")
     return exists
 
 
@@ -120,9 +113,10 @@ def get_prefix(id: int) -> Path:
             break
 
     if prefix and prefix.exists():
-        logger.debug(f"Prefix for {id}: {prefix}")
+        logger.trace(f"Proton prefix path for ID {id}: {prefix}")
+        return prefix
     else:
-        logger.error(f"Could not find a valid prefix directory for {id}.")
+        logger.warning(f"Proton prefix path for ID {id} not found.")
     return prefix
 
 
@@ -197,14 +191,12 @@ def redirect_output_to_logger():
             for line in reader:
                 if line := line.rstrip("\n"):
                     output_lines.append(line)
-                    logger.trace(line)
+                    logger.trace(f"protontricks: {line}")
                     try:
                         log_translation(line)
-                    except Exception:
+                    except Exception as e:
                         logger.exception(
-                            "Error translating protontricks log line",
-                            backtrace=True,
-                            diagnose=True,
+                            f"Error translating protontricks log line: {line}. {e}"
                         )
 
     threading.Thread(target=reader_thread, daemon=True).start()

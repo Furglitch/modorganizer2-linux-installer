@@ -24,48 +24,42 @@ def uninstall(game=None, directory=None):
     choice = []
 
     if not length or length == 0:
-        logger.error("No matching instances found for uninstallation.")
+        logger.error(f"No MO2 instance found for game={game}, directory={directory}")
         return
 
     if length == 1:
-        logger.info("Only one instance found. Proceeding to uninstall...")
-        logger.info(f"Uninstalling instance at: {matched[0].instance_path}")
+        logger.debug(
+            f"Found 1 matching Mod Organizer 2 instance for game={game}, directory={directory}"
+        )
         choice = matched
     else:
+        logger.debug(
+            f"Found {length} matching Mod Organizer 2 instances for game={game}, directory={directory}"
+        )
         for instance in matched:
             instance_list.append(instance)
-        logger.info(f"Found {length} matching instance(s) for uninstallation.")
         instance = lang.prompt_uninstall_choice(instance_list)
+        logger.debug(f"User selected instance for uninstallation: {instance}")
         if isinstance(instance, int):
             if not (0 < instance < (len(matched) + 1)):
-                logger.error("Invalid index. Aborting uninstallation.")
-                return
-            logger.info(f"Uninstalling instance {instance}...")
+                logger.warning(f"Invalid instance number selected: {instance}")
+                raise SystemExit(1)
             choice.append(matched[instance - 1])
         elif instance.lower() == "all":
-            logger.info("Uninstalling all matching instances...")
+            logger.debug("User selected to uninstall all matching instances.")
             choice = matched
         else:
-            logger.error("Invalid input. Aborting uninstallation.")
-            return
+            logger.critical(f"Invalid selection for uninstallation: {instance}")
+            raise SystemExit(1)
 
-    confirm_uninstall(choice)
-
-
-def confirm_uninstall(choice):
-    """
-    Prompts the user for confirmation before uninstalling instances.
-
-    Parameters
-    ----------
-    choice : dict[int, Instance]
-        The instances selected for uninstallation.
-    """
     confirm = lang.prompt_uninstall_confirm()
     if confirm:
-        logger.info("Proceeding with uninstallation...")
+        logger.debug(
+            "User confirmed uninstallation. Proceeding to uninstall selected instances."
+        )
         for inst in choice:
-            logger.info(f"Uninstalling instance at: {inst.instance_path}")
             remove_instance(inst, ["symlink", "install", "state"])
+            logger.info(f"Uninstalled Mod Organizer 2 instance at {inst.instance_path}")
     else:
-        logger.info("Uninstallation aborted by user.")
+        logger.debug("Uninstallation aborted by user.")
+        pass

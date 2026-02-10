@@ -15,15 +15,17 @@ def install():
     Install nxm_handler and its desktop entry.
     """
 
-    logger.info("Installing NXM:// Handlers...")
+    logger.debug("Installing NXM Handler.")
 
     # Install handler
     output = Path("~/.local/share/mo2-lint/nxm_handler").expanduser()
     internal_path = internal_file("dist", "nxm_handler")
     if output.exists() and compare_checksum(internal_path, output):
-        logger.info("NXM:// Handler is up to date; skipping installation.")
+        logger.trace(
+            "NXM Handler already installed and up to date. Skipping installation."
+        )
     else:
-        logger.info("Installing NXM:// Handler...")
+        logger.trace(f"Installing NXM Handler to {output}")
         output.parent.mkdir(parents=True, exist_ok=True)
         copy2(internal_path, output)
         output.chmod(output.stat().st_mode | stat.S_IEXEC)
@@ -34,20 +36,22 @@ def install():
     ).expanduser()
     internal_path = internal_file("cfg", "nxm_handler.desktop")
     if output.exists() and compare_checksum(internal_path, output):
-        logger.info(
-            "NXM:// Handler desktop entry is up to date; skipping installation."
+        logger.trace(
+            "NXM Handler desktop entry already installed and up to date. Skipping installation."
         )
     else:
-        logger.info("Installing NXM:// Handler desktop entry...")
+        logger.trace(f"Installing NXM Handler desktop entry to {output}")
         output.parent.mkdir(parents=True, exist_ok=True)
         copy2(internal_path, output)
         output.chmod(output.stat().st_mode | stat.S_IEXEC)
         mime = shutil.which("xdg-mime")
         if mime is None:
-            logger.error("xdg-mime not found; cannot register mimetype.")
+            logger.warning(
+                f"xdg-mime not found. Please manually set the default application for nxm:// URLs to {output}."
+            )
         else:
             subprocess.run(
                 [mime, "default", output.name, "x-scheme-handler/nxm"], check=True
             )
 
-    logger.success("NXM:// Handlers installed successfully.")
+    logger.success("NXM Handler installation complete.")

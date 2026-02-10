@@ -87,7 +87,7 @@ mo2_lint update <directory> [options]
 > Where `<directory>` is the path of the MO2 instance you want to update. Like the `pin` command, you must provide the exact path to the instance you wish to update. Higher level directories will not work for this command.
 
 ## The Instance State File
-MO2-LINT maintains a state file that keeps track of all Mod Organizer 2 instances it manages. This file is located at `~/.config/mo2-lint/instance_state.json`.
+MO2-LINT maintains a state file that keeps track of all Mod Organizer 2 instances it manages. This file is located at `~/.config/mo2-lint/state.json`.
 
 When using the `install` commands, MO2-LINT will automatically update this state file to reflect the current instances. Similarly, when using the `uninstall` command, the corresponding instance will be removed from the state file, and `list` will read from this file to display the current instances.
 

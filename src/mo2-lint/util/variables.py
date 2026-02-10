@@ -43,9 +43,21 @@ class Input:
 
     def __post_init__(self):
         if not self.game:
-            raise ValueError("Input game must be provided.")
+            logger.critical(
+                "variables.Input: 'game' parameter is required but was not provided."
+            )
+            logger.critical(
+                "This should not happen. Please report this to the developer."
+            )
+            raise SystemExit(1)
         if not self.directory:
-            raise ValueError("Input directory must be provided.")
+            logger.critical(
+                "variables.Input: 'directory' parameter is required but was not provided."
+            )
+            logger.critical(
+                "This should not happen. Please report this to the developer."
+            )
+            raise SystemExit(1)
 
 
 input_params: Input = None
@@ -60,8 +72,8 @@ def set_parameters(args: Input | dict):
     args : Input | dict
         Command-line arguments. See Input class for keys.
     """
-    logger.debug(f"Setting input parameters: {args}")
     global input_params
+    logger.debug(f"Setting input parameters: {args}")
     if isinstance(args, dict):
         input_params = Input(**args)
     elif isinstance(args, Input):
@@ -123,21 +135,35 @@ class DownloadData:
 
     def __post_init__(self):
         if not (self.direct or self.nexus):
-            raise ValueError("Either direct or nexus download data must be provided.")
+            logger.critical(
+                "DownloadData: Either 'direct' or 'nexus' data must be provided."
+            )
+            logger.critical(
+                "This should not happen. Please report this to the developer."
+            )
+            raise SystemExit(1)
 
         if self.nexus and not ("mod" in self.nexus and "file" in self.nexus):
-            raise ValueError(
-                "Both mod and file IDs must be provided for nexus download data."
+            logger.critical(
+                "DownloadData: Both 'mod' and 'file' IDs must be provided for nexus data."
             )
+            logger.critical(
+                "This should not happen. Please report this to the developer."
+            )
+            raise SystemExit(1)
 
         nexus_checksum = self.nexus and "checksum" in self.nexus
         direct_checksum = (
             self.direct and isinstance(self.direct, dict) and "checksum" in self.direct
         )
         if self.checksum and (direct_checksum or nexus_checksum):
-            raise ValueError(
-                "Checksum provided at top level and within direct/nexus data; only one location allowed."
+            logger.critical(
+                "DownloadData: Checksum provided both at top level and within direct/nexus data."
             )
+            logger.critical(
+                "This should not happen. Please report this to the developer."
+            )
+            raise SystemExit(1)
 
 
 @dataclass
@@ -168,9 +194,13 @@ class FileWhitelist:
 
     def __post_init__(self):
         if not (self.paths or self.subdirectory):
-            raise ValueError(
-                "Either a file list or subdirectory must be provided for file whitelist."
+            logger.critical(
+                "FileWhitelist: Either 'paths' or 'subdirectory' must be provided."
             )
+            logger.critical(
+                "This should not happen. Please report this to the developer."
+            )
+            raise SystemExit(1)
 
 
 @dataclass
@@ -215,13 +245,31 @@ class ScriptExtender:
 
     def __post_init__(self):
         if not self.version:
-            raise ValueError("Script extender version must be provided.")
+            logger.critical(
+                "ScriptExtender: 'version' parameter is required but was not provided."
+            )
+            logger.critical(
+                "This should not happen. Please report this to the developer."
+            )
+            raise SystemExit(1)
         if not self.download:
-            raise ValueError("Script extender download data must be provided.")
+            logger.critical(
+                "ScriptExtender: 'download' parameter is required but was not provided."
+            )
+            logger.critical(
+                "This should not happen. Please report this to the developer."
+            )
+            raise SystemExit(1)
         if isinstance(self.runtime, dict):
             for launcher, version in self.runtime.items():
                 if not isinstance(version, list):
-                    raise ValueError("Runtime version must be a list of strings.")
+                    logger.critical(
+                        f"ScriptExtender: Runtime version for launcher '{launcher}' must be a list if runtime is provided as a dictionary."
+                    )
+                    logger.critical(
+                        "This should not happen. Please report this to the developer."
+                    )
+                    raise SystemExit(1)
 
 
 @dataclass
@@ -268,7 +316,13 @@ class LauncherIDs:
 
     def __post_init__(self):
         if not (self.steam or self.gog or self.epic):
-            raise ValueError("At least one game ID must be provided.")
+            logger.critical(
+                "LauncherIDs: At least one of 'steam', 'gog', or 'epic' parameters must be provided."
+            )
+            logger.critical(
+                "This should not happen. Please report this to the developer."
+            )
+            raise SystemExit(1)
 
 
 @dataclass
@@ -338,13 +392,37 @@ class GameInfo:
     def __post_init__(self):
         if not self.parent:
             if not self.display_name:
-                raise ValueError("Game display_name must be provided.")
+                logger.critical(
+                    "GameInfo: 'display_name' parameter must be provided if 'parent' is not set."
+                )
+                logger.critical(
+                    "This should not happen. Please report this to the developer."
+                )
+                raise SystemExit(1)
             if not self.nexus_slug:
-                raise ValueError("Game nexus_slug must be provided.")
+                logger.critical(
+                    "GameInfo: 'nexus_slug' parameter must be provided if 'parent' is not set."
+                )
+                logger.critical(
+                    "This should not happen. Please report this to the developer."
+                )
+                raise SystemExit(1)
             if not self.launcher_ids:
-                raise ValueError("Game launcher_ids must be provided.")
+                logger.critical(
+                    "GameInfo: 'launcher_ids' parameter must be provided if 'parent' is not set."
+                )
+                logger.critical(
+                    "This should not happen. Please report this to the developer."
+                )
+                raise SystemExit(1)
         if self.parent and self.parent not in games_info:
-            raise ValueError(f"Parent game '{self.parent}' not found in games_info.")
+            logger.critical(
+                f"GameInfo: Parent '{self.parent}' not found in games_info for game '{self.display_name}'."
+            )
+            logger.critical(
+                "This should not happen. Please report this to the developer."
+            )
+            raise SystemExit(1)
 
 
 games_info: dict[str, GameInfo] = {}
@@ -364,16 +442,18 @@ def load_games_info(path: Optional[Path] = None):
     if not path:
         path = Path("~/.config/mo2-lint/game_info.yml").expanduser()
         if not path.exists():
-            logger.warning(f"Default game_info file not found: {path}")
-            logger.warning("Using built-in game_info data.")
+            logger.warning(
+                f"Game info YAML file not found at {path}. Unable to load game information."
+            )
+            logger.warning("Using built-in game_info.yml as fallback.")
             path = internal_file("cfg", "game_info.yml")
-    logger.debug(f"Loading game info from path: {path}")
-
+    logger.debug(f"Loading game info from {path}")
     with open(path, "r", encoding="utf-8") as file:
         yml = yaml.load(file.read(), Loader=yaml.SafeLoader)
-    logger.trace(f"Game info YAML content: {yml}")
+    logger.trace(f"Parsed game info YAML: {yml}")
     for key, value in yml.get("games", {}).items():
         games_info[key] = GameInfo.from_dict(value)
+    logger.trace(f"Loaded games_info: {games_info}")
 
 
 def load_game_info(game_key: str):
@@ -387,6 +467,7 @@ def load_game_info(game_key: str):
     """
     global game_info
     game_info = games_info[game_key]
+    logger.trace(f"Loaded game_info for key '{game_key}': {game_info}")
     if game_info.parent and game_info.parent in games_info:
         # Backup child values
         child_info = game_info
@@ -411,9 +492,10 @@ def load_game_info(game_key: str):
                 child_value = merged
             else:
                 setattr(game_info, field_name, child_value)
-            logger.trace(f"Set field '{field_name}' to: {child_value}")
-
-    logger.trace(f"Loaded game info for '{game_key}': {game_info}")
+            logger.debug(
+                f"Set game_info.{field_name} to {child_value} (inherited from parent '{game_info.parent}')"
+            )
+    logger.trace(f"Final game_info for key '{game_key}': {game_info}")
 
 
 @dataclass
@@ -470,7 +552,13 @@ class Resource:
 
     def __post_init__(self):
         if not self.download_url:
-            raise ValueError("Resource download_url is missing.")
+            logger.critical(
+                "Resource: 'download_url' parameter is required but was not provided."
+            )
+            logger.critical(
+                "This should not happen. Please report this to the developer."
+            )
+            raise SystemExit(1)
 
 
 @dataclass
@@ -509,9 +597,21 @@ class ResourceInfo:
 
     def __post_init__(self):
         if not self.mod_organizer:
-            raise ValueError("Mod Organizer resource info must be provided.")
+            logger.critical(
+                "ResourceInfo: 'mod_organizer' parameter is required but was not provided."
+            )
+            logger.critical(
+                "This should not happen. Please report this to the developer."
+            )
+            raise SystemExit(1)
         if not self.winetricks:
-            raise ValueError("Winetricks resource info must be provided.")
+            logger.critical(
+                "ResourceInfo: 'winetricks' parameter is required but was not provided."
+            )
+            logger.critical(
+                "This should not happen. Please report this to the developer."
+            )
+            raise SystemExit(1)
 
 
 resource_info: ResourceInfo = None
@@ -530,10 +630,10 @@ def load_resource_info(path: Optional[Path] = None):
     global resource_info
     if not path:
         path = Path("~/.config/mo2-lint/resource_info.yml").expanduser()
-    logger.debug(f"Loading resource info from path: {path}")
+    logger.debug(f"Loading resource info from {path}")
     with open(path, "r", encoding="utf-8") as file:
         yml = yaml.load(file.read(), yaml.SafeLoader)
-    logger.trace(f"Resource info YAML content: {yml}")
+    logger.trace(f"Parsed resource info YAML: {yml}")
     for key, value in yml.get("resources", {}).items():
         if key == "mod_organizer":
             mod_organizer = Resource.from_dict(value)
@@ -546,6 +646,7 @@ def load_resource_info(path: Optional[Path] = None):
         winetricks=winetricks,
         java=java if "java" in locals() else None,
     )
+    logger.trace(f"Loaded resource_info: {resource_info}")
 
 
 @dataclass
@@ -570,7 +671,13 @@ class Plugin:
 
     def __post_init__(self):
         if not self.manifest:
-            raise ValueError("Plugin manifest must be provided.")
+            logger.critical(
+                "Plugin: 'manifest' parameter is required but was not provided."
+            )
+            logger.critical(
+                "This should not happen. Please report this to the developer."
+            )
+            raise SystemExit(1)
 
 
 plugin_info: dict[str, Plugin] = {}
@@ -589,12 +696,13 @@ def load_plugin_info(path: Optional[Path] = None):
     global plugin_info
     if not path:
         path = Path("~/.config/mo2-lint/plugin_info.yml").expanduser()
-    logger.debug(f"Loading plugin info from path: {path}")
+    logger.debug(f"Loading plugin info from {path}")
     with open(path, "r", encoding="utf-8") as file:
         yml = yaml.load(file.read(), yaml.SafeLoader)
-    logger.trace(f"Plugin info YAML content: {yml}")
+    logger.trace(f"Parsed plugin info YAML: {yml}")
     for key, value in yml.get("plugins", {}).items():
         plugin_info[key] = Plugin(manifest=value)
+        logger.trace(f"Loaded plugin_info for key '{key}': {plugin_info[key]}")
 
 
 # --- #

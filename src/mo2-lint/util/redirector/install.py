@@ -30,7 +30,9 @@ def create_path_entry(game_install_path: Path):
     redirect_file.parent.mkdir(parents=True, exist_ok=True)
     with open(redirect_file, "w", encoding="utf-8") as file:
         file.write(str(instance_directory))
-    logger.debug(f"Wrote MO2 path '{instance_directory}' to '{redirect_file}'.")
+    logger.debug(
+        f"Created redirector path entry at {redirect_file} pointing to {instance_directory}"
+    )
 
 
 def validate(exec_path: Path) -> bool:
@@ -60,8 +62,7 @@ def install():
     Installs the internal redirector executable to the game's installation directory.
     """
 
-    logger.info("Starting Redirector installation...")
-
+    logger.info("Installing redirector.")
     game_install_path = (
         state.current_instance.game_path
         if state.current_instance.game_path.is_dir()
@@ -78,7 +79,7 @@ def install():
         state.current_instance.game_path = game_install_path
 
     if not (game_install_path / "modorganizer2" / "instance_path.txt").exists():
-        logger.debug("Creating path entry for Redirector...")
+        logger.debug(f"Creating path entry for redirector at {game_install_path}")
         create_path_entry(game_install_path)
 
     exec = (
@@ -99,13 +100,13 @@ def install():
     )
 
     if validate(exec_path):
-        logger.info("Redirector is already installed and up to date.")
+        logger.info(f"Redirector is already installed and up to date at {exec_path}")
         return
+    logger.trace(f"Game executable path: {exec_path}")
 
     if not exec_backup.exists():
-        logger.info(f"Creating backup of original executable at {exec_backup}...")
+        logger.debug(f"Creating backup of original executable at {exec_backup}")
         copy2(exec_path, exec_backup)
-
-    logger.info(f"Installing Redirector executable to {exec_path}...")
+    logger.info(f"Installing redirector to {exec_path}")
     copy2(redirector_build, exec_path)
     exec_path.chmod(exec_path.stat().st_mode | stat.S_IEXEC)

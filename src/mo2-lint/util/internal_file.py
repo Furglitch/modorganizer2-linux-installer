@@ -21,5 +21,5 @@ def internal_file(*parts) -> Path:
     """
 
     path = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve()))
-    logger.trace(f"Resolving internal file. base={path}, parts={parts}")
+    logger.trace(f"Accessing internal file: {path.joinpath(*parts)}")
     return path.joinpath(*parts)

@@ -34,6 +34,11 @@ def run(
     """
 
     prefix = prefix.expanduser().resolve()
+    exec = (
+        exec.expanduser().resolve()
+        if isinstance(exec, Path)
+        else str(exec.expanduser().resolve())
+    )
 
     # Convert executable to string, with absolute path
     if str(exec).startswith("/usr/bin"):
@@ -43,22 +48,22 @@ def run(
             exec = str(exec.name)
     elif isinstance(exec, str):
         if not Path(exec).exists():
-            logger.error(f"winetricks executable not found at: {exec}")
+            logger.error(f"Winetricks executable not found at specified path: {exec}")
             return []
-        exec = str(Path(exec).expanduser().resolve())
+        exec = exec
     elif isinstance(exec, Path):
         if not exec.exists():
-            logger.error(f"winetricks executable not found at: {exec}")
+            logger.error(f"Winetricks executable not found at specified path: {exec}")
             return []
-        exec = str(exec.expanduser().resolve())
+        exec = str(exec)
+    logger.info(f"Using winetricks executable: {exec}")
 
     command = ["-q", "-f"] + command  # -q for unattended, -f to force
     cmd = [exec] + command
+    logger.debug(f"Constructed winetricks command: {' '.join(cmd)}")
     env = os.environ.copy()
     env.setdefault("WINEPREFIX", str(prefix))
-
-    logger.debug(f"Using WINEPREFIX: {env['WINEPREFIX']}")
-    logger.debug(f"Running winetricks command: {' '.join(cmd)}")
+    logger.trace(f"Using Wine prefix: {prefix}")
 
     remove_loggers()
     add_loggers(process="winetricks")
@@ -73,23 +78,21 @@ def run(
             env=env,
         )
     else:
-        logger.info("No winetricks command provided, skipping.")
+        logger.warning("No winetricks command provided, skipping execution.")
         return output_lines
 
     if proc.stdout:
         for line in proc.stdout:
             line = line.strip()
-            logger.trace(f"winetricks: {line}")
             log_translation(line)
+            logger.trace(f"winetricks: {line}")
             output_lines.append(line)
 
     exit_code = proc.wait()
     if exit_code == 0:
-        logger.success(
-            f"winetricks completed successfully with command: {' '.join(command)}"
-        )
+        logger.success("winetricks command completed successfully.")
     else:
-        logger.warning(f"winetricks exited with non-zero status: {exit_code}")
+        logger.error(f"winetricks command failed with exit code: {exit_code}")
 
     remove_loggers()
     add_loggers()
@@ -112,10 +115,10 @@ def apply(
         The list of tricks to apply
     """
 
-    logger.info(f"Applying tricks to prefix: {tricks}")
     if not tricks:
-        logger.info("No tricks to apply, skipping.")
+        logger.warning("No tricks provided to apply, skipping winetricks execution.")
         return
+    logger.info(f"Applying tricks to prefix with winetricks: {tricks}")
     run(exec, prefix, tricks)
 
 
@@ -131,12 +134,10 @@ def log_translation(input: str = None):
     if not input:
         return
 
-    reg1 = re.search(
-        r"Executing w_do_call\s+(.*)", input
-    )  # "Applying trick: '[trick]'"
-    reg2 = re.search(
-        r"Using native override for following DLLs:\s+(.*)", input
-    )  # "Setting native DLLs: '[DLLs]'"
+    # "Applying trick: '[trick]'"
+    reg1 = re.search(r"Executing w_do_call\s+(.*)", input)
+    # "Setting native DLLs: '[DLLs]'"
+    reg2 = re.search(r"Using native override for following DLLs:\s+(.*)", input)
 
     if reg1:
         trick = reg1.group(1).strip()

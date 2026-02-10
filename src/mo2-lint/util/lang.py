@@ -37,7 +37,7 @@ def list_instances(instance_list: list) -> list:
         List of indices corresponding to the instances.
     """
     instances = [
-        f"{idx}: Game: {inst.nexus_slug}, Path: {inst.instance_path}, Plugins: {', '.join(inst.plugins) if inst.plugins else 'None'}"
+        f"{idx}: Game: {inst.game}, Path: {inst.instance_path}, Plugins: {', '.join(inst.plugins) if inst.plugins else 'None'}"
         for idx, inst in enumerate(instance_list, start=1)
     ]
     return instances
@@ -58,7 +58,7 @@ def prompt_archive() -> bool:
   This process will maintain your personal data (save games, settings) while providing a fresh environment for proton-/winetricks to set up the necessary dependencies.
   The archived prefix will be renamed with a timestamp suffix for easy identification.
 
-Do you want to proceed with archiving the existing prefix and creating a clean one?"""
+  Do you want to proceed with archiving the existing prefix and creating a clean one?"""
 
     msg = {
         "type": "confirm",
@@ -105,7 +105,7 @@ def prompt_archive_init() -> bool:
 
     msg = {
         "type": "confirm",
-        "message": f"{instructions}\n\nHave you completed these instructions?",
+        "message": f"{instructions}\n\n  Have you completed these instructions?",
         "name": "clean_prefix_done",
         "default": False,
     }
@@ -126,7 +126,7 @@ def prompt_install_mo2_checksum_fail(mo2_path: str) -> bool:
     message = f"""Mod Organizer 2 checksum verification has failed for the installation located at: {mo2_path}
   This could indicate that an updated version is available in this installer, or that the installation is corrupted.
 
-Do you want to proceed with the installation anyway?"""
+  Do you want to proceed with the installation anyway?"""
 
     msg = {
         "type": "confirm",
