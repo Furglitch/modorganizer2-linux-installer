@@ -33,7 +33,7 @@ class NexusAPIData:
 
     @classmethod
     def from_dict(
-        cls, data: dict[str, any] | "NexusAPIData"
+        cls, data: "dict[str, any] | NexusAPIData"
     ) -> Optional["NexusAPIData"]:
         if isinstance(data, cls):
             return data
@@ -105,7 +105,7 @@ class InstanceData:
     plugins: Optional[list[str]] = None
 
     @classmethod
-    def from_dict(cls, data: dict[str, any] | "InstanceData") -> "InstanceData":
+    def from_dict(cls, data: "dict[str, any] | InstanceData") -> "InstanceData":
         if isinstance(data, cls):
             return data
         return cls(
@@ -171,7 +171,7 @@ class StateFile:
     instances: list[InstanceData] = field(default_factory=list)
 
     @classmethod
-    def from_dict(cls, data: dict[str, any] | "StateFile") -> "StateFile":
+    def from_dict(cls, data: "dict[str, any] | StateFile") -> "StateFile":
         if isinstance(data, cls):
             return data
         return cls(
