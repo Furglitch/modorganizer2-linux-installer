@@ -124,7 +124,7 @@ class DownloadData:
     nexus: Optional[dict[str, int | str]] = None
 
     @classmethod
-    def from_dict(cls, data: dict[str, any] | "DownloadData") -> "DownloadData":
+    def from_dict(cls, data: "dict[str, any] | DownloadData") -> "DownloadData":
         if isinstance(data, cls):
             return data
         return cls(
@@ -184,7 +184,7 @@ class FileWhitelist:
     paths: Tuple[str, ...] = field(default_factory=tuple)
 
     @classmethod
-    def from_dict(cls, data: dict[str, any] | "FileWhitelist") -> "FileWhitelist":
+    def from_dict(cls, data: "dict[str, any] | FileWhitelist") -> "FileWhitelist":
         if isinstance(data, cls):
             return data
         return cls(
@@ -231,7 +231,7 @@ class ScriptExtender:
     file_whitelist: Optional[FileWhitelist] = None
 
     @classmethod
-    def from_dict(cls, data: dict[str, any] | "ScriptExtender") -> "ScriptExtender":
+    def from_dict(cls, data: "dict[str, any] | ScriptExtender") -> "ScriptExtender":
         if isinstance(data, cls):
             return data
         return cls(
@@ -297,7 +297,7 @@ class LauncherIDs:
     epic: Optional[str] = None
 
     @classmethod
-    def from_dict(cls, data: dict | "LauncherIDs") -> "LauncherIDs":
+    def from_dict(cls, data: "dict | LauncherIDs") -> "LauncherIDs":
         if isinstance(data, cls):
             return data
         return cls(
@@ -368,7 +368,7 @@ class GameInfo:
     workarounds: Optional[dict] = field(default_factory=dict)
 
     @classmethod
-    def from_dict(cls, data: dict[str, any] | "GameInfo") -> "GameInfo":
+    def from_dict(cls, data: "dict[str, any] | GameInfo") -> "GameInfo":
         if isinstance(data, cls):
             return data
         return cls(
@@ -532,7 +532,7 @@ class Resource:
     file_whitelist: Optional[FileWhitelist] = None
 
     @classmethod
-    def from_dict(cls, data: dict[str, any] | "Resource") -> "Resource":
+    def from_dict(cls, data: "dict[str, any] | Resource") -> "Resource":
         if isinstance(data, cls):
             return data
         return cls(
@@ -586,7 +586,7 @@ class ResourceInfo:
     java: Optional[Resource] = None
 
     @classmethod
-    def from_dict(cls, data: dict[str, any] | "ResourceInfo") -> "ResourceInfo":
+    def from_dict(cls, data: "dict[str, any] | ResourceInfo") -> "ResourceInfo":
         if isinstance(data, cls):
             return data
         return cls(
