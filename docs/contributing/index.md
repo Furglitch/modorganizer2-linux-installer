@@ -49,6 +49,7 @@ To run the application, use the following command:
 uv run src/mo2-lint/__init__.py
 ```
 
+Note: The script may fail if the NXM handler and Redirector are not built. Run a build first to ensure these components are available.
 To build the application, use:
 ```bash
 make _build
