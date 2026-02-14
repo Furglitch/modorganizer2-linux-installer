@@ -2,7 +2,7 @@ name: Build Artifact
 
 on:
   push:
-    branches: ["rewrite"]
+    branches: [ "rewrite" ]
   workflow_dispatch:
 
 permissions:
@@ -13,31 +13,31 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
-        steps:
-          - name: Checkout
-            uses: actions/checkout@v6
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
 
-          - name: Setup Python
-            uses: actions/setup-python@v5
-            with:
-              python-version: '3.13'
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version-file: ".python-version"
 
-          - name: Install uv
-            uses: astral-sh/setup-uv@v7
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
 
-          - name: Install dependencies
-            run: |
-              sudo apt-get update
-              sudo apt-get install -y gcc-mingw-w64 make tar
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-mingw-w64 make tar
 
-          - name: Build Artifact
-            run: |
-              make _build
+      - name: Build Artifact
+        run: |
+          make _build
 
-          - name: Upload Artifact
-            uses: actions/upload-artifact@v6
-            with:
-              name: mo2_lint-artifact
-              path: dist/mo2_lint
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: mo2_lint-artifact
+          path: dist/mo2_lint
