@@ -17,7 +17,6 @@ These include:
 - Private key detection
 - Trailing whitespace trimmer
 - YAML formatting checks
-- 'requirements.txt' validation
 - EOF newline checks
 - File size limiter (currently 150kb)
 - Branch committing restrictions
@@ -33,21 +32,30 @@ This project is developed using *Python 3.13*, so please ensure you have this ve
 ### Installation
 To set up your development environment, follow these steps:
 
-1. Clone the repository:
+1. Install Python 3.13, [`uv`](https://docs.astral.sh/uv/getting-started/installation/#cargo), and `make` if you don't have it already.
+2. Clone the repository:
    ```bash
    git clone https://github.com/Furglitch/modorganizer2-linux-installer -b rewrite
    cd modorganizer2-linux-installer
    ```
-2. Create a virtual environment and activate it:
+3. Create a virtual environment, activate it, and install the required dependencies:
    ```bash
-   python -m venv ./venv
-   source ./venv/bin/activate
-   ```
-3. Install the required dependencies:
-   ```bash
-   pip install -r ./requirements.txt
+   uv venv
+   source ./.venv/bin/activate
+   uv sync
    ```
 4. Install pre-commit hooks:
    ```bash
    pre-commit install
    ```
+
+### Running the Application
+To run the application, use the following command:
+```bash
+uv run src/mo2-lint/__init__.py
+```
+
+To build the application, use:
+```bash
+make _build
+```
