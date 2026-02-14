@@ -22,7 +22,6 @@ repos:
       - id: detect-private-key
       - id: trailing-whitespace
       - id: check-yaml
-      - id: requirements-txt-fixer
       - id: end-of-file-fixer
       - id: check-added-large-files
         args: [ --maxkb=150 ]
