@@ -16,13 +16,15 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v7
 
-      - uses: astral-sh/ruff-action@v3
+      - name: "Ruff: Check lint rules"
+        uses: astral-sh/ruff-action@v3
         with:
           src: "./src"
           version: "0.14.6"
           args: check --no-fix
 
-      - run: ruff format --diff
+      - name: "Ruff: Check formatting"
+        run: ruff format --diff
 
       - name: Run pre-commit hooks
         uses: pre-commit/action@v3.0.1
