@@ -1,3 +1,5 @@
+.PHONY: run _build redirector clean
+
 run:
 	uv run src/mo2-lint/__init__.py
 
