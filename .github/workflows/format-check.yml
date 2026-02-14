@@ -16,16 +16,15 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v7
 
-      - name: Run pre-commit hooks
-        uses: pre-commit/action@v3.0.1
-        with:
-          extra_args: --all-files
-
       - uses: astral-sh/ruff-action@v3
         with:
           src: "./src"
           version: "0.14.6"
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          args: check --no-fix
 
-      - run: ruff check --fix
-      - run: ruff format
+      - run: ruff format --diff
+
+      - name: Run pre-commit hooks
+        uses: pre-commit/action@v3.0.1
+        with:
+          extra_args: --all-files
