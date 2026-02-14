@@ -1,14 +1,10 @@
-venv/bin/activate: requirements.txt
-	python3 -m venv venv
-	./venv/bin/pip install -r requirements.txt
+run:
+	uv run src/mo2-lint/__init__.py
 
-run: venv/bin/activate
-	./venv/bin/python3 src/mo2-lint/__init__.py
-
-_build: venv/bin/activate
+_build:
 	make clean
 	make redirector
-	./venv/bin/pyinstaller --onefile --name nxm_handler \
+	uv run pyinstaller --onefile --name nxm_handler \
 		--paths src \
 		--hidden-import find_heroic_install \
 		--hidden-import protontricks \
@@ -17,7 +13,7 @@ _build: venv/bin/activate
 		--runtime-hook "build/runtime_hooks.py" \
 		--additional-hooks-dir "build/hooks" \
 		src/nxm-handler/__init__.py
-	./venv/bin/pyinstaller --onefile --name mo2_lint \
+	uv run pyinstaller --onefile --name mo2_lint \
 		--paths src \
 		--hidden-import InquirerPy \
 		--hidden-import patoolib \
@@ -52,9 +48,3 @@ clean:
 	rm -f nxm_handler.spec
 	rm -f find_heroic_install.spec
 	find . -type d -name '__pycache__' -exec rm -r {} +
-
-revenv:
-	make clean
-	rm -rf venv
-	python3 -m venv venv
-	./venv/bin/pip install -r requirements.txt
