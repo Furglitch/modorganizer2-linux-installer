@@ -38,15 +38,9 @@ To set up your development environment, follow these steps:
    git clone https://github.com/Furglitch/modorganizer2-linux-installer -b rewrite
    cd modorganizer2-linux-installer
    ```
-3. Create a virtual environment, activate it, and install the required dependencies:
+3. Install pre-commit hooks:
    ```bash
-   uv venv
-   source ./.venv/bin/activate
-   uv sync
-   ```
-4. Install pre-commit hooks:
-   ```bash
-   pre-commit install
+   uv run pre-commit install
    ```
 
 ### Running the Application
