@@ -13,7 +13,7 @@ After successfully installing Mod Organizer 2 Linux Installer, there are a few a
 When you run the application for the first time, it will take you through the MO2 setup process.
 
 A few steps need special attention:
-- **"Select the type of instance to create"**: You *must* select "Portable".
+- **"Select the type of instance to create"**: It's recommended to select "Portable" so that all files are stored in the MO2 instance directory, making it easier to manage and backup your mods and profiles.
 - **"Select the game to manage."**: Other games may appear in the list. Choose the game you selected during installation.
   - Additionally, your game may not be detected. If this is the case, you can select "Browse" and navigate to your game's installation directory to select it.
 - **"Configure your profile settings."**: Up to personal preference. Use profile specific saves and INIs as you normall would.
