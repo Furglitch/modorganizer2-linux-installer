@@ -46,10 +46,16 @@ BEFORE=true %command% --after
 When trying to install MO2 in a directory outside of your home directory, or access files outside of your home directory, you may encounter issues with MO2 not launching or not being able to access the necessary files.
 
 This can be resolved with the `STEAM_COMPAT_MOUNTS` variable in your Launch Options. This variable allows you to specify additional directories that Steam should mount for the game.
+
+For example, to include `/path/to/directory`:
+```
+STEAM_COMPAT_MOUNTS="/path/to/directory" %command%
+```
+
+Multiple directories can be included by separating them with a colon (`:`).
 ```
 STEAM_COMPAT_MOUNTS="/path/to/directory1":"/path/to/directory2" %command%
 ```
-In the above example, replace `/path/to/directory1` and `/path/to/directory2` with the actual paths to the directories you want to access. You can add as many directories as needed, just make sure to separate them with a colon (`:`).
 
 ### Launching without opening MO2
 The `moshortcut://` protocol allows you to launch a MO2 profile directly without opening the MO2 interface. This can be useful if you want to quickly launch the game with a specific profile without having go into MO2.
