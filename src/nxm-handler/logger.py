@@ -69,7 +69,7 @@ def add_loggers(
 
     logger.add(
         sink=Path(
-            f"~/.cache/mo2-lint/logs/install.{persist_timestamp()}.log"
+            f"~/.cache/mo2-lint/logs/handler.{persist_timestamp()}.log"
         ).expanduser(),
         format=log_format_str,
         level="TRACE",
