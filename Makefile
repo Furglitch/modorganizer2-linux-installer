@@ -1,11 +1,11 @@
-.PHONY: run _build redirector clean
+.PHONY: run _build nxm_handler mo2_lint redirector clean
 
 run:
 	uv run src/mo2-lint/__init__.py
 
-_build:
-	make clean
-	make redirector
+_build: clean nxm_handler mo2_lint
+
+nxm_handler:
 	uv run pyinstaller --onefile --name nxm_handler \
 		--paths src \
 		--hidden-import find_heroic_install \
@@ -15,6 +15,8 @@ _build:
 		--runtime-hook "build/runtime_hooks.py" \
 		--additional-hooks-dir "build/hooks" \
 		src/nxm-handler/__init__.py
+
+mo2_lint: redirector
 	uv run pyinstaller --onefile --name mo2_lint \
 		--paths src \
 		--hidden-import InquirerPy \

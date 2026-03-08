@@ -265,6 +265,27 @@ def prompt_instance_choice_exact() -> bool:
     return result["use_exact_instance"]
 
 
+def prompt_instance_conflict() -> bool:
+    """
+    Prompts the user to confirm proceeding when an instance conflict is detected.
+    """
+
+    message = f"""An existing instance link was found for the game {var.game}.
+
+    This is primarily used for Nexus' 'Mod Manager Download' button. Overwriting this link will cause the 'Mod Manager Download' button to point to the new instance instead of the old one.
+
+    Would you like to remove the existing link and create a new one pointing to the new instance?"""
+
+    msg = {
+        "type": "confirm",
+        "message": message,
+        "name": "instance_conflict_proceed",
+        "default": False,
+    }
+    result = prompt([msg])
+    return result["instance_conflict_proceed"]
+
+
 def prompt_launcher_choice(
     steam_path: Optional[str], gog_path: Optional[str], epic_path: Optional[str]
 ) -> str:

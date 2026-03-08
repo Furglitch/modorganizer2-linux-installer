@@ -273,7 +273,7 @@ def remove_instance(instance: InstanceData, types: list[str] = ["symlink", "stat
 
     if "symlink" in types:
         symlink_path = Path("~/.config/mo2-lint/instances").expanduser() / str(
-            instance.index
+            instance.nexus_slug
         )
         if symlink_path.exists() or symlink_path.is_symlink():
             symlink_path.unlink()
@@ -283,7 +283,7 @@ def remove_instance(instance: InstanceData, types: list[str] = ["symlink", "stat
         else:
             if symlink_path.exists():
                 logger.warning(
-                    f"Expected symlink path exists but is not a symlink: {symlink_path}"
+                    f"Expected symlink path exists but is not a symlink: {symlink_path}. Skipping symlink removal to avoid deleting non-symlink file/directory."
                 )
             else:
                 logger.debug(
@@ -468,7 +468,7 @@ def symlink_instance():
     """
     source = current_instance.instance_path
     target = Path("~/.config/mo2-lint/instances").expanduser() / str(
-        current_instance.index
+        current_instance.nexus_slug
     )
 
     if not source.exists():
@@ -481,14 +481,17 @@ def symlink_instance():
         symlink_correct = target.resolve() == source.resolve()
         if symlink_correct:
             logger.debug(
-                f"Symlink for instance index {current_instance.index} already exists and is correct. No action needed."
+                f"Symlink for instance '{current_instance.nexus_slug}' already exists and is correct. No action needed."
             )
             return
         elif not symlink_correct:
             logger.warning(
-                f"Symlink for instance index {current_instance.index} exists but points to a different location. Removing incorrect symlink."
+                f"Symlink for instance '{current_instance.nexus_slug}' exists but points to a different location."
             )
-            target.unlink()
+            if lang.prompt_symlink_conflict():
+                target.unlink()
+            else:
+                return
     elif target.exists() and not target.is_symlink():
         logger.warning(
             f"Expected symlink path exists but is not a symlink: {target}. Aborting symlink creation to avoid overwriting."

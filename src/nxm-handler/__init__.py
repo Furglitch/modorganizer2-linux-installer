@@ -1,50 +1,20 @@
 #!/usr/bin/env python3
 
-import click
-from pathlib import Path
 from loguru import logger
+from pathlib import Path
+from typing import Optional
+from logger import add_loggers, remove_loggers
+import protontricks_util as protontricks
 import state_file as state
-import subprocess
-import psutil
+import click
 import os
+import psutil
+import subprocess
 
-stdout = None
-logout = None
-
-launcher: str = None
-steam_id: int = None
-gog_id: int = None
-epic_id: str = None
+version = "3.0.0"
 
 
-def set_logger(log_level):
-    import sys
-
-    global stdout, logout
-
-    logger.remove(stdout)
-    logger.remove(logout)
-
-    stdout = logger.add(
-        sys.stdout,
-        colorize=True,
-        format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | <bold>NXM Handler</bold> | {message}",
-        level=log_level,
-    )
-
-    filename = Path(
-        "~/.cache/mo2-lint/logs/nxm-handler.{time:YYYY-MM-DD_HH-mm-ss}.log"
-    ).expanduser()
-    logout = logger.add(
-        filename,
-        level="TRACE",
-        rotation="10 MB",
-        retention="7 days",
-        compression="zip",
-    )
-
-
-def get_instance_dir(url):
+def get_instance_dir(url: str) -> Optional[Path]:
     logger.debug(f"Received URL: {url}")
     if not url.startswith("nxm://"):
         logger.warning("Invalid NXM URL format.")
@@ -67,36 +37,32 @@ def get_instance_dir(url):
     return instance_dir
 
 
-def get_env(instance_dir):
+def get_env(instance_dir: Path) -> dict:
     state.load_state()
     instance = state.check_existing_instances(str(instance_dir))
     info = state.game_data(instance)
 
-    for key, value in info.items():
-        if str(key) == "launcher":
-            logger.debug(f"Setting launcher to {value}")
-            launcher = str(value)
-        if str(key) == "steam_id" and value is not None and value != "":
-            logger.debug(f"Setting steam_id to {value}")
-            steam_id = int(value)
-        if str(key) == "gog_id" and value is not None and value != "":
-            logger.debug(f"Setting gog_id to {value}")
-            gog_id = int(value)
-        if str(key) == "epic_id":
-            logger.debug(f"Setting epic_id to {value}")
-            epic_id = str(value)
+    # Initialize with defaults
+    launcher = info.get("launcher", "")
+    steam_id = int(info.get("steam_id")) if info.get("steam_id") else None
+    gog_id = int(info.get("gog_id")) if info.get("gog_id") else None
+    epic_id = info.get("epic_id", "")
 
     logger.debug(
-        f"Set launcher to {launcher}, steam_id to {steam_id}, gog_id to {gog_id}, epic_id to {epic_id}"
+        f"Loaded instance data - launcher: {launcher}, steam_id: {steam_id}, gog_id: {gog_id}, epic_id: {epic_id}"
     )
 
     release, runner, app, wine, prefix = None, None, None, None, None
 
-    if launcher == "heroic":
+    if launcher in ["heroic", "gog", "epic"]:
         logger.info("Using heroic launcher handler.")
         from find_heroic_install import get_heroic_data
 
-        release, runner, app, wine, prefix = get_heroic_data(gog_id, epic_id)
+        use_gog_id = gog_id if gog_id and (not epic_id or gog_id) else None
+        use_epic_id = epic_id if epic_id and not use_gog_id else None
+
+        # get_heroic_data returns: (release, launcher, app_id, wine_path, wine_prefix)
+        release, runner, app, wine, prefix = get_heroic_data(use_gog_id, use_epic_id)
 
         if wine is None:
             logger.warning(
@@ -127,7 +93,7 @@ def get_env(instance_dir):
     }
 
 
-def check_instance(instance_dir):
+def check_instance(instance_dir: Path) -> bool:
     exe = ("Z:" + str(instance_dir) + "/ModOrganizer.exe").replace("/", "\\")
     logger.debug(f"Resolved instance directory: {exe}")
 
@@ -154,13 +120,19 @@ def check_instance(instance_dir):
     return found
 
 
-def launch_instance(launcher, steam_id, url, runner=None, app=None):
+def launch_instance(
+    launcher: str,
+    steam_id: Optional[int],
+    url: str,
+    runner: Optional[str] = None,
+    app: Optional[str] = None,
+) -> None:
     logger.info(f"Starting Mod Organizer 2 to download {url}")
     if launcher == "steam":
         cmd = ["steam", "-applaunch", f"{steam_id}", f"{url}"]
         logger.trace(f"Launching via Steam: {cmd}")
         subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    elif launcher == "heroic":
+    elif launcher in ["heroic", "gog", "epic"]:
         cmd = (
             "heroic://launch"
             + f"?appName={app}"
@@ -172,7 +144,7 @@ def launch_instance(launcher, steam_id, url, runner=None, app=None):
         subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
 
-def send_url(instance_dir, url, env_info):
+def send_url(instance_dir: Path, url: str, env_info: dict) -> None:
     logger.info(f"Sending download {url} to running Mod Organizer 2 instance.")
     handler = instance_dir / "nxmhandler.exe"
 
@@ -187,10 +159,9 @@ def send_url(instance_dir, url, env_info):
     prefix = env_info.get("prefix")
 
     if launcher == "steam":
-        from protontricks.cli.main import main as pt
-
-        pt("--verbose", "--appid", f"{steam_id}", f"{handler}", f"{url}")
-    elif launcher == "heroic":
+        cmd = f"wine '{handler}' '{url}'"
+        protontricks.run(["-c", cmd, str(steam_id)])
+    elif launcher in ["heroic", "gog", "epic"]:
         if release == "stable":
             cmd = [f"{wine}", f"{handler}", f"{url}"]
             env.setdefault("WINEPREFIX", f"{prefix}")
@@ -216,7 +187,7 @@ def send_url(instance_dir, url, env_info):
 
 
 @click.command()
-@click.version_option(version="2.0.0", prog_name="mo2-lint-nxm-handler")
+@click.version_option(version=version, prog_name="mo2-lint-nxm-handler")
 @click.help_option("-h", "--help")
 @click.argument(
     "url",
@@ -231,9 +202,10 @@ def send_url(instance_dir, url, env_info):
     help="Set the logging level.",
     show_default=True,
 )
-def main(url, log_level):
+def main(url: str, log_level: str) -> None:
     """A handler for Nexus Mods URLs to interact with Mod Organizer 2 instances that are managed by mo2-lint. (Enables the 'Mod Manager Download' button on mod pages.)"""
-    set_logger(log_level.upper())
+    remove_loggers()
+    add_loggers(log_level.upper())
 
     instance_dir = get_instance_dir(url)
     if not instance_dir:
