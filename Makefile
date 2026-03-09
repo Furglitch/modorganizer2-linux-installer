@@ -3,7 +3,7 @@
 run:
 	uv run src/mo2-lint/__init__.py
 
-_build: clean nxm_handler mo2_lint
+_build: clean redirector nxm_handler mo2_lint
 
 nxm_handler:
 	uv run pyinstaller --onefile --name nxm_handler \
@@ -16,7 +16,7 @@ nxm_handler:
 		--additional-hooks-dir "build/hooks" \
 		src/nxm-handler/__init__.py
 
-mo2_lint: redirector
+mo2_lint:
 	uv run pyinstaller --onefile --name mo2_lint \
 		--paths src \
 		--hidden-import InquirerPy \
@@ -35,10 +35,12 @@ mo2_lint: redirector
 		src/mo2-lint/__init__.py
 
 redirector:
-	(cd src/steam-redirector && \
-	x86_64-w64-mingw32-gcc -v -municode -static -static-libgcc -Bstatic -lpthread -mwindows -o redirector.exe main.c win32_utils.c)
-	mkdir -p dist
-	cp src/steam-redirector/redirector.exe dist/redirector.exe
+	uv run pyinstaller --onefile --name redirector.exe \
+		--paths src \
+		--hidden-import loguru \
+		--add-data "src/steam-redirector:src" \
+		--runtime-hook "build/runtime_hooks.py" \
+		src/steam-redirector/__init__.py
 	chmod +x dist/redirector.exe || true
 
 clean:
