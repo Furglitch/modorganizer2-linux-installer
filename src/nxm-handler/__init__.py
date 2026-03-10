@@ -3,7 +3,7 @@
 from loguru import logger
 from pathlib import Path
 from typing import Optional
-from logger import add_loggers, remove_loggers
+from shared.logger import add_loggers, remove_loggers
 import protontricks_util as protontricks
 import state_file as state
 import click
@@ -205,7 +205,9 @@ def send_url(instance_dir: Path, url: str, env_info: dict) -> None:
 def main(url: str, log_level: str) -> None:
     """A handler for Nexus Mods URLs to interact with Mod Organizer 2 instances that are managed by mo2-lint. (Enables the 'Mod Manager Download' button on mod pages.)"""
     remove_loggers()
-    add_loggers(log_level.upper())
+    add_loggers(
+        log_level=log_level.upper(), script="nxm-handler", process="nxm-handler"
+    )
 
     instance_dir = get_instance_dir(url)
     if not instance_dir:

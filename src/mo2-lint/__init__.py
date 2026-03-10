@@ -5,7 +5,7 @@ from pathlib import Path
 from pydantic_core import from_json
 from typing import Optional
 from util import lang, state_file as state, variables as var
-from util.logger import add_loggers, remove_loggers
+from shared.logger import add_loggers, remove_loggers
 from command.install import install as _install
 from command.uninstall import uninstall as _uninstall
 from command.list import list as _list
@@ -124,7 +124,7 @@ def pre_init():
     and setting up logging. This is used to prepare help texts and command validation.
     """
     remove_loggers()
-    add_loggers("INFO")
+    add_loggers(log_level="INFO", script="mo2-lint", process="installer")
     check_update()
     # pull_config()  # Temporarily disabled for development
     var.load_games_info()
@@ -165,7 +165,7 @@ def start(
         Depending on the provided parameters, returns the game and/or directory
     """
     remove_loggers()
-    add_loggers(log_level)
+    add_loggers(log_level=log_level, script="mo2-lint", process="installer")
     logger.debug(f"Starting MO2-LINT with log level: {log_level}")
     if directory:
         directory = str(directory).rstrip("/")

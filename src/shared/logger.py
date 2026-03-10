@@ -35,7 +35,10 @@ def persist_timestamp() -> str:
 
 
 def add_loggers(
-    log_level: Optional[str] = None, process: str = "nxm-handler", console_sink=None
+    log_level: Optional[str] = "INFO",
+    script: str = "mo2-lint",
+    process: str = "process",
+    console_sink=None,
 ) -> None:
     """
     Adds loggers to loguru, for file and console output.
@@ -44,8 +47,10 @@ def add_loggers(
     ----------
     log_level : str, optional
         Log level for console output. If None, defaults to "INFO".
+    script : str
+        The name of the script calling this function, used in log filenames. Defaults to "mo2-lint".
     process : str, optional
-        The name of the process to include in log messages.
+        The name of the process to include in log messages. Defaults to "process".
     console_sink : optional
         The sink for console output. If None, uses sys.stdout.
     """
@@ -69,7 +74,7 @@ def add_loggers(
 
     logger.add(
         sink=Path(
-            f"~/.cache/mo2-lint/logs/handler.{persist_timestamp()}.log"
+            f"~/.cache/mo2-lint/logs/{script.lower()}.{persist_timestamp()}.log"
         ).expanduser(),
         format=log_format_str,
         level="TRACE",

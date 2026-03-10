@@ -7,7 +7,7 @@ from loguru import logger
 from pathlib import Path
 from pydantic_core import from_json
 from shutil import copy2
-from util.logger import persist_timestamp
+from shared.logger import persist_timestamp
 import json
 import subprocess
 

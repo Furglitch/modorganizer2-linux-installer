@@ -3,7 +3,7 @@
 from loguru import logger
 from pathlib import Path
 from typing import List, Optional
-from util.logger import remove_loggers, add_loggers
+from shared.logger import remove_loggers, add_loggers
 import os
 import re
 import shutil
@@ -66,7 +66,7 @@ def run(
     logger.trace(f"Using Wine prefix: {prefix}")
 
     remove_loggers()
-    add_loggers(process="winetricks")
+    add_loggers(script="mo2-lint", process="winetricks")
     output_lines = []
 
     if not cmd == [exec, "-q", "-f"]:
@@ -95,7 +95,7 @@ def run(
         logger.error(f"winetricks command failed with exit code: {exit_code}")
 
     remove_loggers()
-    add_loggers()
+    add_loggers(script="mo2-lint", process="installer")
     return output_lines
 
 
@@ -124,7 +124,7 @@ def apply(
 
 def log_translation(input: str = None):
     """
-    Translates protontricks log lines into more user-friendly messages and logs them.
+    Translates winetricks log lines into more user-friendly messages and logs them.
 
     Parameters
     ----------

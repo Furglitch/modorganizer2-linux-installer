@@ -5,7 +5,7 @@ from loguru import logger
 from pathlib import Path
 from shutil import copy2
 from util import variables as var
-from util.logger import persist_timestamp
+from shared.logger import persist_timestamp
 import subprocess
 import time
 

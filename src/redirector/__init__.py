@@ -2,7 +2,7 @@
 
 from pathlib import Path
 from loguru import logger
-from logger import add_loggers, remove_loggers
+from shared.logger import add_loggers, remove_loggers
 import os
 import sys
 import json
@@ -180,7 +180,7 @@ def main(argv: list[str]) -> int:
         Exit status code
     """
     try:
-        add_loggers()
+        add_loggers(script="redirector", process="redirector")
         logger.info("MO2 Redirector started")
         logger.debug(f"Arguments: {argv}")
     except Exception as e:

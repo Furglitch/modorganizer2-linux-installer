@@ -5,7 +5,7 @@ from loguru import logger
 from pathlib import Path
 from protontricks.cli.main import main as pt
 from typing import List
-from util.logger import remove_loggers, add_loggers
+from shared.logger import remove_loggers, add_loggers
 import os
 import re
 import sys
@@ -184,7 +184,9 @@ def redirect_output_to_logger():
     original_stdout_file = os.fdopen(original_stdout_fd, "w", buffering=1)
 
     remove_loggers()
-    add_loggers(process="protontricks", console_sink=original_stdout_file)
+    add_loggers(
+        script="mo2-lint", process="protontricks", console_sink=original_stdout_file
+    )
 
     def reader_thread():
         with os.fdopen(read_fd, "r", buffering=1) as reader:
@@ -215,4 +217,4 @@ def redirect_output_to_logger():
 
         remove_loggers()
         original_stdout_file.close()
-        add_loggers()
+        add_loggers(script="mo2-lint", process="installer")
