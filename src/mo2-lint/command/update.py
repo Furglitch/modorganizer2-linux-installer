@@ -4,8 +4,11 @@ from loguru import logger
 from pathlib import Path
 from step.external_resources import download_mod_organizer
 from util import state_file as state, variables as var
-from util.symlink import create_mo2_symlink as symlink
-from util.launch_opt import editor
+from util.launch_opt.editor import (
+    add_internal as add_launch_option,
+    remove_internal as remove_launch_option,
+)
+from util.redirector.install import install as install_redirector
 
 
 def update(directory: Path):
@@ -52,32 +55,16 @@ def update(directory: Path):
     logger.debug(f"Updating MO2 executable in directory: {directory}")
     download_mod_organizer()
 
-    # Update symlink and launch option
-    symlink(state.current_instance)
+    install_redirector()
 
-    # Update launch option if using Steam
-    if (
-        state.current_instance.launcher == "steam"
-        and state.current_instance.launcher_ids.steam
-    ):
-        appid = state.current_instance.launcher_ids.steam
-
-        # Remove old launch option if it exists
-        if state.current_instance.launch_option_index is not None:
-            editor.remove_internal(
-                appid=appid,
-                index=state.current_instance.launch_option_index,
-                no_backup=False,
-            )
-            logger.debug(
-                f"Removed old launch option with index {state.current_instance.launch_option_index}"
-            )
-
-        # Determine launch option attributes from game_info
-        # Add new launch option
-        launch_index = editor.add_internal(
-            appid=appid,
-            executable="ModOrganizer.exe",
+    if state.current_instance.launch_option_index is not None:
+        remove_launch_option(
+            appid=state.current_instance.launcher_ids.steam,
+            index=state.current_instance.launch_option_index,
+        )
+        launch_index = add_launch_option(
+            appid=state.current_instance.launcher_ids.steam,
+            executable="mo2-redirector.exe",
             arguments=var.game_info.launch_options.get("arguments", [])
             if var.game_info.launch_options
             else [],
@@ -94,5 +81,5 @@ def update(directory: Path):
         )
         state.current_instance.launch_option_index = launch_index
         logger.info(
-            f"Updated launch option with index {launch_index} for appid {appid}"
+            f"Updated launch option with index {launch_index} for appid {state.current_instance.launcher_ids.steam}"
         )

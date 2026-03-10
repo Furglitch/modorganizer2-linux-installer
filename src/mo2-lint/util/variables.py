@@ -335,7 +335,7 @@ class AppInfo:
     index : int
         Numeric index for the launch option.
     executable : str
-        Path to the desired executable, relative to the game's install directory. Default is "ModOrganizer.exe".
+        Path to the desired executable, relative to the game's install directory. Default is "mo2-redirector.exe".
     arguments : list[str], optional
         List of launch arguments to use with the executable.
     type : str, optional
@@ -349,7 +349,7 @@ class AppInfo:
     """
 
     index: int = -1
-    executable: str = "ModOrganizer.exe"
+    executable: str = "mo2-redirector.exe"
     arguments: Optional[List[str]] = None
     type: str = "default"
     oslist: List[str] = None
@@ -360,7 +360,7 @@ class AppInfo:
     def from_dict(cls, data: dict, index: int = None) -> "AppInfo":
         return cls(
             index=index,
-            executable=data.get("executable", "ModOrganizer.exe"),
+            executable=data.get("executable", "mo2-redirector.exe"),
             arguments=data.get("arguments") or None,
             type=data.get("type", "default"),
             oslist=data.get("oslist", []),

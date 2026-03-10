@@ -1,8 +1,8 @@
-.PHONY: run _build nxm_handler mo2_lint clean
+.PHONY: run _build redirector nxm_handler mo2_lint clean
 
 run: uv run src/mo2-lint/__init__.py
 
-_build: clean nxm_handler mo2_lint
+_build: clean redirector nxm_handler mo2_lint
 
 nxm_handler:
 	uv run pyinstaller --onefile --name nxm_handler \
@@ -33,12 +33,22 @@ mo2_lint:
 		--additional-hooks-dir "build/hooks" \
 		src/mo2-lint/__init__.py
 
+redirector:
+	uv run pyinstaller --onefile --name mo2-redirector.exe \
+		--paths src \
+		--hidden-import loguru \
+		--add-data "src/redirector:src" \
+		--runtime-hook "build/runtime_hooks.py" \
+		src/redirector/__init__.py
+	chmod +x dist/mo2-redirector.exe || true
+
 clean:
 	rm -rf .ruff_cache
 	rm -rf build/mo2_lint
 	rm -rf build/nxm_handler
 	rm -rf build/find_heroic_install
 	rm -rf dist
+	rm -rf dist/mo2-redirector.exe
 	rm -f mo2_lint.spec
 	rm -f nxm_handler.spec
 	rm -f find_heroic_install.spec

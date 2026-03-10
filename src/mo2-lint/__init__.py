@@ -126,7 +126,7 @@ def pre_init():
     remove_loggers()
     add_loggers("INFO")
     check_update()
-    pull_config()
+    # pull_config()  # Temporarily disabled for development
     var.load_games_info()
     var.load_resource_info()
     var.load_plugin_info()

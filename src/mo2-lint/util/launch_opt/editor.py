@@ -235,6 +235,8 @@ def restart_steam():
                 ["pgrep", "-x", "steamwebhelper"], capture_output=True
             ).returncode
             != 0
+            or subprocess.run(["pgrep", "-x", "steam"], capture_output=True).returncode
+            != 0
         ):
             logger.debug("Steam is not running, no restart needed")
             return

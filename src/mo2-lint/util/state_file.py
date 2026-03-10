@@ -7,7 +7,9 @@ from pydantic_core import to_json
 from send2trash import send2trash
 from shutil import rmtree
 from typing import Optional
-from util import lang, variables as var, state_file as state, symlink
+from util import lang, variables as var, state_file as state
+from util.launch_opt.editor import remove_internal as remove_launch_option
+from util.redirector.uninstall import uninstall as uninstall_redirector
 from uuid import UUID
 import json
 
@@ -331,28 +333,13 @@ def remove_instance(instance: InstanceData, types: list[str] = ["symlink", "stat
                 f"Instance directory for index {instance.index} does not exist, skipping removal."
             )
 
-        # Remove ModOrganizer.exe symlink from game folder if it exists
-        symlink.remove_mo2_symlink(instance)
+        var.load_game_info(instance.game)
+        uninstall_redirector(instance)
 
-        # Remove Steam launch option if it exists
-        if (
-            instance.launcher == "steam"
-            and instance.launcher_ids.steam
-            and instance.launch_option_index is not None
-        ):
-            from util.launch_opt import editor
-
-            try:
-                editor.remove_internal(
-                    appid=instance.launcher_ids.steam,
-                    index=instance.launch_option_index,
-                    no_backup=False,
-                )
-                logger.success(
-                    f"Removed Steam launch option with index {instance.launch_option_index}"
-                )
-            except Exception as e:
-                logger.warning(f"Failed to remove Steam launch option: {e}")
+        if instance.launch_option_index is not None:
+            remove_launch_option(
+                appid=instance.launcher_ids.steam, index=instance.launch_option_index
+            )
 
     if "state" in types:
         global state_file
