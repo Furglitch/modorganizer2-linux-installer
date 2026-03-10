@@ -5,9 +5,9 @@ from loguru import logger
 from pathlib import Path
 from pydantic_core import to_json
 from send2trash import send2trash
-from shutil import move, rmtree
+from shutil import rmtree
 from typing import Optional
-from util import lang, variables as var, state_file as state
+from util import lang, variables as var, state_file as state, symlink
 from uuid import UUID
 import json
 
@@ -83,6 +83,10 @@ class InstanceData:
         Installation path of the game associated with this MO2 instance.
     game_executable : str
         Executable filename for the game.
+    launch_option_index : int
+        The index of the associated launch option in the Steam appinfo.vdf file.
+    script_extender : bool
+        Whether this instance uses a script extender.
     plugins : list[str], optional
         List of plugins enabled for this MO2 instance.
 
@@ -101,6 +105,7 @@ class InstanceData:
     launcher_ids: var.LauncherIDs = None
     game_path: Path = None
     game_executable: str = None
+    launch_option_index: int = None
     script_extender: bool = False
     plugins: Optional[list[str]] = None
 
@@ -118,6 +123,7 @@ class InstanceData:
             launcher_ids=var.LauncherIDs.from_dict(data.get("launcher_ids")),
             game_path=Path(data.get("game_path")),
             game_executable=data.get("game_executable"),
+            launch_option_index=data.get("launch_option_index"),
             plugins=data.get("plugins"),
         )
 
@@ -133,6 +139,7 @@ class InstanceData:
             "launcher_ids": var.LauncherIDs.to_dict(data.launcher_ids),
             "game_path": str(data.game_path),
             "game_executable": data.game_executable,
+            "launch_option_index": data.launch_option_index,
             "plugins": data.plugins,
         }
 
@@ -155,6 +162,8 @@ class InstanceData:
             logger.warning("InstanceData: Game install path is not set.")
         if not self.game_executable:
             logger.warning("InstanceData: Game executable is not set.")
+        if not self.launch_option_index:
+            logger.warning("InstanceData: Launch option index is not set.")
         if self.plugins is None:
             self.plugins = []
         elif any(plugin not in var.plugin_info for plugin in self.plugins):
@@ -322,39 +331,28 @@ def remove_instance(instance: InstanceData, types: list[str] = ["symlink", "stat
                 f"Instance directory for index {instance.index} does not exist, skipping removal."
             )
 
-        # Restore game executable if it was backed up
-        exec = (
-            instance.game_executable.get(instance.launcher)
-            if isinstance(instance.game_executable, dict)
-            else instance.game_executable
-        )
-        game_exec = instance.game_path / exec
-        if game_exec.exists():
-            logger.trace(f"Game executable exists at expected path: {game_exec}")
-            data_dir = game_exec.parent / "modorganizer2"
-            if data_dir.exists() and data_dir.is_dir():
-                rmtree(data_dir)
+        # Remove ModOrganizer.exe symlink from game folder if it exists
+        symlink.remove_mo2_symlink(instance)
+
+        # Remove Steam launch option if it exists
+        if (
+            instance.launcher == "steam"
+            and instance.launcher_ids.steam
+            and instance.launch_option_index is not None
+        ):
+            from util.launch_opt import editor
+
+            try:
+                editor.remove_internal(
+                    appid=instance.launcher_ids.steam,
+                    index=instance.launch_option_index,
+                    no_backup=False,
+                )
                 logger.success(
-                    f"Removed Redirector data directory from game path: {data_dir}"
+                    f"Removed Steam launch option with index {instance.launch_option_index}"
                 )
-
-            if not var.game_info:
-                var.load_game_info(instance.nexus_slug)
-
-            backup_exec = (
-                Path(str(game_exec.with_suffix("")) + ".bak.exe")
-                if var.game_info.workarounds
-                and any(
-                    isinstance(w, dict) and w.get("single_executable") is True
-                    for w in var.game_info.workarounds
-                )
-                else Path(str(game_exec) + ".bak")
-            )
-            if backup_exec.exists():
-                move(backup_exec, game_exec)
-                logger.debug(f"Restored game executable from backup: {game_exec}")
-            else:
-                pass
+            except Exception as e:
+                logger.warning(f"Failed to remove Steam launch option: {e}")
 
     if "state" in types:
         global state_file
@@ -488,7 +486,7 @@ def symlink_instance():
             logger.warning(
                 f"Symlink for instance '{current_instance.nexus_slug}' exists but points to a different location."
             )
-            if lang.prompt_symlink_conflict():
+            if lang.prompt_instance_conflict():
                 target.unlink()
             else:
                 return

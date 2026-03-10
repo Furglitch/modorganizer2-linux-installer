@@ -9,8 +9,7 @@ parent: Installation and Usage
 
 Installation of MO2-LINT is straightforward. Follow the steps below to get started.
 
-Download the latest release from the [GitHub Releases page]. The file is called `mo2-lint` (without any file extension).
-<sub>Please note, only versions above 7.0.0 are supported.</sub>
+Download the latest release from the [GitHub Releases page]. The file is called `mo2-lint` (without any file extension). <sub>Please note, only versions above 7.0.0 are supported.</sub>
 
 Make the downloaded file executable. You can do this via the terminal with the command:
 ```bash
@@ -21,6 +20,7 @@ After making the file executable, you can run MO2-LINT directly from the termina
 ```bash
 path/to/downloaded/mo2-lint <command> [options]
 ```
+<sup>It's recommended to move the executable to a directory included in your system's PATH for easier access.</sup>
 
 ### Setting up Proton
 
@@ -47,18 +47,18 @@ You can set up Proton with the below steps. These steps are also given during th
 
 #### Heroic (GOG and Epic):
 
-> ### Option A: Universal Settings
+> #### Option A: Universal Settings
 > 1. In Heroic, navigate to 'Settings', then the 'Game Defaults' section.
 > 2. Under 'Wine Version', select 'Proton - Proton 10.0' from the dropdown menu.
 > *This will make all games launched through Heroic use Proton 10 by default*.
 >
-> ### Option B: Per-Game Settings
+> #### Option B: Per-Game Settings
 > If you prefer using a different Proton version by default, you can set Proton 10 for specific games.
 > 1. Right-click on the game in your Heroic library.
 > 2. Select 'Settings' and navigate to the 'Wine' tab.
 > 3. Under 'Wine Version', select 'Proton - Proton 10.0' from the dropdown menu.
 >
-> ### Notes for either option:
+> #### Notes for either option:
 > - If you don't see Proton versions in the dropdown, you may need to go to Heroic's settings, navigate to the 'Advanced' tab, and enable 'Allow using Valve Proton builds to run games'.
 > - In Heroic's settings, you can navigate to 'Game Defaults' section, the 'Other' tab, and enable 'Use Steam Runtime'. This is recommended and may help with compatibility.
 

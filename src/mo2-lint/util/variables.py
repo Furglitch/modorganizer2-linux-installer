@@ -326,6 +326,99 @@ class LauncherIDs:
 
 
 @dataclass
+class AppInfo:
+    """
+    Data class for storing appinfo.vdf data for a specific game.
+
+    Parameters
+    -----------
+    index : int
+        Numeric index for the launch option.
+    executable : str
+        Path to the desired executable, relative to the game's install directory. Default is "ModOrganizer.exe".
+    arguments : list[str], optional
+        List of launch arguments to use with the executable.
+    type : str, optional
+        Type of launch option (e.g., "default", "none", "vr", "server"). Default is "default".
+    oslist : list[str], optional
+        List of operating systems the launch option is valid for. e.g. 'windows', 'linux', 'macos'.
+    osarch : str, optional
+        OS architecture the launch option is valid for (e.g., "32", "64").
+    description : str, optional
+        Label for the launch option, shown in the Steam UI. Default is "Launch Mod Organizer".
+    """
+
+    index: int = -1
+    executable: str = "ModOrganizer.exe"
+    arguments: Optional[List[str]] = None
+    type: str = "default"
+    oslist: List[str] = None
+    osarch: Optional[str] = None
+    description: str = "Launch Mod Organizer"
+
+    @classmethod
+    def from_dict(cls, data: dict, index: int = None) -> "AppInfo":
+        return cls(
+            index=index,
+            executable=data.get("executable", "ModOrganizer.exe"),
+            arguments=data.get("arguments") or None,
+            type=data.get("type", "default"),
+            oslist=data.get("oslist", []),
+            osarch=data.get("osarch") or (data.get("config", {}).get("osarch") or None),
+            description=data.get("description", "Launch Mod Organizer"),
+        )
+
+    @classmethod
+    def to_dict(cls, data: "AppInfo") -> dict[str, any]:
+        return {
+            "index": data.index,
+            "executable": data.executable,
+            "arguments": data.arguments,
+            "type": data.type,
+            "description": data.description,
+            "config": {
+                "oslist": data.oslist,
+                "osarch": data.osarch,
+            }
+            if data.osarch
+            else {
+                "oslist": data.oslist,
+            },
+        }
+
+    def __post_init__(self):
+        if self.index is None or self.index < 0:
+            logger.critical(
+                "AppInfo: 'index' parameter is required but was not provided."
+            )
+            logger.critical(
+                "This should not happen. Please report this to the developer."
+            )
+        if not self.executable:
+            logger.critical(
+                "AppInfo: 'executable' parameter is required but was not provided."
+            )
+            logger.critical(
+                "This should not happen. Please report this to the developer."
+            )
+        if self.osarch and self.osarch not in ("32", "64"):
+            logger.critical(
+                "AppInfo: 'osarch' parameter must be either '32' or '64' if provided."
+            )
+            logger.critical(
+                "This should not happen. Please report this to the developer."
+            )
+        if self.type not in ("default", "none", "vr", "server"):
+            logger.critical(
+                "AppInfo: 'type' parameter must be one of 'default', 'none', 'vr', or 'server'."
+            )
+            logger.critical(
+                "This should not happen. Please report this to the developer."
+            )
+            raise SystemExit(1)
+
+
+@dataclass
 class GameInfo:
     """
     Stores data from the game_info.yml file.
@@ -346,6 +439,8 @@ class GameInfo:
         Game executable filename.
     tricks : Tuple[str, ...], optional
         List of tricks to apply for the game.
+    launch_options : dict[str, AppInfo], optional
+        Dictionary of launch options for the game, keyed by option name.
     script_extenders : ScriptExtenders, optional
         Contains information about script extenders for the game.
     workarounds: List[bool | dict], optional
@@ -364,7 +459,8 @@ class GameInfo:
     subdirectory: Optional[str | dict[str, str]] = None
     executable: Optional[str | dict[str, str]] = None
     tricks: Optional[Tuple[str, ...]] = field(default_factory=tuple)
-    script_extenders: Optional[List[ScriptExtender]] = None
+    launch_options: Optional[dict[str, AppInfo]] = field(default_factory=dict)
+    script_extenders: Optional[List[ScriptExtender]] = field(default_factory=list)
     workarounds: Optional[dict] = field(default_factory=dict)
 
     @classmethod
@@ -381,6 +477,7 @@ class GameInfo:
             subdirectory=data.get("subdirectory") or None,
             executable=data.get("executable") or None,
             tricks=tuple(data.get("tricks") or ()),
+            launch_options=data.get("launch_options", {}),
             script_extenders=[
                 ScriptExtender.from_dict(se) for se in data.get("script_extenders")
             ]

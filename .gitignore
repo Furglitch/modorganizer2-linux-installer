@@ -4,8 +4,6 @@
 *.orig
 *.log
 
-src/steam-redirector/redirector.exe
-
 /*.tar.gz
 
 # Byte-compiled / optimized / DLL files

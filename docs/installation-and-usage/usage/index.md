@@ -40,7 +40,7 @@ mo2_lint install <game> <directory> [options]
 > - `--custom <path/to/file.yml>` - [ADVANCED USERS ONLY, NOT SUPPORTED] - This allows you to specify a custom gameinfo file to use for the installation. More information on the gameinfo file can be found in the [Custom Games](/custom-games) section of the documentation.
 
 ## `uninstall`
-The `uninstall` command removes an existing Mod Organizer 2 instance, uninstalling the instance and redirector, and removing it from the state file. Without options, it will list all instances and allow you to choose one (or all) to uninstall.
+The `uninstall` command removes an existing Mod Organizer 2 instance, uninstalling the instance and removing the launch option, and removing it from the state file. Without options, it will list all instances and allow you to choose one (or all) to uninstall.
 
 ```bash
 mo2_lint uninstall [options]
@@ -75,7 +75,7 @@ mo2_lint pin <directory> [options]
 > Where `<directory>` is the path of the MO2 instance you want to pin/unpin. You must provide the exact path to the instance you wish to adjust. Higher level directories will not work for this command.
 
 ## `update`
-The `update` command updates the Mod Organizer 2 install and Redirector of an existing instance, as well as the NXM handler to the latest version.<br>
+The `update` command updates the Mod Organizer 2 install and launch option of an existing instance, as well as the NXM handler to the latest version.<br>
 <sub>If the instance is pinned, the Mod Organizer 2 version will not be updated.</sub>
 
 ```bash

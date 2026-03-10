@@ -15,7 +15,6 @@ def apply_workarounds():
                 for i in w.items():
                     t = i[0]
                     w = i[1]
-                # if t == "single_executable": # Handled in util.redirector.install
                 if t == "directories":
                     logger.debug(f"Creating directories for workaround: {w}")
                     for d in w:

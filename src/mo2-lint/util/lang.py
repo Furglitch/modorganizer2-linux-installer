@@ -14,7 +14,7 @@ help_uninstall = """Uninstall an existing Mod Organizer 2 instance."""
 help_list = """List existing Mod Organizer 2 instances."""
 help_pin = """Pin the Mod Organizer 2 installation in the specified directory, preventing updates."""
 help_unpin = """Unpin the Mod Organizer 2 installation in the specified directory, allowing updates."""
-help_update = """Update the Mod Organizer 2 installation in the specified directory, as well as the redirector for the game."""
+help_update = """Update the Mod Organizer 2 installation in the specified directory, as well as the launch option for the game."""
 
 prompt_archive_done = """Your prefix has been archived and can be found at: {directory}
 

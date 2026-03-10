@@ -143,6 +143,9 @@ games:
     tricks:
       - "xaudio2_7=native"
       - "grabfullscreen=y"
+    launch_options:
+      osarch: "64"
+      type: "none"
     script_extenders:
       - version: "0.6.23"
         runtime:
