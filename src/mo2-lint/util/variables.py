@@ -339,22 +339,23 @@ class AppInfo:
     arguments : list[str], optional
         List of launch arguments to use with the executable.
     type : str, optional
-        Type of launch option (e.g., "default", "none", "vr", "server"). Default is "default".
+        Type of launch option (e.g., "default", "none", "vr", "server"). Default is "none".
     oslist : list[str], optional
         List of operating systems the launch option is valid for. e.g. 'windows', 'linux', 'macos'.
     osarch : str, optional
         OS architecture the launch option is valid for (e.g., "32", "64").
     description : str, optional
-        Label for the launch option, shown in the Steam UI. Default is "Launch Mod Organizer".
+        Label for the launch option, shown in the Steam UI.
     """
 
     index: int = -1
     executable: str = "mo2-redirector.exe"
     arguments: Optional[List[str]] = None
-    type: str = "default"
+    type: str = "none"
     oslist: List[str] = None
     osarch: Optional[str] = None
-    description: str = "Launch Mod Organizer"
+    description: Optional[str] = None
+    description_loc: Optional[dict[str, str]] = None
 
     @classmethod
     def from_dict(cls, data: dict, index: int = None) -> "AppInfo":
@@ -362,29 +363,36 @@ class AppInfo:
             index=index,
             executable=data.get("executable", "mo2-redirector.exe"),
             arguments=data.get("arguments") or None,
-            type=data.get("type", "default"),
+            type=data.get("type", "none"),
             oslist=data.get("oslist", []),
             osarch=data.get("osarch") or (data.get("config", {}).get("osarch") or None),
-            description=data.get("description", "Launch Mod Organizer"),
+            description=data.get("description") or None,
+            description_loc=data.get("description_loc") or None,
         )
 
     @classmethod
     def to_dict(cls, data: "AppInfo") -> dict[str, any]:
-        return {
+        result = {
             "index": data.index,
             "executable": data.executable,
             "arguments": data.arguments,
             "type": data.type,
-            "description": data.description,
-            "config": {
+        }
+        if data.description:
+            result["description"] = data.description
+        if data.description_loc:
+            result["description_loc"] = data.description_loc
+        if data.osarch:
+            result["config"] = {
                 "oslist": data.oslist,
                 "osarch": data.osarch,
             }
-            if data.osarch
-            else {
+        else:
+            result["config"] = {
                 "oslist": data.oslist,
-            },
-        }
+            }
+
+        return result
 
     def __post_init__(self):
         if self.index is None or self.index < 0:

@@ -10,7 +10,7 @@ games:
       gog: 1423049311
       epic: 77f2b98e2cef40c8a7437518bf420e47
     subdirectory: Cyberpunk 2077
-    executable: REDprelauncher.exe
+    executable: bin/x64/Cyberpunk2077.exe
     tricks:
       - "xaudio2_7=native"
       - "d3dcompiler_47"
@@ -23,7 +23,7 @@ games:
       steam: 47810
       gog: 1949616134
     subdirectory: Dragon Age Ultimate Edition
-    executable: DAOriginsLauncher.exe
+    executable: DAOriginsLauncher.exe # UPDATE
     tricks:
       - "xaudio2_7=native"
       - "d3dcompiler_43"
@@ -36,7 +36,7 @@ games:
       steam: 933480
       gog: 1708684988
     subdirectory: Enderal
-    executable: Enderal Launcher.exe
+    executable: Enderal Launcher.exe # UPDATE
     tricks:
       - "d3dcompiler_43"
       - "d3dx9"
@@ -56,7 +56,7 @@ games:
     launcher_ids:
       steam: 976620
     subdirectory: Enderal Special Edition
-    executable: Enderal Launcher.exe
+    executable: Enderal Launcher.exe # UPDATE
     tricks:
       - "xaudio2_7=native"
       - "xact"
@@ -69,7 +69,7 @@ games:
     launcher_ids:
       steam: 22300
     subdirectory: Fallout 3
-    executable: Fallout3Launcher.exe
+    executable: Fallout3.exe
     tricks:
       - "d3dcompiler_43"
       - "d3dx9"
@@ -139,13 +139,12 @@ games:
       gog: 1998527297
       epic: 61d52ce4d09d41e48800c22784d13ae8
     subdirectory: Fallout 4
-    executable: Fallout4Launcher.exe
+    executable: Fallout4.exe
     tricks:
       - "xaudio2_7=native"
       - "grabfullscreen=y"
     launch_options:
       osarch: "64"
-      type: "none"
     script_extenders:
       - version: "0.6.23"
         runtime:
@@ -272,7 +271,7 @@ games:
       gog: 1454587428
       epic: 5daeb974a22a435988892319b3a4f476
     subdirectory: Fallout New Vegas
-    executable: FalloutNVLauncher.exe
+    executable: FalloutNV.exe
     tricks:
       - "d3dcompiler_43"
       - "d3dx9"
@@ -312,7 +311,7 @@ games:
       gog: 1435828767
       # epic: ??? It's available on Epic, but I can't find the ID anywhere
     subdirectory: Morrowind
-    executable: Morrowind Launcher.exe
+    executable: Morrowind Launcher.exe # UPDATE
     tricks:
       - "d3dcompiler_43"
       - "d3dx9"
@@ -332,8 +331,8 @@ games:
     subdirectory:
       steam: Oblivion
       gog: Oblivion
-      epic: Oblivion/Oblivion GOTY English # ! MO2 installs proper, but game won't launch
-    executable: OblivionLauncher.exe
+      epic: Oblivion
+    executable: Oblivion GOTY English/Oblivion.exe
     tricks:
       - "d3dcompiler_43"
       - "d3dx9"
@@ -357,21 +356,25 @@ games:
 
   oblivion_fr:
     parent: oblivion
+    executable: Oblivion GOTY French/Oblivion.exe
     subdirectory:
       epic: Oblivion/Oblivion GOTY French # ! Untested, may have same issue as English
 
   oblivion_de:
     parent: oblivion
+    executable: Oblivion GOTY German/Oblivion.exe
     subdirectory:
       epic: Oblivion/Oblivion GOTY German # ! Untested, may have same issue as English
 
   oblivion_it:
     parent: oblivion
+    executable: Oblivion GOTY Italian/Oblivion.exe
     subdirectory:
       epic: Oblivion/Oblivion GOTY Italian # ! Untested, may have same issue as English
 
   oblivion_es:
     parent: oblivion
+    executable: Oblivion GOTY Spanish/Oblivion.exe
     subdirectory:
       epic: Oblivion/Oblivion GOTY Spanish # ! Untested, may have same issue as English
 
@@ -381,7 +384,7 @@ games:
     launcher_ids:
       steam: 72850
     subdirectory: Skyrim
-    executable: SkyrimLauncher.exe
+    executable: TESV.exe
     tricks:
       - "d3dcompiler_43"
       - "d3dx9"
@@ -416,7 +419,7 @@ games:
       gog: 1711230643
       epic: ac82db5035584c7f8a2c548d98c86b2c
     subdirectory: Skyrim Special Edition
-    executable: SkyrimSELauncher.exe
+    executable: SkyrimSE.exe
     tricks:
       - "xaudio2_7=native"
       - "xact"

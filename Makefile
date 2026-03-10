@@ -37,7 +37,10 @@ redirector:
 	uv run pyinstaller --onefile --name mo2-redirector.exe \
 		--paths src \
 		--hidden-import loguru \
+		--hidden-import yaml \
+		--hidden-import configparser \
 		--add-data "src/redirector:src" \
+		--add-data "configs:cfg" \
 		--runtime-hook "build/runtime_hooks.py" \
 		src/redirector/__init__.py
 	chmod +x dist/mo2-redirector.exe || true

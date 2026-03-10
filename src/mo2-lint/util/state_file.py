@@ -8,7 +8,7 @@ from send2trash import send2trash
 from shutil import rmtree
 from typing import Optional
 from util import lang, variables as var, state_file as state
-from util.launch_opt.editor import remove_internal as remove_launch_option
+from util.launch_opt.editor import remove_launch_option
 from util.redirector.uninstall import uninstall as uninstall_redirector
 from uuid import UUID
 import json
@@ -336,10 +336,23 @@ def remove_instance(instance: InstanceData, types: list[str] = ["symlink", "stat
         var.load_game_info(instance.game)
         uninstall_redirector(instance)
 
-        if instance.launch_option_index is not None:
-            remove_launch_option(
-                appid=instance.launcher_ids.steam, index=instance.launch_option_index
-            )
+        launcher = instance.launcher
+        game_id = getattr(instance.launcher_ids, launcher, None)
+
+        if launcher and game_id:
+            if launcher == "steam" and instance.launch_option_index is not None:
+                remove_launch_option(
+                    launcher=launcher,
+                    game_id=game_id,
+                    index=instance.launch_option_index,
+                )
+            elif launcher == "epic":
+                remove_launch_option(
+                    launcher=launcher,
+                    game_id=game_id,
+                    label="Launch Mod Organizer",
+                )
+            logger.info(f"Removed launch option for {launcher} game ID {game_id}")
 
     if "state" in types:
         global state_file

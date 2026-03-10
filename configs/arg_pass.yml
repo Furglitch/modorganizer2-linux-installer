@@ -1,0 +1,15 @@
+# Arguments from launchers that we want to remove when launching MO2, but pass to the MO2 ini
+
+heroic-epic: # Sourced from legendary/core.py in Heroic-Games-Launcher/legendary
+  - "-AUTH_LOGIN="
+  - "-AUTH_PASSWORD="
+  - "-AUTH_TYPE="
+  - "-epicapp="
+  - "-epicenv="
+  - "-epicovt="
+  - "-EpicPortal"
+  - "-epicusername="
+  - "-epicuserid="
+  - "-epiclocale="
+  - "-epicsandboxid="
+  - "-epicdeploymentid="

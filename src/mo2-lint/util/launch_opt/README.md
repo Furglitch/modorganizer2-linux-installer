@@ -1,24 +1,79 @@
 # launch-opt
 
-Contains the functions for parsing and editing the launch options of a game from appinfo.vdf.
+Contains functions for parsing and editing launch options across different game launchers.
 
 This is used to add the MO2 instance link to the launch options of the desired game.
 
+## Structure
+
+- **editor.py** - High-level wrapper/dispatcher providing a unified interface
+- **steam.py** - Steam-specific implementation (appinfo.vdf parsing)
+- **epic.py** - Epic Games (Heroic) implementation (JSON-based)
+- **appinfo.py** - VDF parser library for Steam
+
 ## Usage
 
-The `editor.py` file can be used as a standalone script to read and edit the appinfo.vdf file.
+### Programmatic API
 
-```bash
-PYTHONPATH=src/mo2-lint python3 src/mo2-lint/util/launch_opt/editor.py read [AppID]
+Use the unified interface from `editor.py`:
+
+```python
+from util.launch_opt.editor import add_launch_option, remove_launch_option, read_launch_option
+
+# Add a launch option
+add_launch_option(
+    launcher="steam",  # or "epic"
+    game_id=1091500,   # appid for Steam, epic_id string for Epic
+    executable="mo2-redirector.exe",
+    label="Launch Mod Organizer"
+)
+
+# Remove a launch option
+remove_launch_option(
+    launcher="steam",
+    game_id=1091500,
+    index=5  # For Steam (required)
+)
+
+remove_launch_option(
+    launcher="epic",
+    game_id="77f2b98e2cef40c8a7437518bf420e47",
+    label="Launch Mod Organizer"  # For Epic (matches by name)
+)
 ```
 
+### Command Line
+
+The `editor.py` file can be used as a standalone script for both Steam and Epic:
+
+**Reading launch options:**
 ```bash
-PYTHONPATH=src/mo2-lint python3 src/mo2-lint/util/launch_opt/editor.py add [AppID] [/path/to/executable] [OPTIONS]
+# Steam
+PYTHONPATH=src/mo2-lint python3 -m util.launch_opt.editor read -l steam <AppID>
+
+# Epic
+PYTHONPATH=src/mo2-lint python3 -m util.launch_opt.editor read -l epic <EpicGameID>
 ```
 
+**Adding a launch option:**
 ```bash
-PYTHONPATH=src/mo2-lint python3 src/mo2-lint/util/launch_opt/editor.py remove [AppID] [Option #]
+# Steam
+PYTHONPATH=src/mo2-lint python3 -m util.launch_opt.editor add -l steam <AppID> <executable> --label "My Option" [OPTIONS]
+
+# Epic
+PYTHONPATH=src/mo2-lint python3 -m util.launch_opt.editor add -l epic <EpicGameID> <executable> --label "My Option"
 ```
+
+**Removing a launch option:**
+```bash
+# Steam (requires index)
+PYTHONPATH=src/mo2-lint python3 -m util.launch_opt.editor remove -l steam <AppID> --index <Index>
+
+# Epic (requires label)
+PYTHONPATH=src/mo2-lint python3 -m util.launch_opt.editor remove -l epic <EpicGameID> --label "My Option"
+```
+
+For more options, use `--help` on any command.
 
 ## Attribution
 

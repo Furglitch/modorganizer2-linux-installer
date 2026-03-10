@@ -270,7 +270,7 @@ def prompt_instance_conflict() -> bool:
     Prompts the user to confirm proceeding when an instance conflict is detected.
     """
 
-    message = f"""An existing instance link was found for the game {var.game}.
+    message = f"""An existing instance link was found for the game {state.current_instance.game}.
 
     This is primarily used for Nexus' 'Mod Manager Download' button. Overwriting this link will cause the 'Mod Manager Download' button to point to the new instance instead of the old one.
 

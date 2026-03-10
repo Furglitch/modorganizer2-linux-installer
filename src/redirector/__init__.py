@@ -6,44 +6,145 @@ from logger import add_loggers, remove_loggers
 import os
 import sys
 import json
+import yaml
 
-state_file_path: Path = Path("~/.config/mo2-lint/state.json").expanduser()
+STATE_FILE = Path("~/.config/mo2-lint/state.json").expanduser()
 
 
-def can_execute(exe: Path) -> bool:
+def get_internal_file(relative_path: str) -> Path:
     """
-    Checks if the given path is a file and is executable.
+    Gets the path to an internal file. Handles both dev and built environments.
 
     Parameters:
     -----------
-    exe : Path
-        Path to the executable file
+    relative_path : str
+        Relative path to the file from the project root
 
     Returns:
     --------
-    bool
-        True if exe exists and is executable
+    Path
+        Absolute path to the internal file
     """
-    if not exe.is_file():
-        logger.error(f"File not found: {exe}")
-        return False
-
-    return (
-        os.access(exe, os.R_OK)
-        if str(exe).lower().endswith(".exe")
-        else os.access(exe, os.X_OK)
-    )
+    if getattr(sys, "frozen", False):
+        return Path(sys._MEIPASS) / "cfg" / relative_path
+    return Path(__file__).parent.parent.parent / "configs" / relative_path
 
 
-def execute(exe: Path, args: list[str]) -> int:
+def load_launcher_prefixes() -> list[str]:
     """
-    Executes the given executable with the provided arguments.
-    If the executable is a Windows .exe file, it will attempt to run it using Wine.
+    Loads launcher-specific argument prefixes from the YAML configuration file.
+
+    Returns:
+    --------
+    list[str]
+        Flattened list of all launcher argument prefixes to filter
+    """
+    try:
+        config_path = get_internal_file("arg_pass.yml")
+        with open(config_path, encoding="utf-8") as f:
+            data = yaml.safe_load(f) or {}
+
+        prefixes = []
+        for category_prefixes in data.values():
+            if isinstance(category_prefixes, list):
+                prefixes.extend(category_prefixes)
+
+        logger.debug(f"Loaded {len(prefixes)} launcher argument prefixes")
+        return prefixes
+    except Exception as e:
+        logger.warning(f"Failed to load launcher args config: {e}")
+        return []
+
+
+def get_instance_info(game_dir: Path) -> tuple[Path | None, str | None]:
+    """
+    Retrieves the ModOrganizer.exe path and game executable from the state file.
+
+    Parameters:
+    -----------
+    game_dir : Path
+        Path to the game installation directory
+
+    Returns:
+    --------
+    tuple[Path | None, str | None]
+        Tuple of (mo2_exe_path, game_executable_path), or (None, None) if an error occurred
+    """
+    if not STATE_FILE.is_file():
+        logger.error(f"State file not found: {STATE_FILE}")
+        return None, None
+
+    try:
+        with open(STATE_FILE, encoding="utf-8") as f:
+            state = json.load(f)
+    except Exception as e:
+        logger.error(f"Failed to read state file: {e}")
+        return None, None
+
+    game_dir_resolved = game_dir.resolve()
+
+    # Find matching instance
+    for instance in state.get("instances", []):
+        try:
+            game_path = Path(instance.get("game_path", "")).resolve()
+            if game_dir_resolved == game_path or game_path in game_dir_resolved.parents:
+                instance_path = Path(instance["instance_path"])
+                game_exe = instance.get("game_executable", "")
+
+                # Build full path to game executable
+                if game_exe:
+                    game_exe = str((game_path / game_exe).resolve())
+
+                return instance_path / "ModOrganizer.exe", game_exe
+        except Exception:
+            continue
+
+    logger.error(f"No instance found for: {game_dir}")
+    return None, None
+
+
+def split_arguments(
+    args: list[str], prefixes: list[str]
+) -> tuple[list[str], list[str]]:
+    """
+    Separates arguments into launcher-specific and non-launcher arguments.
+
+    Parameters:
+    -----------
+    args : list[str]
+        List of command-line arguments
+    prefixes : list[str]
+        List of launcher argument prefixes to extract
+
+    Returns:
+    --------
+    tuple[list[str], list[str]]
+        Tuple of (launcher_args, other_args)
+    """
+    if not prefixes:
+        return [], args
+
+    launcher_args = []
+    other_args = []
+
+    for arg in args:
+        if any(arg.startswith(prefix) for prefix in prefixes):
+            launcher_args.append(arg)
+            logger.debug(f"Extracted launcher arg: {arg}")
+        else:
+            other_args.append(arg)
+
+    return launcher_args, other_args
+
+
+def execute_mo2(exe: Path, args: list[str]) -> int:
+    """
+    Executes ModOrganizer.exe using Wine with the provided arguments.
 
     Parameters:
     -----------
     exe : Path
-        Path to the executable file
+        Path to the ModOrganizer.exe file
     args : list[str]
         List of arguments to pass to the executable
 
@@ -52,138 +153,85 @@ def execute(exe: Path, args: list[str]) -> int:
     int
         Exit status of the executed process
     """
-    exe_str = str(exe)
-
-    if exe_str.lower().endswith(".exe"):
-        wine = os.getenv("WINE", "wine64")
-        try:
-            os.execlp(wine, wine, exe_str, *(args if args else []))
-            return 0
-        except Exception as e:
-            logger.error(f"Failed to execute {exe_str} with {wine}: {e}")
-            return 1
-
+    wine = os.getenv("WINE", "wine64")
     try:
-        os.execl(exe_str, exe_str, *(args if args else []))
+        os.execlp(wine, wine, str(exe), *args)
         return 0
     except Exception as e:
-        logger.error(f"Failed to execute {exe_str}: {e}")
+        logger.error(f"Failed to execute {exe}: {e}")
         return 1
-
-
-def get_instance_path(game_dir: Path) -> Path:
-    """
-    Reads the instance path from the state.json file by matching the game directory.
-
-    Parameters:
-    -----------
-    game_dir : Path
-        The game directory where the redirector is being run from
-
-    Returns:
-    --------
-    Path
-        The instance path for ModOrganizer.exe, or None if an error occurred
-    """
-
-    if not state_file_path.is_file():
-        logger.error(f"State file not found: {state_file_path}")
-        return None
-
-    try:
-        with open(state_file_path, "r", encoding="utf-8") as f:
-            state_data = json.load(f)
-    except Exception as e:
-        logger.error(f"Failed to read state file {state_file_path}: {e}")
-        return None
-
-    instances = state_data.get("instances", [])
-    if not instances:
-        logger.error("No instances found in state file")
-        return None
-
-    # Normalize the game directory path for comparison
-    game_dir_resolved = game_dir.resolve()
-
-    # Find the instance that matches this game directory
-    matched_instance = None
-    for instance in instances:
-        game_path = Path(instance.get("game_path", ""))
-        if not game_path:
-            continue
-
-        # Check if game_dir is the same as or a child of game_path
-        try:
-            game_path_resolved = game_path.resolve()
-            if (
-                game_dir_resolved == game_path_resolved
-                or game_path_resolved in game_dir_resolved.parents
-            ):
-                matched_instance = instance
-                break
-        except Exception:
-            continue
-
-    if not matched_instance:
-        logger.error(f"No instance found for game directory: {game_dir}")
-        return None
-
-    instance_path = Path(matched_instance.get("instance_path", ""))
-    if not instance_path:
-        logger.error("Instance path is empty in state file")
-        return None
-
-    mo2_exe = instance_path / "ModOrganizer.exe"
-    return mo2_exe
 
 
 def main(argv: list[str]) -> int:
     """
-    Main function for the Steam Redirector.
+    Main function for the MO2 Redirector.
+
+    Captures launcher-specific arguments (like Epic auth tokens) and writes them to
+    ModOrganizer.ini so games launched from MO2 receive the necessary parameters.
 
     Parameters:
     -----------
     argv : list[str]
-        List of command-line arguments passed to the MO2 instance
+        List of command-line arguments passed to the redirector
 
     Returns:
     --------
     int
         Exit status code
     """
-    add_loggers()
-    exit_status = 1
-    arg = argv[1] if len(argv) > 1 else None
+    try:
+        add_loggers()
+        logger.info("MO2 Redirector started")
+        logger.debug(f"Arguments: {argv}")
+    except Exception as e:
+        print(f"ERROR: Failed to initialize logger: {e}", file=sys.stderr)
+        return 1
 
-    # Get the current working directory (game directory)
-    game_dir = Path.cwd()
-    logger.debug(f"Redirector running from: {game_dir}")
+    try:
+        game_dir = Path.cwd()
+        logger.debug(f"Running from: {game_dir}")
 
-    exe_path = get_instance_path(game_dir)
+        # Load launcher argument prefixes and split arguments
+        prefixes = load_launcher_prefixes()
+        launcher_args, other_args = split_arguments(argv[1:], prefixes)
 
-    if not exe_path or exe_path is None:
-        logger.error("Failed to determine executable path")
-        return exit_status
-    elif not exe_path.is_file():
-        logger.error(f"Executable not found: {exe_path}")
-        return exit_status
+        # Find MO2 instance for this game
+        mo2_exe, game_executable = get_instance_info(game_dir)
 
-    executable = can_execute(exe_path)
-    if not executable:
-        error = os.strerror(getattr(os, "errno", 0)) if hasattr(os, "errno") else -1
-        logger.error(f"File is not executable: {exe_path} (Error: {error})")
-        return exit_status
+        if not mo2_exe:
+            logger.error("Failed to find MO2 instance")
+            return 1
 
-    logger.info(f"Executing: {exe_path} with args: {arg}")
-    exit_status = execute(exe_path, [arg] if arg else [])
-    if exit_status == 0:
-        logger.info(f"Execution completed successfully: {exe_path}")
-        exit_status = 0
-    else:
-        logger.error(f"Execution failed with exit code {exit_status}: {exe_path}")
+        if not mo2_exe.is_file():
+            logger.error(f"MO2 executable not found: {mo2_exe}")
+            return 1
 
-    remove_loggers()
-    return exit_status
+        # Update ModOrganizer.ini with launcher arguments if present
+        if launcher_args and game_executable:
+            logger.info(f"Updating INI with {len(launcher_args)} launcher arguments")
+            try:
+                try:
+                    from .mo2_ini import update_mo2_ini
+                except ImportError:
+                    from mo2_ini import update_mo2_ini
+
+                update_mo2_ini(mo2_exe.parent, game_executable, launcher_args)
+            except Exception as e:
+                logger.warning(f"Failed to update INI: {e}")
+
+        # Execute MO2
+        logger.info(
+            f"Launching: {mo2_exe}"
+            + (f" with args: {other_args}" if other_args else "")
+        )
+        return execute_mo2(mo2_exe, other_args)
+
+    except Exception as e:
+        logger.error(f"Redirector error: {e}")
+        logger.exception("Traceback:")
+        return 1
+    finally:
+        remove_loggers()
 
 
 if __name__ == "__main__":

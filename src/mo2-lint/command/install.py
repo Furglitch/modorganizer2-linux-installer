@@ -5,13 +5,13 @@ from pathlib import Path
 from typing import Optional
 from util import variables as var, state_file as state
 from util.state_file import set_index, InstanceData
-from util.launch_opt.editor import add_internal as add_launch_option
 from util.redirector.install import install as install_redirector
 from util.nexus.install_handler import install as install_handler
 from step.workarounds import apply_workarounds
 from step.load_game_info import get_launcher, get_library
 from step.external_resources import download
 from step.configure_prefix import prompt as configure_prefix
+from step.launch_opt import add_launch_opt
 
 
 def install(
@@ -64,21 +64,6 @@ def install(
     download()
     install_handler()
     install_redirector()
-    add_launch_option(
-        appid=state.current_instance.launcher_ids.steam,
-        executable="mo2-redirector.exe",
-        arguments=var.game_info.launch_options.get("arguments", [])
-        if var.game_info.launch_options
-        else [],
-        label="Launch Mod Organizer",
-        opt_type=var.game_info.launch_options.get("type", "default")
-        if var.game_info.launch_options
-        else "default",
-        oslist=var.game_info.launch_options.get("oslist", None)
-        if var.game_info.launch_options
-        else None,
-        osarch=var.game_info.launch_options.get("osarch", None)
-        if var.game_info.launch_options
-        else None,
-    )
+    add_launch_opt()
+
     apply_workarounds()

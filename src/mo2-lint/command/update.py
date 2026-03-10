@@ -4,10 +4,7 @@ from loguru import logger
 from pathlib import Path
 from step.external_resources import download_mod_organizer
 from util import state_file as state, variables as var
-from util.launch_opt.editor import (
-    add_internal as add_launch_option,
-    remove_internal as remove_launch_option,
-)
+from step.launch_opt import add_launch_opt, remove_launch_opt
 from util.redirector.install import install as install_redirector
 
 
@@ -57,29 +54,5 @@ def update(directory: Path):
 
     install_redirector()
 
-    if state.current_instance.launch_option_index is not None:
-        remove_launch_option(
-            appid=state.current_instance.launcher_ids.steam,
-            index=state.current_instance.launch_option_index,
-        )
-        launch_index = add_launch_option(
-            appid=state.current_instance.launcher_ids.steam,
-            executable="mo2-redirector.exe",
-            arguments=var.game_info.launch_options.get("arguments", [])
-            if var.game_info.launch_options
-            else [],
-            label="Launch Mod Organizer",
-            opt_type=var.game_info.launch_options.get("type", "default")
-            if var.game_info.launch_options
-            else "default",
-            oslist=var.game_info.launch_options.get("oslist", None)
-            if var.game_info.launch_options
-            else None,
-            osarch=var.game_info.launch_options.get("osarch", None)
-            if var.game_info.launch_options
-            else None,
-        )
-        state.current_instance.launch_option_index = launch_index
-        logger.info(
-            f"Updated launch option with index {launch_index} for appid {state.current_instance.launcher_ids.steam}"
-        )
+    remove_launch_opt()
+    add_launch_opt()
