@@ -126,7 +126,7 @@ def pre_init():
     remove_loggers()
     add_loggers(log_level="INFO", script="mo2-lint", process="installer")
     check_update()
-    # pull_config()  # Temporarily disabled for development
+    pull_config()  # Temporarily disable for development
     var.load_games_info()
     var.load_resource_info()
     var.load_plugin_info()
