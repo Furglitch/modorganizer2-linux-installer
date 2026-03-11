@@ -139,6 +139,7 @@ def launch_instance(
             + f"?appName={app}"
             + f"&launcher={runner}"
             + f"&arg={url}"
+            + "&arg=--override-exe mo2-redirector.exe"
         )
         cmd = ["xdg-open", cmd]
         logger.trace(f"Launching via Heroic: {cmd}")
