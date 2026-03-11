@@ -49,28 +49,28 @@ The `editor.py` file can be used as a standalone script for both Steam and Epic:
 **Reading launch options:**
 ```bash
 # Steam
-PYTHONPATH=src/mo2-lint python3 -m util.launch_opt.editor read -l steam <AppID>
+PYTHONPATH=src:src/mo2-lint python3 -m util.launch_opt.editor read -l steam <AppID>
 
 # Epic
-PYTHONPATH=src/mo2-lint python3 -m util.launch_opt.editor read -l epic <EpicGameID>
+PYTHONPATH=src:src/mo2-lint python3 -m util.launch_opt.editor read -l epic <EpicGameID>
 ```
 
 **Adding a launch option:**
 ```bash
 # Steam
-PYTHONPATH=src/mo2-lint python3 -m util.launch_opt.editor add -l steam <AppID> <executable> --label "My Option" [OPTIONS]
+PYTHONPATH=src:src/mo2-lint python3 -m util.launch_opt.editor add -l steam <AppID> <executable> --label "My Option" [OPTIONS]
 
 # Epic
-PYTHONPATH=src/mo2-lint python3 -m util.launch_opt.editor add -l epic <EpicGameID> <executable> --label "My Option"
+PYTHONPATH=src:src/mo2-lint python3 -m util.launch_opt.editor add -l epic <EpicGameID> <executable> --label "My Option"
 ```
 
 **Removing a launch option:**
 ```bash
 # Steam (requires index)
-PYTHONPATH=src/mo2-lint python3 -m util.launch_opt.editor remove -l steam <AppID> --index <Index>
+PYTHONPATH=src:src/mo2-lint python3 -m util.launch_opt.editor remove -l steam <AppID> --index <Index>
 
 # Epic (requires label)
-PYTHONPATH=src/mo2-lint python3 -m util.launch_opt.editor remove -l epic <EpicGameID> --label "My Option"
+PYTHONPATH=src:src/mo2-lint python3 -m util.launch_opt.editor remove -l epic <EpicGameID> --label "My Option"
 ```
 
 For more options, use `--help` on any command.
