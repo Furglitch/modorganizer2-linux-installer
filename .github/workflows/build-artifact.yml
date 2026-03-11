@@ -30,7 +30,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y gcc-mingw-w64 make tar
+          sudo apt-get install -y make tar wine wine64
 
       - name: Build Artifact
         run: |
