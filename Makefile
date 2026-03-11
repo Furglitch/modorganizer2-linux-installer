@@ -42,7 +42,7 @@ redirector:
 	WINEPREFIX="$$WINEPREFIX" wine "C:\\Program Files\\Python311\\python.exe" -m pip install -q --upgrade pip pyinstaller loguru pyyaml 2>&1 | grep -v '^[0-9a-f]*:' || true; \
 	WINEPREFIX="$$WINEPREFIX" wine "C:\\Program Files\\Python311\\python.exe" -m PyInstaller --onefile --noconsole --name mo2-redirector.exe \
 		--paths src --hidden-import loguru --hidden-import yaml --hidden-import configparser \
-		--add-data "configs;cfg" src/redirector/__init__.py 2>&1 | grep -E '(Building|WARNING|ERROR|completed)' || true
+		--add-data "configs;cfg" --icon .github/README/logo.ico src/redirector/__init__.py 2>&1 | grep -E '(Building|WARNING|ERROR|completed)' || true
 	@chmod +x dist/mo2-redirector.exe 2>/dev/null || true
 	@echo "Done. Verify: file dist/mo2-redirector.exe"
 
