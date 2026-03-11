@@ -39,6 +39,7 @@ def add_loggers(
     script: str = "mo2-lint",
     process: str = "process",
     console_sink=None,
+    log_path: Optional[Path] = None,
 ) -> None:
     """
     Adds loggers to loguru, for file and console output.
@@ -53,6 +54,8 @@ def add_loggers(
         The name of the process to include in log messages. Defaults to "process".
     console_sink : optional
         The sink for console output. If None, uses sys.stdout.
+    log_path : Path, optional
+        Custom path for log directory. If None, uses ~/.cache/mo2-lint/logs/
     """
 
     time_format = "{time:YYYY-MM-DD HH:mm:ss}"
@@ -72,10 +75,17 @@ def add_loggers(
         + "{message}"
     )
 
-    logger.add(
-        sink=Path(
+    # Use custom log path if provided, otherwise default
+    if log_path is None:
+        log_file = Path(
             f"~/.cache/mo2-lint/logs/{script.lower()}.{persist_timestamp()}.log"
-        ).expanduser(),
+        ).expanduser()
+    else:
+        log_file = log_path / f"{script.lower()}.{persist_timestamp()}.log"
+        log_file.parent.mkdir(parents=True, exist_ok=True)
+
+    logger.add(
+        sink=log_file,
         format=log_format_str,
         level="TRACE",
         rotation="10 MB",

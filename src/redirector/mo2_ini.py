@@ -8,21 +8,24 @@ import configparser
 
 def normalize_path(path: str | Path) -> str:
     """
-    Convert a POSIX path to Wine-style Z:\\ Windows path format.
+    Convert a path to Wine-style Z:\\ Windows path format for INI storage.
 
     Parameters:
     -----------
     path : str | Path
-        Path to convert
+        Path to convert (POSIX or Windows-style)
 
     Returns:
     --------
     str
-        Windows-style path with escaped backslashes for INI storage
+        Windows-style Z:\\ path with escaped backslashes for INI storage
     """
     s = str(path).replace("/", "\\")
-    if not s.startswith("Z:") and not s[1:2] == ":":
+
+    # If already has drive letter, keep it; otherwise add Z:\
+    if not (len(s) > 1 and s[1] == ":"):
         s = "Z:\\" + s.lstrip("\\")
+
     return s.replace("\\", "\\\\")  # Escape for INI
 
 
@@ -54,7 +57,6 @@ def update_mo2_ini(
 
     logger.debug(f"Updating {ini_path} with args: {args_string}")
 
-    # Read existing config or create new one
     config = configparser.RawConfigParser()
     config.optionxform = str  # Preserve case
 
@@ -64,7 +66,6 @@ def update_mo2_ini(
         except Exception as e:
             logger.warning(f"Failed to read existing INI: {e}")
 
-    # Ensure customExecutables section exists
     if "customExecutables" not in config:
         config.add_section("customExecutables")
         config.set("customExecutables", "size", "0")
@@ -98,7 +99,6 @@ def update_mo2_ini(
         section[f"{new_idx}\\steamAppID"] = ""
         section["size"] = str(new_idx)
 
-    # Write config
     try:
         with open(ini_path, "w", encoding="utf-8") as f:
             config.write(f, space_around_delimiters=False)

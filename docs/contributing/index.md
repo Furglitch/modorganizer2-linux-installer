@@ -27,20 +27,27 @@ These commit checks will run when you make a pull request, in case any are misse
 ## Setting Up Your Development Environment
 
 ### Prerequisites
-This project is developed using *Python 3.13*, so please ensure you have this version installed.
+
+Install the following dependencies if you don't have them already:
+- Python 3.13
+- [`uv`](https://docs.astral.sh/uv/getting-started/installation/#cargo)
+- `make`
 
 ### Installation
 To set up your development environment, follow these steps:
 
-1. Install Python 3.13, [`uv`](https://docs.astral.sh/uv/getting-started/installation/#cargo), and `make` if you don't have it already.
-2. Clone the repository:
+1. Clone the repository:
    ```bash
    git clone https://github.com/Furglitch/modorganizer2-linux-installer -b rewrite
    cd modorganizer2-linux-installer
    ```
-3. Install pre-commit hooks:
+2. Install pre-commit hooks:
    ```bash
    uv run pre-commit install
+   ```
+3. Install Python to Wine: <sub>This is required to build the redirector.</sub>
+   ```bash
+   make setup-wine-python
    ```
 
 ### Running the Application
@@ -49,8 +56,15 @@ To run the application, use the following command:
 uv run src/mo2-lint/__init__.py
 ```
 
-Note: The script may fail if the NXM handler is not built. Run a build first to ensure these components are available.
+Note: The script may fail if the Redirector and NXM handler is not built. Run a build first to ensure these components are available.
 To build the application, use:
 ```bash
 make _build
+```
+
+To build individual components, use:
+```bash
+make redirector
+make nxm_handler
+make mo2_lint
 ```
