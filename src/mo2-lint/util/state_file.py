@@ -464,10 +464,11 @@ def symlink_instance():
     """
     Creates a symbolic link for the current instance's Mod Organizer 2 directory.
     """
+    symlink_dir = Path("~/.config/mo2-lint/instances").expanduser()
+    symlink_dir.mkdir(parents=True, exist_ok=True)
+
     source = current_instance.instance_path
-    target = Path("~/.config/mo2-lint/instances").expanduser() / str(
-        current_instance.nexus_slug
-    )
+    target = symlink_dir / str(current_instance.nexus_slug)
 
     if not source.exists():
         logger.error(
