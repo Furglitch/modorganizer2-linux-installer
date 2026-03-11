@@ -29,11 +29,16 @@ jobs:
 
       - name: Install dependencies
         run: |
+          sudo dpkg --add-architecture i386
           sudo apt-get update
-          sudo apt-get install -y make tar wine wine64
+          sudo apt-get install -y make tar wget curl unzip wine wine64 wine32:i386
+          sudo apt-get install -y --no-install-recommends cabextract
+          wine --version
 
       - name: Build Artifact
         run: |
+          export WINEPREFIX=$HOME/.wine-py
+          export WINEARCH=win64
           make _build
 
       - name: Upload Artifact
