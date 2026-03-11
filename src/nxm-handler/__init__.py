@@ -47,6 +47,7 @@ def get_env(instance_dir: Path) -> dict:
     steam_id = int(info.get("steam_id")) if info.get("steam_id") else None
     gog_id = int(info.get("gog_id")) if info.get("gog_id") else None
     epic_id = info.get("epic_id", "")
+    launch_option_type = info.get("launch_option_type")
 
     logger.debug(
         f"Loaded instance data - launcher: {launcher}, steam_id: {steam_id}, gog_id: {gog_id}, epic_id: {epic_id}"
@@ -91,6 +92,7 @@ def get_env(instance_dir: Path) -> dict:
         "app": app,
         "wine": wine,
         "prefix": prefix,
+        "launch_option_type": launch_option_type,
     }
 
 
@@ -124,26 +126,65 @@ def check_instance(instance_dir: Path) -> bool:
 def launch_instance(
     launcher: str,
     steam_id: Optional[int],
-    url: str,
     runner: Optional[str] = None,
     app: Optional[str] = None,
+    launch_option_type: Optional[str] = None,
 ) -> None:
-    logger.info(f"Starting Mod Organizer 2 to download {url}")
+    logger.info("Starting Mod Organizer 2")
     if launcher == "steam":
-        cmd = ["steam", "-applaunch", f"{steam_id}", f"{url}"]
-        logger.trace(f"Launching via Steam: {cmd}")
+        if launch_option_type:
+            # Use steam:// protocol to launch with specific launch option type
+            steam_url = f"steam://launch/{steam_id}/{launch_option_type}"
+            cmd = ["xdg-open", steam_url]
+            logger.trace(
+                f"Launching via Steam with launch option type {launch_option_type}: {cmd}"
+            )
+        else:
+            # Fallback to default launch
+            cmd = ["steam", "-applaunch", f"{steam_id}"]
+            logger.trace(f"Launching via Steam (default): {cmd}")
         subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     elif launcher in ["heroic", "gog", "epic"]:
         cmd = (
             "heroic://launch"
             + f"?appName={app}"
             + f"&launcher={runner}"
-            + f"&arg={url}"
             + "&arg=--override-exe mo2-redirector.exe"
         )
         cmd = ["xdg-open", cmd]
         logger.trace(f"Launching via Heroic: {cmd}")
         subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+
+def wait_for_instance(instance_dir: Path, timeout: int = 60) -> bool:
+    """
+    Wait for MO2 to start up.
+
+    Parameters
+    ----------
+    instance_dir : Path
+        The instance directory path.
+    timeout : int
+        Maximum time to wait in seconds (default: 60).
+
+    Returns
+    -------
+    bool
+        True if MO2 started, False if timeout.
+    """
+    import time
+
+    logger.info(f"Waiting for Mod Organizer 2 to start (timeout: {timeout}s)...")
+    start_time = time.time()
+
+    while time.time() - start_time < timeout:
+        if check_instance(instance_dir):
+            logger.info("Mod Organizer 2 is now running.")
+            return True
+        time.sleep(2)  # Check every 2 seconds
+
+    logger.warning(f"Timed out waiting for Mod Organizer 2 to start after {timeout}s")
+    return False
 
 
 def send_url(instance_dir: Path, url: str, env_info: dict) -> None:
@@ -222,10 +263,19 @@ def main(url: str, log_level: str) -> None:
         launch_instance(
             env_info.get("launcher"),
             env_info.get("steam_id"),
-            url,
             env_info.get("runner"),
             env_info.get("app"),
+            env_info.get("launch_option_type"),
         )
+        if wait_for_instance(instance_dir, timeout=60):
+            import time
+
+            time.sleep(5)
+            send_url(instance_dir, url, env_info)
+        else:
+            logger.error(
+                "Failed to detect running Mod Organizer 2 instance after launch."
+            )
     else:
         send_url(instance_dir, url, env_info)
 

@@ -339,7 +339,7 @@ class AppInfo:
     arguments : list[str], optional
         List of launch arguments to use with the executable.
     type : str, optional
-        Type of launch option (e.g., "default", "none", "vr", "server"). Default is "none".
+        Type of launch option (e.g., "default", "none", "vr", "server", "OPTION1", "OPTION2", "OPTION3"). Default is "OPTION3".
     oslist : list[str], optional
         List of operating systems the launch option is valid for. e.g. 'windows', 'linux', 'macos'.
     osarch : str, optional
@@ -351,7 +351,7 @@ class AppInfo:
     index: int = -1
     executable: str = "mo2-redirector.exe"
     arguments: Optional[List[str]] = None
-    type: str = "none"
+    type: str = "OPTION3"
     oslist: List[str] = None
     osarch: Optional[str] = None
     description: Optional[str] = None
@@ -416,9 +416,17 @@ class AppInfo:
             logger.critical(
                 "This should not happen. Please report this to the developer."
             )
-        if self.type not in ("default", "none", "vr", "server"):
+        if self.type not in (
+            "default",
+            "none",
+            "vr",
+            "server",
+            "OPTION1",
+            "OPTION2",
+            "OPTION3",
+        ):
             logger.critical(
-                "AppInfo: 'type' parameter must be one of 'default', 'none', 'vr', or 'server'."
+                "AppInfo: 'type' parameter must be one of 'default', 'none', 'vr', 'server', 'OPTION1', 'OPTION2', or 'OPTION3'."
             )
             logger.critical(
                 "This should not happen. Please report this to the developer."

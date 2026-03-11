@@ -9,6 +9,9 @@ def add_launch_opt():
     launcher = state.current_instance.launcher
     game_id = getattr(state.current_instance.launcher_ids, launcher, None)
     if launcher and game_id:
+        label = "Mod Organizer"
+        if not launcher == "steam":
+            label = "Launch " + label
         launch_index = add_launch_option(
             launcher=launcher,
             game_id=game_id,
@@ -16,13 +19,13 @@ def add_launch_opt():
             arguments=var.game_info.launch_options.get("arguments", [])
             if var.game_info.launch_options
             else [],
-            label="Launch Mod Organizer",
+            label=("Launch " if launcher != "steam" else "") + "Mod Organizer",
             game_path=str(state.current_instance.game_path)
             if state.current_instance.game_path
             else None,
-            opt_type=var.game_info.launch_options.get("type", "none")
+            opt_type=var.game_info.launch_options.get("type", "OPTION3")
             if var.game_info.launch_options
-            else "none",
+            else "OPTION3",
             oslist=var.game_info.launch_options.get("oslist", None)
             if var.game_info.launch_options
             else None,
@@ -32,6 +35,12 @@ def add_launch_opt():
         )
         if launcher == "steam" and launch_index is not None:
             state.current_instance.launch_option_index = launch_index
+            # Store the launch option type for Steam URL protocol
+            state.current_instance.launch_option_type = (
+                var.game_info.launch_options.get("type", "OPTION3")
+                if var.game_info.launch_options
+                else "OPTION3"
+            )
         logger.info(f"Added launch option for {launcher} game ID {game_id}")
     else:
         logger.warning(

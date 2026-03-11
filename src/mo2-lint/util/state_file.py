@@ -87,6 +87,8 @@ class InstanceData:
         Executable filename for the game.
     launch_option_index : int
         The index of the associated launch option in the Steam appinfo.vdf file.
+    launch_option_type : str
+        The type of the launch option (e.g., 'OPTION3', 'none', 'default').
     script_extender : bool
         Whether this instance uses a script extender.
     plugins : list[str], optional
@@ -108,6 +110,7 @@ class InstanceData:
     game_path: Path = None
     game_executable: str = None
     launch_option_index: int = None
+    launch_option_type: str = None
     script_extender: bool = False
     plugins: Optional[list[str]] = None
 
@@ -126,6 +129,7 @@ class InstanceData:
             game_path=Path(data.get("game_path")),
             game_executable=data.get("game_executable"),
             launch_option_index=data.get("launch_option_index"),
+            launch_option_type=data.get("launch_option_type"),
             plugins=data.get("plugins"),
         )
 
@@ -142,6 +146,7 @@ class InstanceData:
             "game_path": str(data.game_path),
             "game_executable": data.game_executable,
             "launch_option_index": data.launch_option_index,
+            "launch_option_type": data.launch_option_type,
             "plugins": data.plugins,
         }
 
