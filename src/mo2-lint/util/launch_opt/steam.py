@@ -103,6 +103,11 @@ def read_internal(
     config = appinfo_section.get("config", {})
     launch_opts = config["launch"] if "launch" in config else {}
 
+    # print(f"{sections}")
+    # print(f"{appinfo_section}")
+    # print(f"{config}")
+    # print(f"{launch_opts}")
+
     opts = []
     for key, value in launch_opts.items():
         opts.append(var.AppInfo.from_dict(data=value, index=int(key)))
