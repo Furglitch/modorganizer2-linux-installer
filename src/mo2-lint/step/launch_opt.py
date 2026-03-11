@@ -17,6 +17,9 @@ def add_launch_opt():
             if var.game_info.launch_options
             else [],
             label="Launch Mod Organizer",
+            game_path=str(state.current_instance.game_path)
+            if state.current_instance.game_path
+            else None,
             opt_type=var.game_info.launch_options.get("type", "none")
             if var.game_info.launch_options
             else "none",
@@ -53,6 +56,15 @@ def remove_launch_opt():
             remove_launch_option(
                 launcher=launcher,
                 game_id=game_id,
+                label="Launch Mod Organizer",
+            )
+        elif launcher == "gog":
+            remove_launch_option(
+                launcher=launcher,
+                game_id=game_id,
+                game_path=str(state.current_instance.game_path)
+                if state.current_instance.game_path
+                else None,
                 label="Launch Mod Organizer",
             )
         logger.info(f"Removed launch option for {launcher} game ID {game_id}")

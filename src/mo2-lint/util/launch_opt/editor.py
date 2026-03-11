@@ -5,10 +5,11 @@ from typing import Union, Optional
 import click
 
 try:
-    from . import steam, epic
+    from . import steam, epic, gog
 except Exception:
     import steam
     import epic
+    import gog
 
 from util import variables as var
 
@@ -16,6 +17,7 @@ from util import variables as var
 def read_launch_option(
     launcher: str,
     game_id: Union[int, str],
+    game_path: str = None,
     output: bool = False,
 ) -> Union[list[var.AppInfo], list[dict]]:
     """
@@ -24,9 +26,11 @@ def read_launch_option(
     Parameters:
     -----------
     launcher : str
-        The launcher type ("steam" or "epic").
+        The launcher type ("steam", "epic", or "gog").
     game_id : int | str
-        Game identifier (appid for Steam, epic_id for Epic).
+        Game identifier (appid for Steam, epic_id for Epic, game_id for GOG).
+    game_path : str
+        The game's installation directory (required for GOG).
     output : bool
         Whether to print the launch options to stdout.
 
@@ -39,6 +43,12 @@ def read_launch_option(
         return steam.read_internal(appid=int(game_id), output=output)
     elif launcher == "epic":
         return epic.read_internal(epic_id=str(game_id), output=output)
+    elif launcher == "gog":
+        from pathlib import Path
+
+        return gog.read_internal(
+            game_path=Path(game_path), game_id=str(game_id), output=output
+        )
     else:
         logger.error(f"Unsupported launcher type: {launcher}")
         return []
@@ -50,6 +60,7 @@ def add_launch_option(
     executable: str,
     arguments: list = [],
     label: str = "Launch Mod Organizer",
+    game_path: str = None,
     opt_type: str = "none",
     oslist: Optional[list[str]] = None,
     osarch: Optional[str] = None,
@@ -61,15 +72,17 @@ def add_launch_option(
     Parameters:
     -----------
     launcher : str
-        The launcher type ("steam" or "epic").
+        The launcher type ("steam", "epic", or "gog").
     game_id : int | str
-        Game identifier (appid for Steam, epic_id for Epic).
+        Game identifier (appid for Steam, epic_id for Epic, game_id for GOG).
     executable : str
         The executable to launch.
     arguments : list
         Arguments to pass to the executable.
     label : str
         Display name for the launch option.
+    game_path : str
+        The game's installation directory (required for GOG).
     opt_type : str
         Type of launch option (Steam only: 'default', 'none', 'vr', 'server').
     oslist : list[str]
@@ -83,7 +96,7 @@ def add_launch_option(
     --------
     int | bool
         For Steam: returns the launch option index.
-        For Epic: returns True on success, False on failure.
+        For Epic/GOG: returns True on success, False on failure.
     """
     if launcher == "steam":
         return steam.add_internal(
@@ -105,6 +118,23 @@ def add_launch_option(
             no_backup=no_backup,
         )
         return None if result else False
+    elif launcher == "gog":
+        from pathlib import Path
+
+        if game_path is None:
+            logger.error("GOG requires game_path to be provided")
+            return False
+        # For GOG, arguments should be a string, not a list
+        args_str = " ".join(arguments) if arguments else None
+        result = gog.add_internal(
+            game_path=Path(game_path),
+            game_id=str(game_id),
+            executable=executable,
+            arguments=args_str,
+            label=label,
+            no_backup=no_backup,
+        )
+        return None if result else False
     else:
         logger.error(f"Unsupported launcher type: {launcher}")
         return False
@@ -115,6 +145,7 @@ def remove_launch_option(
     game_id: Union[int, str],
     index: Optional[int] = None,
     label: str = "Launch Mod Organizer",
+    game_path: str = None,
     no_backup: bool = False,
 ) -> bool:
     """
@@ -123,13 +154,15 @@ def remove_launch_option(
     Parameters:
     -----------
     launcher : str
-        The launcher type ("steam" or "epic").
+        The launcher type ("steam", "epic", or "gog").
     game_id : int | str
-        Game identifier (appid for Steam, epic_id for Epic).
+        Game identifier (appid for Steam, epic_id for Epic, game_id for GOG).
     index : int
         Launch option index (Steam only, required for Steam).
     label : str
-        Launch option name (Epic only).
+        Launch option name (Epic/GOG only).
+    game_path : str
+        The game's installation directory (required for GOG).
     no_backup : bool
         Skip creating a backup before modifying.
 
@@ -148,6 +181,18 @@ def remove_launch_option(
     elif launcher == "epic":
         return epic.remove_internal(
             epic_id=str(game_id), label=label, no_backup=no_backup
+        )
+    elif launcher == "gog":
+        from pathlib import Path
+
+        if game_path is None:
+            logger.error("GOG requires game_path to be provided")
+            return False
+        return gog.remove_internal(
+            game_path=Path(game_path),
+            game_id=str(game_id),
+            label=label,
+            no_backup=no_backup,
         )
     else:
         logger.error(f"Unsupported launcher type: {launcher}")
@@ -178,18 +223,28 @@ def cli(ctx):
 @click.option(
     "--launcher",
     "-l",
-    type=click.Choice(["steam", "epic"], case_sensitive=False),
+    type=click.Choice(["steam", "epic", "gog"], case_sensitive=False),
     required=True,
     help="Launcher type.",
 )
 @click.argument("game_id", metavar="GAME_ID")
-def read(launcher: str, game_id: str):
+@click.option(
+    "--game-path",
+    "-p",
+    help="Game installation directory (required for GOG).",
+)
+def read(launcher: str, game_id: str, game_path: str):
     """
     Read launch options for a game.
 
-    GAME_ID: Steam AppID (integer) or Epic game ID (string)
+    GAME_ID: Steam AppID (integer), Epic game ID (string), or GOG game ID (string)
     """
-    return read_launch_option(launcher=launcher.lower(), game_id=game_id, output=True)
+    if launcher.lower() == "gog" and not game_path:
+        click.echo("Error: --game-path is required for GOG", err=True)
+        raise SystemExit(1)
+    return read_launch_option(
+        launcher=launcher.lower(), game_id=game_id, game_path=game_path, output=True
+    )
 
 
 @cli.command(help="Add a launch option for a game")
@@ -197,7 +252,7 @@ def read(launcher: str, game_id: str):
 @click.option(
     "--launcher",
     "-l",
-    type=click.Choice(["steam", "epic"], case_sensitive=False),
+    type=click.Choice(["steam", "epic", "gog"], case_sensitive=False),
     required=True,
     help="Launcher type.",
 )
@@ -207,6 +262,11 @@ def read(launcher: str, game_id: str):
     "--label",
     default="Custom Launch Option",
     help="Display name for the launch option.",
+)
+@click.option(
+    "--game-path",
+    "-p",
+    help="Game installation directory (required for GOG).",
 )
 @click.option(
     "--arguments",
@@ -234,6 +294,7 @@ def add(
     game_id: str,
     executable: str,
     label: str,
+    game_path: str,
     arguments: tuple,
     opt_type: str,
     oslist: tuple,
@@ -243,14 +304,18 @@ def add(
     """
     Add a launch option for a game.
 
-    GAME_ID: Steam AppID (integer) or Epic game ID (string)
+    GAME_ID: Steam AppID (integer), Epic game ID (string), or GOG game ID (string)
     EXECUTABLE: Path to the executable to launch
     """
+    if launcher.lower() == "gog" and not game_path:
+        click.echo("Error: --game-path is required for GOG", err=True)
+        raise SystemExit(1)
     result = add_launch_option(
         launcher=launcher.lower(),
         game_id=game_id,
         executable=executable,
         label=label,
+        game_path=game_path,
         arguments=list(arguments),
         opt_type=opt_type,
         oslist=list(oslist) if oslist else None,
@@ -270,24 +335,31 @@ def add(
 @click.option(
     "--launcher",
     "-l",
-    type=click.Choice(["steam", "epic"], case_sensitive=False),
+    type=click.Choice(["steam", "epic", "gog"], case_sensitive=False),
     required=True,
     help="Launcher type.",
 )
 @click.argument("game_id", metavar="GAME_ID")
 @click.option(
+    "--game-path",
+    "-p",
+    help="Game installation directory (required for GOG).",
+)
+@click.option(
     "--index",
     "-i",
     type=int,
-    help="Launch option index (Steam only, required for Steam).",
+    help="Launch option index (Required for Steam).",
 )
 @click.option(
-    "--label", help="Launch option name (Epic only, default: 'Custom Launch Option')."
+    "--label",
+    help="Launch option name (Required for Epic/GOG).",
 )
 @click_opt_no_backup
 def remove(
     launcher: str,
     game_id: str,
+    game_path: str,
     index: Optional[int],
     label: Optional[str],
     no_backup: bool,
@@ -295,17 +367,21 @@ def remove(
     """
     Remove a launch option for a game.
 
-    GAME_ID: Steam AppID (integer) or Epic game ID (string)
+    GAME_ID: Steam AppID (integer), Epic game ID (string), or GOG game ID (string)
     """
     if launcher.lower() == "steam" and index is None:
         click.echo("Error: --index is required for Steam", err=True)
         raise SystemExit(1)
-    if launcher.lower() == "epic" and label is None:
+    if launcher.lower() in ["epic", "gog"] and label is None:
         label = "Custom Launch Option"
+    if launcher.lower() == "gog" and not game_path:
+        click.echo("Error: --game-path is required for GOG", err=True)
+        raise SystemExit(1)
 
     result = remove_launch_option(
         launcher=launcher.lower(),
         game_id=game_id,
+        game_path=game_path,
         index=index,
         label=label,
         no_backup=no_backup,

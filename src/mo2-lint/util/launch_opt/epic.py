@@ -171,6 +171,7 @@ def add_internal(
         json.dump(data, file, indent="\t")
 
     logger.success(f"Successfully added launch option for Epic ID {epic_id}")
+    restart_heroic()
     return True
 
 
@@ -238,12 +239,13 @@ def remove_internal(
         json.dump(data, file, indent="\t")
 
     logger.success(f"Successfully removed launch option for Epic ID {epic_id}")
+    restart_heroic()
     return True
 
 
-def restart_epic():
+def restart_heroic():
     """
-    Restart the Epic Games Launcher by sending a SIGTERM signal to its process.
+    Restart the Heroic Games Launcher by sending a SIGTERM signal to its process.
     """
     try:
         if (
