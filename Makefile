@@ -47,12 +47,7 @@ redirector:
 
 clean:
 	rm -rf .ruff_cache
-	rm -rf build/mo2_lint
-	rm -rf build/nxm_handler
-	rm -rf build/find_heroic_install
+	find build -maxdepth 1 -mindepth 1 ! -name 'hooks' ! -name 'runtime_hooks.py' -exec rm -rf {} +
 	rm -rf dist
-	rm -rf dist/mo2-redirector.exe
-	rm -f mo2_lint.spec
-	rm -f nxm_handler.spec
-	rm -f find_heroic_install.spec
+	rm -f *.spec
 	find . -type d -name '__pycache__' -exec rm -r {} +
