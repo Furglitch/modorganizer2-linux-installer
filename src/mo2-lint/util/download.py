@@ -3,9 +3,12 @@
 from loguru import logger
 from pathlib import Path
 from typing import Optional
-from urllib.request import urlretrieve as dl
 from util.checksum import compare_checksum
 from util.nexus.download_mod import nexus_download as nexus_dl
+import ssl
+import certifi
+
+ssl_context = ssl.create_default_context(cafile=certifi.where())
 
 
 def download(
@@ -45,7 +48,12 @@ def download(
 
     for i in range(attempts):
         try:
-            dl(url, export)
+            from urllib.request import urlopen, Request
+
+            req = Request(url)
+            with urlopen(req, context=ssl_context) as response:
+                with open(export, "wb") as out_file:
+                    out_file.write(response.read())
             if export.exists() and checksum:
                 if compare_checksum(export, checksum):
                     logger.trace(

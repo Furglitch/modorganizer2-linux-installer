@@ -5,6 +5,7 @@ description = "An easy-to-use Mod Organizer 2 installer for Linux"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "certifi>=2024.0.0",
     "click>=8.3.1",
     "dotenv>=0.9.9",
     "inquirerpy>=0.3.4",

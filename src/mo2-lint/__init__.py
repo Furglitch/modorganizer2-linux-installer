@@ -11,9 +11,13 @@ from command.uninstall import uninstall as _uninstall
 from command.list import list as _list
 from command.pin import pin as _pin
 from command.update import update as _update
+import certifi
 import click
 import re
+import ssl
 import yaml
+
+ssl_context = ssl.create_default_context(cafile=certifi.where())
 
 
 def check_update():
@@ -24,7 +28,8 @@ def check_update():
         logger.trace("Fetching latest release info from GitHub API.")
         response = from_json(
             requests.get(
-                "https://api.github.com/repos/Furglitch/modorganizer2-linux-installer/releases/latest"
+                "https://api.github.com/repos/Furglitch/modorganizer2-linux-installer/releases/latest",
+                verify=certifi.where(),
             ).text
         )
         latest = response["tag_name"]
@@ -86,12 +91,12 @@ def pull_config():
         remote_raw = f"https://raw.githubusercontent.com/Furglitch/modorganizer2-linux-installer/refs/heads/rewrite/configs/{config}"
 
         try:
-            from urllib.request import urlretrieve
+            from urllib.request import urlopen, Request
             from requests import get
 
             # Check remote schema version
             logger.debug(f"Fetching remote config from GitHub: {remote_raw}")
-            response = get(remote_raw)
+            response = get(remote_raw, verify=certifi.where())
             remote_yml = yaml.load(response.text, Loader=yaml.SafeLoader)
             remote_schema_version = remote_yml.get("schema", 0)
             remote_schema_parts = str(remote_schema_version).split(".")
@@ -106,10 +111,10 @@ def pull_config():
                 )
             else:
                 config_path.parent.mkdir(parents=True, exist_ok=True)
-                urlretrieve(
-                    remote_raw,
-                    config_path,
-                )
+                req = Request(remote_raw)
+                with urlopen(req, context=ssl_context) as response:
+                    with open(config_path, "wb") as out_file:
+                        out_file.write(response.read())
         except Exception as e:
             logger.exception(f"Failed to download config file {config}: {e}")
 

@@ -5,12 +5,16 @@ from pathlib import Path
 from patoolib import extract_archive as unzip
 from shutil import copytree, copyfile as copy, rmtree
 from typing import Optional
-from urllib.request import urlretrieve as request
+from urllib.request import urlopen, Request
 from util import lang, variables as var, state_file as state
 from util.checksum import compare_checksum
 from util.download import download as dl, download_nexus as nexus_dl
 from util.state_file import symlink_instance
 import json
+import ssl
+import certifi
+
+ssl_context = ssl.create_default_context(cafile=certifi.where())
 
 cache_dir: Path = Path("~/.cache/mo2-lint").expanduser()
 download_dir = cache_dir / "downloads"
@@ -236,9 +240,10 @@ def download_plugin(plugin: str):
         return
     logger.trace(f"Found manifest URL for plugin {plugin}: {manifest[plugin]}")
 
-    file = Path(request(manifest[plugin])[0])
-    with open(file, "r") as f:
-        data = json.loads(f.read())
+    # Download manifest using SSL context
+    req = Request(manifest[plugin])
+    with urlopen(req, context=ssl_context) as response:
+        data = json.loads(response.read())
     if not data:
         return
     latest = data.get("Versions", [])[-1]

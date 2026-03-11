@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import certifi
 from click import Path
 from loguru import logger
 from pydantic_core import from_json
@@ -46,7 +47,7 @@ def nexus_request(url: str) -> requests.Response:
 
     headers = header()
     logger.trace(f"Making Nexus API request to URL: {url}")
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers, verify=certifi.where())
     logger.trace(f"Received response with status code: {response.status_code}")
     return response
 
@@ -127,7 +128,9 @@ def nexus_download(
         return ""
     logger.trace(f"Downloading file from Nexus CDN URL: {download_url}")
     with open(path, "wb") as f:
-        download = requests.get(download_url, headers=header(), stream=True)
+        download = requests.get(
+            download_url, headers=header(), stream=True, verify=certifi.where()
+        )
         for chunk in download.iter_content(chunk_size=8192):
             if chunk:
                 f.write(chunk)

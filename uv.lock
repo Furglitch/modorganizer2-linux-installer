@@ -190,6 +190,7 @@ name = "modorganizer2-linux-installer"
 version = "7.0.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "certifi" },
     { name = "click" },
     { name = "dotenv" },
     { name = "inquirerpy" },
@@ -210,6 +211,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "certifi", specifier = ">=2024.0.0" },
     { name = "click", specifier = ">=8.3.1" },
     { name = "dotenv", specifier = ">=0.9.9" },
     { name = "inquirerpy", specifier = ">=0.3.4" },
