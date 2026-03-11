@@ -126,7 +126,6 @@ The `workarounds` section allows you to define specific workarounds to apply for
 ```yaml
     workarounds:
       - needs_java: true
-      - single_executable: true
       - directories:
           - <directory_1>
           - <directory_2>
@@ -138,7 +137,6 @@ All workarounds defined here are optional and will only be applied if specified 
 
 **Key Fields:**
 - `needs_java`: Indicates if the game or one of it's components (tools, mods, etc.) requires Java to run.
-- `single_executable`: Indicates if the game uses a single executable file for launching. This will switch the backup file extension from `.exe.bak` to `.bak.exe` so the file is still usable.
 - `directories`: A list of directories to create in the root of the game's installation folder.
 - `files`: A list of files to add to the game's installation folder.
   - `<source>`: The source file name in the installer's `cfg/workarounds/` directory. ([`configs/`]`workarounds/` in the repository)

@@ -258,10 +258,6 @@ games:
             - "f4sevr_1_2_72.dll"
             - "f4sevr_loader.exe"
             - "f4sevr_steam_loader.dll"
-    workarounds:
-      - single_executable: true
-      - files:
-        - "F4SEVR.ini": "Data/F4SE/F4SEVR.ini"
 
   falloutnv:
     display_name: 'Fallout: New Vegas'
@@ -492,10 +488,6 @@ games:
             - "sksevr_1_4_15.dll"
             - "sksevr_loader.exe"
             - "sksevr_steam_loader.dll"
-    workarounds:
-      - single_executable: true
-      - files:
-        - "SKSEVR.ini": "Data/SKSE/SKSE.ini"
 
   starfield:
     display_name: Starfield
@@ -521,7 +513,3 @@ games:
           paths:
             - "sfse_1_15_222.dll"
             - "sfse_loader.exe"
-    workarounds:
-      - single_executable: true
-      - files:
-        - "SFSE.ini": "Data/SFSE/SFSE.ini"
