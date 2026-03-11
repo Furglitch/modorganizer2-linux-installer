@@ -194,6 +194,11 @@ def main(argv: list[str]) -> int:
         # Load launcher argument prefixes and split arguments
         prefixes = load_launcher_prefixes()
         launcher_args, other_args = split_arguments(argv[1:], prefixes)
+        # launcher_args = [arg for arg in argv]; other_args = [] # bypass filter
+        logger.trace(f"argv: {argv}")
+        logger.trace(f"argv[1:]: {argv[1:]}")
+        logger.trace(f"Launcher args: {launcher_args}")
+        logger.trace(f"Other args: {other_args}")
 
         # Find MO2 instance for this game
         mo2_exe, game_executable = get_instance_info(game_dir)
