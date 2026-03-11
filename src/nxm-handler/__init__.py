@@ -58,8 +58,9 @@ def get_env(instance_dir: Path) -> dict:
         logger.info("Using heroic launcher handler.")
         from find_heroic_install import get_heroic_data
 
-        use_gog_id = gog_id if gog_id and (not epic_id or gog_id) else None
-        use_epic_id = epic_id if epic_id and not use_gog_id else None
+        use_epic_id, use_gog_id = None, None
+        use_gog_id = gog_id if launcher in ["gog", "heroic"] and gog_id else None
+        use_epic_id = epic_id if launcher == "epic" and epic_id else None
 
         # get_heroic_data returns: (release, launcher, app_id, wine_path, wine_prefix)
         release, runner, app, wine, prefix = get_heroic_data(use_gog_id, use_epic_id)
@@ -175,10 +176,11 @@ def send_url(instance_dir: Path, url: str, env_info: dict) -> None:
                 f"{url}",
             ]
         try:
+            logger.debug(f"Executing handler command: {cmd}")
+            logger.trace(f"Environment: WINEPREFIX={env.get('WINEPREFIX')}")
             subprocess.run(
                 cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env
             )
-            logger.debug(f"Executing handler command: {cmd}")
         except Exception as e:
             logger.exception(f"Failed to execute handler command: {e}")
     else:
@@ -223,7 +225,8 @@ def main(url: str, log_level: str) -> None:
             env_info.get("runner"),
             env_info.get("app"),
         )
-    send_url(instance_dir, url, env_info)
+    else:
+        send_url(instance_dir, url, env_info)
 
 
 if __name__ == "__main__":
