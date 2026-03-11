@@ -2,9 +2,27 @@
 
 run: uv run src/mo2-lint/__init__.py
 
-_build: clean redirector nxm_handler mo2_lint
+_build: clean mo2_lint
 
-mo2_lint:
+mo2_lint: redirector nxm_handler
+	uv run pyinstaller --onefile --name mo2_lint \
+		--paths src \
+		--hidden-import InquirerPy \
+		--hidden-import patoolib \
+		--hidden-import protontricks \
+		--hidden-import pydantic_core \
+		--hidden-import requests \
+		--hidden-import send2trash \
+		--hidden-import websockets \
+		--hidden-import yaml \
+		--add-data "src/mo2-lint:src" \
+		--add-data "configs:cfg" \
+		--add-data "dist:dist" \
+		--runtime-hook "build/runtime_hooks.py" \
+		--additional-hooks-dir "build/hooks" \
+		src/mo2-lint/__init__.py
+
+mo2_lint_only:
 	uv run pyinstaller --onefile --name mo2_lint \
 		--paths src \
 		--hidden-import InquirerPy \
@@ -65,11 +83,13 @@ setup-wine-python:
 		unzip -q python-3.13.0-embed-amd64.zip && rm -f python-3.13.0-embed-amd64.zip; \
 		echo "Installing pip..."; \
 		wget -q https://bootstrap.pypa.io/get-pip.py 2>/dev/null || curl -# -L https://bootstrap.pypa.io/get-pip.py -o get-pip.py; \
+		sed -i 's/#import site/import site/' python313._pth; \
 		WINEPREFIX="$$WINEPREFIX" wine python.exe get-pip.py --no-warn-script-location 2>&1 | grep -v '^[0-9a-f]*:' || true; \
 		rm -f get-pip.py; \
 		echo "Python 3.13 installed at $$WINEPREFIX/drive_c/python313/python.exe"; \
 	else \
 		echo "Python already installed at $$WINEPREFIX/drive_c/python313/python.exe"; \
+		sed -i 's/#import site/import site/' "$$WINEPREFIX/drive_c/python313/python313._pth" 2>/dev/null || true; \
 	fi
 
 clean:
