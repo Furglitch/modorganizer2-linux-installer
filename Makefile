@@ -36,15 +36,15 @@ nxm_handler:
 redirector: setup-wine-python
 	@WINEPREFIX=$${WINEPREFIX:-$$HOME/.wine-py}; \
 	export WINEARCH=win64; \
-	echo "Checking for Windows Python at $$WINEPREFIX/drive_c/python311/python.exe"; \
-	if [ ! -f "$$WINEPREFIX/drive_c/python311/python.exe" ]; then \
+	echo "Checking for Windows Python at $$WINEPREFIX/drive_c/python313/python.exe"; \
+	if [ ! -f "$$WINEPREFIX/drive_c/python313/python.exe" ]; then \
 		echo "ERROR: Windows Python not found. WINEPREFIX=$$WINEPREFIX"; \
 		ls -la "$$WINEPREFIX/drive_c/" 2>/dev/null || echo "drive_c directory not found"; \
 		exit 1; \
 	fi; \
 	echo "Building redirector..."; \
-	WINEPREFIX="$$WINEPREFIX" WINEARCH=win64 wine "C:\\python311\\python.exe" -m pip install -q --upgrade pip pyinstaller loguru pyyaml 2>&1 | grep -v '^[0-9a-f]*:' || true; \
-	WINEPREFIX="$$WINEPREFIX" WINEARCH=win64 wine "C:\\python311\\python.exe" -m PyInstaller --onefile --noconsole --name mo2-redirector.exe \
+	WINEPREFIX="$$WINEPREFIX" WINEARCH=win64 wine "C:\\python313\\python.exe" -m pip install -q --upgrade pip pyinstaller loguru pyyaml 2>&1 | grep -v '^[0-9a-f]*:' || true; \
+	WINEPREFIX="$$WINEPREFIX" WINEARCH=win64 wine "C:\\python313\\python.exe" -m PyInstaller --onefile --noconsole --name mo2-redirector.exe \
 		--paths src --hidden-import loguru --hidden-import yaml --hidden-import configparser \
 		--add-data "configs;cfg" --icon .github/README/logo.ico src/redirector/__init__.py 2>&1 | grep -E '(Building|WARNING|ERROR|completed)' || true
 	@chmod +x dist/mo2-redirector.exe 2>/dev/null || true
@@ -56,20 +56,20 @@ setup-wine-python:
 	@command -v unzip >/dev/null 2>&1 || { echo "ERROR: unzip not found"; exit 1; }
 	@WINEPREFIX=$${WINEPREFIX:-$$HOME/.wine-py}; \
 	export WINEARCH=win64; \
-	if [ ! -f "$$WINEPREFIX/drive_c/python311/python.exe" ]; then \
-		echo "Installing Python embeddable (Windows) to $$WINEPREFIX..."; \
-		mkdir -p "$$WINEPREFIX/drive_c/python311"; \
-		cd "$$WINEPREFIX/drive_c/python311"; \
-		wget -q --show-progress https://www.python.org/ftp/python/3.11.9/python-3.11.9-embed-amd64.zip 2>/dev/null || \
-		curl -# -L https://www.python.org/ftp/python/3.11.9/python-3.11.9-embed-amd64.zip -o python-3.11.9-embed-amd64.zip || { echo "ERROR: Failed to download Python"; exit 1; }; \
-		unzip -q python-3.11.9-embed-amd64.zip && rm -f python-3.11.9-embed-amd64.zip; \
+	if [ ! -f "$$WINEPREFIX/drive_c/python313/python.exe" ]; then \
+		echo "Installing Python 3.13 embeddable (Windows) to $$WINEPREFIX..."; \
+		mkdir -p "$$WINEPREFIX/drive_c/python313"; \
+		cd "$$WINEPREFIX/drive_c/python313"; \
+		wget -q --show-progress https://www.python.org/ftp/python/3.13.0/python-3.13.0-embed-amd64.zip 2>/dev/null || \
+		curl -# -L https://www.python.org/ftp/python/3.13.0/python-3.13.0-embed-amd64.zip -o python-3.13.0-embed-amd64.zip || { echo "ERROR: Failed to download Python"; exit 1; }; \
+		unzip -q python-3.13.0-embed-amd64.zip && rm -f python-3.13.0-embed-amd64.zip; \
 		echo "Installing pip..."; \
 		wget -q https://bootstrap.pypa.io/get-pip.py 2>/dev/null || curl -# -L https://bootstrap.pypa.io/get-pip.py -o get-pip.py; \
 		WINEPREFIX="$$WINEPREFIX" wine python.exe get-pip.py --no-warn-script-location 2>&1 | grep -v '^[0-9a-f]*:' || true; \
 		rm -f get-pip.py; \
-		echo "Python installed at $$WINEPREFIX/drive_c/python311/python.exe"; \
+		echo "Python 3.13 installed at $$WINEPREFIX/drive_c/python313/python.exe"; \
 	else \
-		echo "Python already installed at $$WINEPREFIX/drive_c/python311/python.exe"; \
+		echo "Python already installed at $$WINEPREFIX/drive_c/python313/python.exe"; \
 	fi
 
 clean:
