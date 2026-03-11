@@ -33,7 +33,7 @@ nxm_handler:
 		--additional-hooks-dir "build/hooks" \
 		src/nxm-handler/__init__.py
 
-redirector:
+redirector: setup-wine-python
 	@WINEPREFIX=$${WINEPREFIX:-$$HOME/.wine-py}; \
 	if [ ! -f "$$WINEPREFIX/drive_c/Program Files/Python311/python.exe" ]; then \
 		echo "ERROR: Run 'make setup-wine-python' first."; exit 1; \

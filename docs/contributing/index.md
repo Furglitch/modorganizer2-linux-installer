@@ -32,6 +32,7 @@ Install the following dependencies if you don't have them already:
 - Python 3.13
 - [`uv`](https://docs.astral.sh/uv/getting-started/installation/#cargo)
 - `make`
+- Wine (for building the redirector)
 
 ### Installation
 To set up your development environment, follow these steps:
@@ -44,10 +45,6 @@ To set up your development environment, follow these steps:
 2. Install pre-commit hooks:
    ```bash
    uv run pre-commit install
-   ```
-3. Install Python to Wine: <sub>This is required to build the redirector.</sub>
-   ```bash
-   make setup-wine-python
    ```
 
 ### Running the Application
