@@ -328,7 +328,10 @@ games:
       steam: Oblivion
       gog: Oblivion
       epic: Oblivion
-    executable: Oblivion GOTY English/Oblivion.exe
+    executable:
+      steam: Oblivion.exe
+      gog: Oblivion.exe
+      epic: Oblivion GOTY English/Oblivion.exe
     tricks:
       - "d3dcompiler_43"
       - "d3dx9"
@@ -352,27 +355,23 @@ games:
 
   oblivion_fr:
     parent: oblivion
-    executable: Oblivion GOTY French/Oblivion.exe
-    subdirectory:
-      epic: Oblivion/Oblivion GOTY French # ! Untested, may have same issue as English
+    executable:
+      epic: Oblivion GOTY French/Oblivion.exe
 
   oblivion_de:
     parent: oblivion
-    executable: Oblivion GOTY German/Oblivion.exe
-    subdirectory:
-      epic: Oblivion/Oblivion GOTY German # ! Untested, may have same issue as English
+    executable:
+      epic: Oblivion GOTY German/Oblivion.exe
 
   oblivion_it:
     parent: oblivion
-    executable: Oblivion GOTY Italian/Oblivion.exe
-    subdirectory:
-      epic: Oblivion/Oblivion GOTY Italian # ! Untested, may have same issue as English
+    executable:
+      epic: Oblivion GOTY Italian/Oblivion.exe
 
   oblivion_es:
     parent: oblivion
-    executable: Oblivion GOTY Spanish/Oblivion.exe
-    subdirectory:
-      epic: Oblivion/Oblivion GOTY Spanish # ! Untested, may have same issue as English
+    executable:
+      epic: Oblivion GOTY Spanish/Oblivion.exe
 
   skyrim:
     display_name: 'The Elder Scrolls V: Skyrim'

@@ -107,7 +107,11 @@ def get_library() -> Path:
         if isinstance(chosen_game.subdirectory, dict)
         else chosen_game.subdirectory
     )
-    executable = chosen_game.executable
+    executable = (
+        chosen_game.executable.get(var.launcher)
+        if isinstance(chosen_game.executable, dict)
+        else chosen_game.executable
+    )
 
     library = None
     if var.launcher == "steam":

@@ -38,15 +38,21 @@ def install(
     logger.trace(f"Ensured installation directory exists: {directory}")
 
     if not state.match_instances(directory=directory):
+        launcher = get_launcher()
+        executable = (
+            var.game_info.executable.get(launcher)
+            if isinstance(var.game_info.executable, dict)
+            else var.game_info.executable
+        )
         state.current_instance = InstanceData(
             index=-1,
             game=game,
             nexus_slug=var.game_info.nexus_slug,
             instance_path=directory,
-            launcher=get_launcher(),
+            launcher=launcher,
             launcher_ids=var.LauncherIDs.from_dict(var.game_info.launcher_ids),
             game_path=get_library(),
-            game_executable=var.game_info.executable,
+            game_executable=executable,
             script_extender=script_extender,
             plugins=list(plugin),
         )
