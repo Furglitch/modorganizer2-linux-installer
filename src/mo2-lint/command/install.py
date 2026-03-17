@@ -9,7 +9,7 @@ from util.redirector.install import install as install_redirector
 from util.nexus.install_handler import install as install_handler
 from step.workarounds import apply_workarounds
 from step.load_game_info import get_launcher, get_library
-from step.external_resources import download
+from step.external_resources import download, download_winetricks
 from step.configure_prefix import prompt as configure_prefix
 from step.launch_opt import add_launch_opt
 
@@ -66,6 +66,7 @@ def install(
         )
         raise SystemExit(1)
 
+    download_winetricks()
     configure_prefix()
     download()
     install_handler()

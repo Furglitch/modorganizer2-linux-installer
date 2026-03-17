@@ -6,10 +6,13 @@ from pathlib import Path
 from protontricks.cli.main import main as pt
 from typing import List
 from shared.logger import remove_loggers, add_loggers
+from util.wine.winetricks import found_exec as winetricks_path
 import os
 import re
 import sys
 import threading
+
+os.environ['WINETRICKS'] = Path(winetricks_path).expanduser().resolve()
 
 
 def run(command: List[str]) -> List[str]:

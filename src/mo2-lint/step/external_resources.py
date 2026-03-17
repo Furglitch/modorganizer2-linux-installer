@@ -395,7 +395,6 @@ def download():
     if params.plugins:
         for plugin in params.plugins:
             download_plugin(plugin)
-    download_winetricks()
     if params.script_extender:
         for entry in script_extenders or []:
             match = False
