@@ -406,9 +406,9 @@ def match_instances(
     Parameters
     ----------
     game : str, optional
-        Nexus Mods slug identifier for the game to match.
+        Return only instances matching this game identifier.
     directory : Path, optional
-        Directory path to match instances against.
+        Return only instances installed at/under this path.
     exact : bool, optional
         If True, requires an exact match for the directory. If False, matches any instance whose directory starts with the given directory.
 
@@ -429,7 +429,7 @@ def match_instances(
         logger.debug("No game or directory criteria provided. Returning all instances.")
 
     for instance in state_file.instances:
-        if game and instance.nexus_slug != game:
+        if game and instance.game != game:
             logger.trace(
                 f"Instance index {instance.index} does not match game slug '{game}'. Skipping."
             )
