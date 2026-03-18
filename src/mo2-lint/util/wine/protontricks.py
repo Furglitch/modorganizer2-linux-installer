@@ -12,7 +12,7 @@ import re
 import sys
 import threading
 
-os.environ['WINETRICKS'] = Path(winetricks_path).expanduser().resolve()
+os.environ['WINETRICKS'] = str(Path(winetricks_path).expanduser().resolve())
 
 
 def run(command: List[str]) -> List[str]:
