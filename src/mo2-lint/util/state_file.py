@@ -435,32 +435,23 @@ def match_instances(
             )
             continue
 
-        startswith = (
-            str(instance.instance_path).startswith(str(directory))
-            if directory
-            else False
-        )
-        if directory and not startswith:
-            logger.trace(
-                f"Instance index {instance.index} does not match directory '{directory}'. Skipping."
-            )
-            continue
+        if directory:
+            if exact:
+                if instance.instance_path.resolve() != directory.resolve():
+                    logger.trace(
+                        f"Instance index {instance.index} does not match directory '{directory}' exactly. Skipping."
+                    )
+                    continue
+            else:
+                # instance_path.resolve() probably isn't necessary
+                if not instance.instance_path.resolve().is_relative_to(directory.resolve()):
+                    logger.trace(
+                        f"Instance index {instance.index} does not match directory '{directory}'. Skipping."
+                        )
+                    continue
 
-        if exact and directory and (instance.instance_path == directory):
-            logger.trace(
-                f"Instance index {instance.index} matches directory '{directory}' exactly. Adding to matched list."
-            )
-            matched.append(instance)
-            continue
-        elif (game == instance.nexus_slug) or (not exact and directory and startswith):
-            logger.trace(
-                f"Instance index {instance.index} matches criteria (game: '{game}', directory: '{directory}'). Adding to matched list."
-            )
-            matched.append(instance)
-            continue
-        elif not exact and not (game or directory):
-            logger.trace(f"Adding instance index {instance.index} to matched list.")
-            matched.append(instance)
+        logger.trace(f"Adding instance index {instance.index} to matched list.")
+        matched.append(instance)
 
     return matched
 
