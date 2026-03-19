@@ -2,20 +2,30 @@
 
 from loguru import logger
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 from shared.logger import remove_loggers, add_loggers
+from util.download import download_dir
 import os
 import re
 import shutil
 import subprocess
 
-found_exec = shutil.which("winetricks") or "~/.cache/mo2-lint/downloads/winetricks"
+cached_winetricks = download_dir / "winetricks"
+found_exec = shutil.which("winetricks")
+# Try to use $WINETRICKS, only if it provides a file
+winetricks_path = os.environ.get("WINETRICKS")
+if winetricks_path:
+    winetricks_path = Path(winetricks_path).expanduser()
+elif found_exec:
+    winetricks_path = Path(found_exec)
+else:
+    winetricks_path = cached_winetricks
 
 
 def run(
-    exec: Optional[Path | str] = found_exec,
-    prefix: Path = None,
-    command: List[str] = None,
+    exe: Path | str = winetricks_path,
+    prefix: Path | str = None,
+    command: List[str] = [],
 ) -> List[str]:
     """
     Runs a winetricks command and captures its output.
@@ -33,34 +43,33 @@ def run(
         The output lines from the winetricks command.
     """
 
+    if not isinstance(exe, (str, Path)):
+        raise TypeError("exe parameter must be a Path or string")
+    if not isinstance(prefix, (str, Path)):
+        raise TypeError("prefix parameter must be a Path or string")
+    if not isinstance(command, list):
+        raise TypeError("command parameter must be a list")
+    if isinstance(exe, str):
+        exe = Path(exe)
+    exe = exe.expanduser().resolve()
+    if isinstance(prefix, str):
+        prefix = Path(prefix)
     prefix = prefix.expanduser().resolve()
-    exec = (
-        exec.expanduser().resolve()
-        if isinstance(exec, Path)
-        else str(exec.expanduser().resolve())
-    )
 
-    # Convert executable to string, with absolute path
-    if str(exec).startswith("/usr/bin"):
-        if isinstance(exec, str):
-            exec = str(Path(exec).name)
-        elif isinstance(exec, Path):
-            exec = str(exec.name)
-    elif isinstance(exec, str):
-        if not Path(exec).exists():
-            logger.error(f"Winetricks executable not found at specified path: {exec}")
+    if exe.is_relative_to("/usr/bin"):
+        # If referring to winetricks by bare name when possible is correct behavior, then it should
+        # probably be done whenever bool(found_exec), not just when it was found in /usr/bin?
+        exe = str(exe.name)
+    else:
+        if not exe.exists():
+            logger.error(f"Winetricks executable not found at specified path: {exe}")
             return []
-        exec = exec
-    elif isinstance(exec, Path):
-        if not exec.exists():
-            logger.error(f"Winetricks executable not found at specified path: {exec}")
-            return []
-        exec = str(exec)
-    logger.info(f"Using winetricks executable: {exec}")
+        exe = str(exe)
+    logger.info(f"Using winetricks executable: {exe}")
 
-    command = ["-q", "-f"] + command  # -q for unattended, -f to force
-    cmd = [exec] + command
+    cmd = ["-q", "-f"] + command  # -q for unattended, -f to force
     logger.debug(f"Constructed winetricks command: {' '.join(cmd)}")
+    cmd.insert(exe)
     env = os.environ.copy()
     env.setdefault("WINEPREFIX", str(prefix))
     logger.trace(f"Using Wine prefix: {prefix}")
@@ -69,7 +78,7 @@ def run(
     add_loggers(script="mo2-lint", process="winetricks")
     output_lines = []
 
-    if not cmd == [exec, "-q", "-f"]:
+    if not cmd == [exe, "-q", "-f"]:
         proc = subprocess.Popen(
             cmd,
             stdout=subprocess.PIPE,
@@ -100,9 +109,8 @@ def run(
 
 
 def apply(
-    exec: Optional[Path | str] = found_exec,
-    prefix: Path = None,
-    tricks: List[str] = None,
+    prefix: Path,
+    tricks: List[str],
 ):
     """
     Applies tricks to the specified prefix.
@@ -119,7 +127,7 @@ def apply(
         logger.warning("No tricks provided to apply, skipping winetricks execution.")
         return
     logger.info(f"Applying tricks to prefix with winetricks: {tricks}")
-    run(exec, prefix, tricks)
+    run(prefix=prefix, tricks=tricks)
 
 
 def log_translation(input: str = None):

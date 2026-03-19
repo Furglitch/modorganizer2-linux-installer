@@ -9,6 +9,8 @@ import ssl
 import certifi
 
 ssl_context = ssl.create_default_context(cafile=certifi.where())
+cache_dir: Path = Path("~/.cache/mo2-lint").expanduser()
+download_dir = cache_dir / "downloads"
 
 
 def download(

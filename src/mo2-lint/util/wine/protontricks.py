@@ -4,15 +4,20 @@ from contextlib import contextmanager
 from loguru import logger
 from pathlib import Path
 from protontricks.cli.main import main as pt
-from typing import List
 from shared.logger import remove_loggers, add_loggers
-from util.wine.winetricks import found_exec as winetricks_path
+from typing import List
+from util.wine.winetricks import winetricks_path, cached_winetricks
 import os
 import re
 import sys
 import threading
 
-os.environ['WINETRICKS'] = str(Path(winetricks_path).expanduser().resolve())
+winetricks_str = str(winetricks_path)
+if winetricks_str == str(cached_winetricks):
+    logger.debug("setting WINETRICKS")
+    os.environ["WINETRICKS"] = winetricks_str
+else:
+    logger.debug("not setting WINETRICKS")
 
 
 def run(command: List[str]) -> List[str]:

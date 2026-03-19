@@ -8,16 +8,15 @@ from typing import Optional
 from urllib.request import urlopen, Request
 from util import lang, variables as var, state_file as state
 from util.checksum import compare_checksum
-from util.download import download as dl, download_nexus as nexus_dl
+from util.download import download as dl, download_nexus as nexus_dl, download_dir
 from util.state_file import symlink_instance
+from util.wine.winetricks import winetricks_path
 import json
 import ssl
 import certifi
 
 ssl_context = ssl.create_default_context(cafile=certifi.where())
 
-cache_dir: Path = Path("~/.cache/mo2-lint").expanduser()
-download_dir = cache_dir / "downloads"
 extract_dir = download_dir / "extracted"
 
 
@@ -62,6 +61,9 @@ def download_winetricks():
     """
     Runs the download process for Winetricks.
     """
+    if str(winetricks_path) != str(download_dir / "winetricks"):
+        logger.info("Using provided Winetricks. Skipping download")
+        return
     logger.info("Starting download process for Winetricks")
     url = var.resource_info.winetricks.download_url
     checksum = var.resource_info.winetricks.checksum
@@ -385,7 +387,6 @@ def download():
     """
     Runs the download process for all required external resources.
     """
-    cache_dir.mkdir(parents=True, exist_ok=True)
     params = var.input_params
     game_info = var.game_info
     script_extenders = game_info.script_extenders if game_info is not None else None
