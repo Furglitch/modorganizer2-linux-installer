@@ -448,6 +448,7 @@ games:
       - "xaudio2_7=native"
       - "xact"
       - "d3dcompiler_43"
+      - "d3dcompiler_47"
       - "vcrun2022"
     script_extenders:
       - version: "2.0.20"
