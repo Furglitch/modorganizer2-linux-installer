@@ -54,26 +54,31 @@ def get_data() -> tuple[
             logger.debug(
                 f"Found {release} release located at {dir}. Checking for game data."
             )
+
             if not get_libraries(dir):
                 logger.warning(
                     f"Could not retrieve valid library paths from {dir}. Skipping this directory."
                 )
                 continue
-            elif gog_data and not epic_data:
+
+            gog_valid = gog_data is not None and "install_path" in gog_data
+            epic_valid = epic_data is not None and "install_path" in epic_data
+
+            if gog_valid and not epic_valid:
                 logger.trace(f"Found GOG install: {gog_data.get('install_path')}")
                 launcher = "gog"
                 display = "GOG"
                 game_id = gog_data["game_id"]
                 install_path = Path(gog_data["install_path"])
                 wine_prefix = get_wine_prefix(gog_data["game_id"], dir)
-            elif epic_data and not gog_data:
+            elif epic_valid and not gog_valid:
                 logger.trace(f"Found Epic install: {epic_data.get('install_path')}")
                 launcher = "epic"
                 display = "Epic"
                 game_id = epic_data["game_id"]
                 install_path = Path(epic_data["install_path"])
                 wine_prefix = get_wine_prefix(epic_data["game_id"], dir)
-            elif epic_data and gog_data:
+            elif gog_valid and epic_valid:
                 logger.trace(
                     f"Found both GOG and Epic installs: {gog_data.get('install_path')}, {epic_data.get('install_path')}"
                 )
@@ -157,6 +162,9 @@ def get_libraries(config_directory: Path) -> tuple[Path, Path]:
     tuple[Path, Path]
         A tuple containing the install paths for Epic and GOG games, respectively.
     """
+    global gog_data, epic_data
+    gog_data = {}
+    epic_data = {}
     gog_available = True
     epic_available = True
 
@@ -174,6 +182,7 @@ def get_libraries(config_directory: Path) -> tuple[Path, Path]:
 
     if not var.game_info.launcher_ids.gog:
         gog_available = False
+        gog_data = None
         logger.trace(
             "GOG launcher ID not found in game info. Marking GOG as unavailable."
         )
@@ -182,6 +191,7 @@ def get_libraries(config_directory: Path) -> tuple[Path, Path]:
         gog_data["installed_json"] = config_directory / "gog_store" / "installed.json"
     if not var.game_info.launcher_ids.epic:
         epic_available = False
+        epic_data = None
         logger.trace(
             "Epic launcher ID not found in game info. Marking Epic as unavailable."
         )
@@ -198,11 +208,13 @@ def get_libraries(config_directory: Path) -> tuple[Path, Path]:
             f'GOG installed.json not found at "{gog_data["installed_json"]}". Marking GOG as unavailable.',
         )
         gog_available = False
+        gog_data = None
     if epic_available and not epic_data["installed_json"].exists():
         logger.trace(
             f'Epic installed.json not found at "{epic_data["installed_json"]}". Marking Epic as unavailable.'
         )
         epic_available = False
+        epic_data = None
     if not valid():
         return None
 
@@ -220,11 +232,13 @@ def get_libraries(config_directory: Path) -> tuple[Path, Path]:
                 f"Game with GOG ID {gog_data['game_id']} not found in installed games list. Marking GOG as unavailable."
             )
             gog_available = False
-        if not gog_data.get("install_path"):
+            gog_data = None
+        if gog_data is not None and "install_path" not in gog_data:
             logger.warning(
                 f"Unable to extract install_path from {gog_data['installed_json']}. Marking GOG as unavailable."
             )
             gog_available = False
+            gog_data = None
 
     if epic_available:
         with open(epic_data["installed_json"], "r", encoding="utf-8") as file:
@@ -236,19 +250,34 @@ def get_libraries(config_directory: Path) -> tuple[Path, Path]:
                 f"Game with Epic ID {epic_data['game_id']} not found in installed games list. Marking Epic as unavailable."
             )
             epic_available = False
-        if not epic_data.get("install_path"):
+            epic_data = None
+        if epic_data is not None and "install_path" not in epic_data:
             logger.warning(
                 f"Unable to extract install_path from {epic_data['installed_json']}. Marking Epic as unavailable."
             )
             epic_available = False
+            epic_data = None
 
     if not valid():
         return None
 
-    logger.success(
-        f"Successfully retrieved library paths from Heroic config. gog={gog_data.get('install_path')}, epic={epic_data.get('install_path')}"
+    epic_path = (
+        epic_data.get("install_path")
+        if (epic_data and "install_path" in epic_data)
+        else None
     )
-    return epic_data.get("install_path"), gog_data.get("install_path")
+    gog_path = (
+        gog_data.get("install_path")
+        if (gog_data and "install_path" in gog_data)
+        else None
+    )
+
+    logger.success(
+        f"Successfully retrieved library paths from Heroic config. "
+        f"gog={gog_path} "
+        f"epic={epic_path}"
+    )
+    return epic_path, gog_path
 
 
 def get_wine_prefix(game_id: str | int, config_directory: Path) -> Path:

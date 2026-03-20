@@ -3,7 +3,7 @@
 from loguru import logger
 from pathlib import Path
 from util import lang, variables as var, state_file as state
-from util.heroic.find_library import get_data as get_heroic_data, gog_data, epic_data
+from util.heroic.find_library import get_data as get_heroic_data
 from util.steam.find_library import get_libraries as get_steam_libraries
 
 
@@ -51,6 +51,9 @@ def get_launcher() -> str:
         logger.trace(
             "Multiple game installations detected. Prompting user for launcher choice."
         )
+
+        gog_install_path = None
+        epic_install_path = None
         if heroic_install_path:
             if heroic_data[0] == "gog":
                 gog_install_path = heroic_install_path
@@ -129,14 +132,21 @@ def get_library() -> Path:
                     library = candidate
                     break
     elif var.launcher == "gog" or var.launcher == "epic":
-        get_heroic_data()
-        library = (
-            Path(gog_data["install_path"])
-            if var.launcher == "gog"
-            else Path(epic_data["install_path"])
-            if var.launcher == "epic"
-            else None
-        )
+        # Use cached heroic_config instead of calling get_heroic_data() again
+        if var.heroic_config and len(var.heroic_config) >= 3:
+            heroic_launcher, heroic_game_id, heroic_install_path, heroic_wine_prefix = (
+                var.heroic_config
+            )
+            if isinstance(heroic_install_path, dict):
+                library = heroic_install_path.get(var.launcher)
+            else:
+                library = heroic_install_path
+        else:
+            logger.error("Heroic configuration not available.")
+            return None
+        if not library:
+            logger.error(f"Install path not found for {var.launcher}.")
+            return None
     logger.trace(f"Determined {var.launcher} installation path: {library}")
 
     if state.current_instance:
