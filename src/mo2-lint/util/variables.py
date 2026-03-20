@@ -495,9 +495,9 @@ class GameInfo:
             tricks=tuple(data.get("tricks") or ()),
             launch_options=data.get("launch_options", {}),
             script_extenders=[
-                ScriptExtender.from_dict(se) for se in data.get("script_extenders")
+                ScriptExtender.from_dict(se) for se in data.get("script_extenders", [])
             ]
-            if data.get("script_extenders")
+            if "script_extenders" in data
             else None,
             workarounds=data.get("workarounds") or {},
         )
@@ -594,7 +594,7 @@ def load_game_info(game_key: str):
                 continue
 
             child_value = getattr(child_info, field_name)
-            if child_value in (None, (), [], {}):
+            if child_value in (None, (), {}):
                 continue
 
             parent_value = getattr(game_info, field_name)

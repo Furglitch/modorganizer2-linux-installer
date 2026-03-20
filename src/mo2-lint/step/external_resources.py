@@ -397,8 +397,8 @@ def download():
             download_plugin(plugin)
     download_winetricks()
     if params.script_extender:
+        match = False
         for entry in script_extenders or []:
-            match = False
             if entry.runtime:
                 runtime = (
                     entry.runtime.get(var.launcher)

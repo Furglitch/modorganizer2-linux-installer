@@ -33,10 +33,11 @@ def get_launcher() -> str:
                 if isinstance(var.game_info.subdirectory, dict)
                 else var.game_info.subdirectory
             )
-            steam_install_path = Path(lib) / "steamapps" / "common" / subdir
-            if steam_install_path.exists():
-                steam_has_game = True
-                break
+            if subdir is not None:
+                steam_install_path = Path(lib) / "steamapps" / "common" / subdir
+                if steam_install_path.exists():
+                    steam_has_game = True
+                    break
     if heroic_data and isinstance(heroic_data[2], Path):
         heroic_has_game = True
         heroic_install_path = heroic_data[2]
