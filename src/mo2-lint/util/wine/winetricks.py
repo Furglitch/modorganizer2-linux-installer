@@ -34,32 +34,19 @@ def run(
     """
 
     prefix = prefix.expanduser().resolve()
-    exec = (
-        exec.expanduser().resolve()
-        if isinstance(exec, Path)
-        else str(exec.expanduser().resolve())
-    )
+    exec = exec.expanduser().resolve()
 
     # Convert executable to string, with absolute path
     if str(exec).startswith("/usr/bin"):
-        if isinstance(exec, str):
-            exec = str(Path(exec).name)
-        elif isinstance(exec, Path):
-            exec = str(exec.name)
-    elif isinstance(exec, str):
-        if not Path(exec).exists():
-            logger.error(f"Winetricks executable not found at specified path: {exec}")
-            return []
-        exec = exec
-    elif isinstance(exec, Path):
+        exec = exec.name
+    else:
         if not exec.exists():
             logger.error(f"Winetricks executable not found at specified path: {exec}")
             return []
-        exec = str(exec)
     logger.info(f"Using winetricks executable: {exec}")
 
     command = ["-q", "-f"] + command  # -q for unattended, -f to force
-    cmd = [exec] + command
+    cmd = [str(exec)] + command
     logger.debug(f"Constructed winetricks command: {' '.join(cmd)}")
     env = os.environ.copy()
     env.setdefault("WINEPREFIX", str(prefix))
@@ -69,7 +56,7 @@ def run(
     add_loggers(script="mo2-lint", process="winetricks")
     output_lines = []
 
-    if not cmd == [exec, "-q", "-f"]:
+    if not cmd == [str(exec), "-q", "-f"]:
         proc = subprocess.Popen(
             cmd,
             stdout=subprocess.PIPE,
