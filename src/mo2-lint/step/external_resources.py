@@ -205,20 +205,62 @@ def download_scriptextender():
             )
     logger.trace(f"Downloaded script extender to {downloaded}")
 
-    extract(downloaded, extract_dir / "scriptextender" / downloaded.name)
-    logger.trace(
-        f"Extracted script extender to {extract_dir / 'scriptextender' / downloaded.name}"
-    )
-
-    logger.trace(
-        f"Installing script extender to {var.game_install_path} with whitelist {src[2]}"
-    )
-    install(
-        extract_dir / "scriptextender" / downloaded.name,
-        Path(var.game_install_path),
-        src[2],
-    )
+    extract_path = extract_dir / "scriptextender" / downloaded.name
+    extract(downloaded, extract_path)
+    logger.trace(f"Extracted script extender to {extract_path}")
+    install_scriptextender(extract_path, src[2] if src[2] else None)
     logger.success("Script extender download and installation complete.")
+
+
+def install_scriptextender(source: Path, whitelist: Optional[var.FileWhitelist] = None):
+    """
+    Installs the downloaded script extender to the game directory.
+
+    Parameters
+    ----------
+    source : Path
+        The path to the extracted script extender files.
+    whitelist : FileWhitelist, optional
+        A list of specific files or directories to copy from source to destination.
+    """
+    if var.input_params.plugins and "root-builder" in var.input_params.plugins:
+        logger.info("Root builder plugin detected. Installing Script Extender via MO2")
+        mod_root = var.input_params.directory / "mods" / "Script Extender"
+        root_folder = mod_root / "root"
+        data_folder = root_folder / "Data"
+
+        logger.debug(f"Installing script extender root files to {root_folder}")
+        install(
+            source,
+            root_folder,
+            whitelist,
+        )
+
+        if (
+            data_folder.exists() and data_folder.is_dir()
+        ):  # Move Data folder contents to mod root
+            logger.debug(
+                f"Moving Data folder contents from {data_folder} to {mod_root}"
+            )
+            for item in data_folder.iterdir():
+                dest = mod_root / item.name
+                if item.is_dir():
+                    copytree(item, dest, dirs_exist_ok=True)
+                else:
+                    copy(item, dest)
+                logger.trace(f"Moved {item} to {dest}")
+            rmtree(data_folder)
+
+    else:  # Otherwise, install Script Extender to game directory
+        destination = var.game_install_path
+        logger.debug(
+            f"Installing script extender to {destination} with whitelist {whitelist}"
+        )
+        install(
+            source,
+            destination,
+            whitelist,
+        )
 
 
 def download_plugin(plugin: str):
