@@ -208,11 +208,20 @@ def download_scriptextender():
     extract_path = extract_dir / "scriptextender" / downloaded.name
     extract(downloaded, extract_path)
     logger.trace(f"Extracted script extender to {extract_path}")
-    install_scriptextender(extract_path, src[2] if src[2] else None)
+    installed_files = install_scriptextender(extract_path, src[2] if src[2] else None)
+
+    if choice and getattr(choice, "version", None):
+        state.current_instance.script_extender = choice.version
+        state.current_instance.script_extender_files = installed_files
+        logger.debug(f"Tracking installed script extender version: {choice.version}")
+        logger.trace(f"Tracking {len(installed_files)} installed script extender files")
+
     logger.success("Script extender download and installation complete.")
 
 
-def install_scriptextender(source: Path, whitelist: Optional[var.FileWhitelist] = None):
+def install_scriptextender(
+    source: Path, whitelist: Optional[var.FileWhitelist] = None
+) -> list[str]:
     """
     Installs the downloaded script extender to the game directory.
 
@@ -222,15 +231,24 @@ def install_scriptextender(source: Path, whitelist: Optional[var.FileWhitelist] 
         The path to the extracted script extender files.
     whitelist : FileWhitelist, optional
         A list of specific files or directories to copy from source to destination.
+
+    Returns
+    -------
+    list[str]
+        A list of relative paths for all files that were installed.
     """
-    if var.input_params.plugins and "root-builder" in var.input_params.plugins:
+    installed_files: list[str] = []
+
+    if (
+        var.input_params.plugins and "root-builder" in var.input_params.plugins
+    ):  # If root_builder plugin is enabled, install Script Extender to mod root instead of game directory
         logger.info("Root builder plugin detected. Installing Script Extender via MO2")
         mod_root = var.input_params.directory / "mods" / "Script Extender"
         root_folder = mod_root / "root"
         data_folder = root_folder / "Data"
 
         logger.debug(f"Installing script extender root files to {root_folder}")
-        install(
+        _, installed_files = install(
             source,
             root_folder,
             whitelist,
@@ -246,8 +264,12 @@ def install_scriptextender(source: Path, whitelist: Optional[var.FileWhitelist] 
                 dest = mod_root / item.name
                 if item.is_dir():
                     copytree(item, dest, dirs_exist_ok=True)
+                    for file in dest.rglob("*"):
+                        if file.is_file():
+                            installed_files.append(str(file.relative_to(mod_root)))
                 else:
                     copy(item, dest)
+                    installed_files.append(str(dest.relative_to(mod_root)))
                 logger.trace(f"Moved {item} to {dest}")
             rmtree(data_folder)
 
@@ -256,11 +278,13 @@ def install_scriptextender(source: Path, whitelist: Optional[var.FileWhitelist] 
         logger.debug(
             f"Installing script extender to {destination} with whitelist {whitelist}"
         )
-        install(
+        _, installed_files = install(
             source,
             destination,
             whitelist,
         )
+
+    return installed_files
 
 
 def download_plugin(plugin: str):
@@ -348,7 +372,7 @@ def extract(target: Path, destination: Path) -> Path:
 
 def install(
     source: Path, destination: Path, file_list: Optional[var.FileWhitelist] = None
-) -> Path:
+) -> tuple[Path, list[str]]:
     """
     Copies files from source to destination.
 
@@ -363,9 +387,12 @@ def install(
 
     Returns
     -------
-    Path
-        The path to the destination where files were copied.
+    tuple[Path, list[str]]
+        A tuple containing the path to the destination where files were copied,
+        and a list of relative paths for all files that were installed.
     """
+
+    installed_files: list[str] = []
 
     if file_list and file_list.subdirectory:
         subdirectory = file_list.subdirectory
@@ -373,7 +400,7 @@ def install(
         file_list = file_list.paths if file_list.paths else None
     if not source.exists():
         logger.warning(f"Source path {source} does not exist. Installation skipped.")
-        return None
+        return None, []
     logger.trace(
         f"Installing from source {source} to destination {destination} with file list: {file_list}"
     )
@@ -386,41 +413,42 @@ def install(
             "No specific file list provided or file list indicates all files. Copying entire source directory."
         )
         if source.is_dir():
+            # Collect all files from source before copying
+            for item in source.rglob("*"):
+                if item.is_file():
+                    installed_files.append(str(item.relative_to(source)))
             copytree(source, destination, dirs_exist_ok=True)
         elif source.is_file():
             copy(source, destination)
+            installed_files.append(source.name)
 
     else:
-        file_list = (
-            var.FileWhitelist(paths=file_list)
-            if isinstance(file_list, tuple)
-            else var.FileWhitelist(paths=tuple(file_list))
-            if isinstance(file_list, list)
-            else var.FileWhitelist(
-                paths=tuple(
-                    file_list,
-                )
-            )
-            if isinstance(file_list, str)
-            else file_list
-            if isinstance(file_list, var.FileWhitelist)
-            else None
-        )
+        if isinstance(file_list, var.FileWhitelist):
+            pass
+        elif isinstance(file_list, str):
+            file_list = var.FileWhitelist(paths=(file_list,))
+        elif isinstance(file_list, (list, tuple)):
+            file_list = var.FileWhitelist(paths=tuple(file_list))
         logger.trace(
             f"Copying specific files from source to destination based on file list: {file_list}"
         )
         for file in file_list.paths:
-            file = source / file
-            dest = destination / file.name
-            if file.is_dir():
-                copytree(file, dest, dirs_exist_ok=True)
+            src = source / file
+            dest = destination / Path(file).name
+            if src.is_dir():
+                # Collect all files from source directory before copying
+                for item in src.rglob("*"):
+                    if item.is_file():
+                        installed_files.append(str(item.relative_to(source)))
+                copytree(src, dest, dirs_exist_ok=True)
             else:
-                if not file.parent.exists():
-                    file.parent.mkdir(parents=True, exist_ok=True)
-                copy(file, dest)
-            logger.trace(f"Copied {file} to {dest}")
+                if not src.parent.exists():
+                    src.parent.mkdir(parents=True, exist_ok=True)
+                copy(src, dest)
+                installed_files.append(str(Path(file)))
+            logger.trace(f"Copied {src} to {dest}")
 
-    return destination
+    return destination, installed_files
 
 
 def download():

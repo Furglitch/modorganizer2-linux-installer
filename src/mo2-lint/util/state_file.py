@@ -89,8 +89,10 @@ class InstanceData:
         The index of the associated launch option in the Steam appinfo.vdf file.
     launch_option_type : str
         The type of the launch option (e.g., 'OPTION3', 'none', 'default').
-    script_extender : bool
-        Whether this instance uses a script extender.
+    script_extender : Optional[str]
+        The version string of the installed script extender, or None if not installed.
+    script_extender_files : Optional[list[str]]
+        List of files installed by the script extender, relative to the game directory.
     plugins : list[str], optional
         List of plugins enabled for this MO2 instance.
 
@@ -111,7 +113,8 @@ class InstanceData:
     game_executable: str = None
     launch_option_index: int = None
     launch_option_type: str = None
-    script_extender: bool = False
+    script_extender: Optional[str] = None
+    script_extender_files: Optional[list[str]] = None
     plugins: Optional[list[str]] = None
 
     @classmethod
@@ -130,6 +133,8 @@ class InstanceData:
             game_executable=data.get("game_executable"),
             launch_option_index=data.get("launch_option_index"),
             launch_option_type=data.get("launch_option_type"),
+            script_extender=data.get("script_extender"),
+            script_extender_files=data.get("script_extender_files"),
             plugins=data.get("plugins"),
         )
 
@@ -147,6 +152,8 @@ class InstanceData:
             "game_executable": data.game_executable,
             "launch_option_index": data.launch_option_index,
             "launch_option_type": data.launch_option_type,
+            "script_extender": data.script_extender,
+            "script_extender_files": data.script_extender_files,
             "plugins": data.plugins,
         }
 
@@ -365,6 +372,48 @@ def remove_instance(instance: InstanceData, types: list[str] = ["symlink", "stat
             inst for inst in state_file.instances if inst.index != instance.index
         ]
         logger.trace(f"Removed instance index {instance.index} from state file.")
+
+    if "scriptextender" in types and instance.script_extender_files:
+        if not instance.script_extender_files:
+            if instance.script_extender:
+                logger.warning(
+                    f"Script extender version {instance.script_extender} is tracked but "
+                    "no file list is available. Cannot automatically remove script extender files."
+                )
+            return
+
+        logger.debug(
+            f"Removing {len(instance.script_extender_files)} script extender files"
+        )
+        game_path = instance.game_path
+        removed_count = 0
+
+        for file_rel_path in instance.script_extender_files:
+            file_path = game_path / file_rel_path
+            try:
+                if not (file_path.is_symlink() or file_path.exists()):
+                    logger.trace(
+                        f"Script extender file not found, skipping: {file_path}"
+                    )
+                    continue
+
+                if file_path.is_dir():
+                    try:
+                        file_path.rmdir()
+                        logger.debug(f"Removed empty directory: {file_path}")
+                        removed_count += 1
+                    except OSError:
+                        logger.trace(f"Directory not empty, skipping: {file_path}")
+                else:
+                    file_path.unlink()
+                    logger.debug(f"Removed script extender file: {file_path}")
+                    removed_count += 1
+            except Exception as e:
+                logger.warning(
+                    f"Failed to remove script extender file {file_path}: {e}"
+                )
+
+        logger.success(f"Removed {removed_count} script extender files.")
 
     write_state(False)
     logger.trace(f"State file updated after removing instance index {instance.index}.")

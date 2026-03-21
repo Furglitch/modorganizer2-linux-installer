@@ -58,7 +58,10 @@ def uninstall(game=None, directory=None):
             "User confirmed uninstallation. Proceeding to uninstall selected instances."
         )
         for inst in choice:
-            remove_instance(inst, ["symlink", "install", "state"])
+            types = ["symlink", "install", "state"]
+            if inst.script_extender and inst.script_extender_files:
+                types.append("scriptextender")
+            remove_instance(inst, types)
             logger.info(f"Uninstalled Mod Organizer 2 instance at {inst.instance_path}")
     else:
         logger.debug("Uninstallation aborted by user.")

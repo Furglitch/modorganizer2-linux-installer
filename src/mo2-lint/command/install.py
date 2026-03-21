@@ -53,7 +53,7 @@ def install(
             launcher_ids=var.LauncherIDs.from_dict(var.game_info.launcher_ids),
             game_path=get_library(),
             game_executable=executable,
-            script_extender=script_extender,
+            script_extender=None,
             plugins=list(plugin),
         )
         set_index()
