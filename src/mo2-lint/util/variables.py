@@ -497,7 +497,7 @@ class GameInfo:
             script_extenders=[
                 ScriptExtender.from_dict(se) for se in data.get("script_extenders", [])
             ]
-            if "script_extenders" in data
+            if "script_extenders" in data and data.get("script_extenders") is not None
             else None,
             workarounds=data.get("workarounds") or {},
         )

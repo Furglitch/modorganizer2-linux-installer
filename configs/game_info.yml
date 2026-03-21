@@ -265,28 +265,13 @@ games:
   falloutlondon:
     parent: fallout4
     display_name: 'Fallout: London'
-    nexus_slug: falloutlondon
-    script_extenders:
-      - version: "0.6.23"
-        runtime:
-          steam:
-            - "1.10.163"
-          gog:
-            - "1.10.163"
-        download:
-          checksum: 39575bbb688fc40598496e28afafb5270a6e44c00656a160a30f467efbade21c
-          direct: "https://f4se.silverlock.org/beta/f4se_0_06_23.7z"
-          nexus:
-            mod: 42147
-            file: 253313
-        file_whitelist:
-          subdirectory: f4se_0_06_23
-          paths:
-            - "Data"
-            - "CustomControlMap.txt"
-            - "f4se_1_10_163.dll"
-            - "f4se_loader.exe"
-            - "f4se_steam_loader.dll"
+    nexus_slug: fallout4london
+    launcher_ids:
+      steam: null
+      gog: 1897848199
+      epic: null
+    subdirectory: Fallout London
+    script_extenders: null
 
   falloutnv:
     display_name: 'Fallout: New Vegas'
