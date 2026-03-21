@@ -6,6 +6,7 @@ from step.external_resources import download_mod_organizer
 from util import state_file as state, variables as var
 from step.launch_opt import add_launch_opt, remove_launch_opt
 from util.redirector.install import install as install_redirector
+from util.wine import protontricks, winetricks
 
 
 def update(directory: Path):
@@ -51,6 +52,12 @@ def update(directory: Path):
 
     logger.debug(f"Updating MO2 executable in directory: {directory}")
     download_mod_organizer()
+
+    logger.info("Updating protontricks")
+    if state.current_instance.launcher == "steam":
+        protontricks.run(["--self-update"])
+    else:
+        winetricks.run(["--self-update"])
 
     install_redirector()
 
