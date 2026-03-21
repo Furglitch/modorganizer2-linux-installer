@@ -7,6 +7,8 @@ parent: Mod Organizer 2 Linux Installer
 
 # Using MO2-LINT
 
+> NOTE: Prior to following the instructions on this page, please read through the [Game-Specific Instructions](/usage/game-specific) section of the documentation, as there may be important information or specific steps required for your game.
+
 Below are some of the key commands and features available in MO2-LINT.
 
 ## `install`

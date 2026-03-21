@@ -15,9 +15,7 @@ body:
           required: true
         - label: I have updated to the latest installer version.
           required: false
-        - label: I have read the [post-install documentation](https://github.com/Furglitch/modorganizer2-linux-installer/blob/master/post-install.md).
-          required: true
-        - label: I have read the ['Troubleshooting' section](https://github.com/Furglitch/modorganizer2-linux-installer/blob/master/post-install.md#Troubleshooting) of the post-install documentation.
+        - label: I have read the [Troubleshooting documentation](https://wiki.furglitch.com/modorganizer2-linux-installer/troubleshooting).
           required: true
   - type: textarea
     id: issue

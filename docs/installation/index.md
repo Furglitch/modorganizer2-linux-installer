@@ -7,6 +7,13 @@ parent: Mod Organizer 2 Linux Installer
 
 # Installing MO2-LINT
 
+## Prerequisites
+- **Linux** distro. Does not work on Windows, and MacOS is not supported.
+- **Steam** (for Steam games) or **Heroic Games Launcher** (for GOG/Epic games)
+- **Proton 10.0** - Earlier versions may work. MO2-LINT currently only supports Proton 10
+
+## Installation
+
 Installation of MO2-LINT is straightforward. Follow the steps below to get started.
 
 Download the latest release from the [GitHub Releases page]. The file is called `mo2-lint` (without any file extension). <sub>Please note, only versions above 7.0.0 are supported.</sub>

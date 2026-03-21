@@ -1,15 +1,13 @@
 ---
 title: Adding Custom Games
 layout: default
-nav_order: 2
+nav_order: 3
 parent: Usage
 ---
 
 # Adding Custom Games
 
-> ## Warning
-> Adding custom games is not supported, as there are too many variables to account for. There is no guarantee that the installation or game will work properly. Use at your own risk.<br>
-> This guide is intended for advanced users who are comfortable with troubleshooting potential issues that may arise
+> Note: Adding custom games is not supported, as there are too many variables to account for. There is no guarantee that the installation or game will work properly. This guide is intended for advanced users who are comfortable with troubleshooting potential issues that may arise. Use at your own risk.
 
 The `install` command supports adding custom games via the `--custom-game` (`-c`) flag. This flag takes a path to a YAML file that defines the custom games.
 
