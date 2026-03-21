@@ -296,7 +296,7 @@ def restart_steam():
         subprocess.Popen(["killall", "steam", "steamwebhelper"])
         time.sleep(5)  # Wait for processes to terminate
         subprocess.Popen(
-            ["steam"],
+            ["steam", "-silent"],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
             start_new_session=True,

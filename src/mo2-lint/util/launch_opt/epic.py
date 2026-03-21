@@ -263,7 +263,7 @@ def restart_heroic():
         subprocess.run(["pkill", "-x", "heroic"], check=True)
         time.sleep(5)  # Wait for the process to terminate
         subprocess.Popen(
-            ["heroic"],
+            ["heroic", "--no-gui"],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
             start_new_session=True,
