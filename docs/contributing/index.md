@@ -1,7 +1,7 @@
 ---
 title: Contributing
 layout: default
-nav_order: 1
+nav_order: 4
 parent: Mod Organizer 2 Linux Installer
 ---
 

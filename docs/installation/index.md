@@ -2,7 +2,7 @@
 title: Installation
 layout: default
 nav_order: 1
-parent: Installation and Usage
+parent: Mod Organizer 2 Linux Installer
 ---
 
 # Installing MO2-LINT
