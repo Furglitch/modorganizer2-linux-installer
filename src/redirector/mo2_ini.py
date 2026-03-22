@@ -105,5 +105,5 @@ def update_mo2_ini(
         logger.success("Updated ModOrganizer.ini")
         return True
     except Exception as e:
-        logger.error(f"Failed to write INI: {e}")
+        logger.exception(f"Failed to write INI: {e}")
         return False

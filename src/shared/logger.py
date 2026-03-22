@@ -13,7 +13,7 @@ def remove_loggers() -> None:
     """
     Removes existing loggers from loguru.
     """
-    logger.trace("Removing existing loggers")
+    logger.debug("Removing existing loggers")
     handler_ids = list(logger._core.handlers.keys())
     for hid in handler_ids:
         logger.remove(hid)
@@ -93,13 +93,19 @@ def add_loggers(
         compression="zip",
     )
 
-    log_level = log_level or "INFO"
+    log_level = (
+        log_level.upper()
+        if log_level.upper()
+        in {"TRACE", "DEBUG", "INFO", "SUCCESS", "WARNING", "ERROR", "CRITICAL"}
+        else "INFO"
+    )
+
     logger.add(
         sink=console_sink if console_sink is not None else sys.stdout,
         format=console_format_str,
         level=log_level,
     )
 
-    logger.trace(
+    logger.debug(
         f"Added loggers with level {log_level} for console and TRACE for file output"
     )

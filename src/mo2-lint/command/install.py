@@ -35,7 +35,7 @@ def install(
     logger.debug(f"Starting installation with parameters: {var.input_params}")
 
     directory.mkdir(parents=True, exist_ok=True)
-    logger.trace(f"Ensured installation directory exists: {directory}")
+    logger.debug(f"Ensured installation directory exists: {directory}")
 
     if not state.match_instances(directory=directory):
         launcher = get_launcher()

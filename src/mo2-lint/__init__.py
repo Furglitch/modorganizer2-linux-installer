@@ -42,7 +42,7 @@ def check_update():
                 f"Parsed version parts: current={version_parts}, latest={latest_parts}"
             )
             if tuple(latest_parts) > tuple(version_parts):
-                logger.critical(
+                logger.warning(
                     f"A new version of MO2-LINT is available: {latest}. Please update to the latest version."
                 )
                 return
@@ -207,7 +207,7 @@ def load_game_info(game: Optional[str], game_info_path: Optional[Path]):
             logger.debug("Defaulting to standard game_info.yml from .config folder.")
             var.load_games_info()
         else:
-            logger.info(f"Using custom game_info.yml from path: {game_info_path}")
+            logger.debug(f"Using custom game_info.yml from path: {game_info_path}")
             var.load_games_info(game_info_path)
     else:
         var.load_games_info()
@@ -313,7 +313,7 @@ def install(
     log_level,
 ):
     game, directory = start(game, directory, game_info_path, log_level)
-    logger.trace(
+    logger.debug(
         f"Running install command with game={game}, directory={directory}, game_info_path={game_info_path}, script_extender={script_extender}, plugin={plugin}"
     )
     if plugin:
@@ -343,7 +343,7 @@ def install(
 @click_opt_game
 def uninstall(game: str, directory: Path, game_info_path: Optional[Path], log_level):
     game, directory = start(game, directory, game_info_path, log_level)
-    logger.trace(
+    logger.debug(
         f"Running uninstall command with game={game}, directory={directory}, game_info_path={game_info_path}"
     )
     _uninstall(game, directory)
@@ -358,7 +358,7 @@ def uninstall(game: str, directory: Path, game_info_path: Optional[Path], log_le
 @click_opt_game
 def list(game: Optional[str], directory: Optional[Path], log_level):
     game, directory = start(game, directory, log_level=log_level)
-    logger.trace(f"Running list command with game={game}, directory={directory}")
+    logger.debug(f"Running list command with game={game}, directory={directory}")
     _list(game, directory)
 
 
@@ -369,7 +369,7 @@ def list(game: Optional[str], directory: Optional[Path], log_level):
 @click_arg_directory(required=True)
 def pin(directory: Path, log_level):
     waste, directory = start(directory=directory, log_level=log_level)
-    logger.trace(f"Running pin command with directory={directory}")
+    logger.debug(f"Running pin command with directory={directory}")
     _pin(directory, pin=True)
 
 
@@ -380,7 +380,7 @@ def pin(directory: Path, log_level):
 @click_arg_directory(required=True)
 def unpin(directory: Path, log_level):
     waste, directory = start(directory=directory, log_level=log_level)
-    logger.trace(f"Running unpin command with directory={directory}")
+    logger.debug(f"Running unpin command with directory={directory}")
     _pin(directory, pin=False)
 
 
@@ -391,7 +391,7 @@ def unpin(directory: Path, log_level):
 @click_arg_directory(required=True)
 def update(directory: Path, log_level):
     waste, directory = start(directory=directory, log_level=log_level)
-    logger.trace(f"Running update command with directory={directory}")
+    logger.debug(f"Running update command with directory={directory}")
     _update(directory)
 
 

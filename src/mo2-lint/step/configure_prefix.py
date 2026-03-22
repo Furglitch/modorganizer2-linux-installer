@@ -130,7 +130,7 @@ def configure():
     Run the necessary winetricks/protontricks for the selected game launcher.
     """
     tricks = default_tricks + list(var.game_info.tricks)
-    logger.info(f"Configuring prefix with the following tricks: {tricks}")
+    logger.debug(f"Configuring prefix with the following tricks: {tricks}")
     match var.launcher:
         case "steam":
             protontricks.apply(var.game_info.launcher_ids.steam, tricks)

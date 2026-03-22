@@ -70,7 +70,7 @@ def request_connection_token() -> str:
     """
 
     uuid = id()
-    logger.info(f"Requesting new Nexus connection token with UUID: {uuid}")
+    logger.debug(f"Requesting new Nexus connection token with UUID: {uuid}")
     with websockets.connect("wss://sso.nexusmods.com") as socket:
         logger.trace("Connected to Nexus SSO WebSocket server.")
         socket.send(
@@ -128,7 +128,7 @@ def request_api_key() -> str:
     uuid = str(id())
     token = connection_token()
     key = ""
-    logger.info(f"Requesting new Nexus API key with UUID: {uuid} and connection token")
+    logger.debug(f"Requesting new Nexus API key with UUID: {uuid} and connection token")
     with websockets.connect("wss://sso.nexusmods.com") as socket:
         logger.trace("Connected to Nexus SSO WebSocket server.")
         socket.send(

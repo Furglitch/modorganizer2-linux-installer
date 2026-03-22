@@ -62,7 +62,7 @@ def install():
         )
         return
 
-    logger.trace(f"Game install path: {game_install_path}")
+    logger.debug(f"Game install path: {game_install_path}")
     logger.info(f"Installing redirector to: {redirector_path}")
 
     copy2(redirector_build, redirector_path)

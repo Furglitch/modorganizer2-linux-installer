@@ -14,14 +14,12 @@ def pin(directory: Path, pin: bool = True):
     if not matched:
         logger.error(f"No MO2 instance found in {directory}")
     elif len(matched) > 1:
-        logger.critical(
-            f"Multiple MO2 instances found in {directory}. Please specify the instance directory more precisely."
-        )
-        logger.error("Matched instances:")
+        logger.error(f"Multiple MO2 instances found in {directory}.")
+        logger.warning("Matched instances:")
         for key, value in matched.items():
-            logger.error(f"  - {key}: {value}")
-        logger.error(
-            "Only one instance can be un-/pinned at a time. Please try again with a more specific directory."
+            logger.warning(f"  - {key}: {value}")
+        logger.critical(
+            "Only one instance can be un-/pinned at a time. Please try again with the exact directory."
         )
         raise SystemExit(1)
 

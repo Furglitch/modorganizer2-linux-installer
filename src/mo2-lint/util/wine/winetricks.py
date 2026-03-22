@@ -43,11 +43,11 @@ def run(
         if not exec.exists():
             logger.error(f"Winetricks executable not found at specified path: {exec}")
             return []
-    logger.info(f"Using winetricks executable: {exec}")
+    logger.debug(f"Using winetricks executable: {exec}")
 
-    command = ["-q", "-f"] + command  # -q for unattended, -f to force
-    cmd = [str(exec)] + command
-    logger.debug(f"Constructed winetricks command: {' '.join(cmd)}")
+    cmd = ["-q", "-f"] + command  # -q for unattended, -f to force
+    cmd = [str(exec)] + cmd
+    logger.trace(f"Constructed winetricks command: {' '.join(cmd)}")
     env = os.environ.copy()
     env.setdefault("WINEPREFIX", str(prefix))
     logger.trace(f"Using Wine prefix: {prefix}")
@@ -105,7 +105,7 @@ def apply(
     if not tricks:
         logger.warning("No tricks provided to apply, skipping winetricks execution.")
         return
-    logger.info(f"Applying tricks to prefix with winetricks: {tricks}")
+    logger.debug(f"Applying tricks to prefix with winetricks: {tricks}")
     run(exec, prefix, tricks)
 
 
@@ -129,10 +129,10 @@ def log_translation(input: str = None):
     if reg1:
         trick = reg1.group(1).strip()
         translated = f"Applying trick: '{trick}'"
-        logger.info(translated)
+        logger.debug(translated)
         return
     if reg2:
         dlls = reg2.group(1).strip()
         translated = f"Setting native DLLs: '{dlls}'"
-        logger.info(translated)
+        logger.debug(translated)
         return

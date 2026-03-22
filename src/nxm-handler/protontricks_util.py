@@ -27,7 +27,7 @@ def run(command: List[str]) -> List[str]:
     """
 
     args = ["--verbose"] + command
-    logger.debug(f"Constructed protontricks command: {' '.join(args)}")
+    logger.trace(f"Constructed protontricks command: {' '.join(args)}")
 
     output_lines = []
     if args != ["--verbose"]:
@@ -79,22 +79,22 @@ def log_translation(input: str = None):
             cmd = cmd[1:-1].strip()
             cmd = cmd.replace("'", "").replace(",", "")
         translated = f"Running: '{cmd}'"
-        logger.info(translated)
+        logger.debug(translated)
         return
     if reg2:
         trick = reg2.group(1).strip()
         translated = f"Applying trick: '{trick}'"
-        logger.info(translated)
+        logger.debug(translated)
         return
     if reg3:
         dlls = reg3.group(1).strip()
         translated = f"Setting native DLLs: '{dlls}'"
-        logger.info(translated)
+        logger.debug(translated)
         return
     if reg4:
         pid_info = reg4.group(1).strip()
         translated = f"End of protontricks process (PID: {pid_info})"
-        logger.info(translated)
+        logger.debug(translated)
         return
 
 

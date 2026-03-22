@@ -36,10 +36,10 @@ def download_mod_organizer():
     )
 
     downloaded = dl(url, download_dir, checksum=checksum)
-    logger.trace(f"Downloaded Mod Organizer 2 to {downloaded}")
+    logger.debug(f"Downloaded Mod Organizer 2 to {downloaded}")
     extracted = extract(downloaded, extract_dir / downloaded.stem)
     if extracted and extracted.exists():
-        logger.trace(f"Extracted Mod Organizer 2 to {extracted}")
+        logger.debug(f"Extracted Mod Organizer 2 to {extracted}")
         destination = var.input_params.directory
         mo2_exec = destination / path_internal
         if (  # if ModOrganizer.exe exists in destination check if it's the same file
@@ -47,13 +47,13 @@ def download_mod_organizer():
         ):
             if not compare_checksum(mo2_exec, checksum_internal):
                 if not lang.prompt_install_mo2_checksum_fail(str(mo2_exec)):
-                    logger.trace(
+                    logger.info(
                         "User chose not to overwrite existing Mod Organizer 2 executable. Skipping installation."
                     )
                     return
         elif not destination.exists():
             destination.mkdir(parents=True, exist_ok=True)
-    logger.trace(f"Installing Mod Organizer 2 to {destination}")
+    logger.debug(f"Installing Mod Organizer 2 to {destination}")
     install(extracted, destination, None)
     logger.success("Mod Organizer 2 download and installation complete.")
 
@@ -84,11 +84,11 @@ def download_java():
         f"Download info: url={url}, checksum={checksum}, path_internal={path_internal}, checksum_internal={checksum_internal}"
     )
     downloaded = dl(url, download_dir, checksum=checksum)
-    logger.trace(f"Downloaded Java to {downloaded}")
+    logger.debug(f"Downloaded Java to {downloaded}")
     extracted = extract(downloaded, extract_dir / downloaded.stem)
 
     if extracted and extracted.exists():
-        logger.trace(f"Extracted Java to {extracted}")
+        logger.debug(f"Extracted Java to {extracted}")
         if not compare_checksum(extracted / path_internal, checksum_internal):
             downloaded.unlink(missing_ok=True)
             extracted.rmdir()
@@ -108,7 +108,7 @@ def download_java():
         if var.resource_info.java.file_whitelist
         else None
     )
-    logger.trace(
+    logger.debug(
         f"Installing Java to {install_dir} with file whitelist: {file_whitelist}"
     )
     install(extracted, install_dir, file_whitelist)
@@ -148,7 +148,7 @@ def download_scriptextender():
             choice = matches[index]
     else:
         return
-    logger.info(f"Chosen script extender entry: {choice}")
+    logger.debug(f"Chosen script extender entry: {choice}")
 
     src = [None, None, None]  # [download source, checksum, file whitelist]
     if choice is None:
@@ -170,7 +170,7 @@ def download_scriptextender():
                 src[1] = getattr(direct, "checksum", None)
             else:
                 src[1] = getattr(download_info, "checksum", None)
-            logger.trace(
+            logger.debug(
                 "Determined download method for script extender: direct download"
             )
         elif getattr(download_info, "nexus", None):
@@ -178,7 +178,7 @@ def download_scriptextender():
             mod_id = nexus_info.get("mod", None)
             file_id = nexus_info.get("file", None)
             src[0] = f"nxm(mod={mod_id}, file={file_id})"
-            logger.trace(
+            logger.debug(
                 "Determined download method for script extender: Nexus download"
             )
             if getattr(nexus_info, "checksum", None):
@@ -203,11 +203,11 @@ def download_scriptextender():
                 download_dir,
                 checksum=src[1],
             )
-    logger.trace(f"Downloaded script extender to {downloaded}")
+    logger.debug(f"Downloaded script extender to {downloaded}")
 
     extract_path = extract_dir / "scriptextender" / downloaded.name
     extract(downloaded, extract_path)
-    logger.trace(f"Extracted script extender to {extract_path}")
+    logger.debug(f"Extracted script extender to {extract_path}")
     installed_files = install_scriptextender(extract_path, src[2] if src[2] else None)
 
     if choice and getattr(choice, "version", None):
@@ -304,7 +304,7 @@ def download_plugin(plugin: str):
     manifest[plugin] = var.plugin_info[plugin].manifest
     if not manifest[plugin]:
         return
-    logger.trace(f"Found manifest URL for plugin {plugin}: {manifest[plugin]}")
+    logger.debug(f"Found manifest URL for plugin {plugin}: {manifest[plugin]}")
 
     # Download manifest using SSL context
     req = Request(manifest[plugin])
@@ -327,11 +327,11 @@ def download_plugin(plugin: str):
 
     destination = download_dir / "plugins" / plugin
     downloaded = dl(url, destination, url.split("/")[-1])
-    logger.trace(f"Downloaded plugin {plugin} to {downloaded}")
+    logger.debug(f"Downloaded plugin {plugin} to {downloaded}")
 
     extract_dest = extract_dir / "plugins" / plugin / downloaded.name
     extract(downloaded, extract_dest)
-    logger.trace(f"Extracted plugin {plugin} to {extract_dest}")
+    logger.debug(f"Extracted plugin {plugin} to {extract_dest}")
 
     logger.trace(
         f"Installing plugin {plugin} to {var.input_params.directory / 'plugins'} with whitelist {file_path}"
