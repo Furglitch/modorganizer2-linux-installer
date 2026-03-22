@@ -32,6 +32,10 @@ def uninstall(game=None, directory=None):
             f"Found 1 matching Mod Organizer 2 instance for game={game}, directory={directory}"
         )
         choice = matched
+        instance_list.append(matched[0])
+        logger.info(
+            f"Automatically selected the only matching instance for uninstallation: {matched[0].instance_path}"
+        )
     else:
         logger.debug(
             f"Found {length} matching Mod Organizer 2 instances for game={game}, directory={directory}"
@@ -39,7 +43,19 @@ def uninstall(game=None, directory=None):
         for instance in matched:
             instance_list.append(instance)
         instance = lang.prompt_uninstall_choice(instance_list)
-        logger.debug(f"User selected instance for uninstallation: {instance}")
+        instance_path = (
+            instance_list[instance - 1].instance_path
+            if isinstance(instance, int)
+            else next(
+                (
+                    inst.instance_path
+                    for inst in instance_list
+                    if inst.instance_path == instance
+                ),
+                None,
+            )
+        )
+        logger.debug(f"User selected instance for uninstallation: {instance_path}")
         if isinstance(instance, int):
             if not (0 < instance < (len(matched) + 1)):
                 logger.warning(f"Invalid instance number selected: {instance}")
