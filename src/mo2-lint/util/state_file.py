@@ -232,8 +232,8 @@ def load_state_file():
         try:
             with filepath.open("r", encoding="utf-8") as f:
                 data = json.load(f)
-        except Exception as e:
-            logger.exception(f"Failed to load state file: {e}")
+        except Exception:
+            logger.exception("Failed to load state file")
             logger.critical(
                 "State file is corrupted or unreadable. Please validate or delete it to continue."
             )
@@ -440,6 +440,7 @@ def write_state(add_current: bool = True):
             if inst.index == current_instance.index:
                 state_file.instances[i] = state.InstanceData.from_dict(current_instance)
 
+    logger.debug(f"Writing state file with {len(state_file.instances)} instances")
     json = to_json(StateFile.to_dict(state_file), indent=2).decode("utf-8")
     with filepath.open("w", encoding="utf-8") as f:
         f.write(json)

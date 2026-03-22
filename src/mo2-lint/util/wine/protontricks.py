@@ -40,8 +40,8 @@ def run(command: List[str]) -> List[str]:
                     logger.error(
                         f"protontricks exited with code {e.code} for args: {args}"
                     )
-            except Exception as e:
-                logger.exception(f"Error running protontricks with args: {args} - {e}")
+            except Exception:
+                logger.exception(f"Error running protontricks with args: {args}")
             finally:
                 logger.success(f"Finished running protontricks with args: {args}")
     else:
@@ -196,9 +196,9 @@ def redirect_output_to_logger():
                     logger.trace(f"protontricks: {line}")
                     try:
                         log_translation(line)
-                    except Exception as e:
+                    except Exception:
                         logger.exception(
-                            f"Error translating protontricks log line: {line}. {e}"
+                            f"Error translating protontricks log line: {line}."
                         )
 
     threading.Thread(target=reader_thread, daemon=True).start()

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from InquirerPy import prompt
+from loguru import logger
 from pathlib import Path
 from typing import Optional
 from util import state_file as state, variables as var
@@ -52,6 +53,7 @@ def prompt_archive() -> bool:
     bool
         True if the user agrees to archive prefix, False otherwise.
     """
+    logger.debug("Prompting user to archive existing prefix")
 
     message = """It is recommended to archive your existing game prefix and create a clean one for Mod Organizer 2 to avoid potential conflicts.
 
@@ -67,6 +69,7 @@ def prompt_archive() -> bool:
         "default": False,
     }
     result = prompt([msg])
+    logger.debug(f"User chose to archive prefix: {result['archive_clean']}")
     return result["archive_clean"]
 
 
@@ -79,6 +82,9 @@ def prompt_archive_init() -> bool:
     bool
         True if the user indicates they have followed the instructions, False otherwise.
     """
+    logger.debug(
+        f"Prompting user to initialize clean prefix for launcher: {state.current_instance.launcher}"
+    )
 
     match state.current_instance.launcher:
         case "steam":
@@ -110,6 +116,9 @@ def prompt_archive_init() -> bool:
         "default": False,
     }
     result = prompt([msg])
+    logger.debug(
+        f"User completed clean prefix initialization: {result['clean_prefix_done']}"
+    )
     return result["clean_prefix_done"]
 
 
@@ -122,6 +131,7 @@ def prompt_install_mo2_checksum_fail(mo2_path: str) -> bool:
     bool
         True if the user wants to proceed with installation, False otherwise.
     """
+    logger.debug(f"MO2 checksum verification failed for: {mo2_path}")
 
     message = f"""Mod Organizer 2 checksum verification has failed for the installation located at: {mo2_path}
   This could indicate that an updated version is available in this installer, or that the installation is corrupted.
@@ -135,6 +145,9 @@ def prompt_install_mo2_checksum_fail(mo2_path: str) -> bool:
         "default": False,
     }
     result = prompt([msg])
+    logger.debug(
+        f"User chose to proceed with failed checksum: {result['mo2_checksum_proceed']}"
+    )
     return result["mo2_checksum_proceed"]
 
 
@@ -152,6 +165,9 @@ def prompt_install_scriptextender_choice(script_extenders: dict) -> int:
     int
         The index of the selected script extender.
     """
+    logger.debug(
+        f"Prompting user to select script extender from {len(script_extenders)} options"
+    )
 
     message = "Multiple script extenders are available for installation.\n  Please select one: "
     choices = []
@@ -180,6 +196,7 @@ def prompt_install_scriptextender_choice(script_extenders: dict) -> int:
     }
     result = prompt([msg])
     index = int(result["scriptextender_choice"].split(":")[0]) - 1
+    logger.debug(f"User selected script extender at index: {index}")
     return index
 
 
@@ -216,6 +233,7 @@ def prompt_instance_choice(
     result = result["instance_choice"].split(":")[0]
     if result.isdigit():
         result = int(result)
+    logger.debug(f"User selected instance: {result}")
     return result
 
 
@@ -225,6 +243,9 @@ def prompt_instance_choice_existing(
     """
     Prompts the user to choose between using an existing instance or creating a new one.
     """
+    logger.debug(
+        f"Prompting user to select from {len(existing_instances)} existing instances or create new"
+    )
 
     choices = [
         f"{inst.nexus_slug} at {inst.instance_path}" for inst in existing_instances
@@ -239,6 +260,7 @@ def prompt_instance_choice_existing(
     result = prompt([msg])
     if not result["instance_option"] == "Create new instance":
         result["instance_option"] = Path(result["instance_option"].split(" at ")[1])
+    logger.debug(f"User chose: {result['instance_option']}")
     return result["instance_option"]
 
 
@@ -246,6 +268,7 @@ def prompt_instance_choice_exact() -> bool:
     """
     Prompts the user to confirm using the exact instance found.
     """
+    logger.debug("Instance path conflict detected - prompting user for confirmation")
 
     message = """The path of the chosen instance directly matches the directory you specified.
 
@@ -262,6 +285,9 @@ def prompt_instance_choice_exact() -> bool:
         "default": True,
     }
     result = prompt([msg])
+    logger.debug(
+        f"User chose to use exact instance path: {result['use_exact_instance']}"
+    )
     return result["use_exact_instance"]
 
 
@@ -269,6 +295,9 @@ def prompt_instance_conflict() -> bool:
     """
     Prompts the user to confirm proceeding when an instance conflict is detected.
     """
+    logger.debug(
+        f"Instance link conflict detected for game: {state.current_instance.game}"
+    )
 
     message = f"""An existing instance link was found for the game {state.current_instance.game}.
 
@@ -283,6 +312,9 @@ def prompt_instance_conflict() -> bool:
         "default": False,
     }
     result = prompt([msg])
+    logger.debug(
+        f"User chose to overwrite existing link: {result['instance_conflict_proceed']}"
+    )
     return result["instance_conflict_proceed"]
 
 
@@ -292,6 +324,7 @@ def prompt_launcher_choice(
     """
     Prompts the user to choose which launcher to use.
     """
+    logger.debug("Prompting user to select launcher")
     choices = []
     if steam_path:
         choices.append(f"Steam: {steam_path}")
@@ -307,6 +340,7 @@ def prompt_launcher_choice(
         "name": "launcher_choice",
     }
     result = prompt([msg])
+    logger.debug(f"User selected launcher: {result['launcher_choice']}")
     return result["launcher_choice"]
 
 
@@ -323,6 +357,7 @@ def prompt_uninstall_confirm():
     """
     Prompts the user to confirm uninstallation of the selected instance(s).
     """
+    logger.debug("Prompting user to confirm uninstallation")
     msg = {
         "type": "confirm",
         "message": "Are you sure you want to uninstall the selected instance(s)?",
@@ -330,6 +365,7 @@ def prompt_uninstall_confirm():
         "default": False,
     }
     result = prompt([msg])
+    logger.debug(f"User confirmed uninstallation: {result['confirm_uninstall']}")
     return result["confirm_uninstall"]
 
 
@@ -342,6 +378,7 @@ def prompt_uninstall_trash() -> bool:
     bool
         True if the user chooses to delete permanently, False if moving to trash.
     """
+    logger.debug("Prompting user for trash/permanent delete choice")
 
     msg = {
         "type": "list",
@@ -351,7 +388,9 @@ def prompt_uninstall_trash() -> bool:
         "default": "Move to Trash",
     }
     result = prompt([msg])
-    if result["trash_choice"] == "Delete Permanently":
+    permanent_delete = result["trash_choice"] == "Delete Permanently"
+    logger.debug(f"User chose permanent delete: {permanent_delete}")
+    if permanent_delete:
         return True
     return False
 
@@ -360,6 +399,7 @@ def prompt_uninstall_trash_confirm() -> bool:
     """
     Prompts the user to confirm permanent deletion.
     """
+    logger.debug("Prompting user to confirm permanent deletion")
 
     msg = {
         "type": "confirm",
@@ -368,4 +408,5 @@ def prompt_uninstall_trash_confirm() -> bool:
         "default": False,
     }
     result = prompt([msg])
+    logger.debug(f"User confirmed permanent deletion: {result['confirm_trash_config']}")
     return result["confirm_trash_config"]

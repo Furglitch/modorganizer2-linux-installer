@@ -268,8 +268,8 @@ def restart_heroic():
             stderr=subprocess.DEVNULL,
             start_new_session=True,
         )
-    except Exception as e:
-        logger.exception(f"Failed to restart Heroic: {e}")
+    except Exception:
+        logger.exception("Failed to restart Heroic")
         logger.warning(
             "You may need to manually restart Heroic for changes to take effect."
         )

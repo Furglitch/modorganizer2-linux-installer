@@ -301,8 +301,8 @@ def restart_steam():
             stderr=subprocess.DEVNULL,
             start_new_session=True,
         )
-    except Exception as e:
-        logger.exception(f"Failed to restart Steam: {e}")
+    except Exception:
+        logger.exception("Failed to restart Steam")
         logger.warning(
             "You may need to manually restart Steam for changes to take effect."
         )

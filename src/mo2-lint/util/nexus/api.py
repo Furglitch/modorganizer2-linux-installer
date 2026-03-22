@@ -148,9 +148,9 @@ def request_api_key() -> str:
                 "https://www.nexusmods.com/sso?id=" + uuid + "&application=mo2lint"
             )
             message = socket.recv()
-        except Exception as e:
+        except Exception:
             logger.exception(
-                f"Error while waiting for response from Nexus SSO WebSocket server: {e}"
+                "Error while waiting for response from Nexus SSO WebSocket server"
             )
             return ""
         finally:

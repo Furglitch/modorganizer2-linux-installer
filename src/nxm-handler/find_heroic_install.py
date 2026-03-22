@@ -90,8 +90,8 @@ def get_wine_path(game_id: str | int, config_directory: Path) -> Optional[str]:
         with open(config_json, "r", encoding="utf-8") as file:
             data = from_json(file.read())
         wine_path = data.get(str(game_id), {}).get("wineVersion", {}).get("bin") or None
-    except Exception as e:
-        logger.warning(f"Failed to parse {config_json} for wine path: {e}")
+    except Exception:
+        logger.exception(f"Failed to parse {config_json} for wine path")
         failed = True
 
     if failed or not wine_path:
@@ -107,8 +107,8 @@ def get_wine_path(game_id: str | int, config_directory: Path) -> Optional[str]:
             else:
                 logger.warning(f"Global config JSON not found at {global_cfg}")
                 return None
-        except Exception as e:
-            logger.warning(f"Failed to parse {global_cfg} for wine version: {e}")
+        except Exception:
+            logger.exception(f"Failed to parse {global_cfg} for wine version")
             return None
 
     if not wine_path:
@@ -194,8 +194,8 @@ def get_libraries(
                     if item.get("appName") == str(gog_data["game_id"]):
                         gog_data["json"] = item
                         break
-        except Exception as e:
-            logger.error(f"Failed to parse {gog_data['installed_json']}: {e}")
+        except Exception:
+            logger.exception(f"Failed to parse {gog_data['installed_json']}")
             gog_available = False
 
         if gog_available and gog_data.get("json"):
@@ -216,8 +216,8 @@ def get_libraries(
         try:
             with open(epic_data["installed_json"], "r", encoding="utf-8") as file:
                 json = from_json(file.read()).get(epic_data["game_id"], {})
-        except Exception as e:
-            logger.error(f"Unable to parse {epic_data['installed_json']}: {e}")
+        except Exception:
+            logger.exception(f"Unable to parse {epic_data['installed_json']}")
             epic_available = False
 
         if epic_available and json:

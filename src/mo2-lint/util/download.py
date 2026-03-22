@@ -70,9 +70,9 @@ def download(
                     f"Successfully downloaded {filename} from {url} on attempt {i + 1}."
                 )
                 return export
-        except Exception as e:
+        except Exception:
             logger.exception(
-                f"Failed to download {filename} from {url} on attempt {i + 1}. {e}"
+                f"Failed to download {filename} from {url} on attempt {i + 1}."
             )
     return None
 
@@ -132,8 +132,8 @@ def download_nexus(
                 f"Successfully downloaded file_id {file_id} from mod_id {mod_id} for game {game} from Nexus Mods."
             )
             return export
-    except Exception as e:
+    except Exception:
         logger.exception(
-            f"Failed to download file_id {file_id} from mod_id {mod_id} for game {game} from Nexus Mods. {e}"
+            f"Failed to download file_id {file_id} from mod_id {mod_id} for game {game} from Nexus Mods."
         )
     return None

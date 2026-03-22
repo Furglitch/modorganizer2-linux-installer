@@ -64,8 +64,8 @@ def get_libraries() -> list[Path]:
                     for i in range(len(libraries)):
                         libraries[i] = Path(libraries[i])
                     logger.trace(f"Found Steam library folders: {libraries}")
-            except Exception as e:
-                logger.exception(f"Error reading libraryfolders.vdf in {library}: {e}")
+            except Exception:
+                logger.exception(f"Error reading libraryfolders.vdf in {library}")
         else:
             logger.trace(f"Steam directory does not exist: {dir}")
     logger.debug(f"Total Steam library directories found: {len(libraries)}")

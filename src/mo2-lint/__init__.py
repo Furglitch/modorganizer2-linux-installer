@@ -46,8 +46,8 @@ def check_update():
                     f"A new version of MO2-LINT is available: {latest}. Please update to the latest version."
                 )
                 return
-    except Exception as e:
-        logger.exception(f"Failed to check for updates: {e}")
+    except Exception:
+        logger.exception("Failed to check for updates")
         return
     logger.info("No updates available.")
 
@@ -115,8 +115,8 @@ def pull_config():
                 with urlopen(req, context=ssl_context) as response:
                     with open(config_path, "wb") as out_file:
                         out_file.write(response.read())
-        except Exception as e:
-            logger.exception(f"Failed to download config file {config}: {e}")
+        except Exception:
+            logger.exception(f"Failed to download config file {config}")
 
 
 game_list = None

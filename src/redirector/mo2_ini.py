@@ -63,8 +63,11 @@ def update_mo2_ini(
     if ini_path.exists():
         try:
             config.read(ini_path, encoding="utf-8")
-        except Exception as e:
-            logger.warning(f"Failed to read existing INI: {e}")
+            logger.debug(f"Successfully read existing INI: {ini_path}")
+        except Exception:
+            logger.exception(f"Failed to read existing INI: {ini_path}")
+    else:
+        logger.debug(f"INI file does not exist, will create new: {ini_path}")
 
     if "customExecutables" not in config:
         config.add_section("customExecutables")
@@ -104,6 +107,6 @@ def update_mo2_ini(
             config.write(f, space_around_delimiters=False)
         logger.success("Updated ModOrganizer.ini")
         return True
-    except Exception as e:
-        logger.exception(f"Failed to write INI: {e}")
+    except Exception:
+        logger.exception("Failed to write INI")
         return False

@@ -67,9 +67,20 @@ def install(
         raise SystemExit(1)
 
     configure_prefix()
+    logger.info("Prefix configuration completed")
+
     download()
+    logger.info("Download phase completed")
+
     install_handler()
+    logger.info("Installation handler completed")
+
     install_redirector()
+    logger.info("Redirector installation completed")
+
     add_launch_opt()
+    logger.info("Launch options configured")
 
     apply_workarounds()
+    logger.info("Workarounds applied")
+    logger.success("Installation completed successfully")

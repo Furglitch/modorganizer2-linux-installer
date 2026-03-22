@@ -223,8 +223,8 @@ def send_url(instance_dir: Path, url: str, env_info: dict) -> None:
             subprocess.run(
                 cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env
             )
-        except Exception as e:
-            logger.exception(f"Failed to execute handler command: {e}")
+        except Exception:
+            logger.exception("Failed to execute handler command")
     else:
         logger.warning("Unknown launcher, cannot send URL")
         return
