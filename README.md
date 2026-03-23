@@ -1,4 +1,4 @@
-<img src="./.github/README/logo.svg" alt="Mod Organizer 2 Linux Installer Logo" width="96" align="left" />
+<img src="https://github.com/Furglitch/modorganizer2-linux-installer/Furglitch/modorganizer2-linux-installer/raw/master/.github/img/modorganizer2-linux-installer.svg" alt="MO2-LINT Logo" width="96" align="left" />
 
 # Mod Organizer 2 Linux Installer (MO2-LINT)
 
