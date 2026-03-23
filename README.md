@@ -4,24 +4,55 @@
 
 <br clear="left"/>
 
-Currently, MO2-LINT is almost written entirely in Bash. [As stated by the original developer](https://github.com/Furglitch/modorganizer2-linux-installer/issues/182#issuecomment-740300503), this was due to it's ease of access and integration.
+Mod Organizer 2 Linux Installer (MO2-LINT, for short) aims to make installing [Mod Organizer 2] on Linux systems easier and more accessible, providing a simple process to set up a fully functional Mod Organizer 2 installation with minimal user input.
 
-But, as the functionality and userbase of this project has grown, the cracks in approach have started to show. The codebase is becoming increasingly difficult to manage and expand upon.
+Originally developed by [rockerbacon][@rockerbacon] as a Bash script, it has since been maintained by [furglitch][@furglitch] and fully rewritten in Python to improve maintainability, extensibility, and cross-distro compatibility.
 
-As such, the project will be rewritten in it's entirety, switching over to Python.
+## Features
+- Automated installation and removal of Mod Organizer 2 and its dependencies
+- Support for multiple instances of Mod Organizer 2
+- No additional installations required beyond the installer itself
+- Easy-to-use command-line interface
+- Automatic handling of the Nexus Mods 'Mod Manager Download' button via a custom NXM handler
+- Automatic setup of various plugins for Mod Organizer 2
+- Implements various workarounds to improve compatibility with certain mods
 
----
+### Supported Games
 
-Our goals with this rewrite are as follows:
-* **Preserve the Functionality of the Original Script** - Set-up of the MO2 instances, related game's Proton prefix, NXM protocol integration and Steam Redirector (The "simply click play in Steam" part).
-* **Improve User Experience** - Give users a clearer and more streamlined installer. Visually pleasing is a plus.
-  * **Troubleshooting** - Provide clearer logging so that less adept users might be more able to resolve issues on their own.
-  * **Instance Management** - Allow users to modify or uninstall existing instances of MO2.
-* **Improve Contributor Experience** - Improve script readability and expansion capability.
-  * **Linting** - Enforce code styles with pre-commit hooks and linters.
-* **Improve Distribution** - Package MO2-LINT as an AppImage, rather than multiple scripts in a .tar file.
-* **Improve Downloads** - Decrease the resource-intensiveness of downloads for the MO2 instance
-  * **Caching** - The script will cache external resources locally for future use, for the benefit of file providers and those will less capable hardware/ISPs.
-  * **Cache Purging** - Cache purging will no longer occur whenever the script fails, as it did originally.
+| Game                     | Gameplay          | Script Extender                                          | ENB                                                            |
+|:-------------------------|:------------------|:---------------------------------------------------------|:---------------------------------------------------------------|
+| Cyberpunk 2077           | Working*          | N/A                                                      | Not Tested                                                     |
+| Dragon Age: Origins      | Working*          | N/A                                                      | N/A                                                            |
+| Enderal                  | Working*          | Working*                                                 | Working*                                                       |
+| Enderal Special Edition  | Working*          | Working*                                                 | Not Tested                                                     |
+| Fallout 3                | Working*          | Working*                                                 | Not Tested                                                     |
+| Fallout 3 GOTY           | Working*          | Working*                                                 | Not Tested                                                     |
+| Fallout 4                | Working*          | Some F4SE plugins may not work. See [#32]*               | ≤ v0.393 may need `EnablePostPassShader` disabled. See [#95]*  |
+| Fallout London           | Not Tested        | Not Tested                                               | Not Tested                                                     |
+| Fallout New Vegas        | Fullscreen Only*  | Working*                                                 | Working*                                                       |
+| Morrowind                | Not Tested*       | Not Tested                                               | Not Tested                                                     |
+| Oblivion                 | Working*          | Some xOBSE plugins may require manual setup. See [#63]*  | Not Tested                                                     |
+| Skyrim                   | Working*          | Working*                                                 | Working*                                                       |
+| Skyrim Special Edition   | Working*          | Working*                                                 | Working*                                                       |
+| Starfield                | Working*          | Working*                                                 | Not Tested                                                     |
 
-This is not a firm or all-inclusive list. For more detailed information, see the discussion thread [here](https://github.com/Furglitch/modorganizer2-linux-installer/discussions/873).
+<sub>* Game last tested with a pre 7.0.0 version of MO2-LINT. Issues may arise, please report if you encounter any problems with a supported game.</sub><br>
+
+## Getting Started
+To get started with MO2-LINT, please refer to the [Installation Guide] for detailed instructions on how to install and use the installer.
+
+## Contributing
+Contributions to MO2-LINT are welcome! If you would like to contribute, please read the [Contributing Guide] for more information on how to get involved.
+
+
+
+[Mod Organizer 2]: https://github.com/Modorganizer2/modorganizer
+[@rockerbacon]: https://github.com/rockerbacon
+[@furglitch]: https://github.com/furglitch
+
+[Installation Guide]: /installation/
+[Contributing Guide]: /contributing/
+
+[#32]: https://github.com/furglitch/modorganizer2-linux-installer/issues/32
+[#63]: https://github.com/furglitch/modorganizer2-linux-installer/issues/63#issuecomment-643690247
+[#95]: https://github.com/furglitch/modorganizer2-linux-installer/issues/95

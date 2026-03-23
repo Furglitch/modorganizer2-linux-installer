@@ -25,6 +25,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Copy README
+        run: cp README.md docs/
+
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
