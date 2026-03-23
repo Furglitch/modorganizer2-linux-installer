@@ -3,7 +3,6 @@ name: Build Artifact
 on:
   push:
     branches: [ "rewrite" ]
-  workflow_dispatch:
 
 permissions:
   contents: read

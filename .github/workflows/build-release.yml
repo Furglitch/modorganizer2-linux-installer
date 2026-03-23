@@ -2,10 +2,119 @@ name: Build Release
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release"
+        required: true
+        default: "7.X.X"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: "build-release"
+  cancel-in-progress: true
 
 jobs:
-  disabled:
+
+  precheck:
     runs-on: ubuntu-latest
     steps:
-      - name: Workflow Disabled
-        run: echo "This workflow is currently disabled"
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Check for existing tag
+        id: check_tag
+        uses: actions/github-script@v8.0.0
+        with:
+          script: |
+            const tag = '${{inputs.version}}';
+            try {
+              await github.rest.git.getRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: `tags/${tag}`
+              });
+              core.setOutput('exists', 'true');
+            } catch (error) {
+              if (error.status === 404) {
+                core.setOutput('exists', 'false');
+                return;
+              }
+              throw error;
+            }
+
+      - name: Fail if tag exists
+        if: steps.check_tag.outputs.exists == 'true'
+        run: |
+          echo "Error: Tag ${{inputs.version}} already exists."
+          exit 1
+
+  build:
+    runs-on: ubuntu-latest
+    needs: precheck
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version-file: ".python-version"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Install dependencies
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y make tar wget curl unzip wine wine64 wine32:i386
+          sudo apt-get install -y --no-install-recommends cabextract
+          wine --version
+
+      - name: Build Release
+        run: |
+          export WINEPREFIX=$HOME/.wine-py
+          export WINEARCH=win64
+          make _build
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: mo2_lint-artifact
+          path: dist/mo2_lint
+
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Create Release Tag
+        id: create_tag
+        uses: actions/github-script@v8.0.0
+        with:
+          script: |
+            await github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/${{inputs.version}}',
+              sha: context.sha
+            })
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v6
+        with:
+          name: mo2_lint-artifact
+          path: /tmp/artifact
+
+      - name: Create Release
+        id: release
+        uses: ncipollo/release-action@v1.21.0
+        with:
+          tag: ${{inputs.version}}
+          token: ${{secrets.GITHUB_TOKEN}}
+          artifacts: /tmp/artifact/**
+          name: "MO2-LINT ${{inputs.version}}"
