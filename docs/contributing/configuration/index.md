@@ -23,7 +23,7 @@ games:
   <game_id>:
     display_name: <display_name>
     nexus_slug: <nexus_slug>
-    launcher:
+    launcher_ids:
       steam: <steam>
       gog: <gog>
       epic: <epic>
@@ -32,28 +32,45 @@ games:
     tricks:
       - <trick_1>
       - <trick_2>
+    launch_options: # Further details below
     script_extenders: # Further details below
     workarounds: # Further details below
 ```
 
-**Key Fields:**
-- `game_id`: A unique identifier for the game. This is used in the `<game>` argument of the installer commands.
-- `display_name`: The human-readable name of the game.
-- `nexus_slug`: The Nexus Mods slug for the game, used for downloading mods. (i.e. `fallout4` for Fallout 4)
-- `launcher`: Specifies the supported launchers for the game (Steam, GOG, Epic Games).
-  - `steam`: The Steam App ID for the game. *(Integer)*
-  - `gog`: The GOG Galaxy ID for the game. *(Integer)*
-  - `epic`: The Epic Games Store ID for the game. *(String)*
-- `subdirectory`: The subdirectory name(s) for the game's installation in the launcher library.
-- `executable`: The filename(s) of the game's executable file.
-- `tricks`: A list of compatibility tricks to apply with proton-/winetricks during installation.
-- `script_extenders`: A list of script extenders associated with the game. *([See below][script_extenders] for details)*
-- `workarounds`: A list of workarounds to apply for the game. *([See below][workarounds] for details)*
+| Field | Required | Description |
+| --- | --- | --- |
+| `game_id` | Yes | Unique identifier. Used in the CLI. |
+| `display_name` | Yes | Human-readable name of the game. |
+| `nexus_slug` | Yes | Nexus Mods slug for the game. (i.e. `fallout4` for Fallout 4) |
+| `launcher_ids` | Yes | Supported launchers and their IDs. [See below](#launcher_ids) for more details. |
+| `subdirectory` | Yes | Subdirectory name(s) for the game's installation in the launcher library. [See below](#subdirectory-and-executable-for-different-launcher-paths) for more details. |
+| `executable` | Yes | Filename(s) of the game's executable file. [See below](#subdirectory-and-executable-for-different-launcher-paths) for more details. |
+| `tricks` | No | List of "tricks" to apply with proton-/winetricks during installation. |
+| `launch_options` | No | Specifications for Steam launch options. [See below](#launch_options) for more details. |
+| `script_extenders` | No | List of script extenders associated with the game. [See below](#script_extenders) for more details. |
+| `workarounds` | No | List of workarounds to apply for the game. [See below](#workarounds) for more details. |
 
-### `subdirectory` and `executable` for different launcher paths
-Some games may have different installation paths or executable names depending on the launcher used. In such cases, you can specify these fields as mappings for each launcher, rather than a single string.:
+### `launcher_ids`
+The `launcher_ids` field specifies the supported launchers for the game and their corresponding IDs. The supported launchers are Steam, GOG, and Epic Games Store. Each launcher has its own unique ID.
 
 ```yaml
+    launcher_ids:
+      steam: <steam_app_id> # integer
+      gog: <gog_galaxy_id> # integer
+      epic: <epic_game_id> # string
+```
+
+### `subdirectory` and `executable` for different launcher paths
+Some games may have different installation paths or executable names depending on the launcher used. In such cases, you can specify these fields as mappings for each launcher, rather than a single string.
+
+```yaml
+    # All launchers
+    subdirectory: <subdirectory>
+    executable: <executable>
+
+OR
+
+    # Per-launcher
     subdirectory:
       steam: <steam_subdirectory>
       gog: <gog_subdirectory>
@@ -62,7 +79,33 @@ Some games may have different installation paths or executable names depending o
       steam: <steam_executable>
       gog: <gog_executable>
       epic: <epic_executable>
+
+# Not interchangable. You can either specify a single value or per-launcher values, but not both.
 ```
+
+### `launch_options`
+The `launch_options` field allows you to specify custom launch options for the game when launched through Steam.
+
+```yaml
+    launch_options:
+      label: <label>
+      arguments:
+        - <argument_1>
+        - <argument_2>
+      type: <type>
+      oslist:
+        - <os_1>
+        - <os_2>
+      osarch: <osarch>
+```
+
+| Field | Required | Description | Default | Options |
+| --- | --- | --- | --- | --- |
+| `label` | No |The label to display for the launch option in Steam. | "Launch Mod Organizer" |  |
+| `arguments` | If Applicable | A list of command-line arguments to pass when launching the game through Steam. |  |  |
+| `type` | No | The type of launch option. | `OPTION3` | `default`, `none`, `vr`, `OPTION1`, `OPTION2`, and `OPTION3`. |
+| `oslist` | If Applicable | A list of operating systems to apply the launch options for. If not specified, the launch options will be applied for all operating systems. |  |  |
+| `osarch` | If Applicable | The operating system architecture to apply the launch options for. Available options are '32' and '64'. |  | '32', '64' |
 
 ### `script_extenders`
 The `script_extenders` section allows you to define script extenders associated with the game. Each script extender can have its own set of properties, such as download URLs and installation instructions.
@@ -70,14 +113,7 @@ The `script_extenders` section allows you to define script extenders associated 
 ```yaml
     script_extenders:
       - version: <version>
-        runtime: < any | unknown >
-          steam:
-            - <steam_runtime_version_1>
-            - <steam_runtime_version_2>
-          gog:
-            - <gog_runtime_version_1>
-          epic:
-            - <epic_runtime_version_1>
+        runtime: # Further details below
         download: # Further details below
         file_whitelist:
           - <file_1>
@@ -86,14 +122,32 @@ The `script_extenders` section allows you to define script extenders associated 
           - <directory/subdirectory/file_4>
 ```
 
-**Key Fields:**
-- `version`: The version of the script extender.
-- `runtime`: Specifies the compatible runtime versions for different launchers. This can either be a single version string (will apply to ALL launchers), or a list of per-launcher version strings.
-  - `steam`: A list of compatible Steam runtime versions.
-  - `gog`: A list of compatible GOG runtime versions.
-  - `epic`: A list of compatible Epic Games Store runtime versions.
-- `download`: Defines how to download the script extender files. *([See below][script_extenders_download] for details)*
-- `file_whitelist`: A list of files and directories to include in the script extender installation.
+| Field | Required | Description |
+| --- | --- | --- |
+| `version` | Yes | The version of the script extender. |
+| `runtime` | Yes | Compatible runtime version. [See below](#runtime) for more details. |
+| `download` | Yes | Download information for the script extender. [See below](#download) for more details. |
+| `file_whitelist` | No | A list of files and directories to include in the script extender installation. If not specified, all files will be included. |
+
+> ### `runtime`
+> The `runtime` field specifies the compatible runtime versions for different launchers. This can either be a single version string that applies to all launchers, or a list of per-launcher version strings. The installer will use this information to determine which script extender version to install based on the runtime version of the game instance.
+>
+> ```yaml
+>     runtime: <version> # Applies to all launchers
+>
+> OR
+>
+>     runtime:
+>       steam:
+>         - <steam_runtime_version_1>
+>         - <steam_runtime_version_2>
+>       gog:
+>         - <gog_runtime_version_1>
+>         - <gog_runtime_version_2>
+>       epic:
+>         - <epic_runtime_version_1>
+>         - <epic_runtime_version_2>
+> ```
 
 > ### `download`
 > The `download` section within a script extender defines how to download the script extender files. It can include multiple download sources, each with its own URL and optional checksum for verification.
@@ -110,13 +164,11 @@ The `script_extenders` section allows you to define script extenders associated 
 >             checksum: <checksum>
 > ```
 >
->
-> **Key Fields:**
-> - `checksum`: The SHA256 checksum of the downloaded file for verification. This can be specified at the top level (same as `direct` or `nexus`), or within each download if different checksums are required for each source.
-> - `direct`: Specifies a direct download URL for the script extender. The URL can be provided either as a string (`direct: <url>`) or withing the `url` subfield (`direct: url: <url>`).
-> - `nexus`: Specifies a Nexus Mods download for the script extender.
->   - `mod_id`: The Nexus Mods mod ID for the script extender.
->   - `file_id`: The specific file ID to download from the mod.
+> | Field | Required | Description |
+> | --- | --- | --- |
+> | `checksum` | No | The SHA256 checksum of the downloaded file for verification. This can be specified at the top level to be applied to both direct and Nexus downloads, or per download type |
+> | `direct` | or Nexus | Specifies a direct download URL for the script extender. The URL can be provided either as a string (`direct: <url>`), or within the `url` subfield (`direct: url: <url>`) if specify type-specific checksums. |
+> | `nexus` | or Direct | Specifies a Nexus Mods download for the script extender. Requires both `mod_id` and `file_id` to be specified. |
 >
 > ***Note:** At least one download source (`direct` or `nexus`) must be provided for each script extender.*
 
@@ -135,12 +187,26 @@ The `workarounds` section allows you to define specific workarounds to apply for
 
 All workarounds defined here are optional and will only be applied if specified for the game.
 
-**Key Fields:**
-- `needs_java`: Indicates if the game or one of it's components (tools, mods, etc.) requires Java to run.
-- `directories`: A list of directories to create in the root of the game's installation folder.
-- `files`: A list of files to add to the game's installation folder.
-  - `<source>`: The source file name in the installer's `cfg/workarounds/` directory. ([`configs/`]`workarounds/` in the repository)
-  - `<destination>`: The destination file name in the game's installation folder.
+| Field | Required | Description | Default |
+| --- | --- | --- |
+| `needs_java` | No | Indicates if the game or one of its components (tools, mods, etc.) requires Java to run. | false |
+| `directories` | No | A list of directories to create in the root of the game's installation folder. |  |
+| `files` | No | A list of files to add to the game's installation folder. Each file is specified as a mapping of a source file (located in the installer's `cfg/workarounds/` directory) to a destination file in the game's installation folder. |  |
+
+### Children
+You can specify child configurations as well, which allows a game to 'adopt' the properties of another game. This is mostly used for games with alternate languages (i.e. New Vegas's Russian variant) or alternate editions (i.e. Fallout 3's GOTY edition). Child configurations can override any of the parent properties as needed. Any property not specified in the child will be inherited from the parent.
+
+```yaml
+    <game_id>:
+      parent: <parent_game_id>
+      display_name: <display_name>
+      nexus_slug: <nexus_slug>
+      launcher_ids:
+        steam: <steam>
+        gog: <gog>
+        epic: <epic>
+      [...other properties as needed...]
+```
 
 
 ## `resource_info.yml`
@@ -160,13 +226,14 @@ resources:
     checksum_internal: <checksum_internal>
 ```
 
-**Key Fields:**
-- `resource`: A unique identifier for the resource (e.g. `mod_organizer`, `java`, `winetricks`).
-- `version`: The version of the resource.
-- `download_url`: The direct download URL for the resource.
-- `checksum`: The SHA256 checksum of the downloaded file for verification.
-- `path_internal`: The path to the main executable or relevant file within the downloaded archive.
-- `checksum_internal`: The SHA256 checksum of the internal file specified in `path_internal` for verification after extraction.
+| Field | Required | Description |
+| --- | --- | --- |
+| `resource` | Yes | Unique identifier. |
+| `version` | Yes | The version of the resource. |
+| `download_url` | No | The direct download URL for the resource. |
+| `checksum` | No | The SHA256 checksum of the downloaded file for verification. |
+| `path_internal` | No | Relative path to the main executable or relevant file within the downloaded archive. |
+| `checksum_internal` | No | The SHA256 checksum of the internal file specified in `path_internal` for verification after extraction. |
 
 ## `plugin_info.yml`
 
@@ -180,14 +247,11 @@ plugins:
   <plugin>: <manifest_url>
 ```
 
-**Key Fields:**
-- `plugin`: A unique identifier for the plugin (e.g. `root-builder`).
-- `manifest_url`: The URL to the plugin's manifest file, which contains information about the plugin's versions and download URLs. This must point directly to the raw file.
-  - The manifest file must be a JSON file following the manifest structure created by [@Kezyma] for their 'Plugin Finder' plugin. For more details on this schema, please refer to the documentation for [Kezyma's Plugin Finder].
+| Field | Required | Description |
+| --- | --- | --- |
+| `plugin` | Yes | Unique identifier for the plugin. |
+| `manifest_url` | Yes | The URL to the plugin's manifest file. This must point directly to the raw file. The manifest file must be a JSON file following the manifest structure created by [@Kezyma] for their 'Plugin Finder' plugin. For more details on this schema, please refer to the documentation for [Kezyma's Plugin Finder]. |
 
-[script_extenders]: #script_extenders
-[script_extenders_download]: #download
-[workarounds]: #workarounds
 [`configs/`]: https://github.com/furglitch/modorganizer2-linux-installer/tree/rewrite/configs
 [@Kezyma]: https://github.com/Kezyma
-[Kezyma's Plugin Finder]: https://github.com/Kezyma/ModOrganizer-Plugins/blob/main/docs/pluginfinder.md
+[Kezyma's Plugin Finder]: https://github.com/Kezyma/ModOrganizer-Plugins/blob/main/docs/pluginfinder.md#adding-your-plugin

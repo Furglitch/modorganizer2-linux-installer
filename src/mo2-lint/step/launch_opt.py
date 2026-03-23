@@ -18,19 +18,22 @@ def add_launch_opt():
             executable="mo2-redirector.exe",
             arguments=var.game_info.launch_options.get("arguments", [])
             if var.game_info.launch_options
+            and "arguments" in var.game_info.launch_options
             else [],
-            label=("Launch " if launcher != "steam" else "") + "Mod Organizer",
+            label=var.game_info.launch_options.get("label", label)
+            if var.game_info.launch_options and "label" in var.game_info.launch_options
+            else label,
             game_path=str(state.current_instance.game_path)
             if state.current_instance.game_path
             else None,
             opt_type=var.game_info.launch_options.get("type", "OPTION3")
-            if var.game_info.launch_options
+            if var.game_info.launch_options and "type" in var.game_info.launch_options
             else "OPTION3",
             oslist=var.game_info.launch_options.get("oslist", None)
-            if var.game_info.launch_options
+            if var.game_info.launch_options and "oslist" in var.game_info.launch_options
             else None,
             osarch=var.game_info.launch_options.get("osarch", None)
-            if var.game_info.launch_options
+            if var.game_info.launch_options and "osarch" in var.game_info.launch_options
             else None,
         )
         if launcher == "steam" and launch_index is not None:
