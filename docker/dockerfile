@@ -1,0 +1,15 @@
+FROM ubuntu:latest
+
+WORKDIR /tmp/mo2-lint
+ENV HOME=/home/docker
+
+RUN apt-get update
+# && apt-get install -y --no-install-recommends \
+
+COPY src ./src
+COPY docker/filesystem/home/docker /home/docker
+
+RUN useradd docker
+USER docker
+
+CMD ["ls", "-la", "src", "/home/docker"]

@@ -1,0 +1,6 @@
+services:
+  test:
+    container_name: mo2-lint
+    build:
+      context: ..
+      dockerfile: docker/dockerfile
