@@ -12,14 +12,14 @@ import subprocess
 
 def install():
     """
-    Install nxm_handler and its desktop entry.
+    Install nxm-handler and its desktop entry.
     """
 
     logger.debug("Installing NXM Handler.")
 
     # Install handler
-    output = Path("~/.local/share/mo2-lint/nxm_handler").expanduser()
-    internal_path = internal_file("dist", "nxm_handler")
+    output = Path("~/.local/share/mo2-lint/nxm-handler").expanduser()
+    internal_path = internal_file("dist", "nxm-handler")
     if output.exists() and compare_checksum(internal_path, output):
         logger.trace(
             "NXM Handler already installed and up to date. Skipping installation."
@@ -32,9 +32,9 @@ def install():
 
     # Install desktop entry
     output = Path(
-        "~/.local/share/applications/mo2lint_nxm_handler.desktop"
+        "~/.local/share/applications/mo2lint_nxm-handler.desktop"
     ).expanduser()
-    internal_path = internal_file("cfg", "nxm_handler.desktop")
+    internal_path = internal_file("cfg", "nxm-handler.desktop")
     if output.exists() and compare_checksum(internal_path, output):
         logger.trace(
             "NXM Handler desktop entry already installed and up to date. Skipping installation."

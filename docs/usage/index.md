@@ -15,7 +15,7 @@ Below are some of the key commands and features available in MO2-LINT.
 The `install` command allows you to create a new Mod Organizer 2 instance. You can specify the game and directory for the installation.
 
 ```bash
-mo2_lint install <game> <directory> [options]
+mo2-lint install <game> <directory> [options]
 ```
 
 > #### Parameters
@@ -23,17 +23,17 @@ mo2_lint install <game> <directory> [options]
 > Where `<game>` is the game you want to install MO2 for (e.g., `skyrim`, `fallout4`), and `<directory>` is the path where you want the MO2 instance to be created.<br>
 > Supported games can be seen by running:
 > ```bash
-> mo2_lint install --help
+> mo2-lint install --help
 > ```
 
 > #### Options
 > - `--plugin <plugin>`, `-p <plugin>` - Installs the specified plugin into the MO2 instance being created.
 >   - This option can be used multiple times to install multiple plugins at once. For example:
 >      ```bash
->      mo2_lint install skyrim /path/to/instance -p root-builder -p nxm-collection-dl
+>      mo2-lint install skyrim /path/to/instance -p root-builder -p nxm-collection-dl
 >   - Supported plugins can be seen by running:
 >     ```bash
->     mo2_lint install --help
+>     mo2-lint install --help
 >     ```
 >
 > - `--script-extender`, `-s` - If the game supports a script extender (e.g., SKSE for Skyrim, F4SE for Fallout 4), this option will install the script extender into the game's install directory. If multiple versions are available, you will be prompted to choose which one to install. If the game doesn't support a script extender, this option will be ignored.
@@ -45,7 +45,7 @@ mo2_lint install <game> <directory> [options]
 The `uninstall` command removes an existing Mod Organizer 2 instance, uninstalling the instance and removing the launch option, and removing it from the state file. Without options, it will list all instances and allow you to choose one (or all) to uninstall.
 
 ```bash
-mo2_lint uninstall [options]
+mo2-lint uninstall [options]
 ```
 
 > #### Options
@@ -57,7 +57,7 @@ mo2_lint uninstall [options]
 The `list` command displays all Mod Organizer 2 instances currently managed by MO2-LINT.
 
 ```bash
-mo2_lint list [options]
+mo2-lint list [options]
 ```
 
 > #### Options
@@ -69,7 +69,7 @@ The `pin` command allows you to prevent an MO2 instance from having it's Mod Org
 To reverse this, you can use the `unpin` command. The same parameters apply, just switching the command name.
 
 ```bash
-mo2_lint pin <directory> [options]
+mo2-lint pin <directory> [options]
 ```
 
 > #### Parameters
@@ -81,7 +81,7 @@ The `update` command updates the Mod Organizer 2 install and launch option of an
 <sub>If the instance is pinned, the Mod Organizer 2 version will not be updated.</sub>
 
 ```bash
-mo2_lint update <directory> [options]
+mo2-lint update <directory> [options]
 ```
 
 > #### Parameters

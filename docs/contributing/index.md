@@ -62,6 +62,6 @@ make _build
 To build individual components, use:
 ```bash
 make redirector
-make nxm_handler
-make mo2_lint
+make nxm-handler
+make mo2-lint
 ```

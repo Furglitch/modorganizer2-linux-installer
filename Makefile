@@ -1,11 +1,11 @@
-.PHONY: run _build redirector nxm_handler mo2_lint clean
+.PHONY: run _build redirector nxm-handler mo2-lint clean
 
 run: uv run src/mo2-lint/__init__.py
 
-_build: clean mo2_lint
+_build: clean mo2-lint
 
-mo2_lint: redirector nxm_handler
-	uv run pyinstaller --onefile --name mo2_lint \
+mo2-lint: redirector nxm-handler
+	uv run pyinstaller --onefile --name mo2-lint \
 		--paths src \
 		--hidden-import InquirerPy \
 		--hidden-import patoolib \
@@ -22,8 +22,8 @@ mo2_lint: redirector nxm_handler
 		--additional-hooks-dir "build/hooks" \
 		src/mo2-lint/__init__.py
 
-mo2_lint_only:
-	uv run pyinstaller --onefile --name mo2_lint \
+mo2-lint_only:
+	uv run pyinstaller --onefile --name mo2-lint \
 		--paths src \
 		--hidden-import InquirerPy \
 		--hidden-import patoolib \
@@ -40,8 +40,8 @@ mo2_lint_only:
 		--additional-hooks-dir "build/hooks" \
 		src/mo2-lint/__init__.py
 
-nxm_handler:
-	uv run pyinstaller --onefile --name nxm_handler \
+nxm-handler:
+	uv run pyinstaller --onefile --name nxm-handler \
 		--paths src \
 		--hidden-import find_heroic_install \
 		--hidden-import protontricks \

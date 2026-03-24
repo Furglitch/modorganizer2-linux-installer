@@ -58,8 +58,8 @@ STEAM_COMPAT_MOUNTS="/path/to/dir1:/path/to/dir2" %command%
 ### Check Handler Files Exist
 
 Ensure these files exist and are not empty:
-- `~/.local/share/mo2-lint/nxm_handler`
-- `~/.local/share/applications/mo2lint_nxm_handler.desktop`
+- `~/.local/share/mo2-lint/nxm-handler`
+- `~/.local/share/applications/mo2lint_nxm-handler.desktop`
 
 If they're missing, try reinstalling MO2-LINT.
 
@@ -70,9 +70,9 @@ Check if the handler is registered correctly:
 xdg-mime query default x-scheme-handler/nxm
 ```
 
-This should return `mo2lint_nxm_handler.desktop`. If not, register it manually:
+This should return `mo2lint_nxm-handler.desktop`. If not, register it manually:
 ```bash
-xdg-mime default ~/.local/share/applications/mo2lint_nxm_handler.desktop x-scheme-handler/nxm
+xdg-mime default ~/.local/share/applications/mo2lint_nxm-handler.desktop x-scheme-handler/nxm
 ```
 
 ### Check Browser Settings

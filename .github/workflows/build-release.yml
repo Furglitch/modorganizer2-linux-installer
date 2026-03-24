@@ -82,8 +82,8 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v6
         with:
-          name: mo2_lint-artifact
-          path: dist/mo2_lint
+          name: mo2-lint_artifact
+          path: dist/mo2-lint
 
   release:
     runs-on: ubuntu-latest
@@ -107,7 +107,7 @@ jobs:
       - name: Download Artifact
         uses: actions/download-artifact@v6
         with:
-          name: mo2_lint-artifact
+          name: mo2-lint_artifact
           path: /tmp/artifact
 
       - name: Create Release

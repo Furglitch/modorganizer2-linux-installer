@@ -14,7 +14,7 @@ The `install` command supports adding custom games via the `--custom-game` (`-c`
 For example, to load a custom game definition file located at `~/my_custom_games.yaml`, you would run:
 
 ```bash
-mo2_lint install -c ~/my_custom_games.yaml
+mo2-lint install -c ~/my_custom_games.yaml
 ```
 
 More information on the structure of the custom game definition file can be found in the [Configuration Files] section of the contributing guide.
