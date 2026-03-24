@@ -50,8 +50,8 @@ Contributions to MO2-LINT are welcome! If you would like to contribute, please r
 [@rockerbacon]: https://github.com/rockerbacon
 [@furglitch]: https://github.com/furglitch
 
-[Installation Guide]: /installation/
-[Contributing Guide]: /contributing/
+[Installation Guide]: https://wiki.furglitch.com/modorganizer2-linux-installer/installation/
+[Contributing Guide]: https://wiki.furglitch.com/modorganizer2-linux-installer/contributing/
 
 [#32]: https://github.com/furglitch/modorganizer2-linux-installer/issues/32
 [#63]: https://github.com/furglitch/modorganizer2-linux-installer/issues/63#issuecomment-643690247

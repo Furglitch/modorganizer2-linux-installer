@@ -13,9 +13,9 @@ Some games require additional setup or have specific considerations when using M
 
 ## Available Guides
 
-- [Cyberpunk 2077](./cyberpunk2077/)
-- [Fallout 3](./fallout3/)
-- [Fallout London](./folon/)
+- [Cyberpunk 2077](./cyberpunk2077.html)
+- [Fallout 3](./fallout3.html)
+- [Fallout London](./folon.html)
 
 ## Contributing a Guide
 
