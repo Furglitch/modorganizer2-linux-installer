@@ -61,6 +61,7 @@ class Input:
 
 
 input_params: Input = None
+unattended: bool = False
 
 
 def set_parameters(args: Input | dict):

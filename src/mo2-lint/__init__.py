@@ -148,6 +148,7 @@ def start(
     directory: Optional[Path | str] = None,
     game_info_path: Optional[Path | str] = None,
     log_level: Optional[str] = "INFO",
+    unattended: bool = False,
 ):
     """
     Common start routine for commands.
@@ -172,6 +173,8 @@ def start(
     remove_loggers()
     add_loggers(log_level=log_level, script="mo2-lint", process="installer")
     logger.debug(f"Starting MO2-LINT with log level: {log_level}")
+    var.unattended = unattended
+    logger.debug(f"Unattended mode: {unattended}")
     if directory:
         directory = str(directory).rstrip("/")
         directory = Path(directory).expanduser().resolve()
@@ -243,6 +246,13 @@ click_opt_directory = click.option(
     type=click.Path(file_okay=False, dir_okay=True),
     help="Target install path for the Mod Organizer 2 instance.",
 )
+click_unattended = click.option(
+    "--unattended",
+    "-u",
+    is_flag=True,
+    default=False,
+    help="Run without interactive prompts, using defaults for all choices.",
+)
 
 
 def click_arg_directory(required=False):
@@ -287,6 +297,7 @@ def cli(ctx):
 @click_version
 @click_help
 @click_log_level
+@click_unattended
 @click_opt_game_info
 @click.option(
     "--launcher",
@@ -319,8 +330,9 @@ def install(
     script_extender: bool,
     plugin: tuple[str],
     log_level,
+    unattended: bool,
 ):
-    game, directory = start(game, directory, game_info_path, log_level)
+    game, directory = start(game, directory, game_info_path, log_level, unattended)
     logger.debug(
         f"Running install command with game={game}, directory={directory}, game_info_path={game_info_path}, launcher={launcher}, script_extender={script_extender}, plugin={plugin}"
     )
@@ -347,11 +359,18 @@ def install(
 @click_version
 @click_help
 @click_log_level
+@click_unattended
 @click_opt_game_info
 @click_opt_directory
 @click_opt_game
-def uninstall(game: str, directory: Path, game_info_path: Optional[Path], log_level):
-    game, directory = start(game, directory, game_info_path, log_level)
+def uninstall(
+    game: str,
+    directory: Path,
+    game_info_path: Optional[Path],
+    log_level,
+    unattended: bool,
+):
+    game, directory = start(game, directory, game_info_path, log_level, unattended)
     logger.debug(
         f"Running uninstall command with game={game}, directory={directory}, game_info_path={game_info_path}"
     )
@@ -363,10 +382,11 @@ def uninstall(game: str, directory: Path, game_info_path: Optional[Path], log_le
 @click_version
 @click_help
 @click_log_level
+@click_unattended
 @click_opt_directory
 @click_opt_game
-def list(game: Optional[str], directory: Optional[Path], log_level):
-    game, directory = start(game, directory, log_level=log_level)
+def list(game: Optional[str], directory: Optional[Path], log_level, unattended: bool):
+    game, directory = start(game, directory, log_level=log_level, unattended=unattended)
     logger.debug(f"Running list command with game={game}, directory={directory}")
     _list(game, directory)
 
@@ -375,9 +395,12 @@ def list(game: Optional[str], directory: Optional[Path], log_level):
 @click_version
 @click_help
 @click_log_level
+@click_unattended
 @click_arg_directory(required=True)
-def pin(directory: Path, log_level):
-    waste, directory = start(directory=directory, log_level=log_level)
+def pin(directory: Path, log_level, unattended: bool):
+    waste, directory = start(
+        directory=directory, log_level=log_level, unattended=unattended
+    )
     logger.debug(f"Running pin command with directory={directory}")
     _pin(directory, pin=True)
 
@@ -386,9 +409,12 @@ def pin(directory: Path, log_level):
 @click_version
 @click_help
 @click_log_level
+@click_unattended
 @click_arg_directory(required=True)
-def unpin(directory: Path, log_level):
-    waste, directory = start(directory=directory, log_level=log_level)
+def unpin(directory: Path, log_level, unattended: bool):
+    waste, directory = start(
+        directory=directory, log_level=log_level, unattended=unattended
+    )
     logger.debug(f"Running unpin command with directory={directory}")
     _pin(directory, pin=False)
 
@@ -397,9 +423,12 @@ def unpin(directory: Path, log_level):
 @click_version
 @click_help
 @click_log_level
+@click_unattended
 @click_arg_directory(required=True)
-def update(directory: Path, log_level):
-    waste, directory = start(directory=directory, log_level=log_level)
+def update(directory: Path, log_level, unattended: bool):
+    waste, directory = start(
+        directory=directory, log_level=log_level, unattended=unattended
+    )
     logger.debug(f"Running update command with directory={directory}")
     _update(directory)
 

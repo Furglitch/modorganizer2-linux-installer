@@ -54,6 +54,9 @@ def prompt_archive() -> bool:
         True if the user agrees to archive prefix, False otherwise.
     """
     logger.debug("Prompting user to archive existing prefix")
+    if var.unattended:
+        logger.debug("Unattended mode: skipping archive prompt, defaulting to False")
+        return False
 
     message = """It is recommended to archive your existing game prefix and create a clean one for Mod Organizer 2 to avoid potential conflicts.
 
@@ -85,6 +88,9 @@ def prompt_archive_init() -> bool:
     logger.debug(
         f"Prompting user to initialize clean prefix for launcher: {state.current_instance.launcher}"
     )
+    if var.unattended:
+        logger.debug("Unattended mode: skipping prefix init prompt, defaulting to True")
+        return True
 
     match state.current_instance.launcher:
         case "steam":
@@ -132,6 +138,11 @@ def prompt_install_mo2_checksum_fail(mo2_path: str) -> bool:
         True if the user wants to proceed with installation, False otherwise.
     """
     logger.debug(f"MO2 checksum verification failed for: {mo2_path}")
+    if var.unattended:
+        logger.debug(
+            "Unattended mode: aborting on checksum failure (defaulting to False)"
+        )
+        return False
 
     message = f"""Mod Organizer 2 checksum verification has failed for the installation located at: {mo2_path}
   This could indicate that an updated version is available in this installer, or that the installation is corrupted.
@@ -168,6 +179,9 @@ def prompt_install_scriptextender_choice(script_extenders: dict) -> int:
     logger.debug(
         f"Prompting user to select script extender from {len(script_extenders)} options"
     )
+    if var.unattended:
+        logger.debug("Unattended mode: auto-selecting first script extender (index 0)")
+        return 0
 
     message = "Multiple script extenders are available for installation.\n  Please select one: "
     choices = []
@@ -222,6 +236,9 @@ def prompt_instance_choice(
     """
     if message is None:
         message = "Select the instance to use: "
+    if var.unattended:
+        logger.debug("Unattended mode: auto-selecting first instance (index 1)")
+        return 1
     choices = list_instances(instance_list) + additional_choices
     msg = {
         "type": "list",
@@ -246,6 +263,9 @@ def prompt_instance_choice_existing(
     logger.debug(
         f"Prompting user to select from {len(existing_instances)} existing instances or create new"
     )
+    if var.unattended:
+        logger.debug("Unattended mode: auto-selecting 'Create new instance'")
+        return "Create new instance"
 
     choices = [
         f"{inst.nexus_slug} at {inst.instance_path}" for inst in existing_instances
@@ -269,6 +289,11 @@ def prompt_instance_choice_exact() -> bool:
     Prompts the user to confirm using the exact instance found.
     """
     logger.debug("Instance path conflict detected - prompting user for confirmation")
+    if var.unattended:
+        logger.debug(
+            "Unattended mode: defaulting to True (proceed with exact instance path)"
+        )
+        return True
 
     message = """The path of the chosen instance directly matches the directory you specified.
 
@@ -298,6 +323,11 @@ def prompt_instance_conflict() -> bool:
     logger.debug(
         f"Instance link conflict detected for game: {state.current_instance.game}"
     )
+    if var.unattended:
+        logger.debug(
+            "Unattended mode: defaulting to False (do not overwrite existing link)"
+        )
+        return False
 
     message = f"""An existing instance link was found for the game {state.current_instance.game}.
 
@@ -332,6 +362,9 @@ def prompt_launcher_choice(
         choices.append(f"GOG: {gog_path}")
     if epic_path:
         choices.append(f"Epic: {epic_path}")
+    if var.unattended:
+        logger.debug(f"Unattended mode: auto-selecting first launcher: {choices[0]}")
+        return choices[0]
 
     msg = {
         "type": "list",
@@ -358,6 +391,9 @@ def prompt_uninstall_confirm():
     Prompts the user to confirm uninstallation of the selected instance(s).
     """
     logger.debug("Prompting user to confirm uninstallation")
+    if var.unattended:
+        logger.debug("Unattended mode: auto-confirming uninstall")
+        return True
     msg = {
         "type": "confirm",
         "message": "Are you sure you want to uninstall the selected instance(s)?",
@@ -379,6 +415,9 @@ def prompt_uninstall_trash() -> bool:
         True if the user chooses to delete permanently, False if moving to trash.
     """
     logger.debug("Prompting user for trash/permanent delete choice")
+    if var.unattended:
+        logger.debug("Unattended mode: defaulting to Move to Trash (False)")
+        return False
 
     msg = {
         "type": "list",
@@ -400,6 +439,11 @@ def prompt_uninstall_trash_confirm() -> bool:
     Prompts the user to confirm permanent deletion.
     """
     logger.debug("Prompting user to confirm permanent deletion")
+    if var.unattended:
+        logger.debug(
+            "Unattended mode: defaulting to False (do not confirm permanent deletion)"
+        )
+        return False
 
     msg = {
         "type": "confirm",
