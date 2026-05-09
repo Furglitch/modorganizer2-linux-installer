@@ -4,3 +4,5 @@ services:
     build:
       context: ..
       dockerfile: docker/dockerfile
+    environment:
+      - BUILD=false

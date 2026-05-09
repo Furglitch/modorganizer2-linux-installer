@@ -3,13 +3,36 @@ FROM ubuntu:latest
 WORKDIR /tmp/mo2-lint
 ENV HOME=/home/docker
 
-RUN apt-get update
-# && apt-get install -y --no-install-recommends \
+# BUILD=true  → build mo2-lint from source via `make _build`
+# BUILD=false → use the pre-built binary in dist/
+ARG BUILD=true
+ENV BUILD=${BUILD}
 
-COPY src ./src
+RUN dpkg --add-architecture i386 \
+ && apt-get update && apt-get install -y --no-install-recommends \
+    binutils \
+    ca-certificates \
+    curl \
+    make \
+    unzip \
+    wget \
+    wine \
+    wine32 \
+    wine64 \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+ENV PATH="${HOME}/.local/bin:${PATH}"
+
+COPY . .
+
 COPY docker/filesystem/home/docker /home/docker
+RUN useradd docker \
+ && chown -R docker:docker /tmp/mo2-lint /home/docker
 
-RUN useradd docker
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 USER docker
 
-CMD ["ls", "-la", "src", "/home/docker"]
+ENTRYPOINT ["/entrypoint.sh"]
