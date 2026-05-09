@@ -1,0 +1,37 @@
+{
+  "0d0c62755e5a45c7a07fd9cc0b61c39c": {
+    "app_name": "0d0c62755e5a45c7a07fd9cc0b61c39c",
+    "base_urls": [
+      "https://egdownload.fastly-edge.com/Builds/Org/o-bthbhn6wd7fzj73v5p4436ucn3k37u/541b3ca52c4f423d83fb2411c5e45962/default",
+      "https://epicgames-download1.akamaized.net/Builds/Org/o-bthbhn6wd7fzj73v5p4436ucn3k37u/541b3ca52c4f423d83fb2411c5e45962/default",
+      "https://download.epicgames.com/Builds/Org/o-bthbhn6wd7fzj73v5p4436ucn3k37u/541b3ca52c4f423d83fb2411c5e45962/default",
+      "https://cloudflare.epicgamescdn.com/Builds/Org/o-bthbhn6wd7fzj73v5p4436ucn3k37u/541b3ca52c4f423d83fb2411c5e45962/default"
+    ],
+    "can_run_offline": true,
+    "egl_guid": "",
+    "executable": "Launcher.exe",
+    "install_path": "/home/docker/Games/gog/Oblivion",
+    "install_size": 29130917939,
+    "install_tags": [],
+    "is_dlc": false,
+    "launch_parameters": "",
+    "manifest_path": null,
+    "needs_verification": false,
+    "platform": "Windows",
+    "prereq_info": {
+      "args": "",
+      "ids": [
+        "DX10_Redist"
+      ],
+      "name": "",
+      "path": "Installers/DirectX/DXSETUP.exe"
+    },
+    "requires_ot": false,
+    "save_path": null,
+    "save_timestamp": null,
+    "title": "The Elder Scrolls IV: Oblivion\u00ae Game of the Year Edition",
+    "uninstaller": null,
+    "use_signed_url": false,
+    "version": "1.3"
+  }
+}

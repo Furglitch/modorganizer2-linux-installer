@@ -1,0 +1,47 @@
+"installscript"
+{
+	"Registry"
+	{
+		"HKEY_LOCAL_MACHINE\\SOFTWARE\\Bethesda Softworks\\Oblivion"
+		{
+			"string"
+			{
+				"Installed Path"		"%INSTALLDIR%\\"
+			}
+		}
+		"HKEY_LOCAL_MACHINE\\SOFTWARE\\Bethesda Softworks\\Oblivion\\1.00.0000"
+		{
+			"string"
+			{
+				"(Default)"		""
+			}
+		}
+		"HKEY_LOCAL_MACHINE\\SOFTWARE\\Bethesda Softworks\\Oblivion - Construction Set"
+		{
+			"string"
+			{
+				"(Default)"		""
+			}
+		}
+		"HKEY_LOCAL_MACHINE\\SOFTWARE\\Bethesda Softworks\\Oblivion - Construction Set\\1.00.0000"
+		{
+			"string"
+			{
+				"(Default)"		""
+			}
+		}
+	}
+	"run process"
+	{
+		"DirectX"
+		{
+			"process 1"		"%INSTALLDIR%\\directx\\DXSETUP.exe"
+			"command 1"		"/silent"
+			"NoCleanUp"		"1"
+		}
+	}
+}
+"kvsignatures"
+{
+	"installscript"		"4e225eda10905bbccff7bda3a2f6a5fb49203b58988df2b80fb6dbb8cc9adb71a8de2b21a13d740071c7f0001545f687e31c73454e4dba553c84285f7170e84df530152b0fb4f68004660a226e0ae027cf15d5b8a1f33f9d5c2f36bef91c0f958afe3d96ee4e093452ea8c8492b19bdaf7d24ad7843ac0cb83c3617e618a5757"
+}
