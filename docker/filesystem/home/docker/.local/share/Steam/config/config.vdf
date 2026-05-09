@@ -1,0 +1,21 @@
+"InstallConfigStore"
+{
+	"Software"
+	{
+		"Valve"
+		{
+			"Steam"
+			{
+				"CompatToolMapping"
+				{
+					"22330"
+					{
+						"name"		"proton_10"
+						"config"	""
+						"Priority"	"250"
+					}
+				}
+			}
+		}
+	}
+}

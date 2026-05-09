@@ -3,22 +3,22 @@ FROM ubuntu:latest
 WORKDIR /tmp/mo2-lint
 ENV HOME=/home/docker
 
-# BUILD=true  → build mo2-lint from source via `make _build`
-# BUILD=false → use the pre-built binary in dist/
-ARG BUILD=true
-ENV BUILD=${BUILD}
-
 RUN dpkg --add-architecture i386 \
  && apt-get update && apt-get install -y --no-install-recommends \
     binutils \
     ca-certificates \
     curl \
     make \
+    p7zip-full \
+    python3 \
     unzip \
     wget \
     wine \
     wine32 \
     wine64 \
+    winetricks \
+    xvfb \
+    zenity \
  && rm -rf /var/lib/apt/lists/*
 
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -34,5 +34,33 @@ COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 USER docker
+
+# Symlink Steam library
+RUN rm -rf "${HOME}/.steam/steam" \
+ && mkdir -p "${HOME}/.steam" \
+ && ln -sf "${HOME}/.local/share/Steam" "${HOME}/.steam/steam" \
+ && ln -sf "${HOME}/.local/share/Steam" "${HOME}/.steam/root"
+
+# Convert appinfo.vdf to binary
+RUN python3 /tmp/mo2-lint/docker/gen_appinfo.py \
+    "${HOME}/.local/share/Steam/appcache/appinfo.vdf"
+
+# Create Proton 10 stub
+RUN mkdir -p "${HOME}/.local/share/Steam/steamapps/common/Proton 10.0/files/bin" \
+ && printf '#!/bin/sh\nexec wine "$@"\n' \
+    > "${HOME}/.local/share/Steam/steamapps/common/Proton 10.0/proton" \
+ && chmod +x "${HOME}/.local/share/Steam/steamapps/common/Proton 10.0/proton"
+
+# Create appmanifest ACF files
+RUN printf '"AppState"\n{\n\t"appid"\t"22330"\n\t"name"\t"Oblivion"\n\t"installdir"\t"Oblivion"\n}\n' \
+    > "${HOME}/.local/share/Steam/steamapps/appmanifest_22330.acf" \
+ && printf '"AppState"\n{\n\t"appid"\t"2805730"\n\t"name"\t"Proton 10.0"\n\t"installdir"\t"Proton 10.0"\n}\n' \
+    > "${HOME}/.local/share/Steam/steamapps/appmanifest_2805730.acf"
+
+# Create Oblivion Wine prefix
+RUN WINEDEBUG=-all \
+    WINEPREFIX="${HOME}/.local/share/Steam/steamapps/compatdata/22330/pfx" \
+    xvfb-run -a wine wineboot --init 2>/dev/null \
+ && touch "${HOME}/.local/share/Steam/steamapps/compatdata/22330/pfx.lock"
 
 ENTRYPOINT ["/entrypoint.sh"]

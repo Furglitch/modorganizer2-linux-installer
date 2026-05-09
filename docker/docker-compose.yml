@@ -5,4 +5,4 @@ services:
       context: ..
       dockerfile: docker/dockerfile
     environment:
-      - BUILD=false
+      - STEAM_RUNTIME=0

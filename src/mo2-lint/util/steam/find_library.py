@@ -7,6 +7,7 @@ import os
 import re
 
 steam_directories = [
+    "${HOME}/.local/share/Steam",
     "${HOME}/.steam/root",
     "${HOME}/.var/app/com.valvesoftware.Steam/.local/share/Steam",
 ]
