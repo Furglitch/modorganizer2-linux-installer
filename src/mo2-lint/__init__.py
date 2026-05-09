@@ -289,6 +289,13 @@ def cli(ctx):
 @click_log_level
 @click_opt_game_info
 @click.option(
+    "--launcher",
+    "-L",
+    type=click.Choice(["steam", "gog", "epic"], case_sensitive=False),
+    default=None,
+    help="Force a specific launcher instead of auto-detecting.",
+)
+@click.option(
     "--script-extender",
     "-s",
     is_flag=True,
@@ -308,13 +315,14 @@ def install(
     game: str,
     directory: Path,
     game_info_path: Optional[Path],
+    launcher: Optional[str],
     script_extender: bool,
     plugin: tuple[str],
     log_level,
 ):
     game, directory = start(game, directory, game_info_path, log_level)
     logger.debug(
-        f"Running install command with game={game}, directory={directory}, game_info_path={game_info_path}, script_extender={script_extender}, plugin={plugin}"
+        f"Running install command with game={game}, directory={directory}, game_info_path={game_info_path}, launcher={launcher}, script_extender={script_extender}, plugin={plugin}"
     )
     if plugin:
         for p in plugin:
@@ -330,6 +338,7 @@ def install(
         log_level,
         script_extender,
         plugin,
+        launcher,
     )
     state.write_state()
 

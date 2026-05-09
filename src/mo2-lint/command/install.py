@@ -21,6 +21,7 @@ def install(
     log_level: str = "INFO",
     script_extender: bool = False,
     plugin: Optional[tuple[str]] = (),
+    launcher: Optional[str] = None,
 ):
     var.set_parameters(
         {
@@ -38,7 +39,7 @@ def install(
     logger.debug(f"Ensured installation directory exists: {directory}")
 
     if not state.match_instances(directory=directory):
-        launcher = get_launcher()
+        launcher = get_launcher(launcher)
         executable = (
             var.game_info.executable.get(launcher)
             if isinstance(var.game_info.executable, dict)

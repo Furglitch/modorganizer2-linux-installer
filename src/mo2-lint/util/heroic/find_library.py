@@ -141,9 +141,12 @@ def get_data() -> tuple[
 
     global heroic_config
     heroic_config = (launcher, game_id, install_path, wine_prefix)
-    logger.success(
-        f"Successfully retrieved game data for {display} from Heroic config. game_id={game_id}, install_path={install_path}, wine_prefix={wine_prefix}"
-    )
+    if launcher is not None:
+        logger.success(
+            f"Successfully retrieved game data for {display} from Heroic config. game_id={game_id}, install_path={install_path}, wine_prefix={wine_prefix}"
+        )
+    else:
+        logger.warning("No valid Heroic game data found in any config directory.")
     var.heroic_config = heroic_config
     return heroic_config
 

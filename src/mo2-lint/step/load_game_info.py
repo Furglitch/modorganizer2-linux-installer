@@ -2,20 +2,38 @@
 
 from loguru import logger
 from pathlib import Path
+from typing import Optional
 from util import lang, variables as var, state_file as state
 from util.heroic.find_library import get_data as get_heroic_data
 from util.steam.find_library import get_libraries as get_steam_libraries
 
 
-def get_launcher() -> str:
+def get_launcher(launcher: Optional[str] = None) -> str:
     """
     Determines the launcher being used based on detected libraries.
+
+    Parameters
+    ----------
+    launcher : str, optional
+        If provided, skip auto-detection and use this launcher directly.
+        Must be one of "steam", "gog", or "epic".
 
     Returns
     -------
     str
         The launcher type ("steam", "gog", "epic"), or None if not found.
     """
+
+    if launcher:
+        launcher = launcher.lower()
+        if launcher not in ("steam", "gog", "epic"):
+            logger.error(
+                f"Invalid launcher specified: {launcher}. Must be one of: steam, gog, epic."
+            )
+            return None
+        logger.debug(f"Using specified launcher: {launcher}")
+        var.launcher = launcher
+        return var.launcher
 
     logger.debug("Detecting game launchers.")
     steam_libraries = get_steam_libraries()
