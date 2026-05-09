@@ -31,7 +31,8 @@ RUN useradd docker \
  && chown -R docker:docker /tmp/mo2-lint /home/docker
 
 COPY docker/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY docker/validate.sh /validate.sh
+RUN chmod +x /entrypoint.sh /validate.sh
 
 USER docker
 
