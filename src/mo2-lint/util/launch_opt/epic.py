@@ -248,15 +248,12 @@ def restart_heroic():
     Restart the Heroic Games Launcher by sending a SIGTERM signal to its process.
     """
     try:
-        if (
-            subprocess.run(
-                ["pgrep", "-x", "heroic"],
-                capture_output=True,
-                text=True,
-                check=True,
-            )
-            != 0
-        ):
+        result = subprocess.run(
+            ["pgrep", "-x", "heroic"],
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
             logger.debug("Heroic is not running, no restart needed")
             return
         logger.info("Restarting Heroic to apply launch option changes...")

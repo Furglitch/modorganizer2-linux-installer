@@ -150,7 +150,9 @@ def get_library() -> Path:
                     library = candidate
                     break
     elif var.launcher == "gog" or var.launcher == "epic":
-        # Use cached heroic_config instead of calling get_heroic_data() again
+        # Use cached heroic_config, or fetch it if not yet populated
+        if not var.heroic_config or len(var.heroic_config) < 3:
+            get_heroic_data()
         if var.heroic_config and len(var.heroic_config) >= 3:
             heroic_launcher, heroic_game_id, heroic_install_path, heroic_wine_prefix = (
                 var.heroic_config

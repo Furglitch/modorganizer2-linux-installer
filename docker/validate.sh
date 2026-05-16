@@ -144,85 +144,148 @@ fi
 header "Runtime Tests"
 
 if [[ -f "$STATE_FILE" ]]; then
-    TEST_INSTANCE=""
-    TEST_GAME=""
-    TEST_REDIRECTOR=""
+    WINE_USER=$(whoami)
 
-    while IFS='|' read -r game ipath gpath; do
+    while IFS='|' read -r game ipath gpath launcher wine_prefix; do
         [[ -z "$game" ]] && continue
-        TEST_INSTANCE="$ipath"
-        TEST_GAME="$game"
+
+        echo
+        echo "  Testing redirector execution for [$game / $launcher]..."
+
         game_dir="$gpath"
         [[ ! -d "$gpath" ]] && game_dir=$(dirname "$gpath")
-        TEST_REDIRECTOR=$(find "$game_dir" -maxdepth 2 -name "mo2-redirector.exe" 2>/dev/null | head -1)
-        break
-    done < <(python3 - "$STATE_FILE" <<'PYEOF'
+        redirector=$(find "$game_dir" -maxdepth 2 -name "mo2-redirector.exe" 2>/dev/null | head -1)
+
+        MO2_EXE="$ipath/ModOrganizer.exe"
+        WINE_PREFIX="$wine_prefix"
+        GAME_DIR=$(dirname "$redirector")
+
+        echo "    → Instance:    $ipath"
+        echo "    → Redirector:  ${redirector:-<not found>}"
+        echo "    → MO2 Exe:     $MO2_EXE"
+        echo "    → Wine Prefix: $WINE_PREFIX"
+
+        if [[ -z "$redirector" ]]; then
+            fail "[$game] Redirector not found near: $game_dir"
+            continue
+        fi
+        if [[ ! -f "$MO2_EXE" ]]; then
+            fail "[$game] ModOrganizer.exe not found: $MO2_EXE"
+            continue
+        fi
+        if [[ -z "$WINE_PREFIX" ]]; then
+            fail "[$game] Wine prefix could not be determined"
+            continue
+        fi
+
+        proc=$(ls -lh "$redirector" | awk '{print $1, $3, $4, $5, $6, $7, $8}')
+        echo "    → Permissions: $proc"
+
+        mkdir -p "$WINE_PREFIX/drive_c/users/$WINE_USER/Temp" \
+                 "$WINE_PREFIX/drive_c/users/$WINE_USER/AppData/Local/Temp" \
+                 "$HOME/.cache/mo2-lint/logs"
+        rm -f "$HOME/.cache/mo2-lint/logs/redirector."*.log 2>/dev/null || true
+
+        echo "    → Running redirector (15s timeout)..."
+        (
+            cd "$GAME_DIR" || exit 1
+            timeout 15s env \
+            WINEPREFIX="$WINE_PREFIX" \
+            USER="$WINE_USER" \
+            WINEDEBUG=-all \
+            xvfb-run -a wine "./$(basename "$redirector")" >/dev/null 2>&1
+        ) || true
+
+        REDIR_LOGFILE=$(ls -t "$HOME/.cache/mo2-lint/logs/redirector."*.log 2>/dev/null | head -1)
+        if [[ -f "$REDIR_LOGFILE" ]]; then
+            echo "    → Redirector log: $REDIR_LOGFILE"
+            sed 's/^/      /' "$REDIR_LOGFILE"
+        else
+            warn "Redirector log not found"
+            REDIR_ERRLOG="$HOME/.cache/mo2-lint/logs/redirector.error.log"
+            [[ -f "$REDIR_ERRLOG" ]] && sed 's/^/      /' "$REDIR_ERRLOG"
+        fi
+
+        if [[ -f "$REDIR_LOGFILE" ]] && grep -q "Launching:.*ModOrganizer" "$REDIR_LOGFILE" 2>/dev/null; then
+            pass "[$game] Redirector launched ModOrganizer.exe"
+        else
+            fail "[$game] Redirector did not start ModOrganizer.exe"
+        fi
+
+        # Verify redirector found the correct MO2 instance
+        expected_mo2_wine="Z:$(echo "$ipath/ModOrganizer.exe" | sed 's|/|\\|g')"
+        found_mo2=$(grep "Found MO2 instance:" "$REDIR_LOGFILE" 2>/dev/null | sed 's/.*Found MO2 instance: //' | tr -d '\r')
+        if [[ -n "$found_mo2" ]]; then
+            if [[ "$found_mo2" == "$expected_mo2_wine" ]]; then
+                pass "[$game] Correct MO2 instance: $found_mo2"
+            else
+                fail "[$game] Wrong MO2 instance: expected '$expected_mo2_wine', got '$found_mo2'"
+            fi
+        else
+            warn "[$game] Could not extract MO2 instance path from log"
+        fi
+
+        # Verify redirector resolved the correct game executable
+        expected_exe=$(python3 - "$STATE_FILE" "$game" "$launcher" <<'PYEOF'
 import json, sys
 with open(sys.argv[1]) as f:
     data = json.load(f)
 for inst in data.get("instances", []):
-    print("{}|{}|{}".format(
+    if inst.get("game") == sys.argv[2] and inst.get("launcher") == sys.argv[3]:
+        gpath = inst.get("game_path", "")
+        exe   = inst.get("game_executable", "")
+        print(str(gpath) + "/" + exe if exe else "")
+        break
+PYEOF
+)
+        found_exe=$(grep "Game executable:" "$REDIR_LOGFILE" 2>/dev/null | sed 's/.*Game executable: //' | tr -d '\r')
+        if [[ -n "$found_exe" && -n "$expected_exe" ]]; then
+            # Convert Wine Z:\ path to POSIX for comparison
+            found_exe_posix=$(echo "$found_exe" | sed 's|^Z:\\||;s|^Z:/||;s|\\|/|g')
+            found_exe_posix="/${found_exe_posix#/}"
+            if [[ "$found_exe_posix" == "$expected_exe" ]]; then
+                pass "[$game] Correct game executable: $found_exe_posix"
+            else
+                fail "[$game] Wrong game executable: expected '$expected_exe', got '$found_exe_posix'"
+            fi
+        else
+            warn "[$game] Could not verify game executable (found='$found_exe' expected='$expected_exe')"
+        fi
+
+    done < <(python3 - "$STATE_FILE" <<'PYEOF'
+import json, sys, os
+
+HEROIC_CFG = os.path.expanduser("~/.config/heroic/GamesConfig")
+STEAM_PFX  = os.path.expanduser("~/.local/share/Steam/steamapps/compatdata/22330/pfx")
+
+with open(sys.argv[1]) as f:
+    data = json.load(f)
+
+for inst in data.get("instances", []):
+    launcher = inst.get("launcher", "")
+    wine_prefix = ""
+    if launcher == "steam":
+        wine_prefix = STEAM_PFX
+    elif launcher in ("epic", "gog"):
+        ids = inst.get("launcher_ids", {})
+        game_id = str(ids.get(launcher, ""))
+        if game_id:
+            cfg = os.path.join(HEROIC_CFG, f"{game_id}.json")
+            try:
+                with open(cfg) as cf:
+                    cdata = json.load(cf)
+                wine_prefix = cdata.get(game_id, {}).get("winePrefix", "")
+            except Exception:
+                pass
+    print("{}|{}|{}|{}|{}".format(
         inst.get("game", "unknown"),
         inst.get("instance_path", ""),
         inst.get("game_path", ""),
+        launcher,
+        wine_prefix,
     ))
 PYEOF
 )
-
-    if [[ -n "$TEST_INSTANCE" && -n "$TEST_REDIRECTOR" ]]; then
-        echo "  Testing redirector execution for [$TEST_GAME]..."
-
-        MO2_EXE="$TEST_INSTANCE/ModOrganizer.exe"
-        WINE_PREFIX="$HOME/.local/share/Steam/steamapps/compatdata/22330/pfx"
-        WINE_USER=$(whoami)
-        GAME_DIR=$(dirname "$TEST_REDIRECTOR")
-
-        echo "    → Instance:    $TEST_INSTANCE"
-        echo "    → Redirector:  $TEST_REDIRECTOR"
-        echo "    → MO2 Exe:     $MO2_EXE"
-        echo "    → Wine Prefix: $WINE_PREFIX"
-        proc=$(ls -lh "$TEST_REDIRECTOR" | awk '{print $1, $3, $4, $5, $6, $7, $8}')
-        echo "    → Permissions: $proc"
-
-        if [[ ! -f "$TEST_REDIRECTOR" ]]; then
-            fail "Redirector not found: $TEST_REDIRECTOR"
-        elif [[ ! -f "$MO2_EXE" ]]; then
-            fail "ModOrganizer.exe not found: $MO2_EXE"
-        else
-            mkdir -p "$WINE_PREFIX/drive_c/users/$WINE_USER/Temp" \
-                     "$WINE_PREFIX/drive_c/users/$WINE_USER/AppData/Local/Temp" \
-                     "$HOME/.cache/mo2-lint/logs"
-            rm -f "$HOME/.cache/mo2-lint/logs/redirector."*.log 2>/dev/null || true
-
-            echo "    → Running redirector (30s timeout)..."
-            (
-                cd "$GAME_DIR" || exit 1
-                timeout 30s env \
-                WINEPREFIX="$WINE_PREFIX" \
-                USER="$WINE_USER" \
-                WINEDEBUG=-all \
-                xvfb-run -a wine "./$(basename "$TEST_REDIRECTOR")" >/dev/null 2>&1
-            ) || true
-
-            REDIR_LOGFILE=$(ls -t "$HOME/.cache/mo2-lint/logs/redirector."*.log 2>/dev/null | head -1)
-            if [[ -f "$REDIR_LOGFILE" ]]; then
-                echo "    → Redirector log: $REDIR_LOGFILE"
-                sed 's/^/      /' "$REDIR_LOGFILE"
-            else
-                warn "Redirector log not found"
-                REDIR_ERRLOG="$HOME/.cache/mo2-lint/logs/redirector.error.log"
-                [[ -f "$REDIR_ERRLOG" ]] && sed 's/^/      /' "$REDIR_ERRLOG"
-            fi
-
-            if [[ -f "$REDIR_LOGFILE" ]] && grep -q "Launching:.*ModOrganizer" "$REDIR_LOGFILE" 2>/dev/null; then
-                pass "Redirector launched ModOrganizer.exe"
-            else
-                fail "Redirector did not start ModOrganizer.exe"
-            fi
-        fi
-    else
-        warn "No instance or redirector found for runtime tests"
-    fi
 else
     warn "Skipping runtime tests (state.json missing)"
 fi

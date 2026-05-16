@@ -37,6 +37,10 @@ RUN chmod +x /entrypoint.sh /validate.sh
 
 USER docker
 
+# Make empty directories
+RUN mkdir -p "${HOME}/.local/share/Steam/steamapps/compatdata/22330" \
+ && mkdir -p "${HOME}/Games/heroic/.prefixes/The Elder Scrolls IV Oblivion"
+
 # Symlink Steam library
 RUN rm -rf "${HOME}/.steam/steam" \
  && mkdir -p "${HOME}/.steam" \
@@ -59,7 +63,12 @@ RUN printf '"AppState"\n{\n\t"appid"\t"22330"\n\t"name"\t"Oblivion"\n\t"installd
  && printf '"AppState"\n{\n\t"appid"\t"2805730"\n\t"name"\t"Proton 10.0"\n\t"installdir"\t"Proton 10.0"\n}\n' \
     > "${HOME}/.local/share/Steam/steamapps/appmanifest_2805730.acf"
 
-# Create Oblivion Wine prefix
+# Create Heroic Wine prefixes
+RUN WINEDEBUG=-all \
+    WINEPREFIX="${HOME}/Games/heroic/.prefixes/The Elder Scrolls IV Oblivion" \
+    xvfb-run -a wine wineboot --init 2>/dev/null
+
+# Create Steam Wine prefix
 RUN WINEDEBUG=-all \
     WINEPREFIX="${HOME}/.local/share/Steam/steamapps/compatdata/22330/pfx" \
     xvfb-run -a wine wineboot --init 2>/dev/null \
