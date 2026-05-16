@@ -10,6 +10,7 @@ RUN dpkg --add-architecture i386 \
     curl \
     make \
     p7zip-full \
+    psmisc \
     python3 \
     unzip \
     wget \
@@ -62,6 +63,8 @@ RUN printf '"AppState"\n{\n\t"appid"\t"22330"\n\t"name"\t"Oblivion"\n\t"installd
 RUN WINEDEBUG=-all \
     WINEPREFIX="${HOME}/.local/share/Steam/steamapps/compatdata/22330/pfx" \
     xvfb-run -a wine wineboot --init 2>/dev/null \
- && touch "${HOME}/.local/share/Steam/steamapps/compatdata/22330/pfx.lock"
+ && touch "${HOME}/.local/share/Steam/steamapps/compatdata/22330/pfx.lock" \
+ && mkdir -p "${HOME}/.local/share/Steam/steamapps/compatdata/22330/pfx/drive_c/users/docker/Temp" \
+ && mkdir -p "${HOME}/.local/share/Steam/steamapps/compatdata/22330/pfx/drive_c/users/docker/AppData/Local/Temp"
 
 ENTRYPOINT ["/entrypoint.sh"]

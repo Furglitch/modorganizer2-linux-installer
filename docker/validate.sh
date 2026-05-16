@@ -141,6 +141,94 @@ fi
 
 # --- #
 
+header "Runtime Tests"
+
+if [[ -f "$STATE_FILE" ]]; then
+    TEST_INSTANCE=""
+    TEST_GAME=""
+    TEST_REDIRECTOR=""
+
+    while IFS='|' read -r game ipath gpath; do
+        [[ -z "$game" ]] && continue
+        TEST_INSTANCE="$ipath"
+        TEST_GAME="$game"
+        game_dir="$gpath"
+        [[ ! -d "$gpath" ]] && game_dir=$(dirname "$gpath")
+        TEST_REDIRECTOR=$(find "$game_dir" -maxdepth 2 -name "mo2-redirector.exe" 2>/dev/null | head -1)
+        break
+    done < <(python3 - "$STATE_FILE" <<'PYEOF'
+import json, sys
+with open(sys.argv[1]) as f:
+    data = json.load(f)
+for inst in data.get("instances", []):
+    print("{}|{}|{}".format(
+        inst.get("game", "unknown"),
+        inst.get("instance_path", ""),
+        inst.get("game_path", ""),
+    ))
+PYEOF
+)
+
+    if [[ -n "$TEST_INSTANCE" && -n "$TEST_REDIRECTOR" ]]; then
+        echo "  Testing redirector execution for [$TEST_GAME]..."
+
+        MO2_EXE="$TEST_INSTANCE/ModOrganizer.exe"
+        WINE_PREFIX="$HOME/.local/share/Steam/steamapps/compatdata/22330/pfx"
+        WINE_USER=$(whoami)
+        GAME_DIR=$(dirname "$TEST_REDIRECTOR")
+
+        echo "    → Instance:    $TEST_INSTANCE"
+        echo "    → Redirector:  $TEST_REDIRECTOR"
+        echo "    → MO2 Exe:     $MO2_EXE"
+        echo "    → Wine Prefix: $WINE_PREFIX"
+        proc=$(ls -lh "$TEST_REDIRECTOR" | awk '{print $1, $3, $4, $5, $6, $7, $8}')
+        echo "    → Permissions: $proc"
+
+        if [[ ! -f "$TEST_REDIRECTOR" ]]; then
+            fail "Redirector not found: $TEST_REDIRECTOR"
+        elif [[ ! -f "$MO2_EXE" ]]; then
+            fail "ModOrganizer.exe not found: $MO2_EXE"
+        else
+            mkdir -p "$WINE_PREFIX/drive_c/users/$WINE_USER/Temp" \
+                     "$WINE_PREFIX/drive_c/users/$WINE_USER/AppData/Local/Temp" \
+                     "$HOME/.cache/mo2-lint/logs"
+            rm -f "$HOME/.cache/mo2-lint/logs/redirector."*.log 2>/dev/null || true
+
+            echo "    → Running redirector (30s timeout)..."
+            (
+                cd "$GAME_DIR" || exit 1
+                timeout 30s env \
+                WINEPREFIX="$WINE_PREFIX" \
+                USER="$WINE_USER" \
+                WINEDEBUG=-all \
+                xvfb-run -a wine "./$(basename "$TEST_REDIRECTOR")" >/dev/null 2>&1
+            ) || true
+
+            REDIR_LOGFILE=$(ls -t "$HOME/.cache/mo2-lint/logs/redirector."*.log 2>/dev/null | head -1)
+            if [[ -f "$REDIR_LOGFILE" ]]; then
+                echo "    → Redirector log: $REDIR_LOGFILE"
+                sed 's/^/      /' "$REDIR_LOGFILE"
+            else
+                warn "Redirector log not found"
+                REDIR_ERRLOG="$HOME/.cache/mo2-lint/logs/redirector.error.log"
+                [[ -f "$REDIR_ERRLOG" ]] && sed 's/^/      /' "$REDIR_ERRLOG"
+            fi
+
+            if [[ -f "$REDIR_LOGFILE" ]] && grep -q "Launching:.*ModOrganizer" "$REDIR_LOGFILE" 2>/dev/null; then
+                pass "Redirector launched ModOrganizer.exe"
+            else
+                fail "Redirector did not start ModOrganizer.exe"
+            fi
+        fi
+    else
+        warn "No instance or redirector found for runtime tests"
+    fi
+else
+    warn "Skipping runtime tests (state.json missing)"
+fi
+
+# --- #
+
 echo
 echo "================================"
 if [[ $FAIL -gt 0 ]]; then
