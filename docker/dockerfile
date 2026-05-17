@@ -1,35 +1,125 @@
-FROM ubuntu:latest
+ARG BASE_IMAGE=ubuntu:latest
+FROM ${BASE_IMAGE}
+
+ARG DISTRO=ubuntu
 
 WORKDIR /tmp/mo2-lint
 ENV HOME=/home/docker
 
-RUN dpkg --add-architecture i386 \
- && apt-get update && apt-get install -y --no-install-recommends \
-    binutils \
-    ca-certificates \
-    curl \
-    make \
-    p7zip-full \
-    psmisc \
-    python3 \
-    unzip \
-    wget \
-    wine \
-    wine32 \
-    wine64 \
-    winetricks \
-    xvfb \
-    zenity \
- && rm -rf /var/lib/apt/lists/*
+RUN case "${DISTRO}" in \
+    ubuntu) \
+        dpkg --add-architecture i386 \
+     && apt-get update \
+     && apt-get install -y --no-install-recommends \
+            binutils \
+            ca-certificates \
+            curl \
+            make \
+            p7zip-full \
+            psmisc \
+            python3 \
+            unzip \
+            wget \
+            wine \
+            wine32 \
+            wine64 \
+            winetricks \
+            xvfb \
+            zenity \
+     && rm -rf /var/lib/apt/lists/* \
+    ;; \
+    debian) \
+        sed -i 's/Components: main$/Components: main contrib/' /etc/apt/sources.list.d/debian.sources \
+     && dpkg --add-architecture i386 \
+     && apt-get update \
+     && apt-get install -y --no-install-recommends \
+            binutils \
+            ca-certificates \
+            curl \
+            libpython3.13 \
+            make \
+            p7zip-full \
+            psmisc \
+            python3 \
+            unzip \
+            wget \
+            wine \
+            wine32 \
+            wine64 \
+            winetricks \
+            xauth \
+            xvfb \
+            zenity \
+     && rm -rf /var/lib/apt/lists/* \
+    ;; \
+    fedora) \
+        dnf install -y \
+            "https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm" \
+            "https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm" \
+     && dnf install -y --setopt=install_weak_deps=False \
+            binutils \
+            ca-certificates \
+            curl \
+            make \
+            p7zip \
+            psmisc \
+            python3 \
+            unzip \
+            wget \
+            wine \
+            winetricks \
+            xorg-x11-server-Xvfb \
+            zenity \
+     && dnf clean all \
+    ;; \
+    arch) \
+        echo -e '\n[multilib]\nInclude = /etc/pacman.d/mirrorlist' >> /etc/pacman.conf \
+     && pacman -Syu --noconfirm \
+     && pacman -S --noconfirm --needed \
+            binutils \
+            ca-certificates \
+            curl \
+            make \
+            p7zip \
+            psmisc \
+            python \
+            unzip \
+            wget \
+            wine \
+            winetricks \
+            xorg-server-xvfb \
+            zenity \
+     && pacman -Scc --noconfirm \
+    ;; \
+    steamos) \
+        echo "https://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories \
+     && apk add --no-cache \
+            binutils \
+            ca-certificates \
+            curl \
+            make \
+            p7zip \
+            procps \
+            python3 \
+            unzip \
+            wget \
+            wine \
+            winetricks \
+            xvfb-run \
+            zenity \
+    ;; \
+    *) echo "Unknown DISTRO: ${DISTRO}" && exit 1 ;; \
+    esac
+
+RUN useradd docker
+COPY docker/filesystem/home/docker /home/docker
+RUN chown -R docker:docker /tmp/mo2-lint /home/docker
 
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 ENV PATH="${HOME}/.local/bin:${PATH}"
 
 COPY . .
-
-COPY docker/filesystem/home/docker /home/docker
-RUN useradd docker \
- && chown -R docker:docker /tmp/mo2-lint /home/docker
+RUN chown -R docker:docker /tmp/mo2-lint
 
 COPY docker/entrypoint.sh /entrypoint.sh
 COPY docker/validate.sh /validate.sh
@@ -63,15 +153,18 @@ RUN printf '"AppState"\n{\n\t"appid"\t"22330"\n\t"name"\t"Oblivion"\n\t"installd
  && printf '"AppState"\n{\n\t"appid"\t"2805730"\n\t"name"\t"Proton 10.0"\n\t"installdir"\t"Proton 10.0"\n}\n' \
     > "${HOME}/.local/share/Steam/steamapps/appmanifest_2805730.acf"
 
-# Create Heroic Wine prefixes
-RUN WINEDEBUG=-all \
+# Create Wine prefixes
+RUN xvfb-run -a sh -c '\
+    WINEDEBUG=-all \
+    WINEDLLOVERRIDES="mscoree,mshtml=" \
     WINEPREFIX="${HOME}/Games/heroic/.prefixes/The Elder Scrolls IV Oblivion" \
-    xvfb-run -a wine wineboot --init 2>/dev/null
-
-# Create Steam Wine prefix
-RUN WINEDEBUG=-all \
+    wine wineboot --init 2>/dev/null; \
+    WINEPREFIX="${HOME}/Games/heroic/.prefixes/The Elder Scrolls IV Oblivion" wineserver -k 2>/dev/null; \
+    WINEDEBUG=-all \
+    WINEDLLOVERRIDES="mscoree,mshtml=" \
     WINEPREFIX="${HOME}/.local/share/Steam/steamapps/compatdata/22330/pfx" \
-    xvfb-run -a wine wineboot --init 2>/dev/null \
+    wine wineboot --init 2>/dev/null; \
+    WINEPREFIX="${HOME}/.local/share/Steam/steamapps/compatdata/22330/pfx" wineserver -k 2>/dev/null' \
  && touch "${HOME}/.local/share/Steam/steamapps/compatdata/22330/pfx.lock" \
  && mkdir -p "${HOME}/.local/share/Steam/steamapps/compatdata/22330/pfx/drive_c/users/docker/Temp" \
  && mkdir -p "${HOME}/.local/share/Steam/steamapps/compatdata/22330/pfx/drive_c/users/docker/AppData/Local/Temp"

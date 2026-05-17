@@ -1,0 +1,67 @@
+name: Test Builds
+
+on:
+  push:
+    branches: [ "rewrite" ]
+  pull_request:
+    branches: [ "rewrite" ]
+
+permissions:
+  contents: read
+
+jobs:
+  test-ubuntu:
+    name: Ubuntu Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and run ubuntu tests
+        run: docker compose -f "./docker/docker-compose.yml" run --build --rm test-ubuntu
+
+  test-debian:
+    name: Debian Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and run debian tests
+        run: docker compose -f "./docker/docker-compose.yml" run --build --rm test-debian
+
+  test-fedora:
+    name: Fedora Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and run fedora tests
+        run: docker compose -f "./docker/docker-compose.yml" run --build --rm test-fedora
+
+  test-arch:
+    name: Arch Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and run arch tests
+        run: docker compose -f "./docker/docker-compose.yml" run --build --rm test-arch
+
+  test-steamos:
+    name: SteamOS Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and run steamos tests
+        run: docker compose -f "./docker/docker-compose.yml" run --build --rm test-steamos
+
+  all-passed:
+    name: All tests passed
+    runs-on: ubuntu-latest
+    needs: [test-ubuntu, test-debian, test-fedora, test-arch, test-steamos]
+    if: always()
+    steps:
+      - name: Check results
+        run: |
+          results="${{ needs.test-ubuntu.result }} ${{ needs.test-debian.result }} ${{ needs.test-fedora.result }} ${{ needs.test-arch.result }} ${{ needs.test-steamos.result }}"
+          for result in $results; do
+            if [[ "$result" != "success" ]]; then
+              echo "One or more distro tests failed."
+              exit 1
+            fi
+          done

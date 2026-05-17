@@ -201,7 +201,8 @@ def redirect_output_to_logger():
                             f"Error translating protontricks log line: {line}."
                         )
 
-    threading.Thread(target=reader_thread, daemon=True).start()
+    reader = threading.Thread(target=reader_thread, daemon=True)
+    reader.start()
 
     try:
         os.dup2(write_fd, sys.stdout.fileno())
@@ -210,10 +211,14 @@ def redirect_output_to_logger():
         yield output_lines
 
     finally:
+        sys.stdout.flush()
+        sys.stderr.flush()
         os.dup2(original_stdout_fd, sys.stdout.fileno())
         os.dup2(original_stderr_fd, sys.stderr.fileno())
         os.close(write_fd)
         os.close(original_stderr_fd)
+
+        reader.join()
 
         remove_loggers()
         original_stdout_file.close()
