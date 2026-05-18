@@ -153,19 +153,18 @@ RUN printf '"AppState"\n{\n\t"appid"\t"22330"\n\t"name"\t"Oblivion"\n\t"installd
  && printf '"AppState"\n{\n\t"appid"\t"2805730"\n\t"name"\t"Proton 10.0"\n\t"installdir"\t"Proton 10.0"\n}\n' \
     > "${HOME}/.local/share/Steam/steamapps/appmanifest_2805730.acf"
 
-# Create Wine prefixes
-RUN xvfb-run -a sh -c '\
-    WINEDEBUG=-all \
+# Create Heroic Wine prefix
+RUN WINEDEBUG=-all \
     WINEDLLOVERRIDES="mscoree,mshtml=" \
     WINEPREFIX="${HOME}/Games/heroic/.prefixes/The Elder Scrolls IV Oblivion" \
-    wine wineboot --init 2>/dev/null; \
-    WINEPREFIX="${HOME}/Games/heroic/.prefixes/The Elder Scrolls IV Oblivion" wineserver -k 2>/dev/null; \
-    WINEDEBUG=-all \
+    xvfb-run -a wine wineboot --init 2>/dev/null
+
+# Create Steam Wine prefix
+RUN WINEDEBUG=-all \
     WINEDLLOVERRIDES="mscoree,mshtml=" \
     WINEPREFIX="${HOME}/.local/share/Steam/steamapps/compatdata/22330/pfx" \
-    wine wineboot --init 2>/dev/null; \
-    WINEPREFIX="${HOME}/.local/share/Steam/steamapps/compatdata/22330/pfx" wineserver -k 2>/dev/null' \
- && touch "${HOME}/.local/share/Steam/steamapps/compatdata/22330/pfx.lock" \
+    xvfb-run -a wine wineboot --init 2>/dev/null
+RUN touch "${HOME}/.local/share/Steam/steamapps/compatdata/22330/pfx.lock" \
  && mkdir -p "${HOME}/.local/share/Steam/steamapps/compatdata/22330/pfx/drive_c/users/docker/Temp" \
  && mkdir -p "${HOME}/.local/share/Steam/steamapps/compatdata/22330/pfx/drive_c/users/docker/AppData/Local/Temp"
 
