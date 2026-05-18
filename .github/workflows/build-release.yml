@@ -99,7 +99,7 @@ jobs:
             })
 
       - name: Download Artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           name: mo2-lint_artifact
           path: /tmp/artifact
