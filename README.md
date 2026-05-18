@@ -1,98 +1,58 @@
-<img src="./.github/img/modorganizer2-linux-installer.svg" alt="Mod Organizer 2 Linux Installer Logo" width="96" align="left" />
+<img src="https://github.com/Furglitch/modorganizer2-linux-installer/raw/main/.github/img/modorganizer2-linux-installer.svg" alt="MO2-LINT Logo" width="96" align="left" />
 
-# Mod Organizer 2 Linux Installer
+# Mod Organizer 2 Linux Installer (MO2-LINT)
 
 <br clear="left"/>
 
-This project aims to installing Mod Organizer 2 instances on Linux as easy as possible. It does that by providing installers which automatically setup a working experience for the user.
+Mod Organizer 2 Linux Installer (MO2-LINT, for short) aims to make installing [Mod Organizer 2] on Linux systems easier and more accessible, providing a simple process to set up a fully functional Mod Organizer 2 installation with minimal user input.
 
-Originally developed by rockerbacon. A major thanks to him for doing most of the legwork.
+Originally developed by [rockerbacon][@rockerbacon] as a Bash script, it has since been maintained by [furglitch][@furglitch] and fully rewritten in Python to improve maintainability, extensibility, and cross-distro compatibility.
 
-> $${\color{red}State \space of \space Development}$$<br/>
-> As the vision and features of this project have grown, it has become apparent that Bash is becoming less and less optimal, both for implementing new features and general ease of development.<br/>
-> As such, we are in the process of rewriting the whole project in Python.<br/>
-> Further details can be found on the [rewrite branch's README](https://github.com/Furglitch/modorganizer2-linux-installer/blob/rewrite/README.md) and in the [rewrite discussion thread](https://github.com/Furglitch/modorganizer2-linux-installer/discussions/873).<br/>
-> <b><i>The project is not abandoned</i></b>. Any critical issues will be addressed, but other developments (non-critical bugs, new features) will take a backseat to the rewrite.<br/>
->
-> $${\color{red}Update \space (2025-01-29):}$$<br/>
-> The rewrite is nearly complete! Doing some final checks.
-> At this point, my attention will be fully on the update. Current bugs and feature requests will not be addressed at this time, and closed when the update releases.
-> Thank you for your patience. Hopefully all this work pays off.
+## Features
+- Automated installation and removal of Mod Organizer 2 and its dependencies
+- Support for multiple instances of Mod Organizer 2
+- No additional installations required beyond the installer itself
+- Easy-to-use command-line interface
+- Automatic handling of the Nexus Mods 'Mod Manager Download' button via a custom NXM handler
+- Automatic setup of various plugins for Mod Organizer 2
+- Implements various workarounds to improve compatibility with certain mods
 
-## Installing Mod Organizer 2
+### Supported Games
 
-### Requirements
+| Game                     | Gameplay          | Script Extender                                          | ENB                                                            |
+|:-------------------------|:------------------|:---------------------------------------------------------|:---------------------------------------------------------------|
+| Cyberpunk 2077           | Working*          | N/A                                                      | Not Tested                                                     |
+| Dragon Age: Origins      | Working*          | N/A                                                      | N/A                                                            |
+| Enderal                  | Working*          | Working*                                                 | Working*                                                       |
+| Enderal Special Edition  | Working*          | Working*                                                 | Not Tested                                                     |
+| Fallout 3                | Working*          | Working*                                                 | Not Tested                                                     |
+| Fallout 3 GOTY           | Working*          | Working*                                                 | Not Tested                                                     |
+| Fallout 4                | Working*          | Some F4SE plugins may not work. See [#32]*               | ≤ v0.393 may need `EnablePostPassShader` disabled. See [#95]*  |
+| Fallout London           | Not Tested        | Not Tested                                               | Not Tested                                                     |
+| Fallout New Vegas        | Fullscreen Only*  | Working*                                                 | Working*                                                       |
+| Morrowind                | Not Tested*       | Not Tested                                               | Not Tested                                                     |
+| Oblivion                 | Working*          | Some xOBSE plugins may require manual setup. See [#63]*  | Not Tested                                                     |
+| Skyrim                   | Working*          | Working*                                                 | Working*                                                       |
+| Skyrim Special Edition   | Working*          | Working*                                                 | Working*                                                       |
+| Starfield                | Working*          | Working*                                                 | Not Tested                                                     |
 
-_Currently supports Steam and Heroic installations._
+<sub>* Game last tested with a pre 7.0.0 version of MO2-LINT. Issues may arise, please report if you encounter any problems with a supported game.</sub><br>
 
-| Program | Purpose | Availability |
-|---------|---------|--------------|
-| bash    | programming language | Installed by default on _most_ distros |
-| curl _or_ wget | internet downloads | Installed by default on _most_ distros |
-| zenity | dialog boxes ("gui") | Installed by default on _most_ distros |
-| 7z | archive extractor | Should be available through your distro's package manager |
-| jq | json reader | Should be available through your distro's package manager |
-| websocat | websocket handler | Should be available through your distro's package manager.</br>Soft requirement for Nexus SSO, will run without it |
-| protontricks | proton prefix editor | **Steam Deck:** Must install via Discover.</br>**Others:** Check [available install methods](https://github.com/Matoking/protontricks#installation) to ensure you're using an up-to-date version |
-| protontricks-launcher | protontricks gui | Should come with `protontricks`. If it's not available, see [this](https://github.com/Matoking/protontricks#desktop)
+## Getting Started
+To get started with MO2-LINT, please refer to the [Installation Guide] for detailed instructions on how to install and use the installer.
 
-### Installation Steps
+## Contributing
+Contributions to MO2-LINT are welcome! If you would like to contribute, please read the [Contributing Guide] for more information on how to get involved.
 
-1. Install the game you want to play on Steam;
-2. Download the the latest stable release [here](https://github.com/furglitch/modorganizer2-linux-installer/releases/latest).
-3. Extract the downloaded file;
-4. Open the extracted folder in a terminal and execute `./install.sh`;
-5. The installer will start and guide you through the rest of the process;
-6. After installation, _**read the [post-install instructions](https://github.com/Furglitch/modorganizer2-linux-installer/wiki/Post%E2%80%90Install-Instructions)**_. It contains additional recommended steps and required configurations for some games;
-7. Run the game on Steam and Mod Organizer 2 should start;
 
-The installer will automatically configure game-specific workarounds and install the script extender for your game of choice. Java binaries are also made available at `C:\java` for running Proc Patchers.
 
-**Avoid using ENBoost** with Skyrim: DXVK and Wine have their own better working memory patches, both properly enabled with this installer.
+[Mod Organizer 2]: https://github.com/Modorganizer2/modorganizer
+[@rockerbacon]: https://github.com/rockerbacon
+[@furglitch]: https://github.com/furglitch
 
-**While these installers may be available on Lutris.net**, users are always recommended to use the latest stable release from this repository. The testers and maintainers of this project have little control over the content on Lutris and cannot assure that the installers available there are up to date nor that they haven't been incorrectly modified.
+[Installation Guide]: https://wiki.furglitch.com/modorganizer2-linux-installer/installation/
+[Contributing Guide]: https://wiki.furglitch.com/modorganizer2-linux-installer/contributing/
 
-**To uninstall MO2**, follow the [uninstallation guide](https://github.com/Furglitch/modorganizer2-linux-installer/wiki/Uninstalling-MO2).
-
-## Supported Games
-
-| Game                   | Gameplay          | Script Extender                                                                | ENB                                |
-|------------------------|-------------------|--------------------------------------------------------------------------------|------------------------------------|
-| Cyberpunk 2077         | Working           | N/A                                                                            | Not Tested                         |
-| Dragon Age: Origins    | Working           | N/A                                                                            | N/A                                |
-| Enderal                | Working           | Working                                                                        | Working                            |
-| Enderal Special Edition| Working           | Working                                                                        | Not Tested                         |
-| Fallout 3              | Working           | Working                                                                        | Not Tested                         |
-| Fallout 3 GOTY         | Working           | Working                                                                        | Not Tested                         |
-| Fallout 4              | Working           | Some plugins may not work. See [#32](https://github.com/Furglitch/modorganizer2-linux-installer/issues/32) | v0.393 or older might need `EnablePostPassShader` disabled  |
-| Fallout New Vegas      | Fullscreen Only   | Working                                                                        | Working                            |
-| Morrowind              | Not Tested        | Not Tested                                                                     | Not Tested                         |
-| Oblivion               | Working           | Some plugins might require manual setup                                        | Not Tested                         |
-| Oblivion Remastered*   | Not Tested        | N/A                                                                            | Not Tested                         |
-| Skyrim                 | Working           | Working                                                                        | Working                            |
-| Skyrim Special Edition | Working           | Working                                                                        | Working                            |
-| Starfield              | Working           | Working, Not Included (Hosted on Nexus)                                        | Not Tested                         |
-
-<sub>* Requires an in-dev version of MO2. This is available through the prerelease builds.</sub>
-
-For known bugs and necessary workarounds, please refer to the [issues page](https://github.com/furglitch/modorganizer2-linux-installer/issues?q=is:issue+label:bug).</br>
-Please, help to keep this table up to date by [opening issues](https://github.com/furglitch/modorganizer2-linux-installer/issues/new/choose) on any successes or problems you have experienced.
-
-## Plugin Installation
-
-_This feature is dependent on `jq` being installed, and will be skipped if it is not available._<br/>
-The installer will give you a choice of MO2 plugins to automatically download and install. If you do not want to install any plugins, simply skip the plugin selection step.
-
-Plugin information is loaded via the manifest system created by [Kezyma](https://github.com/Kezyma) and is up to plugin developers to maintain. To add a plugin to this project, add a link to the raw manifest file to [pluginsinfo.json](./pluginsinfo.json) Please refer to Keyzma's [documentation](https://kezyma.github.io/?p=pluginfinder#new-col) for more information on how to create a plugin manifest.
-
-Compatibility with plugins is not guaranteed or supported. If you have issues with a plugin, please report it to the plugin developer.
-If a plugin is found to be outdated or incompatible with Linux/Proton, it will be disabled/removed from the installer until it is fixed.
-
-## Updating Mod Organizer 2
-It is highly recommended to backup your existing installation before updating.
-
-#### From 5.0 and above
-You can update by simply following the install instructions again.
-
-#### From 4.X.X and below
-Instructions are included in the [archived README](.github/OLD-README.md#from-4xx-and-below). Installations of versions prior to 5.0.0 are not supported.
+[#32]: https://github.com/furglitch/modorganizer2-linux-installer/issues/32
+[#63]: https://github.com/furglitch/modorganizer2-linux-installer/issues/63#issuecomment-643690247
+[#95]: https://github.com/furglitch/modorganizer2-linux-installer/issues/95

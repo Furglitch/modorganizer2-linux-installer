@@ -1,0 +1,61 @@
+{
+    "buildId": "50252673715774571",
+    "clientId": "50144659425060655",
+    "gameId": "1458058109",
+    "language": "English",
+    "languages": [
+        "en"
+    ],
+    "name": "The Elder Scrolls IV: Oblivion",
+    "playTasks": [
+        {
+            "category": "launcher",
+            "isPrimary": true,
+            "languages": [
+                "*"
+            ],
+            "name": "The Elder Scrolls IV: Oblivion",
+            "path": "OblivionLauncher.exe",
+            "type": "FileTask"
+        },
+        {
+            "category": "game",
+            "isHidden": true,
+            "languages": [
+                "*"
+            ],
+            "name": "The Elder Scrolls IV: Oblivion",
+            "path": "Oblivion.exe",
+            "type": "FileTask"
+        },
+        {
+            "category": "tool",
+            "languages": [
+                "*"
+            ],
+            "name": "TES Construction Set",
+            "path": "TESConstructionSet.exe",
+            "type": "FileTask"
+        },
+        {
+            "category": "document",
+            "languages": [
+                "en"
+            ],
+            "name": "Manual",
+            "path": "Manual.pdf",
+            "type": "FileTask"
+        },
+        {
+            "category": "document",
+            "languages": [
+                "en"
+            ],
+            "link": "http://www.gog.com/support/the_elder_scrolls_iv_oblivion_game_of_the_year_edition_deluxe",
+            "name": "Support",
+            "type": "URLTask"
+        }
+    ],
+    "rootGameId": "1458058109",
+    "version": 1
+}

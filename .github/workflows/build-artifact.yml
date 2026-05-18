@@ -1,0 +1,47 @@
+name: Build Artifact
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: "build-artifact"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version-file: ".python-version"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+
+      - name: Install dependencies
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y make tar wget curl unzip wine wine64 wine32:i386
+          sudo apt-get install -y --no-install-recommends cabextract
+          wine --version
+
+      - name: Build Artifact
+        run: |
+          export WINEPREFIX=$HOME/.wine-py
+          export WINEARCH=win64
+          make _build
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: mo2-lint_artifact
+          path: dist/mo2-lint

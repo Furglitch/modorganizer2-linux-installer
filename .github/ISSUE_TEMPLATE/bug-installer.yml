@@ -1,0 +1,113 @@
+name: Installer Bug Report
+description: Create a report to help us fix issues. For the MO2-LINT installer only.
+title: "[Bug]: "
+labels: ['bug']
+
+body:
+  - type: checkboxes
+    id: prereq
+    attributes:
+      label: Troubleshooting
+      description: Please confirm you have tried the following before submitting this bug report.
+      options:
+        - label: I have read the documentation, available at [wiki.furglitch.com](https://wiki.furglitch.com/modorganizer2-linux-installer)
+          required: true
+        - label: I have read the troubleshooting documentation, available at [wiki.furglitch.com](https://wiki.furglitch.com/modorganizer2-linux-installer/troubleshooting)
+          required: true
+        - label: I have confirmed that my issue has not already been reported.
+          required: true
+  - type: dropdown
+    id: version
+    attributes:
+      label: Installer version
+      options:
+        - "7.0.0-rc1"
+    validations:
+      required: true
+  - type: dropdown
+    id: game
+    attributes:
+      label: Targeted game
+      description: Which game are you trying to install?
+      options:
+        - "Cyberpunk 2077"
+        - "Dragon Age: Origins"
+        - "Enderal"
+        - "Enderal SE"
+        - "Fallout 3"
+        - "Fallout 3 GOTY"
+        - "Fallout 4"
+        - "Fallout 4 VR"
+        - "Fallout London"
+        - "Fallout New Vegas"
+        - "Starfield"
+        - "TES3: Morrowind"
+        - "TES4: Oblivion"
+        - "TES4: Oblivion Remastered"
+        - "TES5: Skyrim"
+        - "TES5: Skyrim SE"
+        - "TES5: Skyrim VR"
+        - "Multiple / Other (list in 'Additional Info')"
+    validations:
+      required: true
+  - type: dropdown
+    id: launcher
+    attributes:
+      label: Game Launcher
+      description: How is the game installed / launched?
+      options:
+        - "Steam"
+        - "Heroic Games Launcher"
+        - "Other (describe in Additional Notes)"
+    validations:
+      required: true
+  - type: input
+    id: distro
+    attributes:
+      label: Linux Distro
+      description: What distro are you running?
+      placeholder: 'ArchLinux, Debian, Fedora, Ubuntu, etc.'
+    validations:
+      required: true
+  - type: input
+    id: proton
+    attributes:
+      label: Proton/Wine Version
+      description: What version of Proton or Wine are you using?
+      placeholder: 'Proton 10.0, Wine 6.0, etc.'
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Please include the logs here. You can find your log file in ~/.cache/mo2-lint/logs/.
+      placeholder: Drag & drop your install.log file here. *Do not copy-paste, it will not fit*
+    validations:
+      required: true
+  - type: textarea
+    id: issue
+    attributes:
+      label: What happened?
+      placeholder: Describe the bug
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+      placeholder: Describe the expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce the issue
+      value: '1. '
+    validations:
+      required: true
+  - type: textarea
+    id: misc
+    attributes:
+      label: Additional Notes
+      description: Anything else you want to add?

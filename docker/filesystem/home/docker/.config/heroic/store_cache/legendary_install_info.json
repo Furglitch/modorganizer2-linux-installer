@@ -1,0 +1,110 @@
+{
+	"0d0c62755e5a45c7a07fd9cc0b61c39c": {
+		"game": {
+			"app_name": "0d0c62755e5a45c7a07fd9cc0b61c39c",
+			"title": "The Elder Scrolls IV: Oblivion® Game of the Year Edition",
+			"version": "1.3",
+			"platform_versions": {
+				"Windows": "1.3"
+			},
+			"cloud_saves_supported": true,
+			"cloud_save_folder": "{UserDir}/My Games/Oblivion/Saves/",
+			"cloud_save_folder_mac": null,
+			"is_dlc": false,
+			"external_activation": null,
+			"launch_options": [],
+			"command_line": null,
+			"owned_dlc": []
+		},
+		"install": null,
+		"manifest": {
+			"size": 1830111,
+			"type": "binary",
+			"version": 17,
+			"feature_level": 17,
+			"app_name": "0d0c62755e5a45c7a07fd9cc0b61c39c",
+			"launch_exe": "Launcher.exe",
+			"launch_command": "",
+			"build_version": "1.3",
+			"build_id": "SYs_CDfWV3GHP5lJWzfS9sqp6Hw",
+			"prerequisites": {
+				"ids": [
+					"DX10_Redist"
+				],
+				"name": "",
+				"path": "Installers/DirectX/DXSETUP.exe",
+				"args": ""
+			},
+			"uninstaller": null,
+			"install_tags": [
+				"",
+				"French",
+				"German",
+				"Italian",
+				"Spanish"
+			],
+			"num_files": 568,
+			"num_chunks": 27782,
+			"disk_size": 29130917939,
+			"download_size": 27386560839,
+			"tag_disk_size": [
+				{
+					"tag": "",
+					"size": 5941491328,
+					"count": 243
+				},
+				{
+					"tag": "French",
+					"size": 5690747507,
+					"count": 82
+				},
+				{
+					"tag": "German",
+					"size": 5781906731,
+					"count": 80
+				},
+				{
+					"tag": "Italian",
+					"size": 5858117050,
+					"count": 81
+				},
+				{
+					"tag": "Spanish",
+					"size": 5858655323,
+					"count": 82
+				}
+			],
+			"tag_download_size": [
+				{
+					"tag": "",
+					"size": 5596535535,
+					"count": 5667
+				},
+				{
+					"tag": "French",
+					"size": 5342182224,
+					"count": 5428
+				},
+				{
+					"tag": "German",
+					"size": 5413476419,
+					"count": 5515
+				},
+				{
+					"tag": "Italian",
+					"size": 5517962106,
+					"count": 5588
+				},
+				{
+					"tag": "Spanish",
+					"size": 5518323340,
+					"count": 5588
+				}
+			],
+			"use_signed_urls": false
+		}
+	},
+	"__timestamp": {
+		"0d0c62755e5a45c7a07fd9cc0b61c39c": "Tue Apr 21 2026 16:37:27 GMT-0500 (Central Daylight Time)"
+	}
+}

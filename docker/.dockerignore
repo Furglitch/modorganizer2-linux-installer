@@ -1,0 +1,6 @@
+.ruff_cache
+__pycache__
+dist/
+build/mo2-lint/
+build/nxm-handler/
+*.spec

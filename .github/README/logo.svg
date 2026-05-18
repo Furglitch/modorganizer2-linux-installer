@@ -1,0 +1,15 @@
+<!-- Created by Furglitch in Photopea -->
+<!-- Mod Organizer logo utilized in accordance with GPL-3.0 License -->
+
+<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+	<defs>
+		<image width="558" height="558" id="img1" href="data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjIiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDU1OCA1NTgiIHdpZHRoPSI1NTgiIGhlaWdodD0iNTU4Ij4KCTxzdHlsZT4KCQkuczAgeyBmaWxsOiAjZmZmZmZmIH0gCgk8L3N0eWxlPgoJPHBhdGggaWQ9IlNoYXBlIDEiIGNsYXNzPSJzMCIgZD0ibTE4NC42NSAxMjMuMDh2MzEwLjg0aC0xNTMuNjV2LTMxMC44NHptMTExLjEgMTI1LjI4djE4NS41NmgtMTUzLjY1di0xODUuNTZ6bS0xMTEuNjkgMzAuNzNjLTU0LjU4IDAtOTguNjktMzQuODctOTguNjktNzguMDEgMC00My4xMyA0NC4xMS03OCA5OC42OS03OCA1NC41NyAwIDk4LjY5IDM0Ljg3IDk4LjY5IDc4IDAgNDMuMTQtNDQuMTIgNzguMDEtOTguNjkgNzguMDF6bTAgMGMtNTQuNTggMC05OC42OS0zNC44Ny05OC42OS03OC4wMSAwLTQzLjEzIDQ0LjExLTc4IDk4LjY5LTc4IDU0LjU3IDAgOTguNjkgMzQuODcgOTguNjkgNzggMCA0My4xNC00NC4xMiA3OC4wMS05OC42OSA3OC4wMXptMTg5LjcgMTU0LjgzYy04NS4zIDAtMTU0LjI0LTY4Ljk0LTE1NC4yNC0xNTQuMjQgMC04NS4yOSA2OC45NC0xNTQuMjQgMTU0LjI0LTE1NC4yNCA4NS4yOSAwIDE1NC4yNCA2OC45NSAxNTQuMjQgMTU0LjI0IDAgODUuMy02OC45NSAxNTQuMjQtMTU0LjI0IDE1NC4yNHoiLz4KPC9zdmc+"/>
+	</defs>
+	<style>
+		.s0 { fill: #000000 }
+		.s1 { fill: #ffffff }
+	</style>
+	<path id="Body" fill-rule="evenodd" class="s0" d="m127.27 43c68.3-0.13 123.6 54.98 123.73 123.27q0.01 6.12-0.56 12.08c-12.93-6.78-27.66-10.62-43.3-10.62-33.84 0-63.42 17.96-79.75 44.88-16.33-26.92-45.91-44.88-79.76-44.88-15.55 0-30.2 3.8-43.08 10.51q-0.54-5.69-0.55-11.51c-0.13-68.3 54.98-123.6 123.27-123.73z"/>
+	<path id="Beak" fill-rule="evenodd" class="s1" d="m127.37 149.79l23.77 23.77c-9.58 6.61-17.69 15.19-23.75 25.18-6.06-9.99-14.18-18.59-23.77-25.2z"/>
+	<use id="ModOrganizer" href="#img1" transform="matrix(.201,0,0,.201,71.302,43.673)"/>
+</svg>

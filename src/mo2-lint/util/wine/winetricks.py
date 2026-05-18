@@ -1,0 +1,138 @@
+#!/usr/bin/env python3
+
+from loguru import logger
+from pathlib import Path
+from typing import List, Optional
+from shared.logger import remove_loggers, add_loggers
+import os
+import re
+import shutil
+import subprocess
+
+found_exec = shutil.which("winetricks") or "~/.cache/mo2-lint/downloads/winetricks"
+
+
+def run(
+    exec: Optional[Path | str] = found_exec,
+    prefix: Path = None,
+    command: List[str] = None,
+) -> List[str]:
+    """
+    Runs a winetricks command and captures its output.
+
+    Parameters
+    ----------
+    prefix : Path
+        The Wine prefix to use.
+    command : List[str]
+        The command arguments to pass to winetricks.
+
+    Returns
+    -------
+    List[str]
+        The output lines from the winetricks command.
+    """
+
+    prefix = prefix.expanduser().resolve()
+    exec = exec.expanduser().resolve()
+
+    # Convert executable to string, with absolute path
+    if str(exec).startswith("/usr/bin"):
+        exec = exec.name
+    else:
+        if not exec.exists():
+            logger.error(f"Winetricks executable not found at specified path: {exec}")
+            return []
+    logger.debug(f"Using winetricks executable: {exec}")
+
+    cmd = ["-q", "-f"] + command  # -q for unattended, -f to force
+    cmd = [str(exec)] + cmd
+    logger.trace(f"Constructed winetricks command: {' '.join(cmd)}")
+    env = os.environ.copy()
+    env.setdefault("WINEPREFIX", str(prefix))
+    logger.trace(f"Using Wine prefix: {prefix}")
+
+    remove_loggers()
+    add_loggers(script="mo2-lint", process="winetricks")
+    output_lines = []
+
+    if not cmd == [str(exec), "-q", "-f"]:
+        proc = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            env=env,
+        )
+    else:
+        logger.warning("No winetricks command provided, skipping execution.")
+        return output_lines
+
+    if proc.stdout:
+        for line in proc.stdout:
+            line = line.strip()
+            log_translation(line)
+            logger.trace(f"winetricks: {line}")
+            output_lines.append(line)
+
+    exit_code = proc.wait()
+    if exit_code == 0:
+        logger.success("winetricks command completed successfully.")
+    else:
+        logger.error(f"winetricks command failed with exit code: {exit_code}")
+
+    remove_loggers()
+    add_loggers(script="mo2-lint", process="installer")
+    return output_lines
+
+
+def apply(
+    exec: Optional[Path | str] = found_exec,
+    prefix: Path = None,
+    tricks: List[str] = None,
+):
+    """
+    Applies tricks to the specified prefix.
+
+    Parameters
+    ----------
+    prefix : Path
+        The Wine prefix to use.
+    tricks : List[str]
+        The list of tricks to apply
+    """
+
+    if not tricks:
+        logger.warning("No tricks provided to apply, skipping winetricks execution.")
+        return
+    logger.debug(f"Applying tricks to prefix with winetricks: {tricks}")
+    run(exec, prefix, tricks)
+
+
+def log_translation(input: str = None):
+    """
+    Translates winetricks log lines into more user-friendly messages and logs them.
+
+    Parameters
+    ----------
+    input : str
+        The log line to translate.
+    """
+    if not input:
+        return
+
+    # "Applying trick: '[trick]'"
+    reg1 = re.search(r"Executing w_do_call\s+(.*)", input)
+    # "Setting native DLLs: '[DLLs]'"
+    reg2 = re.search(r"Using native override for following DLLs:\s+(.*)", input)
+
+    if reg1:
+        trick = reg1.group(1).strip()
+        translated = f"Applying trick: '{trick}'"
+        logger.debug(translated)
+        return
+    if reg2:
+        dlls = reg2.group(1).strip()
+        translated = f"Setting native DLLs: '{dlls}'"
+        logger.debug(translated)
+        return

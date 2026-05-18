@@ -1,0 +1,408 @@
+// appid: 22330
+"appinfo"
+{
+	"appid"		"22330"
+	"common"
+	{
+		"name"		"The Elder Scrolls IV: Oblivion Game of the Year Edition (2009)"
+		"clienticon"		"a1fb75c63d484711a777e43be1491e281e465696"
+		"clienttga"		"368631f0dcd67094b45d57becca69b78eb6ff6c0"
+		"icon"		"e33402f6e1e4ed6dd001c7add26934f345cbd31e"
+		"logo"		"531dd052b9816ce1484a2c4b46a4f271963c527f"
+		"logo_small"		"531dd052b9816ce1484a2c4b46a4f271963c527f_thumb"
+		"metacritic_url"		"pc/elderscrolls4oblivion"
+		"oslist"		"windows"
+		"osarch"		""
+		"osextended"		""
+		"type"		"game"
+		"content_descriptors"
+		{
+			"0"		"2"
+			"1"		"5"
+		}
+		"steam_deck_compatibility"
+		{
+			"category"		"2"
+			"steamos_compatibility"		"2"
+			"test_timestamp"		"1663113600"
+			"tested_build_id"		"1510065"
+			"tests"
+			{
+				"0"
+				{
+					"display"		"3"
+					"token"		"#SteamDeckVerified_TestResult_ControllerGlyphsDoNotMatchDeckDevice"
+				}
+				"1"
+				{
+					"display"		"3"
+					"token"		"#SteamDeckVerified_TestResult_TextInputDoesNotAutomaticallyInvokesKeyboard"
+				}
+				"2"
+				{
+					"display"		"3"
+					"token"		"#SteamDeckVerified_TestResult_NativeResolutionNotDefault"
+				}
+				"3"
+				{
+					"display"		"4"
+					"token"		"#SteamDeckVerified_TestResult_DefaultControllerConfigFullyFunctional"
+				}
+				"4"
+				{
+					"display"		"4"
+					"token"		"#SteamDeckVerified_TestResult_InterfaceTextIsLegible"
+				}
+				"5"
+				{
+					"display"		"4"
+					"token"		"#SteamDeckVerified_TestResult_DefaultConfigurationIsPerformant"
+				}
+			}
+			"steamos_tests"
+			{
+				"0"
+				{
+					"display"		"3"
+					"token"		"#SteamOS_TestResult_GameStartupFunctional"
+				}
+				"1"
+				{
+					"display"		"1"
+					"token"		"#SteamOS_TestResult_TextInputDoesNotAutomaticallyInvokesKeyboard"
+				}
+			}
+			"configuration"
+			{
+				"supported_input"		"gamepad"
+				"requires_manual_keyboard_invoke"		"1"
+				"requires_non_controller_launcher_nav"		"0"
+				"primary_player_is_controller_slot_0"		"0"
+				"non_deck_display_glyphs"		"1"
+				"small_text"		"0"
+				"requires_internet_for_setup"		"0"
+				"requires_internet_for_singleplayer"		"0"
+				"recommended_runtime"		"proton-stable"
+				"requires_h264"		"0"
+				"requires_voice_files"		"0"
+				"gamescope_frame_limiter_not_supported"		"0"
+				"hdr_support"		"0"
+			}
+		}
+		"metacritic_name"		"The Elder Scrolls IV: Oblivion"
+		"small_capsule"
+		{
+			"english"		"capsule_231x87.jpg"
+		}
+		"header_image"
+		{
+			"english"		"header.jpg"
+		}
+		"library_assets"
+		{
+			"library_capsule"		"en"
+			"library_hero"		"en"
+			"library_logo"		"en"
+			"logo_position"
+			{
+				"pinned_position"		"BottomLeft"
+				"width_pct"		"60.26837806301049"
+				"height_pct"		"67.47803372120636"
+			}
+		}
+		"library_assets_full"
+		{
+			"library_capsule"
+			{
+				"image"
+				{
+					"english"		"library_600x900.jpg"
+				}
+				"image2x"
+				{
+					"english"		"library_600x900_2x.jpg"
+				}
+			}
+			"library_hero"
+			{
+				"image"
+				{
+					"english"		"library_hero.jpg"
+				}
+				"image2x"
+				{
+					"english"		"library_hero_2x.jpg"
+				}
+			}
+			"library_logo"
+			{
+				"image"
+				{
+					"english"		"logo.png"
+				}
+				"image2x"
+				{
+					"english"		"logo_2x.png"
+				}
+				"logo_position"
+				{
+					"pinned_position"		"BottomLeft"
+					"width_pct"		"60.26837806301049"
+					"height_pct"		"67.47803372120636"
+				}
+			}
+		}
+		"store_asset_mtime"		"1745342998"
+		"associations"
+		{
+			"0"
+			{
+				"type"		"developer"
+				"name"		"Bethesda Game Studios"
+			}
+			"1"
+			{
+				"type"		"publisher"
+				"name"		"Bethesda Softworks"
+			}
+			"2"
+			{
+				"type"		"franchise"
+				"name"		"The Elder Scrolls"
+			}
+		}
+		"primary_genre"		"3"
+		"genres"
+		{
+			"0"		"3"
+		}
+		"category"
+		{
+			"category_2"		"1"
+			"category_23"		"1"
+			"category_45"		"1"
+			"category_46"		"1"
+			"category_62"		"1"
+		}
+		"supported_languages"
+		{
+			"english"
+			{
+				"supported"		"true"
+				"full_audio"		"true"
+				"subtitles"		"true"
+			}
+			"french"
+			{
+				"supported"		"true"
+				"full_audio"		"true"
+				"subtitles"		"true"
+			}
+			"italian"
+			{
+				"supported"		"true"
+				"subtitles"		"true"
+			}
+			"german"
+			{
+				"supported"		"true"
+				"full_audio"		"true"
+				"subtitles"		"true"
+			}
+			"spanish"
+			{
+				"supported"		"true"
+				"subtitles"		"true"
+			}
+		}
+		"original_release_date"		"1189494000"
+		"steam_release_date"		"1245168000"
+		"metacritic_score"		"94"
+		"metacritic_fullurl"		"https://www.metacritic.com/game/pc/the-elder-scrolls-iv-oblivion?ftag=MCD-06-10aaa1f"
+		"community_hub_visible"		"1"
+		"gameid"		"22330"
+		"content_descriptors_including_dlc"
+		{
+			"0"		"2"
+			"1"		"5"
+		}
+		"store_tags"
+		{
+			"0"		"122"
+			"1"		"1695"
+			"2"		"1684"
+			"3"		"4182"
+			"4"		"1669"
+			"5"		"3839"
+			"6"		"21"
+			"7"		"3834"
+			"8"		"1756"
+			"9"		"4057"
+			"10"		"4747"
+			"11"		"19"
+			"12"		"1742"
+			"13"		"4166"
+			"14"		"4172"
+			"15"		"3810"
+			"16"		"1693"
+			"17"		"4231"
+			"18"		"1697"
+			"19"		"4604"
+		}
+		"review_score"		"9"
+		"review_percentage"		"95"
+	}
+	"extended"
+	{
+		"developer"		"Bethesda Game Studios"
+		"gamedir"		"Oblivion"
+		"homepage"		"http://www.elderscrolls.com"
+		"icon"		""
+		"installscript"		"installscript.vdf"
+		"noservers"		"1"
+		"order"		"1"
+		"primarycache"		"22331"
+		"serverbrowsername"		""
+		"state"		"eStateAvailable"
+		"developer_url"		"http://www.bethsoft.com"
+		"publisher"		"Bethesda Softworks"
+		"GameManualURL"		"https://store.steampowered.com/manual/22330/"
+		"listofdlc"		"22333"
+	}
+	"config"
+	{
+		"contenttype"		"3"
+		"installdir"		"Oblivion"
+		"launch"
+		{
+			"0"
+			{
+				"executable"		"OblivionLauncher.exe"
+			}
+		}
+	}
+	"depots"
+	{
+		"overridescddb"		"1"
+		"22331"
+		{
+			"systemdefined"		"1"
+			"manifests"
+			{
+				"public"
+				{
+					"gid"		"7977703601170745652"
+					"size"		"5931321158"
+					"download"		"0"
+				}
+			}
+		}
+		"22333"
+		{
+			"optional"		"1"
+			"systemdefined"		"1"
+			"manifests"
+			{
+				"public"
+				{
+					"gid"		"5078222966915536366"
+					"size"		"56068380"
+					"download"		"0"
+				}
+			}
+			"dlcappid"		"22333"
+		}
+		"22334"
+		{
+			"config"
+			{
+				"language"		"spanish"
+			}
+			"manifests"
+			{
+				"public"
+				{
+					"gid"		"6986544622093806923"
+					"size"		"4822628943"
+					"download"		"0"
+				}
+			}
+		}
+		"22335"
+		{
+			"config"
+			{
+				"language"		"french"
+			}
+			"manifests"
+			{
+				"public"
+				{
+					"gid"		"1772388336463976851"
+					"size"		"4655276260"
+					"download"		"0"
+				}
+			}
+		}
+		"22336"
+		{
+			"config"
+			{
+				"language"		"german"
+			}
+			"manifests"
+			{
+				"public"
+				{
+					"gid"		"4349214922682464414"
+					"size"		"4746357812"
+					"download"		"0"
+				}
+			}
+		}
+		"22337"
+		{
+			"config"
+			{
+				"language"		"italian"
+			}
+			"manifests"
+			{
+				"public"
+				{
+					"gid"		"424494866178121373"
+					"size"		"4822705752"
+					"download"		"0"
+				}
+			}
+		}
+		"branches"
+		{
+			"public"
+			{
+				"buildid"		"1510065"
+				"timeupdated"		"1525819151"
+				"timebuildupdated"		"1481323685"
+			}
+		}
+		"privatebranches"		"1"
+	}
+	"ufs"
+	{
+		"quota"		"1000000000"
+		"maxnumfiles"		"1000"
+		"savefiles"
+		{
+			"1"
+			{
+				"root"		"WinMyDocuments"
+				"path"		"/My Games/Oblivion/Saves"
+				"pattern"		"*.ess"
+				"platforms"
+				{
+					"1"		"all"
+				}
+			}
+		}
+	}
+}

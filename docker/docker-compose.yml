@@ -1,0 +1,55 @@
+services:
+  test-ubuntu:
+    container_name: mo2-lint-ubuntu
+    build:
+      context: ..
+      dockerfile: docker/dockerfile
+      args:
+        BASE_IMAGE: ubuntu:latest
+        DISTRO: ubuntu
+    environment:
+      - STEAM_RUNTIME=0
+
+  test-debian:
+    container_name: mo2-lint-debian
+    build:
+      context: ..
+      dockerfile: docker/dockerfile
+      args:
+        BASE_IMAGE: debian:latest
+        DISTRO: debian
+    environment:
+      - STEAM_RUNTIME=0
+
+  test-fedora:
+    container_name: mo2-lint-fedora
+    build:
+      context: ..
+      dockerfile: docker/dockerfile
+      args:
+        BASE_IMAGE: fedora:latest
+        DISTRO: fedora
+    environment:
+      - STEAM_RUNTIME=0
+
+  test-arch:
+    container_name: mo2-lint-arch
+    build:
+      context: ..
+      dockerfile: docker/dockerfile
+      args:
+        BASE_IMAGE: archlinux:latest
+        DISTRO: arch
+    environment:
+      - STEAM_RUNTIME=0
+
+  test-steamos:
+    container_name: mo2-lint-steamos
+    build:
+      context: ..
+      dockerfile: docker/dockerfile
+      args:
+        BASE_IMAGE: linuxserver/steamos:2025-07-12-ls96
+        DISTRO: steamos
+    environment:
+      - STEAM_RUNTIME=0

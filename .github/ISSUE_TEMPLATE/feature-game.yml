@@ -1,0 +1,59 @@
+name: Game Request
+description: Suggest a game for this project to support
+title: "[Game]: {{game_name}}"
+labels: ['enhancement']
+assignees: Furglitch
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Do NOT remove `'{{game_name}}'` from the title.**
+        This will be automatically replaced with the information you provide below.
+  - type: input
+    id: game_name
+    attributes:
+      label: Game Title
+      description: Which game do you want functionality added for?
+      placeholder: 'TES: Skyrim - Hologram Edition'
+    validations:
+      required: true
+  - type: dropdown
+    id: mo2_version
+    attributes:
+      label: MO2 version
+      options:
+        - "2.5.2"
+    validations:
+      required: true
+  - type: dropdown
+    id: support
+    attributes:
+      label: Native or Plugin?
+      description: Is this game supported natively by MO2, or would it require a plugin like [modorganizer-basic_games](https://github.com/ModOrganizer2/modorganizer-basic_games)?
+      options:
+        - "Native MO2 support"
+        - "Requires modorganizer-basic_games plugin"
+        - "Needs third-party plugin"
+        - "Not supported / Unknown"
+    validations:
+      required: true
+  - type: checkboxes
+    id: tested
+    attributes:
+      label: Have you tested this yourself?
+      options:
+        - label: I have personally gotten MO2 working with this game on Linux.
+    validations:
+      required: true
+  - type: textarea
+    id: tricks
+    attributes:
+      label: Proton/Wine Tricks
+      description: What tricks are needed to get this game working in Proton/Wine?
+      placeholder: |
+        For example, "Needs `PROTON_USE_WINED3D=1` to work at all, and `PROTON_NO_ESYNC=1` to prevent random crashes."
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional Notes
+      description: Any other information you want to provide.

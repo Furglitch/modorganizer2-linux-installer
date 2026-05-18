@@ -1,0 +1,18 @@
+{
+	"installed": [
+		{
+			"platform": "windows",
+			"executable": "",
+			"install_path": "/home/docker/Games/epic/Oblivion",
+			"install_size": "5.5 GiB",
+			"is_dlc": false,
+			"version": "1.2.0416 CS",
+			"appName": "1458058109",
+			"installedDLCs": [],
+			"language": "en-US",
+			"versionEtag": "\"7586119178d5540a076c8f942f9c2544\"",
+			"buildId": "50252673715774571",
+			"pinnedVersion": false
+		}
+	]
+}
