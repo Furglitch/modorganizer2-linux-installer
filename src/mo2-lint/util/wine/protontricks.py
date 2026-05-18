@@ -6,6 +6,7 @@ from pathlib import Path
 from protontricks.cli.main import main as pt
 from typing import List
 from shared.logger import remove_loggers, add_loggers
+from util.variables import input_params
 import os
 import re
 import sys
@@ -183,9 +184,13 @@ def redirect_output_to_logger():
     original_stderr_fd = os.dup(sys.stderr.fileno())
     original_stdout_file = os.fdopen(original_stdout_fd, "w", buffering=1)
 
+    level = input_params.log_level if input_params else "INFO"
     remove_loggers()
     add_loggers(
-        script="mo2-lint", process="protontricks", console_sink=original_stdout_file
+        log_level=level,
+        script="mo2-lint",
+        process="protontricks",
+        console_sink=original_stdout_file,
     )
 
     def reader_thread():
@@ -222,4 +227,4 @@ def redirect_output_to_logger():
 
         remove_loggers()
         original_stdout_file.close()
-        add_loggers(script="mo2-lint", process="installer")
+        add_loggers(log_level=level, script="mo2-lint", process="installer")
