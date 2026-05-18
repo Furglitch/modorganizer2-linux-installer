@@ -16,6 +16,7 @@ RUN case "${DISTRO}" in \
             curl \
             make \
             p7zip-full \
+            procps \
             psmisc \
             python3 \
             unzip \
@@ -24,6 +25,7 @@ RUN case "${DISTRO}" in \
             wine32 \
             wine64 \
             winetricks \
+            xdg-utils \
             xvfb \
             zenity \
      && rm -rf /var/lib/apt/lists/* \
@@ -39,6 +41,7 @@ RUN case "${DISTRO}" in \
             libpython3.13 \
             make \
             p7zip-full \
+            procps \
             psmisc \
             python3 \
             unzip \
@@ -48,6 +51,7 @@ RUN case "${DISTRO}" in \
             wine64 \
             winetricks \
             xauth \
+            xdg-utils \
             xvfb \
             zenity \
      && rm -rf /var/lib/apt/lists/* \
@@ -81,12 +85,14 @@ RUN case "${DISTRO}" in \
             curl \
             make \
             p7zip \
+            procps-ng \
             psmisc \
             python \
             unzip \
             wget \
             wine \
             winetricks \
+            xdg-utils \
             xorg-server-xvfb \
             zenity \
      && pacman -Scc --noconfirm \
@@ -105,6 +111,7 @@ RUN case "${DISTRO}" in \
             wget \
             wine \
             winetricks \
+            xdg-utils \
             xvfb-run \
             zenity \
     ;; \
