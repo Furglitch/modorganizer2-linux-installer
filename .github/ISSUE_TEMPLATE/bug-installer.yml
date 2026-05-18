@@ -81,8 +81,8 @@ body:
     id: logs
     attributes:
       label: Logs
-      description: Please include the logs here. You can find your log file in ~/.cache/mo2-lint/logs/.
-      placeholder: Drag & drop your install.log file here. *Do not copy-paste, it will not fit*
+      description: Please include the logs here. You can find your log files in `~/.cache/mo2-lint/logs/`.
+      placeholder: Drag & drop any relevant log files here. *Do not copy-paste, it will not fit*
     validations:
       required: true
   - type: textarea

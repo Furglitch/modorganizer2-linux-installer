@@ -1,8 +1,7 @@
 name: Game Request
 description: Suggest a game for this project to support
 title: "[Game]: {{game_name}}"
-labels: ['enhancement']
-assignees: Furglitch
+labels: ['enhancement', 'new-game']
 body:
   - type: markdown
     attributes:
