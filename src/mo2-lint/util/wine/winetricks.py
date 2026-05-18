@@ -9,7 +9,9 @@ import re
 import shutil
 import subprocess
 
-found_exec = shutil.which("winetricks") or "~/.cache/mo2-lint/downloads/winetricks"
+found_exec = Path(
+    shutil.which("winetricks") or "~/.cache/mo2-lint/downloads/winetricks"
+)
 
 
 def run(
