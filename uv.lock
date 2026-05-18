@@ -218,7 +218,7 @@ requires-dist = [
     { name = "loguru", specifier = ">=0.7.3" },
     { name = "patool", specifier = ">=4.0.2" },
     { name = "pre-commit", specifier = ">=4.5.0" },
-    { name = "protontricks", specifier = ">=1.13.1" },
+    { name = "protontricks", specifier = ">=1.14.1" },
     { name = "psutil", specifier = ">=7.1.3" },
     { name = "pydantic", specifier = ">=2.13.4" },
     { name = "pyinstaller", specifier = ">=6.17.0" },
@@ -372,15 +372,15 @@ wheels = [
 
 [[package]]
 name = "protontricks"
-version = "1.13.1"
+version = "1.14.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pillow" },
     { name = "vdf" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/26/4f/9335eaf9591d326ca3ce14ad7bc1e0221dfcfceef6b656be2bb06e8c8d5a/protontricks-1.13.1.tar.gz", hash = "sha256:e44aa58ea07a2213e6d6eb98580f58a6b875df955dfbb7e3512897c5873d8ffa", size = 182965, upload-time = "2025-11-15T11:02:08.82Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b7/f8/16f50d2aa84cac6c9bd23699f5e8e9a714408ae2c1268b111a787a5762e0/protontricks-1.14.1.tar.gz", hash = "sha256:db242c0249948d3595dd33ffbd0f6850461fbd43665aff40e11ec6ea94e11bc4", size = 187504, upload-time = "2026-03-29T10:12:55.898Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/83/71/0b17e8b5fb1b5d0a0a621893c38fdc6ae1b7b0abe120db234890339aff7e/protontricks-1.13.1-py3-none-any.whl", hash = "sha256:a0b544cb7420bc71ad36defeae0f80b59b26ae267a000ecc9e4d174408090dbb", size = 76648, upload-time = "2025-11-15T11:02:07.024Z" },
+    { url = "https://files.pythonhosted.org/packages/68/af/c251ac31a13bfd685cfb7745d8fd96ec59635d330be5f8ef3550a9faa6aa/protontricks-1.14.1-py3-none-any.whl", hash = "sha256:0ba7a6417754d9e11d88a6dd6eada2d28d07b000547ede3a23cd018b24f47fe8", size = 78996, upload-time = "2026-03-29T10:12:54.184Z" },
 ]
 
 [[package]]
