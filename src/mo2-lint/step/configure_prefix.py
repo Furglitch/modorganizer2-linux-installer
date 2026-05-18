@@ -174,7 +174,7 @@ def prompt():
             "User declined that instructions were followed to create a clean prefix. No support will be provided if errors occur."
         )
 
+    configure()
     if var.archived_prefix is not None:
-        configure()
         restore_archived_prefix(prefix)
         print(lang.prompt_archive_done.format(directory=var.archived_prefix))
