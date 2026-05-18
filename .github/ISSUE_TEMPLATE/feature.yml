@@ -29,16 +29,12 @@ body:
     attributes:
       label: Alternatives
       placeholder: If implementing this isn't possible, is there any alternatives you'd like to suggest?
-  - type: checkboxes
+  - type: input
     id: related-issue
     attributes:
-      label: Is this feature related to an issue?
-      description: If yes, please reference the issue in the 'Additional Info' section.
-      options:
-        - label: "Yes"
-        - label: "No"
-    validations:
-      required: true
+      label: Related Issue
+      description: If this feature request is related to an existing issue, reference it here.
+      placeholder: '#123'
   - type: textarea
     id: misc
     attributes:

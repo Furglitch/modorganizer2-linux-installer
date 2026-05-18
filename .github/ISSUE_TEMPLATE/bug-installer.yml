@@ -21,7 +21,7 @@ body:
     attributes:
       label: Installer version
       options:
-        - "7.0.0"
+        - "7.0.0-rc1"
     validations:
       required: true
   - type: dropdown
@@ -40,15 +40,25 @@ body:
         - "Fallout 4 VR"
         - "Fallout London"
         - "Fallout New Vegas"
-        - "Fallout New Vegas (RU)"
-        - "Morrowind"
-        - "TES: Oblivion"
-        - "TES: Oblivion Remastered"
-        - "TES: Skyrim"
-        - "TES: Skyrim SE"
-        - "TES: Skyrim VR"
         - "Starfield"
+        - "TES3: Morrowind"
+        - "TES4: Oblivion"
+        - "TES4: Oblivion Remastered"
+        - "TES5: Skyrim"
+        - "TES5: Skyrim SE"
+        - "TES5: Skyrim VR"
         - "Multiple / Other (list in 'Additional Info')"
+    validations:
+      required: true
+  - type: dropdown
+    id: launcher
+    attributes:
+      label: Game Launcher
+      description: How is the game installed / launched?
+      options:
+        - "Steam"
+        - "Heroic Games Launcher"
+        - "Other (describe in Additional Notes)"
     validations:
       required: true
   - type: input
@@ -59,12 +69,20 @@ body:
       placeholder: 'ArchLinux, Debian, Fedora, Ubuntu, etc.'
     validations:
       required: true
+  - type: input
+    id: proton
+    attributes:
+      label: Proton/Wine Version
+      description: What version of Proton or Wine are you using?
+      placeholder: 'Proton 10.0, Wine 6.0, etc.'
+    validations:
+      required: true
   - type: textarea
     id: logs
     attributes:
       label: Logs
       description: Please include the logs here. You can find your log file in ~/.cache/mo2-lint/logs/.
-      placeholder: Drag & drop your install.log file here. _Do not copy-paste, it will not fit_
+      placeholder: Drag & drop your install.log file here. *Do not copy-paste, it will not fit*
     validations:
       required: true
   - type: textarea
@@ -79,11 +97,15 @@ body:
     attributes:
       label: What did you expect to happen?
       placeholder: Describe the expected behavior
+    validations:
+      required: true
   - type: textarea
     id: reproduce
     attributes:
       label: Steps to reproduce the issue
       value: '1. '
+    validations:
+      required: true
   - type: textarea
     id: misc
     attributes:

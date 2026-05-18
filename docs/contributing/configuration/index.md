@@ -252,6 +252,6 @@ plugins:
 | `plugin` | Yes | Unique identifier for the plugin. |
 | `manifest_url` | Yes | The URL to the plugin's manifest file. This must point directly to the raw file. The manifest file must be a JSON file following the manifest structure created by [@Kezyma] for their 'Plugin Finder' plugin. For more details on this schema, please refer to the documentation for [Kezyma's Plugin Finder]. |
 
-[`configs/`]: https://github.com/furglitch/modorganizer2-linux-installer/tree/rewrite/configs
+[`configs/`]: https://github.com/furglitch/modorganizer2-linux-installer/tree/main/configs
 [@Kezyma]: https://github.com/Kezyma
 [Kezyma's Plugin Finder]: https://github.com/Kezyma/ModOrganizer-Plugins/blob/main/docs/pluginfinder.md#adding-your-plugin

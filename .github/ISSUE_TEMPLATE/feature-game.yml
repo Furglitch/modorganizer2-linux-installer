@@ -17,12 +17,12 @@ body:
       placeholder: 'TES: Skyrim - Hologram Edition'
     validations:
       required: true
-  - type: input
+  - type: dropdown
     id: mo2_version
     attributes:
-      label: MO2 Version
-      description: Which version of MO2 do you want this game supported in?
-      placeholder: i.e. '2.5.2', '2.5.3dev3'
+      label: MO2 version
+      options:
+        - "2.5.2"
     validations:
       required: true
   - type: dropdown
@@ -31,10 +31,18 @@ body:
       label: Native or Plugin?
       description: Is this game supported natively by MO2, or would it require a plugin like [modorganizer-basic_games](https://github.com/ModOrganizer2/modorganizer-basic_games)?
       options:
-        - label: "Native MO2 support"
-        - label: "Requires modorganizer-basic_games plugin"
-        - label: "Needs third-party plugin"
-        - label: "Not supported at all"
+        - "Native MO2 support"
+        - "Requires modorganizer-basic_games plugin"
+        - "Needs third-party plugin"
+        - "Not supported / Unknown"
+    validations:
+      required: true
+  - type: checkboxes
+    id: tested
+    attributes:
+      label: Have you tested this yourself?
+      options:
+        - label: I have personally gotten MO2 working with this game on Linux.
     validations:
       required: true
   - type: textarea

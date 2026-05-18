@@ -88,7 +88,7 @@ def pull_config():
             logger.trace(f"Config file already exists: {config_path}")
 
         # Check if yml schema version is incompatbile (remote yaml has higher version number than local script)
-        remote_raw = f"https://raw.githubusercontent.com/Furglitch/modorganizer2-linux-installer/refs/heads/rewrite/configs/{config}"
+        remote_raw = f"https://raw.githubusercontent.com/Furglitch/modorganizer2-linux-installer/refs/heads/main/configs/{config}"
 
         try:
             from urllib.request import urlopen, Request

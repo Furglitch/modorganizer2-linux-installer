@@ -39,7 +39,7 @@ To set up your development environment, follow these steps:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/Furglitch/modorganizer2-linux-installer -b rewrite
+   git clone https://github.com/Furglitch/modorganizer2-linux-installer
    cd modorganizer2-linux-installer
    ```
 2. Install pre-commit hooks:
@@ -89,7 +89,7 @@ docker compose -f "./docker/docker-compose.yml" run --build --rm test-debian
 docker compose -f "./docker/docker-compose.yml" run --build --rm test-steamos
 ```
 
-For more details on the test environment, see the [Docker README](https://github.com/furglitch/modorganizer2-linux-installer/blob/rewrite/docker/README.md).
+For more details on the test environment, see the [Docker README](https://github.com/furglitch/modorganizer2-linux-installer/blob/main/docker/README.md).
 
 ## Pull Request Guidelines
 

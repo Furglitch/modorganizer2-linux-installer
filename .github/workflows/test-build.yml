@@ -2,9 +2,9 @@ name: Test Builds
 
 on:
   push:
-    branches: [ "rewrite" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "rewrite" ]
+    branches: [ "main" ]
 
 permissions:
   contents: read
@@ -14,7 +14,7 @@ jobs:
     name: Ubuntu Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Build and run ubuntu tests
         run: docker compose -f "./docker/docker-compose.yml" run --build --rm test-ubuntu
 
@@ -22,7 +22,7 @@ jobs:
     name: Debian Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Build and run debian tests
         run: docker compose -f "./docker/docker-compose.yml" run --build --rm test-debian
 
@@ -30,7 +30,7 @@ jobs:
     name: Fedora Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Build and run fedora tests
         run: docker compose -f "./docker/docker-compose.yml" run --build --rm test-fedora
 
@@ -38,7 +38,7 @@ jobs:
     name: Arch Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Build and run arch tests
         run: docker compose -f "./docker/docker-compose.yml" run --build --rm test-arch
 
@@ -46,7 +46,7 @@ jobs:
     name: SteamOS Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Build and run steamos tests
         run: docker compose -f "./docker/docker-compose.yml" run --build --rm test-steamos
 

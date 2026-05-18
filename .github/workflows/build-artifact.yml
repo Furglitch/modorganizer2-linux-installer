@@ -2,7 +2,7 @@ name: Build Artifact
 
 on:
   push:
-    branches: [ "rewrite" ]
+    branches: [ "main" ]
 
 permissions:
   contents: read

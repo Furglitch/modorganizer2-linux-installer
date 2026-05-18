@@ -11,6 +11,8 @@ parent: Mod Organizer 2 Linux Installer
 - **Linux** distro. Does not work on Windows, and MacOS is not supported.
 - **Steam** (for Steam games) or **Heroic Games Launcher** (for GOG/Epic games)
 - **Proton 10.0** - Earlier versions may work. MO2-LINT currently only supports Proton 10
+- [Optional] **Protontricks** - Protontricks is bundled with MO2-LINT, but you can also install it separately if you want. It is used to manage the Proton prefix and install necessary dependencies for MO2.
+- [Optional] **Winetricks** - The script will download winetricks if necessary, but you can also install it separately if you want. It is used to install necessary dependencies for MO2.
 
 ## Installation
 
