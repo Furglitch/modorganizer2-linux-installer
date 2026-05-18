@@ -93,9 +93,10 @@ def add_loggers(
         compression="zip",
     )
 
+    log_level = (log_level or "INFO").upper()
     log_level = (
-        log_level.upper()
-        if log_level.upper()
+        log_level
+        if log_level
         in {"TRACE", "DEBUG", "INFO", "SUCCESS", "WARNING", "ERROR", "CRITICAL"}
         else "INFO"
     )
