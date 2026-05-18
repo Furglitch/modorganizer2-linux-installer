@@ -41,7 +41,7 @@ jobs:
           make _build
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: mo2-lint_artifact
           path: dist/mo2-lint
