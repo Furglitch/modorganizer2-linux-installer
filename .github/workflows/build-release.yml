@@ -25,7 +25,7 @@ jobs:
 
       - name: Check for existing tag
         id: check_tag
-        uses: actions/github-script@v8.0.0
+        uses: actions/github-script@v9.0.0
         with:
           script: |
             const tag = '${{inputs.version}}';
@@ -80,7 +80,7 @@ jobs:
           make _build
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: mo2-lint_artifact
           path: dist/mo2-lint
@@ -94,7 +94,7 @@ jobs:
 
       - name: Create Release Tag
         id: create_tag
-        uses: actions/github-script@v8.0.0
+        uses: actions/github-script@v9.0.0
         with:
           script: |
             await github.rest.git.createRef({
