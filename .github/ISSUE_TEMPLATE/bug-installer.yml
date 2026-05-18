@@ -22,7 +22,7 @@ body:
       label: Installer version
       options:
         - "7.0.0-rc1"
-        - "7.0.0-rc2"
+        - "7.0.0-rc3"
     validations:
       required: true
   - type: dropdown
