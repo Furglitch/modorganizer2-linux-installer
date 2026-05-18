@@ -52,7 +52,7 @@ To set up your development environment, follow these steps:
 To run the application directly from source:
 
 ```bash
-uv run src/mo2-lint/__init__.py
+make run
 ```
 
 > **Note:** The application requires the Redirector and NXM handler binaries to be present. Run a build first before running from source.
