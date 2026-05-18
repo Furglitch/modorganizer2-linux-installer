@@ -459,7 +459,7 @@ echo
 echo "================================"
 if [[ $FAIL -gt 0 ]]; then
     echo -e "${RED}${BOLD}$FAIL check(s) failed${NC}, ${GREEN}$PASS passed${NC}"
-    echo -e "${RED}Installation has issues — review the failures above.${NC}"
+    echo -e "${RED}Installation has issues - review the failures above.${NC}"
     exit 1
 else
     echo -e "${GREEN}${BOLD}All $PASS checks passed.${NC}"

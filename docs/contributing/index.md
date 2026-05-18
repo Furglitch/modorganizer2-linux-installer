@@ -48,20 +48,63 @@ To set up your development environment, follow these steps:
    ```
 
 ### Running the Application
-To run the application, use the following command:
+
+To run the application directly from source:
+
 ```bash
 uv run src/mo2-lint/__init__.py
 ```
 
-Note: The script may fail if the Redirector and NXM handler is not built. Run a build first to ensure these components are available.
-To build the application, use:
+> **Note:** The application requires the Redirector and NXM handler binaries to be present. Run a build first before running from source.
+
+To build all components:
+
 ```bash
 make _build
 ```
 
-To build individual components, use:
+To build individual components:
+
 ```bash
 make redirector
 make nxm-handler
-make mo2-lint
+make mo2-lint_only
 ```
+
+## Testing
+
+MO2-LINT includes a Docker-based test environment that validates the installer against multiple Linux distributions. To run the full test suite:
+
+```bash
+docker compose -f "./docker/docker-compose.yml" up --build
+```
+
+To run a test for a specific distribution:
+
+```bash
+docker compose -f "./docker/docker-compose.yml" run --build --rm test-ubuntu
+docker compose -f "./docker/docker-compose.yml" run --build --rm test-arch
+docker compose -f "./docker/docker-compose.yml" run --build --rm test-fedora
+docker compose -f "./docker/docker-compose.yml" run --build --rm test-debian
+docker compose -f "./docker/docker-compose.yml" run --build --rm test-steamos
+```
+
+For more details on the test environment, see the [Docker README](https://github.com/furglitch/modorganizer2-linux-installer/blob/rewrite/docker/README.md).
+
+## Pull Request Guidelines
+
+Before submitting a pull request:
+
+1. Ensure your changes pass all pre-commit checks (these run automatically if you set up pre-commit hooks).
+2. Follow [Conventional Commits](https://www.conventionalcommits.org/) for your commit messages.
+3. Keep pull requests focused. One feature or fix per PR.
+4. If your change affects a supported game or adds a new game, include relevant documentation updates.
+5. If you are adding a new game, ensure the game info entry is added to `configs/game_info.yml` following the structure defined in [Configuration Files](./configuration/).
+
+## Adding a New Game
+
+To add support for a new game:
+
+1. Add an entry to `configs/game_info.yml` following the structure in [Configuration Files](./configuration/).
+2. Test the installation using the Docker test environment or a local setup.
+3. If the game requires special steps or known workarounds, add a [game-specific guide](../usage/game-specific/) under `docs/usage/game-specific/` and link it from the [index](../usage/game-specific/).
