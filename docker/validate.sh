@@ -21,9 +21,12 @@ header() { echo; echo -e "${BOLD}── $1 ──${NC}"; }
 STATE_FILE="$HOME/.config/mo2-lint/state.json"
 INSTANCES_DIR="$HOME/.config/mo2-lint/instances"
 MO2_DIR="$HOME/Games/mo2-lint_oblivion-steam"
+MO2_DIR_EPIC="$HOME/Games/mo2-lint_oblivion-epic"
+MO2_DIR_GOG="$HOME/Games/mo2-lint_oblivion-gog"
 LOGS_DIR="$HOME/.cache/mo2-lint/logs"
 NXM_HANDLER="$HOME/.local/share/mo2-lint/nxm-handler"
 DESKTOP_FILE="$HOME/.local/share/applications/mo2lint_nxm-handler.desktop"
+MO2_LINT="/tmp/mo2-lint/dist/mo2-lint"
 
 echo -e "${BOLD}mo2-lint Installation Validator${NC}"
 echo "================================"
@@ -288,6 +291,166 @@ PYEOF
 )
 else
     warn "Skipping runtime tests (state.json missing)"
+fi
+
+# --- #
+
+header "List Command"
+
+output=$("$MO2_LINT" list --unattended -l trace 2>&1); rc=$?
+if [[ $rc -eq 0 ]]; then
+    pass "list (all): exit 0"
+else
+    fail "list (all): non-zero exit ($rc)"
+fi
+if echo "$output" | grep -q "Found 3 Mod Organizer 2 instance(s)"; then
+    pass "list (all): reports 3 instances"
+else
+    fail "list (all): expected 3 instances in output"
+fi
+
+output=$("$MO2_LINT" list --game oblivion --unattended -l trace 2>&1); rc=$?
+if [[ $rc -eq 0 ]]; then
+    pass "list --game oblivion: exit 0"
+else
+    fail "list --game oblivion: non-zero exit ($rc)"
+fi
+if echo "$output" | grep -q "Found 3 matching Mod Organizer 2 instance(s)"; then
+    pass "list --game oblivion: reports 3 matching instances"
+else
+    fail "list --game oblivion: expected 3 matching instances in output"
+fi
+
+output=$("$MO2_LINT" list --directory "$MO2_DIR" --unattended -l trace 2>&1); rc=$?
+if [[ $rc -eq 0 ]]; then
+    pass "list --directory <steam>: exit 0"
+else
+    fail "list --directory <steam>: non-zero exit ($rc)"
+fi
+if echo "$output" | grep -q "Found 1 matching Mod Organizer 2 instance(s)"; then
+    pass "list --directory <steam>: found exactly 1 matching instance"
+else
+    fail "list --directory <steam>: expected exactly 1 matching instance in output"
+fi
+
+# --- #
+
+header "Pin Command"
+
+"$MO2_LINT" pin "$MO2_DIR" --unattended -l trace >/dev/null 2>&1; rc=$?
+if [[ $rc -eq 0 ]]; then
+    pass "pin: exit 0"
+else
+    fail "pin: non-zero exit ($rc)"
+fi
+pin_val=$(python3 -c "
+import json, sys
+with open(sys.argv[1]) as f:
+    data = json.load(f)
+for inst in data.get('instances', []):
+    if inst.get('instance_path') == sys.argv[2]:
+        print(inst.get('pin', False))
+        break
+" "$STATE_FILE" "$MO2_DIR" 2>/dev/null)
+if [[ "${pin_val:-}" == "True" ]]; then
+    pass "pin: state.json shows pin=True for steam instance"
+else
+    fail "pin: expected pin=True in state.json, got '${pin_val:-<empty>}'"
+fi
+
+# --- #
+
+header "Update Command"
+
+output=$("$MO2_LINT" update "$MO2_DIR" --unattended -l trace 2>&1); rc=$?
+if [[ $rc -eq 0 ]]; then
+    pass "update (pinned): exit 0"
+else
+    fail "update (pinned): non-zero exit ($rc)"
+fi
+if echo "$output" | grep -qi "pinned"; then
+    pass "update (pinned): output warns about pinned state"
+else
+    fail "update (pinned): expected pin warning in output"
+fi
+if [[ -f "$MO2_DIR/ModOrganizer.exe" ]]; then
+    pass "update (pinned): ModOrganizer.exe still present (update skipped)"
+else
+    fail "update (pinned): ModOrganizer.exe unexpectedly missing"
+fi
+
+# --- #
+
+header "Unpin Command"
+
+"$MO2_LINT" unpin "$MO2_DIR" --unattended -l trace >/dev/null 2>&1; rc=$?
+if [[ $rc -eq 0 ]]; then
+    pass "unpin: exit 0"
+else
+    fail "unpin: non-zero exit ($rc)"
+fi
+pin_val=$(python3 -c "
+import json, sys
+with open(sys.argv[1]) as f:
+    data = json.load(f)
+for inst in data.get('instances', []):
+    if inst.get('instance_path') == sys.argv[2]:
+        print(inst.get('pin', False))
+        break
+" "$STATE_FILE" "$MO2_DIR" 2>/dev/null)
+if [[ "${pin_val:-}" == "False" ]]; then
+    pass "unpin: state.json shows pin=False for steam instance"
+else
+    fail "unpin: expected pin=False in state.json, got '${pin_val:-<empty>}'"
+fi
+
+"$MO2_LINT" update "$MO2_DIR" --unattended -l trace >/dev/null 2>&1; rc=$?
+if [[ $rc -eq 0 ]]; then
+    pass "update (unpinned): exit 0"
+else
+    fail "update (unpinned): non-zero exit ($rc)"
+fi
+if [[ -f "$MO2_DIR/ModOrganizer.exe" ]]; then
+    pass "update (unpinned): ModOrganizer.exe present after update"
+else
+    fail "update (unpinned): ModOrganizer.exe missing after update"
+fi
+
+# --- #
+
+header "Uninstall Command"
+
+instance_count_before=$(python3 -c "
+import json, sys
+with open(sys.argv[1]) as f:
+    data = json.load(f)
+print(len(data.get('instances', [])))
+" "$STATE_FILE" 2>/dev/null)
+
+"$MO2_LINT" uninstall --directory "$MO2_DIR" --unattended -l trace >/dev/null 2>&1; rc=$?
+if [[ $rc -eq 0 ]]; then
+    pass "uninstall (steam): exit 0"
+else
+    fail "uninstall (steam): non-zero exit ($rc)"
+fi
+
+instance_count_after=$(python3 -c "
+import json, sys
+with open(sys.argv[1]) as f:
+    data = json.load(f)
+print(len(data.get('instances', [])))
+" "$STATE_FILE" 2>/dev/null)
+expected_count=$(( instance_count_before - 1 ))
+if [[ "$instance_count_after" -eq "$expected_count" ]]; then
+    pass "uninstall (steam): instance removed from state.json ($instance_count_before → $instance_count_after)"
+else
+    fail "uninstall (steam): expected $expected_count instance(s) in state.json, got $instance_count_after"
+fi
+
+if [[ ! -f "$MO2_DIR/ModOrganizer.exe" ]]; then
+    pass "uninstall (steam): ModOrganizer.exe removed from instance directory"
+else
+    fail "uninstall (steam): ModOrganizer.exe still present after uninstall"
 fi
 
 # --- #
