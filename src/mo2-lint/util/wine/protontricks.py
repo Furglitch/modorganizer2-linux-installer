@@ -100,7 +100,7 @@ def get_prefix(id: int) -> Path:
 
     Returns
     -------
-    str
+    Path
         The path to the Proton prefix if it exists, otherwise None.
     """
     if not check_prefix(id):
