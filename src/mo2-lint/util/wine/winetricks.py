@@ -13,7 +13,7 @@ found_exec = shutil.which("winetricks") or "~/.cache/mo2-lint/downloads/winetric
 
 
 def run(
-    exec: Optional[Path | str] = found_exec,
+    exec: Optional[Path] = found_exec,
     prefix: Path = None,
     command: List[str] = None,
 ) -> List[str]:
@@ -87,7 +87,7 @@ def run(
 
 
 def apply(
-    exec: Optional[Path | str] = found_exec,
+    exec: Optional[Path] = found_exec,
     prefix: Path = None,
     tricks: List[str] = None,
 ):
