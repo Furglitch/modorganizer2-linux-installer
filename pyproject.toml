@@ -1,6 +1,6 @@
 [project]
 name = "modorganizer2-linux-installer"
-version = "7.0.0-rc1"
+version = "7.0.0-rc2"
 description = "An easy-to-use Mod Organizer 2 installer for Linux"
 readme = "README.md"
 requires-python = ">=3.13"
