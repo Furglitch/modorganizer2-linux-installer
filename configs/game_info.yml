@@ -527,3 +527,12 @@ games:
           paths:
             - "sfse_1_15_222.dll"
             - "sfse_loader.exe"
+
+  subnautica:
+    display_name: Subnautica
+    nexus_slug: subnautica
+    launcher_ids:
+      steam: 264710
+      epic: Jaguar
+    subdirectory: Subnautica
+    executable: Subnautica.exe
