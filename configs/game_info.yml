@@ -29,6 +29,15 @@ games:
       - "d3dcompiler_43"
       - "d3dx9"
 
+  dragonage2:
+    display_name: 'Dragon Age II - Ultimate Edition'
+    nexus_slug: dragonage2
+    launcher_ids:
+      steam: 1238040
+      epic: 4e8c0f56bcf948d581e30c58283d183c
+    subdirectory: Dragon Age II
+    executable: DragonAge2.exe
+
   enderal:
     display_name: 'Enderal: Forgotten Stories'
     nexus_slug: enderal
