@@ -536,3 +536,25 @@ games:
       epic: Jaguar
     subdirectory: Subnautica
     executable: Subnautica.exe
+
+  witcher3:
+    display_name: The Witcher 3
+    nexus_slug: witcher3
+    launcher_ids:
+      steam: 292030
+      gog: 1207664643
+    subdirectory:
+      steam: The Witcher 3
+      gog: The Witcher 3 Wild Hunt
+    executable: bin/x64/witcher3.exe
+    tricks:
+      - "vcrun2022"
+
+  witcher3_goty:
+    parent: witcher3
+    launcher_ids:
+      steam: null
+      gog: 1495134320
+    subdirectory:
+      steam: null
+      gog: The Witcher 3 Wild Hunt GOTY
