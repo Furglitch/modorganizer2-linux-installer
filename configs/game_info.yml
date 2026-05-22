@@ -2,6 +2,18 @@ schema: 7.0.0 # Earliest compatible MO2-LINT Version
 
 games:
 
+  baldursgate3:
+    display_name: Baldur's Gate 3
+    nexus_slug: baldursgate3
+    launcher_ids:
+      steam: 1086940
+      gog: 1456460669
+    subdirectory: Baldurs Gate 3
+    executable: bin/bg3.exe
+    plugins:
+      - "bg3-plugin"
+      - "root-builder"
+
   cyberpunk2077:
     display_name: Cyberpunk 2077
     nexus_slug: cyberpunk2077
