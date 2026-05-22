@@ -546,6 +546,16 @@ games:
     subdirectory: Subnautica
     executable: Subnautica.exe
 
+  valheim:
+    display_name: Valheim
+    nexus_slug: valheim
+    launcher_ids:
+      steam: 892970
+    subdirectory: Valheim
+    executable: valheim.exe
+    tricks:
+      - "vcrun2022"
+
   witcher3:
     display_name: The Witcher 3
     nexus_slug: witcher3
