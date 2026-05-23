@@ -289,7 +289,7 @@ def install_scriptextender(
 
 def download_plugin(plugin: str):
     """
-    Downloads and installs the specified plugin from its manifest.
+    Downloads and installs the specified plugin from its manifest or direct URL.
 
     Parameters
     ----------
@@ -298,45 +298,55 @@ def download_plugin(plugin: str):
     """
 
     logger.info(f"Starting download process for plugin: {plugin}")
-    manifest = {}
-    if plugin not in [entry for entry in var.plugin_info]:
+    if plugin not in var.plugin_info:
         return
-    manifest[plugin] = var.plugin_info[plugin].manifest
-    if not manifest[plugin]:
-        return
-    logger.debug(f"Found manifest URL for plugin {plugin}: {manifest[plugin]}")
+    plugin_obj = var.plugin_info[plugin]
+    url = None
+    checksum = None
+    file_whitelist = None
 
-    # Download manifest using SSL context
-    req = Request(manifest[plugin])
-    with urlopen(req, context=ssl_context) as response:
-        data = json.loads(response.read())
-    if not data:
+    if plugin_obj.direct:
+        url = plugin_obj.direct
+        checksum = plugin_obj.checksum
+        file_whitelist = plugin_obj.file_whitelist
+        logger.debug(f"Using direct download URL for plugin {plugin}: {url}")
+    elif plugin_obj.manifest:
+        logger.debug(f"Found manifest URL for plugin {plugin}: {plugin_obj.manifest}")
+        req = Request(plugin_obj.manifest)
+        with urlopen(req, context=ssl_context) as response:
+            data = json.loads(response.read())
+        if not data:
+            return
+        latest = data.get("Versions", [])[-1]
+        file_path = latest.get("PluginPath")
+        if file_path:
+            file_path = (
+                tuple(file_path) if isinstance(file_path, list) else (file_path,)
+            )
+        file_whitelist = var.FileWhitelist(paths=file_path) if file_path else None
+        url = latest.get("DownloadUrl")
+        logger.trace(
+            f"Parsed manifest for plugin {plugin}: download URL: {url}, file whitelist: {file_whitelist}"
+        )
+
+    if not url:
         return
-    latest = data.get("Versions", [])[-1]
-    file_path = latest.get("PluginPath")
-    if file_path:
-        if isinstance(file_path, list):
-            file_path = tuple(file_path)
-        elif isinstance(file_path, str):
-            file_path = (file_path,)
-    file_path = var.FileWhitelist(paths=file_path) if file_path else None
-    logger.trace(
-        f"Parsed manifest for plugin {plugin}: latest version download URL: {latest.get('DownloadUrl')}, file whitelist: {file_path}"
-    )
-    url = latest.get("DownloadUrl")
 
     destination = download_dir / "plugins" / plugin
-    downloaded = dl(url, destination, url.split("/")[-1])
+    downloaded = dl(url, destination, url.split("/")[-1], checksum=checksum)
     logger.debug(f"Downloaded plugin {plugin} to {downloaded}")
 
     extract_dest = extract_dir / "plugins" / plugin / downloaded.name
     extract(downloaded, extract_dest)
     logger.debug(f"Extracted plugin {plugin} to {extract_dest}")
 
+    install_dir = var.input_params.directory / "plugins"
+    if plugin_obj.subdirectory:
+        install_dir = install_dir / plugin_obj.subdirectory
     logger.trace(
-        f"Installing plugin {plugin} to {var.input_params.directory / 'plugins'} with whitelist {file_path}"
+        f"Installing plugin {plugin} to {install_dir} with whitelist {file_whitelist}"
     )
-    install(extract_dest, var.input_params.directory / "plugins", file_path)
+    install(extract_dest, install_dir, file_whitelist)
     logger.success(f"Plugin {plugin} download and installation complete.")
 
 
@@ -462,8 +472,13 @@ def download():
 
     logger.info("Starting download of external resources.")
     download_mod_organizer()
-    if params.plugins:
-        for plugin in params.plugins:
+    game_plugins = tuple(getattr(game_info, "plugins", None) or ())
+    all_plugins = list(params.plugins or ())
+    for p in game_plugins:
+        if p not in all_plugins:
+            all_plugins.append(p)
+    if all_plugins:
+        for plugin in all_plugins:
             download_plugin(plugin)
     download_winetricks()
     if params.script_extender:

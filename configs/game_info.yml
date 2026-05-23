@@ -2,6 +2,18 @@ schema: 7.0.0 # Earliest compatible MO2-LINT Version
 
 games:
 
+  baldursgate3:
+    display_name: Baldur's Gate 3
+    nexus_slug: baldursgate3
+    launcher_ids:
+      steam: 1086940
+      gog: 1456460669
+    subdirectory: Baldurs Gate 3
+    executable: bin/bg3.exe
+    plugins:
+      - "bg3-plugin"
+      - "root-builder"
+
   cyberpunk2077:
     display_name: Cyberpunk 2077
     nexus_slug: cyberpunk2077
@@ -28,6 +40,15 @@ games:
       - "xaudio2_7=native"
       - "d3dcompiler_43"
       - "d3dx9"
+
+  dragonage2:
+    display_name: 'Dragon Age II - Ultimate Edition'
+    nexus_slug: dragonage2
+    launcher_ids:
+      steam: 1238040
+      epic: 4e8c0f56bcf948d581e30c58283d183c
+    subdirectory: Dragon Age II
+    executable: DragonAge2.exe
 
   enderal:
     display_name: 'Enderal: Forgotten Stories'
@@ -527,3 +548,44 @@ games:
           paths:
             - "sfse_1_15_222.dll"
             - "sfse_loader.exe"
+
+  subnautica:
+    display_name: Subnautica
+    nexus_slug: subnautica
+    launcher_ids:
+      steam: 264710
+      epic: Jaguar
+    subdirectory: Subnautica
+    executable: Subnautica.exe
+
+  valheim:
+    display_name: Valheim
+    nexus_slug: valheim
+    launcher_ids:
+      steam: 892970
+    subdirectory: Valheim
+    executable: valheim.exe
+    tricks:
+      - "vcrun2022"
+
+  witcher3:
+    display_name: The Witcher 3
+    nexus_slug: witcher3
+    launcher_ids:
+      steam: 292030
+      gog: 1207664643
+    subdirectory:
+      steam: The Witcher 3
+      gog: The Witcher 3 Wild Hunt
+    executable: bin/x64/witcher3.exe
+    tricks:
+      - "vcrun2022"
+
+  witcher3_goty:
+    parent: witcher3
+    launcher_ids:
+      steam: null
+      gog: 1495134320
+    subdirectory:
+      steam: null
+      gog: The Witcher 3 Wild Hunt GOTY
