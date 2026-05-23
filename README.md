@@ -8,12 +8,6 @@ This project aims to installing Mod Organizer 2 instances on Linux as easy as po
 
 Originally developed by rockerbacon. A major thanks to him for doing most of the legwork.
 
-> $${\color{red}State \space of \space Development}$$<br/>
-> As the vision and features of this project have grown, it has become apparent that Bash is becoming less and less optimal, both for implementing new features and general ease of development.<br/>
-> As such, we are in the process of rewriting the whole project in Python.<br/>
-> Further details can be found on the [rewrite branch's README](https://github.com/Furglitch/modorganizer2-linux-installer/blob/rewrite/README.md) and in the [rewrite discussion thread](https://github.com/Furglitch/modorganizer2-linux-installer/discussions/873).<br/>
-> <b><i>The project is not abandoned</i></b>. Any critical issues will be addressed, but other developments (non-critical bugs, new features) will take a backseat to the rewrite.<br/>
-
 ## Installing Mod Organizer 2
 
 ### Requirements
