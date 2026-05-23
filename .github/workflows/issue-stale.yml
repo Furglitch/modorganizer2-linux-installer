@@ -20,9 +20,9 @@ jobs:
           days-before-issue-stale: 7
           stale-issue-message: 'This issue has been automatically marked as stale because it has not had activity in 7 days. It will be closed if no further activity occurs within 30 days.'
           days-before-issue-close: 30
-          close-stale-issue-message: 'Closing this issue due to inactivity for 30 days. If you think this issue should not be closed, please comment and we will reopen it.'
+          close-issue-message: 'Closing this issue due to inactivity for 30 days. If you think this issue should not be closed, please comment and we will reopen it.'
 
           days-before-pr-stale: 14
           stale-pr-message: 'This pull request has been automatically marked as stale because it has not had activity in 14 days. It will be closed if no further activity occurs within 45 days.'
           days-before-pr-close: 45
-          close-stale-pr-message: 'Closing this pull request due to inactivity for 45 days. If you think this pull request should not be closed, please comment and we will reopen it.'
+          close-pr-message: 'Closing this pull request due to inactivity for 45 days. If you think this pull request should not be closed, please comment and we will reopen it.'
