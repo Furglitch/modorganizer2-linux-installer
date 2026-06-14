@@ -1,7 +1,7 @@
 .PHONY: run _build redirector nxm-handler mo2-lint clean
 
 run:
-	PYTHONPATH=src/mo2-lint:src uv run src/mo2-lint/__init__.py
+	PYTHONPATH=src/mo2-lint:src uv run src/mo2-lint/__init__.py $(ARGS)
 
 _build: clean mo2-lint
 

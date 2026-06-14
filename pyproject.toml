@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "certifi>=2026.5.20",
-    "click>=8.4.0",
+    "click>=8.4.1",
     "dotenv>=0.9.9",
     "inquirerpy>=0.3.4",
     "loguru>=0.7.3",
