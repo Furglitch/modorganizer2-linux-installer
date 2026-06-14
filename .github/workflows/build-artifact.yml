@@ -3,8 +3,22 @@ name: Build Artifact
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - "src/**"
+      - "configs/**"
+      - ".pre-commit-config.yaml"
+      - ".python-version"
+      - "Makefile"
+      - "pyproject.toml"
   pull_request:
     branches: [ "main" ]
+    paths:
+      - "src/**"
+      - "configs/**"
+      - ".pre-commit-config.yaml"
+      - ".python-version"
+      - "Makefile"
+      - "pyproject.toml"
 
 permissions:
   contents: read
