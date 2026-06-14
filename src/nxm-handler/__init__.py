@@ -203,7 +203,12 @@ def send_url(instance_dir: Path, url: str, env_info: dict) -> None:
 
     if launcher == "steam":
         cmd = f"wine '{handler}' '{url}'"
-        protontricks.run(["-c", cmd, str(steam_id)])
+        # Run without bwrap containerization. protontricks' pressure-vessel
+        # (bwrap) container isolates this process from the already-running MO2,
+        # which breaks the single-instance IPC that nxmhandler.exe relies on to
+        # forward the download. With bwrap the link is silently dropped; with
+        # --no-bwrap the forward reaches the running instance and queues it.
+        protontricks.run(["--no-bwrap", "-c", cmd, str(steam_id)])
     elif launcher in ["heroic", "gog", "epic"]:
         if release == "stable":
             cmd = [f"{wine}", f"{handler}", f"{url}"]
