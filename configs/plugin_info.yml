@@ -15,3 +15,13 @@ plugins:
   nxm-collection-dl: "https://raw.githubusercontent.com/Furglitch/modorganizer2-nxm-collection-dl/main/plugindefinition.json"
 
   # These links lead to manifest files that use the pluginfinder format - https://github.com/Kezyma/ModOrganizer-Plugins/blob/main/docs/pluginfinder.md#adding-your-plugin
+
+  # These entries use direct download URLs instead of a manifest
+  bg3-plugin:
+    direct: "https://github.com/chazwarp923/MO2-BG3-Plugin/releases/download/2.3.0/BG3-Plugin-2.3.0.zip"
+    checksum: "3533668c09a8760d6f895476a086306b5ac57f096caca67823873144c05ccc5f"
+    subdirectory: "basic_games/games"
+    file_whitelist:
+      paths:
+        - "game_baldursgate3.py"
+        - "baldursgate3"

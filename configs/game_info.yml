@@ -2,6 +2,18 @@ schema: 7.0.0 # Earliest compatible MO2-LINT Version
 
 games:
 
+  baldursgate3:
+    display_name: Baldur's Gate 3
+    nexus_slug: baldursgate3
+    launcher_ids:
+      steam: 1086940
+      gog: 1456460669
+    subdirectory: Baldurs Gate 3
+    executable: bin/bg3.exe
+    plugins:
+      - "bg3-plugin"
+      - "root-builder"
+
   cyberpunk2077:
     display_name: Cyberpunk 2077
     nexus_slug: cyberpunk2077
@@ -29,6 +41,15 @@ games:
       - "d3dcompiler_43"
       - "d3dx9"
 
+  dragonage2:
+    display_name: 'Dragon Age II - Ultimate Edition'
+    nexus_slug: dragonage2
+    launcher_ids:
+      steam: 1238040
+      epic: 4e8c0f56bcf948d581e30c58283d183c
+    subdirectory: Dragon Age II
+    executable: DragonAge2.exe
+
   enderal:
     display_name: 'Enderal: Forgotten Stories'
     nexus_slug: enderal
@@ -36,7 +57,7 @@ games:
       steam: 933480
       gog: 1708684988
     subdirectory: Enderal
-    executable: Enderal Launcher.exe # UPDATE
+    executable: Enderal Launcher.exe
     tricks:
       - "d3dcompiler_43"
       - "d3dx9"
@@ -56,7 +77,7 @@ games:
     launcher_ids:
       steam: 976620
     subdirectory: Enderal Special Edition
-    executable: Enderal Launcher.exe # UPDATE
+    executable: Enderal Launcher.exe
     tricks:
       - "xaudio2_7=native"
       - "xact"
@@ -69,7 +90,7 @@ games:
     launcher_ids:
       steam: 22300
     subdirectory: Fallout 3
-    executable: Fallout3.exe
+    executable: Fallout3Launcher.exe
     tricks:
       - "d3dcompiler_43"
       - "d3dx9"
@@ -123,13 +144,21 @@ games:
             - "fose_loader.exe"
 
   fallout3_goty:
+    display_name: Fallout 3 - Game of the Year Edition
     parent: fallout3
     nexus_slug: fallout3
+    executable:
+      steam: Fallout3Launcher.exe
+      gog: FalloutLauncher.exe
+      epic: Fallout 3 GOTY English/FalloutLauncherEpic.exe
     launcher_ids:
       steam: 22370
       gog: 1454315831
       epic: adeae8bbfc94427db57c7dfecce3f1d4
-    subdirectory: Fallout 3 goty
+    subdirectory:
+      steam: Fallout 3 goty
+      gog: Fallout 3
+      epic: fallout3
 
   fallout4:
     display_name: Fallout 4
@@ -142,7 +171,7 @@ games:
       steam: Fallout 4
       gog: Fallout 4 GOTY
       epic: Fallout 4
-    executable: Fallout4.exe
+    executable: Fallout4Launcher.exe
     tricks:
       - "xaudio2_7=native"
       - "grabfullscreen=y"
@@ -281,7 +310,7 @@ games:
       gog: 1454587428
       epic: 5daeb974a22a435988892319b3a4f476
     subdirectory: Fallout New Vegas
-    executable: FalloutNV.exe
+    executable: FalloutNVLauncher.exe
     tricks:
       - "d3dcompiler_43"
       - "d3dx9"
@@ -319,9 +348,12 @@ games:
     launcher_ids:
       steam: 22320
       gog: 1435828767
-      # epic: ??? It's available on Epic, but I can't find the ID anywhere
+      epic: 2b04b1a83647411e956695342f1d14b6
     subdirectory: Morrowind
-    executable: Morrowind Launcher.exe # UPDATE
+    executable:
+      steam: Morrowind Launcher.exe
+      gog: Morrowind Launcher.exe
+      epic: Morrowind GOTY English/Morrowind Launcher.exe
     tricks:
       - "d3dcompiler_43"
       - "d3dx9"
@@ -356,9 +388,9 @@ games:
       gog: Oblivion
       epic: Oblivion
     executable:
-      steam: Oblivion.exe
-      gog: Oblivion.exe
-      epic: Oblivion GOTY English/Oblivion.exe
+      steam: OblivionLauncher.exe
+      gog: OblivionLauncher.exe
+      epic: Oblivion GOTY English/OblivionLauncher.exe
     tricks:
       - "d3dcompiler_43"
       - "d3dx9"
@@ -383,22 +415,22 @@ games:
   oblivion_fr:
     parent: oblivion
     executable:
-      epic: Oblivion GOTY French/Oblivion.exe
+      epic: Oblivion GOTY French/OblivionLauncher.exe
 
   oblivion_de:
     parent: oblivion
     executable:
-      epic: Oblivion GOTY German/Oblivion.exe
+      epic: Oblivion GOTY German/OblivionLauncher.exe
 
   oblivion_it:
     parent: oblivion
     executable:
-      epic: Oblivion GOTY Italian/Oblivion.exe
+      epic: Oblivion GOTY Italian/OblivionLauncher.exe
 
   oblivion_es:
     parent: oblivion
     executable:
-      epic: Oblivion GOTY Spanish/Oblivion.exe
+      epic: Oblivion GOTY Spanish/OblivionLauncher.exe
 
   skyrim:
     display_name: 'The Elder Scrolls V: Skyrim'
@@ -406,7 +438,7 @@ games:
     launcher_ids:
       steam: 72850
     subdirectory: Skyrim
-    executable: TESV.exe
+    executable: SkyrimLauncher.exe
     tricks:
       - "d3dcompiler_43"
       - "d3dx9"
@@ -441,7 +473,7 @@ games:
       gog: 1711230643
       epic: ac82db5035584c7f8a2c548d98c86b2c
     subdirectory: Skyrim Special Edition
-    executable: SkyrimSE.exe
+    executable: SkyrimSELauncher.exe
     tricks:
       - "xaudio2_7=native"
       - "xact"
@@ -540,3 +572,44 @@ games:
           paths:
             - "sfse_1_15_222.dll"
             - "sfse_loader.exe"
+
+  subnautica:
+    display_name: Subnautica
+    nexus_slug: subnautica
+    launcher_ids:
+      steam: 264710
+      epic: Jaguar
+    subdirectory: Subnautica
+    executable: Subnautica.exe
+
+  valheim:
+    display_name: Valheim
+    nexus_slug: valheim
+    launcher_ids:
+      steam: 892970
+    subdirectory: Valheim
+    executable: valheim.exe
+    tricks:
+      - "vcrun2022"
+
+  witcher3:
+    display_name: The Witcher 3
+    nexus_slug: witcher3
+    launcher_ids:
+      steam: 292030
+      gog: 1207664643
+    subdirectory:
+      steam: The Witcher 3
+      gog: The Witcher 3 Wild Hunt
+    executable: bin/x64/witcher3.exe
+    tricks:
+      - "vcrun2022"
+
+  witcher3_goty:
+    parent: witcher3
+    launcher_ids:
+      steam: null
+      gog: 1495134320
+    subdirectory:
+      steam: null
+      gog: The Witcher 3 Wild Hunt GOTY

@@ -1,16 +1,16 @@
 [project]
 name = "modorganizer2-linux-installer"
-version = "7.0.0-rc1"
+version = "7.0.0-rc3"
 description = "An easy-to-use Mod Organizer 2 installer for Linux"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "certifi>=2026.4.22",
-    "click>=8.4.0",
+    "certifi>=2026.5.20",
+    "click>=8.4.1",
     "dotenv>=0.9.9",
     "inquirerpy>=0.3.4",
     "loguru>=0.7.3",
-    "patool>=4.0.2",
+    "patool>=4.0.5",
     "pre-commit>=4.6.0",
     "protontricks>=1.14.1",
     "psutil>=7.1.3",
@@ -18,7 +18,7 @@ dependencies = [
     "pyinstaller>=6.20.0",
     "pyinstaller-hooks-contrib>=2026.5",
     "pyyaml>=6.0.3",
-    "ruff==0.15.13",
+    "ruff==0.15.16",
     "requests>=2.34.2",
     "send2trash>=2.0.0",
     "websockets>=15.0.1",

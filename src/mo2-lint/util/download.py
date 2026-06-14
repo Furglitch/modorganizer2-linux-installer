@@ -115,6 +115,8 @@ def download_nexus(
     )
     try:
         filename = nexus_dl(game, str(mod_id), str(file_id), dest, filename or None)
+        if not filename:
+            return None
         export = dest / filename
         if export.exists() and checksum:
             if compare_checksum(export, checksum):

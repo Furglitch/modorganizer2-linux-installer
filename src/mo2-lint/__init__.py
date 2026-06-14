@@ -11,6 +11,7 @@ from command.uninstall import uninstall as _uninstall
 from command.list import list as _list
 from command.pin import pin as _pin
 from command.update import update as _update
+from packaging.version import Version as version
 import certifi
 import click
 import re
@@ -32,20 +33,15 @@ def check_update():
                 verify=certifi.where(),
             ).text
         )
-        latest = response["tag_name"]
-        current = var.version
+        latest = version(response["tag_name"].lstrip("v"))
+        current = version(var.version)
         logger.trace(f"Latest version: {latest}, Current version: {current}")
-        if latest != str(current):
-            version_parts = str(current).split(".")
-            latest_parts = latest.split(".")
-            logger.trace(
-                f"Parsed version parts: current={version_parts}, latest={latest_parts}"
+        logger.trace(f"Comparing versions: current={current}, latest={latest}")
+        if latest > current:
+            logger.warning(
+                f"A new version of MO2-LINT is available: {latest}. Please update to the latest version."
             )
-            if tuple(latest_parts) > tuple(version_parts):
-                logger.warning(
-                    f"A new version of MO2-LINT is available: {latest}. Please update to the latest version."
-                )
-                return
+            return
     except Exception:
         logger.exception("Failed to check for updates")
         return
@@ -98,14 +94,16 @@ def pull_config():
             logger.debug(f"Fetching remote config from GitHub: {remote_raw}")
             response = get(remote_raw, verify=certifi.where())
             remote_yml = yaml.load(response.text, Loader=yaml.SafeLoader)
-            remote_schema_version = remote_yml.get("schema", 0)
-            remote_schema_parts = str(remote_schema_version).split(".")
-            local_version_parts = str(var.version).split(".")
+            remote_schema_version = version(str(remote_yml.get("schema", 0)))
+            local_version = version(var.version)
+            local_base = version(
+                local_version.base_version
+            )  # TODO: Remove local_base on full 7.0.0 release
             logger.trace(
-                f"Parsed schema parts: current={local_version_parts}, latest={remote_schema_parts}"
+                f"Parsed schema parts: current={local_version} (base={local_base}), latest={remote_schema_version}"
             )
 
-            if tuple(remote_schema_parts) > tuple(local_version_parts):
+            if remote_schema_version > local_base:
                 logger.warning(
                     f"There is a new schema version for {config}: {remote_schema_version}. It will not be downloaded to prevent incompatibility issues. Please update MO2-LINT to the latest version to get the new config."
                 )
@@ -129,7 +127,7 @@ def pre_init():
     and setting up logging. This is used to prepare help texts and command validation.
     """
     remove_loggers()
-    add_loggers(log_level="INFO", script="mo2-lint", process="installer")
+    add_loggers(log_level="TRACE", script="mo2-lint", process="pre-check")
     check_update()
     pull_config()  # Temporarily disable for development
     var.load_games_info()

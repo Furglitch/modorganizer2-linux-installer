@@ -112,13 +112,34 @@ def nexus_download(
         f"Requesting download link for {game_slug} mod id {mod_id}, file ID: {file_id}"
     )
     response = nexus_request(url)
+    code = response.status_code
+    if code != 200:
+        if code in (401, 403):
+            logger.error(
+                f"Nexus API returned unauthorized with HTTP {code} when requesting download for {game_slug} mod id {mod_id}, file ID: {file_id}."
+            )
+            logger.warning(
+                "This may be due to an invalid API key or lack of Nexus Premium subscription."
+            )
+        else:
+            logger.error(
+                f"Nexus API returned HTTP {code} when requesting download link for {game_slug} mod id {mod_id}, file ID: {file_id}."
+            )
+        return ""
     if not filename:
         filename = get_filename(game_slug, mod_id, file_id)
     path = dest / filename
     download_url = None
     logger.trace("Parsing download link response Nexus CDN URL")
-    for item in from_json(response.content):
-        if item.get("short_name") == "Nexus CDN":
+    links = from_json(response.content)
+    if not isinstance(links, list):
+        logger.error("Unexpected Nexus download uri response. See trace for details.")
+        logger.trace(
+            f"Expected a list of CDN entries, got {type(links).__name__}. Response content: {response.content}"
+        )
+        return ""
+    for item in links:
+        if isinstance(item, dict) and item.get("short_name") == "Nexus CDN":
             download_url = item.get("URI", "").replace("\\u0026", "&")
             break
     if not download_url:

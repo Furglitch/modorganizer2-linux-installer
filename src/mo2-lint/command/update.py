@@ -6,6 +6,7 @@ from step.external_resources import download_mod_organizer
 from util import state_file as state, variables as var
 from step.launch_opt import add_launch_opt, remove_launch_opt
 from util.redirector.install import install as install_redirector
+from util.nexus.install_handler import install as install_handler
 from util.wine import protontricks, winetricks
 
 
@@ -60,6 +61,7 @@ def update(directory: Path):
         winetricks.run(["--self-update"])
 
     install_redirector()
+    install_handler()
 
     remove_launch_opt()
     add_launch_opt()

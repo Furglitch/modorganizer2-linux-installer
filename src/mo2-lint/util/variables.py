@@ -529,6 +529,7 @@ class GameInfo:
     launch_options: Optional[dict[str, AppInfo]] = field(default_factory=dict)
     script_extenders: Optional[List[ScriptExtender]] = field(default_factory=list)
     workarounds: Optional[dict] = field(default_factory=dict)
+    plugins: Optional[Tuple[str, ...]] = field(default_factory=tuple)
 
     @classmethod
     def from_dict(cls, data: "dict[str, any] | GameInfo") -> "GameInfo":
@@ -551,6 +552,7 @@ class GameInfo:
             if "script_extenders" in data and data.get("script_extenders") is not None
             else None,
             workarounds=data.get("workarounds") or {},
+            plugins=tuple(data.get("plugins") or ()),
         )
 
     def __post_init__(self):
@@ -820,24 +822,35 @@ class Plugin:
 
     Parameters
     -----------
-    manifest : str
+    manifest : str, optional
         Direct URL to plugin manifest file.\n
         Manifest is formatted using the Kezyma plugin manifest schema.\n
         More info: https://github.com/Kezyma/ModOrganizer-Plugins/blob/main/docs/pluginfinder.md#adding-your-plugin
+    direct : str, optional
+        Direct download URL for the plugin archive.
+        Must be provided if manifest is not provided.
+    checksum : str, optional
+        SHA-256 checksum of the plugin archive. Only used with direct downloads.
+    file_whitelist : FileWhitelist, optional
+        File paths that should be included when installing the plugin. Only used with direct downloads.
+    subdirectory : str, optional
+        Subdirectory within the instance's plugins/ folder to install into. Defaults to plugins/ root.
 
     Raises
     -------
     ValueError
-        If required parameters [manifest] are not provided
+        If neither manifest nor direct is provided
     """
 
-    manifest: str = None
+    manifest: Optional[str] = None
+    direct: Optional[str] = None
+    checksum: Optional[str] = None
+    file_whitelist: Optional[FileWhitelist] = None
+    subdirectory: Optional[str] = None
 
     def __post_init__(self):
-        if not self.manifest:
-            logger.critical(
-                "Plugin: 'manifest' parameter is required but was not provided."
-            )
+        if not (self.manifest or self.direct):
+            logger.critical("Plugin: Either 'manifest' or 'direct' must be provided.")
             logger.critical(
                 "This should not happen. Please report this to the developer."
             )
@@ -860,18 +873,32 @@ def load_plugin_info(path: Optional[Path] = None):
     global plugin_info
     if not path:
         path = Path("~/.config/mo2-lint/plugin_info.yml").expanduser()
-    logger.debug(f"Loading plugin info from {path}")
-    with open(path, "r", encoding="utf-8") as file:
-        yml = yaml.load(file.read(), yaml.SafeLoader)
-    logger.trace(f"Parsed plugin info YAML: {yml}")
-    for key, value in yml.get("plugins", {}).items():
-        plugin_info[key] = Plugin(manifest=value)
-        logger.trace(f"Loaded plugin_info for key '{key}': {plugin_info[key]}")
+
+    paths = [p for p in [internal_file("cfg", "plugin_info.yml"), path] if p.exists()]
+    for p in paths:
+        logger.debug(f"Loading plugin info from {p}")
+        with open(p, "r", encoding="utf-8") as file:
+            yml = yaml.load(file.read(), yaml.SafeLoader)
+        logger.trace(f"Parsed plugin info YAML: {yml}")
+        for key, value in yml.get("plugins", {}).items():
+            if isinstance(value, str):
+                plugin_info[key] = Plugin(manifest=value)
+            else:
+                plugin_info[key] = Plugin(
+                    manifest=value.get("manifest"),
+                    direct=value.get("direct"),
+                    checksum=value.get("checksum"),
+                    file_whitelist=FileWhitelist.from_dict(value["file_whitelist"])
+                    if "file_whitelist" in value
+                    else None,
+                    subdirectory=value.get("subdirectory"),
+                )
+            logger.trace(f"Loaded plugin_info for key '{key}': {plugin_info[key]}")
 
 
 # --- #
 
-version: Final = "7.0.0"
+version: Final = "7.0.0-rc3"
 """
 Current version of mo2-lint.
 """
@@ -884,16 +911,6 @@ Targeted launcher [steam, epic, gog].
 prefix: Path = None
 """
 Path to game's Wine/Proton prefix directory.
-"""
-
-archived_prefix: Path = None
-"""
-Path to archived Wine/Proton prefix directory.
-"""
-
-archived_prefixes: list[Path] = []
-"""
-List of previously archived Wine/Proton prefix directories.
 """
 
 heroic_config: tuple[str, str | int, Path, Path, Path] = ()

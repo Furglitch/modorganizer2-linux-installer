@@ -52,7 +52,14 @@ To set up your development environment, follow these steps:
 To run the application directly from source:
 
 ```bash
-make run
+make run ARGS="<installer arguments>"
+```
+
+Where ARGS *must* be all caps, and `<installer arguments>` are the same as the command-line arguments you would use when running the installer normally. For example:
+
+```bash
+make run ARGS="install skyrim /path/to/install"
+# represents `mo2-lint install skyrim /path/to/install`
 ```
 
 > **Note:** The application requires the Redirector and NXM handler binaries to be present. Run a build first before running from source.
