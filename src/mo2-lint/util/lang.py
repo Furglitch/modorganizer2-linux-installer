@@ -17,11 +17,6 @@ help_pin = """Pin the Mod Organizer 2 installation in the specified directory, p
 help_unpin = """Unpin the Mod Organizer 2 installation in the specified directory, allowing updates."""
 help_update = """Update the Mod Organizer 2 installation in the specified directory, as well as the launch option for the game."""
 
-prompt_archive_done = """Your prefix has been archived and can be found at: {directory}
-
-Personal data from the archived prefix (e.g. saved games) has been preserved and restored to the new prefix.
-Feel free to delete the archive if you no longer need it after confirming your data is intact."""
-
 
 def list_instances(instance_list: list) -> list:
     """
@@ -44,41 +39,9 @@ def list_instances(instance_list: list) -> list:
     return instances
 
 
-def prompt_archive() -> bool:
+def prompt_prefix_init() -> bool:
     """
-    Prompts the user to archive the existing game prefix and create a clean one.
-
-    Returns
-    -------
-    bool
-        True if the user agrees to archive prefix, False otherwise.
-    """
-    logger.debug("Prompting user to archive existing prefix")
-    if var.unattended:
-        logger.debug("Unattended mode: skipping archive prompt, defaulting to False")
-        return False
-
-    message = """It is recommended to archive your existing game prefix and create a clean one for Mod Organizer 2 to avoid potential conflicts.
-
-  This process will maintain your personal data (save games, settings) while providing a fresh environment for proton-/winetricks to set up the necessary dependencies.
-  The archived prefix will be renamed with a timestamp suffix for easy identification.
-
-  Do you want to proceed with archiving the existing prefix and creating a clean one?"""
-
-    msg = {
-        "type": "confirm",
-        "message": message,
-        "name": "archive_clean",
-        "default": False,
-    }
-    result = prompt([msg])
-    logger.debug(f"User chose to archive prefix: {result['archive_clean']}")
-    return result["archive_clean"]
-
-
-def prompt_archive_init() -> bool:
-    """
-    Prompts the user to initialize a clean prefix
+    Prompts the user to confirm their game prefix has been set up.
 
     Returns
     -------
@@ -86,7 +49,7 @@ def prompt_archive_init() -> bool:
         True if the user indicates they have followed the instructions, False otherwise.
     """
     logger.debug(
-        f"Prompting user to initialize clean prefix for launcher: {state.current_instance.launcher}"
+        f"Prompting user to confirm prefix setup for launcher: {state.current_instance.launcher}"
     )
     if var.unattended:
         logger.debug("Unattended mode: skipping prefix init prompt, defaulting to True")
@@ -94,16 +57,16 @@ def prompt_archive_init() -> bool:
 
     match state.current_instance.launcher:
         case "steam":
-            instructions = """To create a clean Steam prefix, please follow these steps:
+            instructions = """Before continuing, please ensure your Steam prefix is set up correctly:
 
   1. Right-click on the game in your Steam library.
   2. Select 'Properties', and navigate to the 'Compatibility' tab.
   3. Check the box for 'Force the use of a specific Steam Play compatibility tool', if it's not already checked.
   4. From the dropdown menu, select your preferred Proton version. Proton 10.0 is the supported and recommended version.
-  5. Close the properties window and launch the game once to allow Steam to set up the prefix.
-  6. Exit the game completely. Do not launch it until the installation process is finished."""
+  5. If you haven't already, launch the game once to allow Steam to set up the prefix, then exit completely.
+  6. Do not launch the game again until the installation process is finished."""
         case "gog" | "epic":
-            instructions = """To create a clean prefix for GOG/Epic via Heroic, please follow these steps:
+            instructions = """Before continuing, please ensure your Heroic prefix is set up correctly:
 
   1. Right-click on the game in your Heroic library.
   2. Select 'Settings', and navigate to the 'WINE' tab.
@@ -112,20 +75,18 @@ def prompt_archive_init() -> bool:
      * If Proton versions are not available, you will need to enable "Allow using Valve Proton builds to run games"
        in Heroic's Settings, under the 'Advanced' tab. Then, ensure that Proton is downloaded and installed in Steam.
   4. Optional: Navigate to the 'OTHER' tab and check 'Use Steam Runtime'. This is recommended and may help with compatibility.
-  5. Launch the game once to allow Heroic to set up the prefix.
-  6. Exit the game completely. Do not launch it until the installation process is finished."""
+  5. If you haven't already, launch the game once to allow Heroic to set up the prefix, then exit completely.
+  6. Do not launch the game again until the installation process is finished."""
 
     msg = {
         "type": "confirm",
-        "message": f"{instructions}\n\n  Have you completed these instructions?",
-        "name": "clean_prefix_done",
+        "message": f"{instructions}\n\n  Have you completed these steps?",
+        "name": "prefix_init_done",
         "default": False,
     }
     result = prompt([msg])
-    logger.debug(
-        f"User completed clean prefix initialization: {result['clean_prefix_done']}"
-    )
-    return result["clean_prefix_done"]
+    logger.debug(f"User confirmed prefix setup: {result['prefix_init_done']}")
+    return result["prefix_init_done"]
 
 
 def prompt_install_mo2_checksum_fail(mo2_path: str) -> bool:
