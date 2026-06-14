@@ -207,8 +207,12 @@ def download_scriptextender():
     logger.debug(f"Downloaded script extender to {downloaded}")
 
     if not downloaded:
-        logger.warning("Could not automatically download Script Extender. Manual installation required.")
-        logger.warning("This may be due to an invalid API key or lack of Nexus Premium subscription.")
+        logger.warning(
+            "Could not automatically download Script Extender. Manual installation required."
+        )
+        logger.warning(
+            "This may be due to an invalid API key or lack of Nexus Premium subscription."
+        )
         return
 
     extract_path = extract_dir / "scriptextender" / downloaded.name
