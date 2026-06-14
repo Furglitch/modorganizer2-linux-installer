@@ -24,6 +24,7 @@ body:
         - "7.0.0-rc1"
         - "7.0.0-rc2"
         - "7.0.0-rc3"
+        - "7.0.0-rc4"
     validations:
       required: true
   - type: dropdown
