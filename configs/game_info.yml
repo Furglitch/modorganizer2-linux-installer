@@ -57,7 +57,7 @@ games:
       steam: 933480
       gog: 1708684988
     subdirectory: Enderal
-    executable: Enderal Launcher.exe # UPDATE
+    executable: Enderal Launcher.exe
     tricks:
       - "d3dcompiler_43"
       - "d3dx9"
@@ -77,7 +77,7 @@ games:
     launcher_ids:
       steam: 976620
     subdirectory: Enderal Special Edition
-    executable: Enderal Launcher.exe # UPDATE
+    executable: Enderal Launcher.exe
     tricks:
       - "xaudio2_7=native"
       - "xact"
@@ -171,7 +171,7 @@ games:
       steam: Fallout 4
       gog: Fallout 4 GOTY
       epic: Fallout 4
-    executable: Fallout4.exe
+    executable: Fallout4Launcher.exe
     tricks:
       - "xaudio2_7=native"
       - "grabfullscreen=y"
@@ -310,7 +310,7 @@ games:
       gog: 1454587428
       epic: 5daeb974a22a435988892319b3a4f476
     subdirectory: Fallout New Vegas
-    executable: FalloutNV.exe
+    executable: FalloutNVLauncher.exe
     tricks:
       - "d3dcompiler_43"
       - "d3dx9"
@@ -348,9 +348,12 @@ games:
     launcher_ids:
       steam: 22320
       gog: 1435828767
-      # epic: ??? It's available on Epic, but I can't find the ID anywhere
+      epic: 2b04b1a83647411e956695342f1d14b6
     subdirectory: Morrowind
-    executable: Morrowind Launcher.exe # UPDATE
+    executable:
+      steam: Morrowind Launcher.exe
+      gog: Morrowind Launcher.exe
+      epic: Morrowind GOTY English/Morrowind Launcher.exe
     tricks:
       - "d3dcompiler_43"
       - "d3dx9"
@@ -372,9 +375,9 @@ games:
       gog: Oblivion
       epic: Oblivion
     executable:
-      steam: Oblivion.exe
-      gog: Oblivion.exe
-      epic: Oblivion GOTY English/Oblivion.exe
+      steam: OblivionLauncher.exe
+      gog: OblivionLauncher.exe
+      epic: Oblivion GOTY English/OblivionLauncher.exe
     tricks:
       - "d3dcompiler_43"
       - "d3dx9"
@@ -399,22 +402,22 @@ games:
   oblivion_fr:
     parent: oblivion
     executable:
-      epic: Oblivion GOTY French/Oblivion.exe
+      epic: Oblivion GOTY French/OblivionLauncher.exe
 
   oblivion_de:
     parent: oblivion
     executable:
-      epic: Oblivion GOTY German/Oblivion.exe
+      epic: Oblivion GOTY German/OblivionLauncher.exe
 
   oblivion_it:
     parent: oblivion
     executable:
-      epic: Oblivion GOTY Italian/Oblivion.exe
+      epic: Oblivion GOTY Italian/OblivionLauncher.exe
 
   oblivion_es:
     parent: oblivion
     executable:
-      epic: Oblivion GOTY Spanish/Oblivion.exe
+      epic: Oblivion GOTY Spanish/OblivionLauncher.exe
 
   skyrim:
     display_name: 'The Elder Scrolls V: Skyrim'
@@ -422,7 +425,7 @@ games:
     launcher_ids:
       steam: 72850
     subdirectory: Skyrim
-    executable: TESV.exe
+    executable: SkyrimLauncher.exe
     tricks:
       - "d3dcompiler_43"
       - "d3dx9"
@@ -457,7 +460,7 @@ games:
       gog: 1711230643
       epic: ac82db5035584c7f8a2c548d98c86b2c
     subdirectory: Skyrim Special Edition
-    executable: SkyrimSE.exe
+    executable: SkyrimSELauncher.exe
     tricks:
       - "xaudio2_7=native"
       - "xact"
