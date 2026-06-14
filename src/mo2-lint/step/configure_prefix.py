@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 
-from datetime import datetime
 from loguru import logger
 from pathlib import Path
-from shutil import copytree, move
 from step.load_game_info import get_launcher
 from util import lang, variables as var, state_file as state
 from util.heroic.find_library import get_data as get_heroic_data
@@ -15,8 +13,6 @@ default_tricks = [
 ]
 
 yes = ("", "y", "yes")
-
-current_time = datetime.now().strftime("%Y%m%d-%H%M%S")
 
 
 def load_prefix() -> Path:
@@ -75,56 +71,6 @@ def load_prefix() -> Path:
     return prefix
 
 
-def archive_prefix(prefix: Path):
-    """
-    Archives the existing game prefix by renaming it with a timestamp suffix.\n
-    Sets the global 'archive' variable to the new archive path.
-
-    Parameters
-    ----------
-    prefix : Path
-        Path to the existing game prefix to be archived.
-    """
-    if prefix.exists() and prefix.is_dir():
-        archive_path = prefix.with_suffix(f".{current_time}").expanduser()
-        move(prefix, archive_path)
-        logger.trace(f"Backed up existing prefix from {prefix} to {archive_path}")
-        var.archived_prefix = archive_path
-
-
-def restore_archived_prefix(prefix: Path):
-    """
-    Restores the `users` directory from the archived prefix to the new prefix,\n
-    preserving personal data such as saved games.
-
-    Parameters
-    ----------
-    prefix : Path
-        Path to the new game prefix where personal data will be restored.
-    """
-    match state.current_instance.launcher:
-        case "steam":
-            subpath = Path("pfx") / "drive_c" / "users"
-            src = var.archived_prefix / subpath
-        case "gog" | "epic" | _:
-            subpath = Path("drive_c") / "users"
-            src = var.archived_prefix / subpath
-    dst = prefix / subpath
-    logger.trace(
-        f"Restoring personal data from archived prefix. Source: {src}, Destination: {dst}"
-    )
-
-    copytree(src, dst.with_suffix(".bak"))
-    logger.trace(
-        f"Copied personal data to temporary backup location: {dst.with_suffix('.bak')}"
-    )
-    copytree(src, dst.with_suffix(".old"))
-    move(dst.with_suffix(".old"), dst)
-    logger.trace(
-        f"Restored personal data to new prefix at {dst}. Original data backed up at {dst.with_suffix('.bak')}"
-    )
-
-
 def configure():
     """
     Run the necessary winetricks/protontricks for the selected game launcher.
@@ -141,40 +87,18 @@ def configure():
 
 def prompt():
     """
-    Prompts the user to archive their existing game prefix and create a clean one.
-
-    Raises
-    ------
-    SystemExit
-        If the user declines to create a clean prefix.
+    Prompts the user to confirm their prefix is set up, then configures it.
     """
-
-    # Prompt user to archive prefix
     prefix = load_prefix()
     for suffix in ["users", "drive_c", "pfx"]:
         if prefix.name == suffix:
             prefix = prefix.parent
     var.prefix = prefix
     logger.trace(f"Resolved prefix path for prompting: {prefix}")
-    logger.debug(f"Prompting user to archive existing prefix at {prefix}")
-    if lang.prompt_archive():
-        logger.trace(
-            "User agreed to archive existing prefix. Proceeding with archival."
-        )
-        archive_prefix(prefix)
-    else:
-        logger.warning(
-            "User declined to archive existing prefix. Proceeding without archival."
-        )
-        var.archived_prefix = None
 
-    # Prompt user to create a clean prefix
-    if not lang.prompt_archive_init():
+    if not lang.prompt_prefix_init():
         logger.warning(
-            "User declined that instructions were followed to create a clean prefix. No support will be provided if errors occur."
+            "User did not confirm prefix setup. No support will be provided if errors occur."
         )
 
     configure()
-    if var.archived_prefix is not None:
-        restore_archived_prefix(prefix)
-        print(lang.prompt_archive_done.format(directory=var.archived_prefix))

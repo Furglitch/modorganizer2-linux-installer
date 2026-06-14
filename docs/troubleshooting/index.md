@@ -146,6 +146,33 @@ MO2-LINT currently only supports Proton 10.0. Ensure your game is configured to 
 
 Launch the game at least once through Steam/Heroic before installing MO2-LINT. This allows the launcher to set up the Proton prefix with default dependencies.
 
+### Preserving Save Data Across a Prefix Reset
+
+If you need to delete and recreate your game's prefix, your save files will be lost unless you back them up first. Save data is stored inside the prefix under the `users` folder:
+
+- **Steam**: `<prefix>/pfx/drive_c/users/`
+- **GOG / Epic (Heroic)**: `<prefix>/drive_c/users/`
+
+To find your prefix path, run:
+```bash
+mo2-lint list
+```
+and note the launcher for your instance, then refer to your launcher's library settings for the exact prefix location.
+
+**To preserve your saves:**
+
+1. Copy the `users` folder somewhere safe before deleting the prefix:
+   ```bash
+   cp -r /path/to/prefix/drive_c/users ~/.tmp/mo2-lint/users-backup
+   ```
+2. Delete the old prefix and launch the game once to generate a fresh one, then exit.
+3. Restore your saves by copying the `users` folder back:
+   ```bash
+   cp -r ~/.tmp/mo2-lint/users-backup/. /path/to/new/prefix/drive_c/users/
+   ```
+
+> **Note:** Overwriting the entire `users` folder should be safe for save data, but be aware that some per-user configuration inside the prefix (e.g. registry hives under `users/<name>/`) may carry over stale settings from the old prefix.
+
 ## Instance Issues
 
 ### Instance Not Found
