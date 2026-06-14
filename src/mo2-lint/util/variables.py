@@ -205,6 +205,47 @@ class FileWhitelist:
 
 
 @dataclass
+class ScriptExtenderDependency:
+    """
+    Stores information about a prerequisite that must be installed for a script extender.
+
+    Parameters
+    -----------
+    download : DownloadData
+        Download information for the dependency.
+    file_whitelist : FileWhitelist, optional
+        File paths that should be included when installing the dependency.
+        If not provided, all files will be installed.
+    """
+
+    download: DownloadData = None
+    file_whitelist: Optional[FileWhitelist] = None
+
+    @classmethod
+    def from_dict(
+        cls, data: "dict[str, any] | ScriptExtenderDependency"
+    ) -> "ScriptExtenderDependency":
+        if isinstance(data, cls):
+            return data
+        return cls(
+            download=DownloadData.from_dict(data.get("download")),
+            file_whitelist=FileWhitelist.from_dict(data.get("file_whitelist"))
+            if "file_whitelist" in data
+            else None,
+        )
+
+    def __post_init__(self):
+        if not self.download:
+            logger.critical(
+                "ScriptExtenderDependency: 'download' parameter is required but was not provided."
+            )
+            logger.critical(
+                "This should not happen. Please report this to the developer."
+            )
+            raise SystemExit(1)
+
+
+@dataclass
 class ScriptExtender:
     """
     Stores information about a specific script extender version.
@@ -219,6 +260,8 @@ class ScriptExtender:
         Download information for the script extender.
     file_whitelist : FileWhitelist, optional
         File paths that should be included when installing the script extender. If not provided, all files will be installed.
+    requires : List[ScriptExtenderDependency], optional
+        List of prerequisite mods that must be downloaded and installed before this script extender.
 
     Raises
     -------
@@ -230,6 +273,7 @@ class ScriptExtender:
     runtime: str | dict[str, str | List[str]] = None
     download: DownloadData = None
     file_whitelist: Optional[FileWhitelist] = None
+    requires: Optional[List[ScriptExtenderDependency]] = field(default_factory=list)
 
     @classmethod
     def from_dict(cls, data: "dict[str, any] | ScriptExtender") -> "ScriptExtender":
@@ -241,6 +285,12 @@ class ScriptExtender:
             download=DownloadData.from_dict(data.get("download")),
             file_whitelist=FileWhitelist.from_dict(data.get("file_whitelist"))
             if "file_whitelist" in data
+            else None,
+            requires=[
+                ScriptExtenderDependency.from_dict(dep)
+                for dep in data.get("requires", [])
+            ]
+            if data.get("requires")
             else None,
         )
 

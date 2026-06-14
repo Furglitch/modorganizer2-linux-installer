@@ -205,6 +205,48 @@ def download_scriptextender():
             )
     logger.debug(f"Downloaded script extender to {downloaded}")
 
+    for dep in choice.requires or []:
+        dep_download = dep.download
+        dep_mod_id = dep_file_id = None
+        if getattr(dep_download, "direct", None):
+            dep_url = (
+                dep_download.direct
+                if isinstance(dep_download.direct, str)
+                else dep_download.direct.get("url")
+            )
+            dep_checksum = dep_download.checksum or (
+                isinstance(dep_download.direct, dict)
+                and dep_download.direct.get("checksum")
+            )
+            dep_downloaded = dl(dep_url, download_dir, checksum=dep_checksum or None)
+        elif getattr(dep_download, "nexus", None):
+            dep_mod_id = dep_download.nexus.get("mod")
+            dep_file_id = dep_download.nexus.get("file")
+            dep_checksum = dep_download.checksum or dep_download.nexus.get("checksum")
+            dep_downloaded = nexus_dl(
+                var.game_info.nexus_slug,
+                dep_mod_id,
+                dep_file_id,
+                download_dir,
+                checksum=dep_checksum or None,
+            )
+        else:
+            logger.warning(
+                f"Skipping script extender dependency (mod={dep_mod_id}): no valid download source."
+            )
+            continue
+        dep_id = f"mod={dep_mod_id}" if dep_mod_id else dep_downloaded.name
+        logger.debug(
+            f"Downloaded script extender dependency '{dep_id}' to {dep_downloaded}"
+        )
+        dep_extract_path = extract_dir / "scriptextender" / dep_downloaded.name
+        extract(dep_downloaded, dep_extract_path)
+        logger.debug(
+            f"Extracted script extender dependency '{dep_id}' to {dep_extract_path}"
+        )
+        install_scriptextender(dep_extract_path, dep.file_whitelist or None)
+        logger.success(f"Installed script extender dependency '{dep_id}'.")
+
     extract_path = extract_dir / "scriptextender" / downloaded.name
     extract(downloaded, extract_path)
     logger.debug(f"Extracted script extender to {extract_path}")
