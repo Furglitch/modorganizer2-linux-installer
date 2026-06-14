@@ -151,6 +151,7 @@ def download_scriptextender():
     logger.debug(f"Chosen script extender entry: {choice}")
 
     src = [None, None, None]  # [download source, checksum, file whitelist]
+    downloaded = None
     if choice is None:
         return
     else:
@@ -204,6 +205,15 @@ def download_scriptextender():
                 checksum=src[1],
             )
     logger.debug(f"Downloaded script extender to {downloaded}")
+
+    if not downloaded:
+        logger.warning(
+            "Could not automatically download Script Extender. Manual installation required."
+        )
+        logger.warning(
+            "This may be due to an invalid API key or lack of Nexus Premium subscription."
+        )
+        return
 
     extract_path = extract_dir / "scriptextender" / downloaded.name
     extract(downloaded, extract_path)
