@@ -51,6 +51,21 @@ Verify the game is visible in your launcher and has been launched at least once.
 
 ---
 
+## Tips and Tricks
+
+### How do I get MO2 to only open in Desktop Mode on Steam Deck?
+
+Steam Deck users can modify the launch options for their game to skip MO2 when in Gaming/Big Picture mode, but still open MO2 in Desktop Mode. The following line should be added:
+```
+%command% $([ -z "$KDE_FULL_SESSION" ] && echo 'moshortcut://"SKSE"' )
+```
+
+**Only compatible with SteamOS environments**
+
+**Note:** This is written prior to the release of the Steam Machine and Steam Frame, so may require adjustments once those are available. Please report any issues you encounter with this approach.
+
+---
+
 ## Troubleshooting
 
 ### Where are the log files?
