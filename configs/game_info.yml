@@ -90,7 +90,7 @@ games:
     launcher_ids:
       steam: 22300
     subdirectory: Fallout 3
-    executable: Fallout3.exe
+    executable: Fallout3Launcher.exe
     tricks:
       - "d3dcompiler_43"
       - "d3dx9"
@@ -144,8 +144,10 @@ games:
             - "fose_loader.exe"
 
   fallout3_goty:
+    display_name: Fallout 3 - Game of the Year Edition
     parent: fallout3
     nexus_slug: fallout3
+    executable: Fallout3Launcher.exe
     launcher_ids:
       steam: 22370
       gog: 1454315831
