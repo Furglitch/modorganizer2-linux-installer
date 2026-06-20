@@ -39,6 +39,10 @@ def install():
     """
 
     logger.info("Installing redirector.")
+    if not state.current_instance or not state.current_instance.game_path:
+        logger.critical("Cannot install redirector because the game path is not set.")
+        raise SystemExit(1)
+
     game_install_path = (
         state.current_instance.game_path
         if state.current_instance.game_path.is_dir()
