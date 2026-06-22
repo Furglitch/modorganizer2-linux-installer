@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Check for existing tag
         id: check_tag
@@ -62,7 +62,7 @@ jobs:
           pacman -S --noconfirm git make wget curl unzip cabextract wine nodejs
 
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
@@ -84,7 +84,7 @@ jobs:
     needs: build
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Create Release Tag
         id: create_tag
