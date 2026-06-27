@@ -26,24 +26,37 @@ def download_mod_organizer():
     Runs the download and installation process for Mod Organizer 2.
     """
 
-    logger.info("Starting download process for Mod Organizer 2")
     url = var.resource_info.mod_organizer.download_url
     checksum = var.resource_info.mod_organizer.checksum
     path_internal = var.resource_info.mod_organizer.path_internal
     checksum_internal = var.resource_info.mod_organizer.checksum_internal
-    logger.trace(
-        f"Download info: url={url}, checksum={checksum}, path_internal={path_internal}, checksum_internal={checksum_internal}"
-    )
+    local_archive = var.input_params.mo2_archive
+    destination = var.input_params.directory
 
-    downloaded = dl(url, download_dir, checksum=checksum)
-    logger.debug(f"Downloaded Mod Organizer 2 to {downloaded}")
+    if local_archive:
+        local_archive = Path(local_archive)
+        logger.info(f"Installing Mod Organizer 2 from local archive: {local_archive}")
+        if not compare_checksum(local_archive, var.input_params.mo2_checksum):
+            logger.critical(
+                f"Checksum mismatch for {local_archive}. Expected {var.input_params.mo2_checksum}."
+            )
+            raise SystemExit(1)
+        downloaded = local_archive
+        destination.mkdir(parents=True, exist_ok=True)
+    else:
+        logger.info("Starting download process for Mod Organizer 2")
+        logger.trace(
+            f"Download info: url={url}, checksum={checksum}, path_internal={path_internal}, checksum_internal={checksum_internal}"
+        )
+        downloaded = dl(url, download_dir, checksum=checksum)
+        logger.debug(f"Downloaded Mod Organizer 2 to {downloaded}")
+
     extracted = extract(downloaded, extract_dir / downloaded.stem)
     if extracted and extracted.exists():
         logger.debug(f"Extracted Mod Organizer 2 to {extracted}")
-        destination = var.input_params.directory
         mo2_exec = destination / path_internal
         if (  # if ModOrganizer.exe exists in destination check if it's the same file
-            destination.exists() and mo2_exec.exists()
+            not local_archive and destination.exists() and mo2_exec.exists()
         ):
             if not compare_checksum(mo2_exec, checksum_internal):
                 if not lang.prompt_install_mo2_checksum_fail(str(mo2_exec)):

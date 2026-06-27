@@ -37,6 +37,13 @@ mo2-lint install <game> <directory> [options]
 >
 > - `--launcher <launcher>`, `-L <launcher>` - Force a specific launcher (`steam`, `gog`, or `epic`) instead of auto-detecting.
 >
+> - `--mo2-archive <path/to/archive>` - Install Mod Organizer 2 from a local `.zip`/`.7z` archive instead of downloading the bundled version. Useful for offline installs or holding an instance at a specific MO2 build. Requires `--mo2-checksum`. The instance is automatically pinned (see [`pin`](#pin)) so a later `update` will not overwrite your chosen build.
+>   ```bash
+>   mo2-lint install skyrim /path/to/instance --mo2-archive ~/Downloads/Mod.Organizer-2.5.2.7z --mo2-checksum <sha256>
+>   ```
+>
+> - `--mo2-checksum <sha256>` - The expected SHA-256 checksum of the `--mo2-archive` file. Required when `--mo2-archive` is used; the archive is verified against it before extraction.
+>
 > - `--custom <path/to/file.yml>` - **[Advanced users only, unsupported]** Use a custom game info file. See [Adding Custom Games](./custom-games) for details.
 
 After installation, **launch the game through Steam or Heroic** to confirm the launch option was created. You should see a "Launch Mod Organizer" entry alongside the default launch option.
@@ -94,13 +101,21 @@ mo2-lint unpin <directory>
 Updates the MO2 executable and NXM handler for an existing instance, and refreshes its launch option.
 
 ```bash
-mo2-lint update <directory>
+mo2-lint update <directory> [options]
 ```
 
 > #### Parameters
 > `<directory>` is required and must be the exact path to the instance.
 
-> **Note:** If the instance is pinned, the MO2 version will not be updated. Run `mo2-lint unpin <directory>` first if you want to update it.
+> #### Options
+> - `--mo2-archive <path/to/archive>` - Update Mod Organizer 2 from a local `.zip`/`.7z` archive instead of downloading the bundled version. Requires `--mo2-checksum`. After the update the instance is automatically pinned so a later bundled `update` will not overwrite it.
+>   ```bash
+>   mo2-lint update ~/Games/instance --mo2-archive ~/Downloads/Mod.Organizer-2.5.2.7z --mo2-checksum <sha256>
+>   ```
+>
+> - `--mo2-checksum <sha256>` - The expected SHA-256 checksum of the `--mo2-archive` file. Required when `--mo2-archive` is used; the archive is verified against it before extraction.
+
+> **Note:** If the instance is pinned, the MO2 version will not be updated by a normal `update`. Run `mo2-lint unpin <directory>` first **or** supply `--mo2-archive`, which overrides the pin for that update (and re-pins the instance afterward).
 
 ## The Instance State File
 
