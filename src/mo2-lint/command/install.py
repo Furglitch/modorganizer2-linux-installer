@@ -45,6 +45,13 @@ def install(
             if isinstance(var.game_info.executable, dict)
             else var.game_info.executable
         )
+        game_path = get_library()
+        if game_path is None:
+            logger.critical(
+                "Could not determine the game installation path. Aborting installation before modifying the instance."
+            )
+            raise SystemExit(1)
+
         state.current_instance = InstanceData(
             index=-1,
             game=game,
@@ -52,7 +59,7 @@ def install(
             instance_path=directory,
             launcher=launcher,
             launcher_ids=var.LauncherIDs.from_dict(var.game_info.launcher_ids),
-            game_path=get_library(),
+            game_path=game_path,
             game_executable=executable,
             script_extender=None,
             plugins=list(plugin),
