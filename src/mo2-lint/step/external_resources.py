@@ -138,14 +138,15 @@ def download_scriptextender():
 
     if matches:
         match_count = len(matches)
+        keys = list(matches.keys())
         if match_count < 1 or None:
             return
         elif match_count == 1:
-            choice = matches[0]
+            choice = matches[keys[0]]
         elif match_count > 1:
             choice = lang.prompt_install_scriptextender_choice(matches)
-            index = choice if (0 < choice <= match_count) else None
-            choice = matches[index]
+            index = keys[choice] if 0 <= choice < match_count else None
+            choice = matches[index] if index is not None else None
     else:
         return
     logger.debug(f"Chosen script extender entry: {choice}")
