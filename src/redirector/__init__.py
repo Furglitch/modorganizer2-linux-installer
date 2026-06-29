@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 
-from pathlib import Path
-from loguru import logger
-from shared.logger import add_loggers, remove_loggers
-import os
-import sys
 import json
-import yaml
+import os
 import subprocess
+import sys
+import traceback
+from pathlib import Path
+
+import yaml
+from loguru import logger
+
+from shared.logger import add_loggers, remove_loggers
 
 # Running inside Wine/Proton: Z:\ is Linux root, C:\ is prefix
 STATE_FILE = (
@@ -62,8 +65,7 @@ def posix_to_wine(posix_path: str | Path) -> str:
 
     # Convert POSIX to Wine Z:\ path
     path = Path(posix_path).resolve()
-    wine_path = "Z:\\" + str(path).lstrip("/").replace("/", "\\")
-    return wine_path
+    return "Z:\\" + str(path).lstrip("/").replace("/", "\\")
 
 
 def write_error_log(error_log: Path, message: str, exc: Exception) -> None:
@@ -82,8 +84,6 @@ def write_error_log(error_log: Path, message: str, exc: Exception) -> None:
     try:
         wine_to_posix(error_log.parent).mkdir(parents=True, exist_ok=True)
         with open(wine_to_posix(error_log), "a") as f:
-            import traceback
-
             f.write(f"{message}: {exc}\n")
             f.write(traceback.format_exc())
     except Exception:
@@ -147,7 +147,8 @@ def get_instance_info(game_dir: Path) -> tuple[Path | None, str | None]:
     Returns:
     --------
     tuple[Path | None, str | None]
-        Tuple of (mo2_exe_path as Wine path, game_executable_path as POSIX str), or (None, None) if an error occurred
+        Tuple of (mo2_exe_path as Wine path, game_executable_path as POSIX str),
+        or (None, None) if an error occurred
     """
     # Try to read state file with Wine path
     state_file_posix = wine_to_posix(STATE_FILE)
@@ -253,7 +254,7 @@ def execute_mo2(exe: Path, args: list[str]) -> int:
     logger.debug(f"Executing: {exe_str} {args}")
 
     try:
-        result = subprocess.run([exe_str] + args)
+        result = subprocess.run([exe_str, *args], check=False)
         return result.returncode
     except Exception as e:
         logger.error(f"Failed to execute {exe_str}: {e}")
@@ -278,7 +279,7 @@ def main(argv: list[str]) -> int:
 
     console_sink = None
     try:
-        console_sink = open(os.devnull, "w")
+        console_sink = open(os.devnull, "w")  # noqa: SIM115
         add_loggers(
             script="redirector",
             process="redirector",
@@ -326,9 +327,9 @@ def main(argv: list[str]) -> int:
             logger.info(f"Updating INI with {len(launcher_args)} launcher arguments")
             try:
                 try:
-                    from .mo2_ini import update_mo2_ini
+                    from .mo2_ini import update_mo2_ini  # noqa: PLC0415
                 except ImportError:
-                    from mo2_ini import update_mo2_ini
+                    from mo2_ini import update_mo2_ini  # noqa: PLC0415
 
                 # mo2_exe is Wine format, convert to POSIX for INI update
                 mo2_dir_posix = wine_to_posix(mo2_exe).parent
