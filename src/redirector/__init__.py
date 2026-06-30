@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 
-from pathlib import Path
-from loguru import logger
-from shared.logger import add_loggers, remove_loggers
-import os
-import sys
 import json
-import yaml
+import os
 import subprocess
+import sys
+import traceback
+from pathlib import Path
+
+import yaml
+from loguru import logger
+
+from shared.logger import add_loggers, remove_loggers
 
 # Running inside Wine/Proton: Z:\ is Linux root, C:\ is prefix
 STATE_FILE = (
@@ -40,6 +43,40 @@ def wine_to_posix(wine_path: str | Path) -> Path:
     return Path(path_str)  # For C:\ or other Windows drives, try to resolve as-is
 
 
+def wine_io_path(wine_path: str | Path) -> Path:
+    path_str = str(wine_path).replace("\\", "/")
+    if os.name == "nt" and len(path_str) > 1 and path_str[1] == ":":
+        return Path(path_str)
+    return wine_to_posix(path_str)
+
+
+def path_parts(path: str | Path) -> list[str]:
+    path_str = str(path).replace("\\", "/")
+    if len(path_str) > 1 and path_str[1] == ":":
+        path_str = path_str[2:]
+    return [part for part in path_str.split("/") if part]
+
+
+def game_dir_matches(game_dir: Path, game_path: Path) -> bool:
+    game_dir_parts = path_parts(game_dir)
+    game_path_parts = path_parts(game_path)
+
+    if game_dir_parts[: len(game_path_parts)] == game_path_parts:
+        return True
+
+    game_dir_str = str(game_dir).replace("\\", "/")
+    if not (len(game_dir_str) > 1 and game_dir_str[1] == ":"):
+        return False
+    if game_dir_str.upper().startswith("Z:"):
+        return False
+
+    max_overlap = min(len(game_dir_parts), len(game_path_parts))
+    for size in range(max_overlap, 1, -1):
+        if game_path_parts[-size:] == game_dir_parts[:size]:
+            return True
+    return False
+
+
 def posix_to_wine(posix_path: str | Path) -> str:
     """
     Convert a POSIX path to Wine (Z:\\) path.
@@ -60,10 +97,12 @@ def posix_to_wine(posix_path: str | Path) -> str:
     if len(path_str) > 1 and path_str[1] == ":":
         return path_str.replace("/", "\\")
 
+    if path_str.startswith("/"):
+        return "Z:\\" + path_str.lstrip("/").replace("/", "\\")
+
     # Convert POSIX to Wine Z:\ path
     path = Path(posix_path).resolve()
-    wine_path = "Z:\\" + str(path).lstrip("/").replace("/", "\\")
-    return wine_path
+    return "Z:\\" + str(path).lstrip("/").replace("/", "\\")
 
 
 def write_error_log(error_log: Path, message: str, exc: Exception) -> None:
@@ -80,10 +119,8 @@ def write_error_log(error_log: Path, message: str, exc: Exception) -> None:
         Exception object for traceback
     """
     try:
-        wine_to_posix(error_log.parent).mkdir(parents=True, exist_ok=True)
-        with open(wine_to_posix(error_log), "a") as f:
-            import traceback
-
+        wine_io_path(error_log.parent).mkdir(parents=True, exist_ok=True)
+        with open(wine_io_path(error_log), "a") as f:
             f.write(f"{message}: {exc}\n")
             f.write(traceback.format_exc())
     except Exception:
@@ -147,41 +184,45 @@ def get_instance_info(game_dir: Path) -> tuple[Path | None, str | None]:
     Returns:
     --------
     tuple[Path | None, str | None]
-        Tuple of (mo2_exe_path as Wine path, game_executable_path as POSIX str), or (None, None) if an error occurred
+        Tuple of (mo2_exe_path as Wine path, game_executable_path as POSIX str),
+        or (None, None) if an error occurred
     """
-    # Try to read state file with Wine path
-    state_file_posix = wine_to_posix(STATE_FILE)
-    if not state_file_posix.is_file():
-        logger.error(f"State file not found: {state_file_posix}")
+    # Read state file using an explicit Wine path. Converting Z:/home/... to
+    # /home/... inside Wine can accidentally resolve against Proton's game drive.
+    state_file_path = wine_io_path(STATE_FILE)
+    if not state_file_path.is_file():
+        logger.error(f"State file not found: {STATE_FILE} (host: {state_file_path})")
         return None, None
 
     try:
-        with open(state_file_posix, encoding="utf-8") as f:
+        with open(state_file_path, encoding="utf-8") as f:
             state = json.load(f)
     except Exception as e:
         logger.error(f"Failed to read state file: {e}")
         return None, None
 
     # Convert Wine path to POSIX for comparison
-    game_dir_posix = wine_to_posix(game_dir).resolve()
+    game_dir_posix = wine_to_posix(game_dir)
     logger.trace(f"Game dir (Wine): {game_dir}")
     logger.trace(f"Game dir (POSIX): {game_dir_posix}")
 
     for instance in state.get("instances", []):
         try:
             # State file stores POSIX paths
-            game_path = Path(instance.get("game_path", "")).resolve()
-            instance_path = Path(instance["instance_path"]).resolve()
+            game_path = Path(instance.get("game_path", ""))
+            instance_path = Path(instance["instance_path"])
 
             logger.trace(f"Checking instance game_path: {game_path}")
 
             # Check if game_dir is at or under game_path
-            if game_dir_posix == game_path or game_path in game_dir_posix.parents:
+            if game_dir_matches(game_dir_posix, game_path) or game_dir_matches(
+                game_dir, game_path
+            ):
                 game_exe = instance.get("game_executable", "")
 
                 # Build full POSIX path to game executable
                 if game_exe:
-                    game_exe = str((game_path / game_exe).resolve())
+                    game_exe = str(game_path / game_exe)
 
                 # Return both as Wine Z:\ paths for Wine compatibility
                 mo2_exe_wine = posix_to_wine(instance_path / "ModOrganizer.exe")
@@ -253,7 +294,7 @@ def execute_mo2(exe: Path, args: list[str]) -> int:
     logger.debug(f"Executing: {exe_str} {args}")
 
     try:
-        result = subprocess.run([exe_str] + args)
+        result = subprocess.run([exe_str, *args], check=False)
         return result.returncode
     except Exception as e:
         logger.error(f"Failed to execute {exe_str}: {e}")
@@ -278,7 +319,7 @@ def main(argv: list[str]) -> int:
 
     console_sink = None
     try:
-        console_sink = open(os.devnull, "w")
+        console_sink = open(os.devnull, "w")  # noqa: SIM115
         add_loggers(
             script="redirector",
             process="redirector",
@@ -314,11 +355,9 @@ def main(argv: list[str]) -> int:
             return 1
 
         # mo2_exe is already a Wine path string, check by trying to convert to POSIX
-        mo2_exe_posix = wine_to_posix(mo2_exe)
-        if not mo2_exe_posix.is_file():
-            logger.error(
-                f"MO2 executable not found: {mo2_exe} (POSIX: {mo2_exe_posix})"
-            )
+        mo2_exe_path = wine_io_path(mo2_exe)
+        if not mo2_exe_path.is_file():
+            logger.error(f"MO2 executable not found: {mo2_exe} (host: {mo2_exe_path})")
             return 1
 
         # Update ModOrganizer.ini with launcher arguments if present
@@ -326,13 +365,13 @@ def main(argv: list[str]) -> int:
             logger.info(f"Updating INI with {len(launcher_args)} launcher arguments")
             try:
                 try:
-                    from .mo2_ini import update_mo2_ini
+                    from .mo2_ini import update_mo2_ini  # noqa: PLC0415
                 except ImportError:
-                    from mo2_ini import update_mo2_ini
+                    from mo2_ini import update_mo2_ini  # noqa: PLC0415
 
                 # mo2_exe is Wine format, convert to POSIX for INI update
-                mo2_dir_posix = wine_to_posix(mo2_exe).parent
-                update_mo2_ini(mo2_dir_posix, game_executable, launcher_args)
+                mo2_dir_path = wine_io_path(mo2_exe).parent
+                update_mo2_ini(mo2_dir_path, game_executable, launcher_args)
             except Exception as e:
                 logger.warning(f"Failed to update INI: {e}")
 
