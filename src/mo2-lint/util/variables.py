@@ -40,6 +40,8 @@ class Input:
     log_level: Optional[str] = "INFO"
     script_extender: Optional[bool] = None
     plugins: Optional[Tuple[str, ...]] = field(default_factory=tuple)
+    mo2_archive: Optional[Path] = None
+    mo2_checksum: Optional[str] = None
 
     def __post_init__(self):
         if not self.game:

@@ -2,6 +2,7 @@
 
 from loguru import logger
 from pathlib import Path
+from typing import Optional
 from step.external_resources import download_mod_organizer
 from util import state_file as state, variables as var
 from step.launch_opt import add_launch_opt, remove_launch_opt
@@ -10,7 +11,11 @@ from util.nexus.install_handler import install as install_handler
 from util.wine import protontricks, winetricks
 
 
-def update(directory: Path):
+def update(
+    directory: Path,
+    mo2_archive: Optional[Path] = None,
+    mo2_checksum: Optional[str] = None,
+):
     """
     Updates the MO2 instance located at the given directory and refreshes the launch option.
     """
@@ -23,6 +28,8 @@ def update(directory: Path):
             "log_level": None,
             "script_extender": None,
             "plugins": [],
+            "mo2_archive": mo2_archive,
+            "mo2_checksum": mo2_checksum,
         }
     )
 
@@ -46,13 +53,23 @@ def update(directory: Path):
     var.load_game_info(state.current_instance.game)
 
     if state.current_instance.pin is True:
-        logger.warning(
-            "Instance is pinned. Please unpin the instance if you want to update it."
-        )
-        return
+        if mo2_archive:
+            logger.info(
+                "Instance is pinned, but a local archive was supplied; overriding the pin for this update."
+            )
+        else:
+            logger.warning(
+                "Instance is pinned. Please unpin the instance if you want to update it."
+            )
+            return
 
     logger.debug(f"Updating MO2 executable in directory: {directory}")
     download_mod_organizer()
+
+    if mo2_archive:
+        logger.info("Pinning instance to the supplied local archive build.")
+        state.current_instance.pin = True
+        state.write_state(add_current=True)
 
     logger.info("Updating protontricks")
     if state.current_instance.launcher == "steam":

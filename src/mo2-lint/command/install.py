@@ -22,6 +22,8 @@ def install(
     script_extender: bool = False,
     plugin: Optional[tuple[str]] = (),
     launcher: Optional[str] = None,
+    mo2_archive: Optional[Path] = None,
+    mo2_checksum: Optional[str] = None,
 ):
     var.set_parameters(
         {
@@ -31,6 +33,8 @@ def install(
             "log_level": log_level,
             "script_extender": script_extender,
             "plugins": list(plugin),
+            "mo2_archive": mo2_archive,
+            "mo2_checksum": mo2_checksum,
         }
     )
     logger.debug(f"Starting installation with parameters: {var.input_params}")
@@ -57,6 +61,7 @@ def install(
             game=game,
             nexus_slug=var.game_info.nexus_slug,
             instance_path=directory,
+            pin=mo2_archive is not None,
             launcher=launcher,
             launcher_ids=var.LauncherIDs.from_dict(var.game_info.launcher_ids),
             game_path=game_path,

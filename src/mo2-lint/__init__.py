@@ -271,6 +271,35 @@ def click_arg_game(required=False):
     )
 
 
+click_opt_mo2_archive = click.option(
+    "--mo2-archive",
+    "mo2_archive",
+    type=click.Path(exists=True, file_okay=True, dir_okay=False),
+    default=None,
+    help="Install MO2 from a local .zip/.7z archive instead of downloading.",
+)
+click_opt_mo2_checksum = click.option(
+    "--mo2-checksum",
+    "mo2_checksum",
+    type=str,
+    default=None,
+    help="SHA-256 checksum of the --mo2-archive file (required with it).",
+)
+
+
+def validate_mo2_archive(mo2_archive: Optional[str], mo2_checksum: Optional[str]):
+    if not mo2_archive:
+        return
+    if not mo2_checksum:
+        logger.critical("--mo2-checksum is required when --mo2-archive is provided.")
+        raise SystemExit(1)
+    if Path(mo2_archive).suffix.lower() not in (".zip", ".7z"):
+        logger.critical(
+            f"--mo2-archive must be a .zip or .7z file, but got '{Path(mo2_archive).name}'."
+        )
+        raise SystemExit(1)
+
+
 class CustomCommand(click.Command):  # Move [OPTIONS] to the end in the full help text
     class MoveOptions(click.Command):
         def get_help(self, ctx):
@@ -318,6 +347,8 @@ def cli(ctx):
     multiple=True,
     help="Specify MO2 plugins to download and install.",
 )
+@click_opt_mo2_archive
+@click_opt_mo2_checksum
 @click_arg_game(required=True)
 @click_arg_directory(required=True)
 def install(
@@ -327,12 +358,14 @@ def install(
     launcher: Optional[str],
     script_extender: bool,
     plugin: tuple[str],
+    mo2_archive: Optional[str],
+    mo2_checksum: Optional[str],
     log_level,
     unattended: bool,
 ):
     game, directory = start(game, directory, game_info_path, log_level, unattended)
     logger.debug(
-        f"Running install command with game={game}, directory={directory}, game_info_path={game_info_path}, launcher={launcher}, script_extender={script_extender}, plugin={plugin}"
+        f"Running install command with game={game}, directory={directory}, game_info_path={game_info_path}, launcher={launcher}, script_extender={script_extender}, plugin={plugin}, mo2_archive={mo2_archive}"
     )
     if plugin:
         for p in plugin:
@@ -341,6 +374,7 @@ def install(
                     f"Plugin '{p}' not supported. Available plugins: {list(var.plugin_info.keys())}",
                 )
                 raise SystemExit(1)
+    validate_mo2_archive(mo2_archive, mo2_checksum)
     _install(
         game,
         directory,
@@ -349,6 +383,8 @@ def install(
         script_extender,
         plugin,
         launcher,
+        Path(mo2_archive) if mo2_archive else None,
+        mo2_checksum,
     )
     state.write_state()
 
@@ -422,13 +458,28 @@ def unpin(directory: Path, log_level, unattended: bool):
 @click_help
 @click_log_level
 @click_unattended
+@click_opt_mo2_archive
+@click_opt_mo2_checksum
 @click_arg_directory(required=True)
-def update(directory: Path, log_level, unattended: bool):
+def update(
+    directory: Path,
+    mo2_archive: Optional[str],
+    mo2_checksum: Optional[str],
+    log_level,
+    unattended: bool,
+):
     waste, directory = start(
         directory=directory, log_level=log_level, unattended=unattended
     )
-    logger.debug(f"Running update command with directory={directory}")
-    _update(directory)
+    logger.debug(
+        f"Running update command with directory={directory}, mo2_archive={mo2_archive}"
+    )
+    validate_mo2_archive(mo2_archive, mo2_checksum)
+    _update(
+        directory,
+        Path(mo2_archive) if mo2_archive else None,
+        mo2_checksum,
+    )
 
 
 if __name__ == "__main__":
