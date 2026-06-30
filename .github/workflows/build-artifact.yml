@@ -24,7 +24,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: "build-artifact"
+  group: build-artifact-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
