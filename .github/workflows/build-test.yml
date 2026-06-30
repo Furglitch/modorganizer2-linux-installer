@@ -28,42 +28,24 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test-ubuntu:
-    name: Ubuntu Test
+  test:
+    name: ${{ matrix.name }} Test
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Ubuntu
+            service: test-ubuntu
+          - name: Debian
+            service: test-debian
+          - name: Fedora
+            service: test-fedora
+          - name: Arch
+            service: test-arch
+          - name: SteamOS
+            service: test-steamos
     steps:
       - uses: actions/checkout@v7
-      - name: Build and run ubuntu tests
-        run: docker compose -f "./docker/docker-compose.yml" run --build --rm test-ubuntu
-
-  test-debian:
-    name: Debian Test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - name: Build and run debian tests
-        run: docker compose -f "./docker/docker-compose.yml" run --build --rm test-debian
-
-  test-fedora:
-    name: Fedora Test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - name: Build and run fedora tests
-        run: docker compose -f "./docker/docker-compose.yml" run --build --rm test-fedora
-
-  test-arch:
-    name: Arch Test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - name: Build and run arch tests
-        run: docker compose -f "./docker/docker-compose.yml" run --build --rm test-arch
-
-  test-steamos:
-    name: SteamOS Test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - name: Build and run steamos tests
-        run: docker compose -f "./docker/docker-compose.yml" run --build --rm test-steamos
+      - name: Build and run ${{ matrix.name }} tests
+        run: docker compose -f "./docker/docker-compose.yml" run --build --rm ${{ matrix.service }}
