@@ -1,0 +1,51 @@
+name: Test Builds
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "src/**"
+      - "configs/**"
+      - ".pre-commit-config.yaml"
+      - ".python-version"
+      - "Makefile"
+      - "pyproject.toml"
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - "src/**"
+      - "configs/**"
+      - ".pre-commit-config.yaml"
+      - ".python-version"
+      - "Makefile"
+      - "pyproject.toml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-test-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: ${{ matrix.name }} Test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Ubuntu
+            service: test-ubuntu
+          - name: Debian
+            service: test-debian
+          - name: Fedora
+            service: test-fedora
+          - name: Arch
+            service: test-arch
+          - name: SteamOS
+            service: test-steamos
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build and run ${{ matrix.name }} tests
+        run: docker compose -f "./docker/docker-compose.yml" run --build --rm ${{ matrix.service }}

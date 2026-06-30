@@ -5,7 +5,7 @@ services:
       context: ..
       dockerfile: docker/dockerfile
       args:
-        BASE_IMAGE: ubuntu:latest
+        BASE_IMAGE: ubuntu:26.04
         DISTRO: ubuntu
     environment:
       - STEAM_RUNTIME=0
@@ -16,7 +16,7 @@ services:
       context: ..
       dockerfile: docker/dockerfile
       args:
-        BASE_IMAGE: debian:latest
+        BASE_IMAGE: debian:13.5
         DISTRO: debian
     environment:
       - STEAM_RUNTIME=0
@@ -27,7 +27,7 @@ services:
       context: ..
       dockerfile: docker/dockerfile
       args:
-        BASE_IMAGE: fedora:latest
+        BASE_IMAGE: fedora:44
         DISTRO: fedora
     environment:
       - STEAM_RUNTIME=0
