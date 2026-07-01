@@ -177,30 +177,31 @@ def start(
         directory = str(directory).rstrip("/")
         directory = Path(directory).expanduser().resolve()
     if game:
+        load_games_info(game_info_path)
         if game not in var.games_info:
+            available_games = ", ".join(var.games_info.keys())
             logger.critical(
-                f"Game '{game}' not supported. Available games: {game_list}"
+                f"Game '{game}' not supported. Available games: {available_games}"
             )
             raise SystemExit(1)
-        load_game_info(game, game_info_path)
+        var.load_game_info(game)
     state.load_state_file()
     logger.debug(f"Initialization complete. Game: {game}, Directory: {directory}")
     return game or None, directory or None
 
 
 # Helper Functions
-def load_game_info(game: Optional[str], game_info_path: Optional[Path]):
+def load_games_info(game_info_path: Optional[Path | str]):
     """
-    Loads game information, both broad and specific to the target game.
+    Loads the standard or custom game information file.
 
     Parameters:
     -----------
-    game : str, optional
-        The target game for which to load game_info.
     game_info_path : Path | str, optional
         Path to a custom game_info.yml file.
     """
     if game_info_path:
+        game_info_path = Path(game_info_path).expanduser()
         if not game_info_path.exists():
             logger.warning(
                 f"Provided game_info.yml path does not exist: {game_info_path}"
@@ -212,6 +213,20 @@ def load_game_info(game: Optional[str], game_info_path: Optional[Path]):
             var.load_games_info(game_info_path)
     else:
         var.load_games_info()
+
+
+def load_game_info(game: Optional[str], game_info_path: Optional[Path | str]):
+    """
+    Loads game information, both broad and specific to the target game.
+
+    Parameters:
+    -----------
+    game : str, optional
+        The target game for which to load game_info.
+    game_info_path : Path | str, optional
+        Path to a custom game_info.yml file.
+    """
+    load_games_info(game_info_path)
     var.load_game_info(game)
 
 
