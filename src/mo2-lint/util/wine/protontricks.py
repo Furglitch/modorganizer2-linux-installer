@@ -13,6 +13,39 @@ import sys
 import threading
 
 
+class ProtontricksOutput(list):
+    """Captured protontricks output with the most recent error line."""
+
+    def __init__(self, *args):
+        super().__init__(*args)
+        self.error_message: str | None = None
+
+
+def error_from_line(line: str) -> str | None:
+    ignored_patterns = (
+        r"^warning: WINE is .*, which is neither on the path nor an executable file$",
+    )
+    for pattern in ignored_patterns:
+        if re.search(pattern, line):
+            return None
+
+    error_patterns = (
+        r"protontricks \(ERROR\):\s*(.*)",
+        r"^(Steam app with the given app ID could not be found\..*)$",
+        r"^(.+: error: .*)$",
+        r"^(warning: Unknown file arch of .*)$",
+        r"^([A-Za-z_][\w.]*[Ee]rror: .*)$",
+        r"^([A-Za-z_][\w.]*[Ee]xception: .*)$",
+        r"^([Ee]rror: .*)$",
+        r"(?i)^(traceback .*)$",
+        r"(?i)^(.*\b(?:failed|failure|fatal|invalid|not found|could not|unable to|isn't installed|is not installed|aborted|aborting)\b.*)$",
+    )
+    for pattern in error_patterns:
+        if match := re.search(pattern, line):
+            return match.group(1).strip()
+    return None
+
+
 def run(command: List[str]) -> List[str]:
     """
     Runs a protontricks command and captures its output.
@@ -31,20 +64,36 @@ def run(command: List[str]) -> List[str]:
     args = ["--verbose", "--no-bwrap"] + command
     logger.trace(f"Constructed protontricks command: {' '.join(args)}")
 
-    output_lines = []
+    output_lines = ProtontricksOutput()
     if args != ["--verbose"]:
+        exit_code = None
+        unexpected_error = None
         with redirect_output_to_logger() as output_lines:
             try:
                 pt(args)
             except SystemExit as e:
-                if e.code != 0:
-                    logger.error(
-                        f"protontricks exited with code {e.code} for args: {args}"
-                    )
-            except Exception:
-                logger.exception(f"Error running protontricks with args: {args}")
+                if e.code not in (0, None):
+                    exit_code = e.code if isinstance(e.code, int) else 1
+            except Exception as e:
+                unexpected_error = e
             finally:
-                logger.success(f"Finished running protontricks with args: {args}")
+                logger.debug(f"Finished running protontricks with args: {args}")
+
+        if exit_code is not None:
+            error_message = output_lines.error_message or "Unknown protontricks error"
+            logger.error(
+                f"protontricks exited with code {exit_code} for args: {args}: {error_message}"
+            )
+            raise SystemExit(exit_code)
+
+        if unexpected_error is not None:
+            error_message = output_lines.error_message or str(unexpected_error)
+            logger.error(
+                f"Error running protontricks with args: {args}: {error_message}"
+            )
+            raise SystemExit(1) from unexpected_error
+
+        logger.success(f"protontricks command completed successfully: {args}")
     else:
         logger.debug("No protontricks command to run (only --verbose).")
     return output_lines
@@ -178,7 +227,7 @@ def redirect_output_to_logger():
     """
 
     read_fd, write_fd = os.pipe()
-    output_lines = []
+    output_lines = ProtontricksOutput()
 
     original_stdout_fd = os.dup(sys.stdout.fileno())
     original_stderr_fd = os.dup(sys.stderr.fileno())
@@ -198,6 +247,8 @@ def redirect_output_to_logger():
             for line in reader:
                 if line := line.rstrip("\n"):
                     output_lines.append(line)
+                    if error_message := error_from_line(line):
+                        output_lines.error_message = error_message
                     logger.trace(f"protontricks: {line}")
                     try:
                         log_translation(line)
