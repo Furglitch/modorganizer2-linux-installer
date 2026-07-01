@@ -8,6 +8,7 @@ from util.heroic.find_library import get_data as get_heroic_data
 from util.wine import protontricks, winetricks
 
 default_tricks = [
+    "win10",
     "arial",
     "fontsmooth=rgb",
 ]
