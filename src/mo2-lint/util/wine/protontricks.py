@@ -22,6 +22,13 @@ class ProtontricksOutput(list):
 
 
 def error_from_line(line: str) -> str | None:
+    ignored_patterns = (
+        r"^warning: WINE is .*, which is neither on the path nor an executable file$",
+    )
+    for pattern in ignored_patterns:
+        if re.search(pattern, line):
+            return None
+
     error_patterns = (
         r"protontricks \(ERROR\):\s*(.*)",
         r"^(Steam app with the given app ID could not be found\..*)$",
