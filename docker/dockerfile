@@ -159,9 +159,7 @@ RUN mkdir -p "${HOME}/.local/share/Steam/steamapps/common/Proton 10.0/files/bin"
     > "${HOME}/.local/share/Steam/steamapps/common/Proton 10.0/proton" \
  && ln -sf "$wine_bin" "${HOME}/.local/share/Steam/steamapps/common/Proton 10.0/files/bin/wine" \
  && ln -sf "$wineserver_bin" "${HOME}/.local/share/Steam/steamapps/common/Proton 10.0/files/bin/wineserver" \
- && chmod +x "${HOME}/.local/share/Steam/steamapps/common/Proton 10.0/proton" \
-     "${HOME}/.local/share/Steam/steamapps/common/Proton 10.0/files/bin/wine" \
-     "${HOME}/.local/share/Steam/steamapps/common/Proton 10.0/files/bin/wineserver"
+ && chmod +x "${HOME}/.local/share/Steam/steamapps/common/Proton 10.0/proton"
 
 # Create appmanifest ACF files
 RUN printf '"AppState"\n{\n\t"appid"\t"22330"\n\t"name"\t"Oblivion"\n\t"installdir"\t"Oblivion"\n}\n' \
