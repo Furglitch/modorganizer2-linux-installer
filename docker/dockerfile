@@ -150,9 +150,18 @@ RUN python3 /tmp/mo2-lint/docker/gen_appinfo.py \
 
 # Create Proton 10 stub
 RUN mkdir -p "${HOME}/.local/share/Steam/steamapps/common/Proton 10.0/files/bin" \
- && printf '#!/bin/sh\nexec wine "$@"\n' \
+ && wine_bin="$(find /usr /opt -path '*/wine/wine' -type f -perm /111 2>/dev/null | head -n 1)" \
+ && wineserver_bin="$(find /usr /opt -path '*/wine/wineserver' -type f -perm /111 2>/dev/null | head -n 1)" \
+ && if [ -z "$wine_bin" ]; then wine_bin="$(readlink -f /usr/bin/wine)"; fi \
+ && if [ -z "$wineserver_bin" ] && [ -e /usr/bin/wineserver ]; then wineserver_bin="$(readlink -f /usr/bin/wineserver)"; fi \
+ && if [ -z "$wine_bin" ] || [ -z "$wineserver_bin" ]; then echo "Unable to locate Wine binaries" && exit 1; fi \
+ && printf '#!/bin/sh\nexec "%s" "$@"\n' "$wine_bin" \
     > "${HOME}/.local/share/Steam/steamapps/common/Proton 10.0/proton" \
- && chmod +x "${HOME}/.local/share/Steam/steamapps/common/Proton 10.0/proton"
+ && ln -sf "$wine_bin" "${HOME}/.local/share/Steam/steamapps/common/Proton 10.0/files/bin/wine" \
+ && ln -sf "$wineserver_bin" "${HOME}/.local/share/Steam/steamapps/common/Proton 10.0/files/bin/wineserver" \
+ && chmod +x "${HOME}/.local/share/Steam/steamapps/common/Proton 10.0/proton" \
+     "${HOME}/.local/share/Steam/steamapps/common/Proton 10.0/files/bin/wine" \
+     "${HOME}/.local/share/Steam/steamapps/common/Proton 10.0/files/bin/wineserver"
 
 # Create appmanifest ACF files
 RUN printf '"AppState"\n{\n\t"appid"\t"22330"\n\t"name"\t"Oblivion"\n\t"installdir"\t"Oblivion"\n}\n' \
