@@ -11,6 +11,17 @@ from util.nexus.install_handler import install as install_handler
 from util.wine import protontricks, winetricks
 
 
+def update_tricks():
+    logger.info("Updating protontricks")
+    try:
+        if state.current_instance.launcher == "steam":
+            protontricks.run(["--self-update"])
+        else:
+            winetricks.run(["--self-update"])
+    except SystemExit as e:
+        logger.warning(f"Failed to update tricks helper; continuing update: {e}")
+
+
 def update(
     directory: Path,
     mo2_archive: Optional[Path] = None,
@@ -71,11 +82,7 @@ def update(
         state.current_instance.pin = True
         state.write_state(add_current=True)
 
-    logger.info("Updating protontricks")
-    if state.current_instance.launcher == "steam":
-        protontricks.run(["--self-update"])
-    else:
-        winetricks.run(["--self-update"])
+    update_tricks()
 
     install_redirector()
     install_handler()

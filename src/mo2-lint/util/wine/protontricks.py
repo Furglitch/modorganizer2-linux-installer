@@ -21,19 +21,31 @@ class ProtontricksOutput(list):
         self.error_message: str | None = None
 
 
-def error_from_line(line: str) -> str | None:
-    ignored_patterns = (
-        r"^warning: WINE is .*, which is neither on the path nor an executable file$",
+def is_warning_line(line: str) -> bool:
+    return re.search(r"^warning: .*$", line) is not None
+
+
+def is_noise_line(line: str) -> bool:
+    noise_patterns = (
+        r"^-+$",
+        r"^WINEPREFIX INFO:$",
+        r"^Registry info:$",
+        r"^Drive C: .*$",
+        r"^[dl-][rwx-]{9}.*$",
+        r"^protontricks - wine \d+: .*$",
+        r"^protontricks \((?:INFO|WARNING)\): .*$",
     )
-    for pattern in ignored_patterns:
-        if re.search(pattern, line):
-            return None
+    return any(re.search(pattern, line) for pattern in noise_patterns)
+
+
+def error_from_line(line: str) -> str | None:
+    if is_warning_line(line):
+        return None
 
     error_patterns = (
         r"protontricks \(ERROR\):\s*(.*)",
         r"^(Steam app with the given app ID could not be found\..*)$",
         r"^(.+: error: .*)$",
-        r"^(warning: Unknown file arch of .*)$",
         r"^([A-Za-z_][\w.]*[Ee]rror: .*)$",
         r"^([A-Za-z_][\w.]*[Ee]xception: .*)$",
         r"^([Ee]rror: .*)$",
@@ -43,6 +55,30 @@ def error_from_line(line: str) -> str | None:
     for pattern in error_patterns:
         if match := re.search(pattern, line):
             return match.group(1).strip()
+    return None
+
+
+def has_ignored_warning_exit(output_lines: List[str]) -> bool:
+    saw_warning = False
+    for line in output_lines:
+        if is_warning_line(line):
+            saw_warning = True
+            continue
+        if is_noise_line(line):
+            continue
+        if error_from_line(line):
+            return False
+    return saw_warning
+
+
+def error_from_output(output_lines: ProtontricksOutput) -> str | None:
+    if output_lines.error_message:
+        return output_lines.error_message
+
+    for line in reversed(output_lines):
+        if not is_warning_line(line) and not is_noise_line(line):
+            if error_message := error_from_line(line):
+                return error_message
     return None
 
 
@@ -80,9 +116,16 @@ def run(command: List[str]) -> List[str]:
                 logger.debug(f"Finished running protontricks with args: {args}")
 
         if exit_code is not None:
-            error_message = output_lines.error_message or "Unknown protontricks error"
+            error_message = error_from_output(output_lines)
+            if error_message is None and has_ignored_warning_exit(output_lines):
+                logger.warning(
+                    f"protontricks exited with code {exit_code} for args: {args}, ignoring warning-only output"
+                )
+                return output_lines
+
+            error_message = error_message or "Unknown protontricks error"
             logger.error(
-                f"protontricks exited with code {exit_code} for args: {args}: {error_message}"
+                f"protontricks exited with code {exit_code} for args: {args}, error: {error_message}"
             )
             raise SystemExit(exit_code)
 

@@ -6,6 +6,7 @@ on:
     paths:
       - "src/**"
       - "configs/**"
+      - "docker/**"
       - ".pre-commit-config.yaml"
       - ".python-version"
       - "Makefile"
@@ -15,6 +16,7 @@ on:
     paths:
       - "src/**"
       - "configs/**"
+      - "docker/**"
       - ".pre-commit-config.yaml"
       - ".python-version"
       - "Makefile"
