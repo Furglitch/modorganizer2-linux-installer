@@ -11,6 +11,7 @@ from util.checksum import compare_checksum
 from util.download import download as dl, download_nexus as nexus_dl
 from util.state_file import symlink_instance
 import json
+import stat
 import ssl
 import certifi
 
@@ -79,7 +80,9 @@ def download_winetricks():
     url = var.resource_info.winetricks.download_url
     checksum = var.resource_info.winetricks.checksum
     logger.trace(f"Download info: url={url}, checksum={checksum}")
-    dl(url, download_dir, "winetricks", checksum=checksum)
+    downloaded = dl(url, download_dir, "winetricks", checksum=checksum)
+    if downloaded:
+        downloaded.chmod(downloaded.stat().st_mode | stat.S_IEXEC)
     logger.success("Winetricks download complete.")
 
 
