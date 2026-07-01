@@ -11,6 +11,7 @@ default_tricks = [
     "win10",
     "arial",
     "fontsmooth=rgb",
+    "vcrun2022",
 ]
 
 yes = ("", "y", "yes")
