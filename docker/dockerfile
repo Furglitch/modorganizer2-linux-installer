@@ -13,6 +13,7 @@ RUN case "${DISTRO}" in \
      && apt-get install -y --no-install-recommends \
             binutils \
             ca-certificates \
+            cabextract \
             curl \
             make \
             p7zip-full \
@@ -37,6 +38,7 @@ RUN case "${DISTRO}" in \
      && apt-get install -y --no-install-recommends \
             binutils \
             ca-certificates \
+            cabextract \
             curl \
             libpython3.13 \
             make \
@@ -63,14 +65,17 @@ RUN case "${DISTRO}" in \
      && dnf install -y --setopt=install_weak_deps=False \
             binutils \
             ca-certificates \
+            cabextract \
             curl \
             make \
             p7zip \
+            procps-ng \
             psmisc \
             python3 \
             unzip \
             wget \
             wine \
+            wine.i686 \
             winetricks \
             xorg-x11-server-Xvfb \
             zenity \
@@ -82,6 +87,7 @@ RUN case "${DISTRO}" in \
      && pacman -S --noconfirm --needed \
             binutils \
             ca-certificates \
+            cabextract \
             curl \
             make \
             p7zip \
@@ -102,6 +108,7 @@ RUN case "${DISTRO}" in \
      && apk add --no-cache \
             binutils \
             ca-certificates \
+            cabextract \
             curl \
             make \
             p7zip \
