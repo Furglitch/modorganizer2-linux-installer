@@ -3,8 +3,49 @@
 from loguru import logger
 from pathlib import Path
 from shutil import copyfile
+from util.checksum import compare_checksum
 from util import variables as var, state_file as state
 from util.internal_file import internal_file
+
+
+def apply_instance_files(files: list[dict]):
+    from .external_resources import download_dir, extract, extract_dir
+    from util.download import download
+
+    instance_path = Path(state.current_instance.instance_path)
+    workaround_dir = download_dir / "workarounds"
+
+    for file_info in files:
+        url = file_info.get("download_url")
+        source = file_info.get("path_internal")
+        destination = file_info.get("destination") or source
+
+        if not url or not source:
+            logger.warning(f"Skipping invalid instance file workaround: {file_info}")
+            continue
+
+        logger.debug(f"Downloading instance file workaround source: {url}")
+        downloaded = download(url, workaround_dir, checksum=file_info.get("checksum"))
+        extracted = extract(downloaded, extract_dir / "workarounds" / downloaded.stem)
+        src = extracted / source
+
+        checksum_internal = file_info.get("checksum_internal")
+        if checksum_internal and not compare_checksum(src, checksum_internal):
+            logger.critical(
+                f"Checksum mismatch for workaround file {src}. Expected {checksum_internal}."
+            )
+            raise SystemExit(1)
+
+        dest = instance_path / destination
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        if dest.exists():
+            logger.debug(
+                f"Removing existing instance file before workaround copy: {dest}"
+            )
+            dest.unlink()
+
+        copyfile(src, dest)
+        logger.trace(f"Copied instance workaround file from {src} to {dest}")
 
 
 def apply_workarounds():
@@ -35,3 +76,6 @@ def apply_workarounds():
 
                     logger.debug("Downloading Java for workaround: needs_java")
                     download_java()
+                if t == "instance_files":
+                    logger.debug(f"Copying instance files for workaround: {w}")
+                    apply_instance_files(w)
