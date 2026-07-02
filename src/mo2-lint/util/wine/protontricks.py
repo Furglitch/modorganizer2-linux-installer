@@ -9,6 +9,8 @@ from shared.logger import remove_loggers, add_loggers
 from util import variables as var
 import os
 import re
+import shutil
+import stat
 import sys
 import threading
 
@@ -82,6 +84,35 @@ def error_from_output(output_lines: ProtontricksOutput) -> str | None:
     return None
 
 
+def get_winetricks_path() -> Path | None:
+    if path := os.environ.get("WINETRICKS"):
+        return Path(path).expanduser()
+
+    downloaded = Path("~/.cache/mo2-lint/downloads/winetricks").expanduser()
+    if downloaded.exists():
+        downloaded.chmod(downloaded.stat().st_mode | stat.S_IEXEC)
+        return downloaded
+    if path := shutil.which("winetricks"):
+        return Path(path)
+    return None
+
+
+@contextmanager
+def protontricks_environment():
+    original_winetricks = os.environ.get("WINETRICKS")
+    winetricks_path = get_winetricks_path()
+    if winetricks_path:
+        os.environ["WINETRICKS"] = str(winetricks_path)
+        logger.trace(f"Using winetricks executable for protontricks: {winetricks_path}")
+    try:
+        yield
+    finally:
+        if original_winetricks is None:
+            os.environ.pop("WINETRICKS", None)
+        else:
+            os.environ["WINETRICKS"] = original_winetricks
+
+
 def run(command: List[str]) -> List[str]:
     """
     Runs a protontricks command and captures its output.
@@ -106,7 +137,8 @@ def run(command: List[str]) -> List[str]:
         unexpected_error = None
         with redirect_output_to_logger() as output_lines:
             try:
-                pt(args)
+                with protontricks_environment():
+                    pt(args)
             except SystemExit as e:
                 if e.code not in (0, None):
                     exit_code = e.code if isinstance(e.code, int) else 1

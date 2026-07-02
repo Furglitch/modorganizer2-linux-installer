@@ -26,7 +26,6 @@ games:
     tricks:
       - "xaudio2_7=native"
       - "d3dcompiler_47"
-      - "vcrun2022"
     workarounds:
       - instance_files:
         - download_url: "https://github.com/ModOrganizer2/modorganizer/releases/download/v2.5.0/Mod.Organizer-2.5.0.7z"
@@ -89,7 +88,6 @@ games:
       - "xaudio2_7=native"
       - "xact"
       - "d3dcompiler_43"
-      - "vcrun2022"
 
   fallout3:
     display_name: Fallout 3
@@ -101,7 +99,6 @@ games:
     tricks:
       - "d3dcompiler_43"
       - "d3dx9"
-      - "vcrun2022"
     script_extenders:
       - version: "1.2-b2"
         runtime:
@@ -281,7 +278,6 @@ games:
       - "xaudio2_7=native"
       - "xact"
       - "d3dcompiler_43"
-      - "vcrun2022"
     script_extenders:
       - version: "0.6.21"
         runtime:
@@ -321,7 +317,6 @@ games:
     tricks:
       - "d3dcompiler_43"
       - "d3dx9"
-      - "vcrun2022"
     script_extenders:
       - version: "6.4.4"
         runtime:
@@ -473,7 +468,6 @@ games:
       - "xact"
       - "d3dcompiler_43"
       - "d3dcompiler_47"
-      - "vcrun2022"
     script_extenders:
       - version: "2.0.20"
         runtime:
@@ -583,8 +577,6 @@ games:
       steam: 892970
     subdirectory: Valheim
     executable: valheim.exe
-    tricks:
-      - "vcrun2022"
 
   witcher3:
     display_name: The Witcher 3
@@ -596,9 +588,6 @@ games:
       steam: The Witcher 3
       gog: The Witcher 3 Wild Hunt
     executable: bin/x64/witcher3.exe
-    tricks:
-      - "vcrun2022"
-
   witcher3_goty:
     parent: witcher3
     launcher_ids:
