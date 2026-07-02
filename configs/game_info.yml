@@ -26,6 +26,13 @@ games:
     tricks:
       - "xaudio2_7=native"
       - "d3dcompiler_47"
+    workarounds:
+      - instance_files:
+        - download_url: "https://github.com/ModOrganizer2/modorganizer/releases/download/v2.5.0/Mod.Organizer-2.5.0.7z"
+          checksum: "9f20a7f2807f5b5a0f801e749d1f4f9160d32b684fe4c27a2d70b0f29fa0fc94"
+          path_internal: "uibase.dll"
+          checksum_internal: "b52ff121ab23e0e6a4cf4d12722b3447579047fdcd42582bbfcda94be7bc7c07"
+          destination: "uibase.dll"
 
   dragonage:
     display_name: 'Dragon Age: Origins - Ultimate Edition'
