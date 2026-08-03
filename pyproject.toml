@@ -21,5 +21,5 @@ dependencies = [
     "ruff==0.15.20",
     "requests>=2.34.2",
     "send2trash>=2.0.0",
-    "websockets>=15.0.1",
+    "websockets>=17.0.1",
 ]
