@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 
-from loguru import logger
+import shutil
 from pathlib import Path
+
+from loguru import logger
 from step.load_game_info import get_launcher
-from util import lang, variables as var, state_file as state
+from util import lang
+from util import state_file as state
+from util import variables as var
 from util.heroic.find_library import get_data as get_heroic_data
 from util.wine import protontricks, winetricks
 
@@ -15,6 +19,16 @@ default_tricks = [
 ]
 
 yes = ("", "y", "yes")
+
+
+def get_default_tricks() -> list[str]:
+    tricks = list(default_tricks)
+    if shutil.which("cabextract") is None and "arial" in tricks:
+        logger.warning(
+            "cabextract was not found on the host system; skipping the arial winetricks trick."
+        )
+        tricks.remove("arial")
+    return tricks
 
 
 def load_prefix() -> Path:
@@ -77,7 +91,7 @@ def configure():
     """
     Run the necessary winetricks/protontricks for the selected game launcher.
     """
-    tricks = default_tricks + list(var.game_info.tricks)
+    tricks = get_default_tricks() + list(var.game_info.tricks)
     logger.debug(f"Configuring prefix with the following tricks: {tricks}")
     match var.launcher:
         case "steam":
