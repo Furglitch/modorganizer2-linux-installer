@@ -13,6 +13,7 @@ parent: Mod Organizer 2 Linux Installer
 - **Proton 10.0** - Earlier versions may work. MO2-LINT currently only supports Proton 10
 - **XDG Mime** - This is used to send Nexus Mods downloads to MO2. It is included in many distros by default.
 - **procps** - This is used for the `pgrep` command, which is used to automatically restart the launcher while adding launch options. It is included in many distros by default, but on Fedora you need to install the `procps-ng` package.
+- **cabextract** - This is used by *protontricks* to extract files for the `arial` trick. The installer will still work without it, but you may experience a visual bug with MO2. Most distros do not include this by default, so you may need to install it manually.
 - [Optional] **Protontricks** - Protontricks is bundled with MO2-LINT, but you can also install it separately if you want. It is used to manage the Proton prefix and install necessary dependencies for MO2.
 - [Optional] **Winetricks** - The script will download winetricks if necessary, but you can also install it separately if you want. It is used to install necessary dependencies for MO2.
 
