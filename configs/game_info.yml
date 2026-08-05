@@ -359,11 +359,24 @@ games:
     tricks:
       - "d3dcompiler_43"
       - "d3dx9"
+      - "dinput8=native,builtin"
+      - "d3d8=native,builtin"
     script_extenders:
-      - version: "latest"
-        runtime: "unknown"
+      - version: "0.18.0"
+        runtime:
+          steam:
+            - "1.6.1820"
+          gog:
+            - "1.6.1820"
+        requires:
+          - download:
+              nexus:
+                mod: 19510
+                file: 1000007846
         download:
-          direct: "https://github.com/MWSE/MWSE/releases/download/build-automatic/mwse.zip"
+          nexus:
+            mod: 41102
+            file: 1000048202
 
   oblivion:
     display_name: 'The Elder Scrolls IV: Oblivion'
