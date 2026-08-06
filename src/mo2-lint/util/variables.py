@@ -341,12 +341,6 @@ class AppInfo:
         Path to the desired executable, relative to the game's install directory. Default is "mo2-redirector.exe".
     arguments : list[str], optional
         List of launch arguments to use with the executable.
-    type : str, optional
-        Type of launch option (e.g., "default", "none", "vr", "server", "OPTION1", "OPTION2", "OPTION3"). Default is "OPTION3".
-    oslist : list[str], optional
-        List of operating systems the launch option is valid for. e.g. 'windows', 'linux', 'macos'.
-    osarch : str, optional
-        OS architecture the launch option is valid for (e.g., "32", "64").
     description : str, optional
         Label for the launch option, shown in the Steam UI.
     """
@@ -354,9 +348,6 @@ class AppInfo:
     index: int = -1
     executable: str = "mo2-redirector.exe"
     arguments: Optional[List[str]] = None
-    type: str = "OPTION3"
-    oslist: List[str] = None
-    osarch: Optional[str] = None
     description: Optional[str] = None
     description_loc: Optional[dict[str, str]] = None
 
@@ -366,9 +357,6 @@ class AppInfo:
             index=index,
             executable=data.get("executable", "mo2-redirector.exe"),
             arguments=data.get("arguments") or None,
-            type=data.get("type", "none"),
-            oslist=data.get("oslist", []),
-            osarch=data.get("osarch") or (data.get("config", {}).get("osarch") or None),
             description=data.get("description") or None,
             description_loc=data.get("description_loc") or None,
         )
@@ -379,22 +367,11 @@ class AppInfo:
             "index": data.index,
             "executable": data.executable,
             "arguments": data.arguments,
-            "type": data.type,
         }
         if data.description:
             result["description"] = data.description
         if data.description_loc:
             result["description_loc"] = data.description_loc
-        if data.osarch:
-            result["config"] = {
-                "oslist": data.oslist,
-                "osarch": data.osarch,
-            }
-        else:
-            result["config"] = {
-                "oslist": data.oslist,
-            }
-
         return result
 
     def __post_init__(self):
@@ -412,29 +389,6 @@ class AppInfo:
             logger.critical(
                 "This should not happen. Please report this to the developer."
             )
-        if self.osarch and self.osarch not in ("32", "64"):
-            logger.critical(
-                "AppInfo: 'osarch' parameter must be either '32' or '64' if provided."
-            )
-            logger.critical(
-                "This should not happen. Please report this to the developer."
-            )
-        if self.type not in (
-            "default",
-            "none",
-            "vr",
-            "server",
-            "OPTION1",
-            "OPTION2",
-            "OPTION3",
-        ):
-            logger.critical(
-                "AppInfo: 'type' parameter must be one of 'default', 'none', 'vr', 'server', 'OPTION1', 'OPTION2', or 'OPTION3'."
-            )
-            logger.critical(
-                "This should not happen. Please report this to the developer."
-            )
-            raise SystemExit(1)
 
 
 @dataclass
