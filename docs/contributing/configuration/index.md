@@ -92,20 +92,12 @@ The `launch_options` field allows you to specify custom launch options for the g
       arguments:
         - <argument_1>
         - <argument_2>
-      type: <type>
-      oslist:
-        - <os_1>
-        - <os_2>
-      osarch: <osarch>
 ```
 
 | Field | Required | Description | Default | Options |
 | --- | --- | --- | --- | --- |
 | `label` | No |The label to display for the launch option in Steam. | "Launch Mod Organizer" |  |
 | `arguments` | If Applicable | A list of command-line arguments to pass when launching the game through Steam. |  |  |
-| `type` | No | The type of launch option. | `OPTION3` | `default`, `none`, `vr`, `OPTION1`, `OPTION2`, and `OPTION3`. |
-| `oslist` | If Applicable | A list of operating systems to apply the launch options for. If not specified, the launch options will be applied for all operating systems. |  |  |
-| `osarch` | If Applicable | The operating system architecture to apply the launch options for. Available options are '32' and '64'. |  | '32', '64' |
 
 ### `script_extenders`
 The `script_extenders` section allows you to define script extenders associated with the game. Each script extender can have its own set of properties, such as download URLs and installation instructions.

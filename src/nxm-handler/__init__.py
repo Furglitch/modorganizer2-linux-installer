@@ -47,7 +47,6 @@ def get_env(instance_dir: Path) -> dict:
     steam_id = int(info.get("steam_id")) if info.get("steam_id") else None
     gog_id = int(info.get("gog_id")) if info.get("gog_id") else None
     epic_id = info.get("epic_id", "")
-    launch_option_type = info.get("launch_option_type")
 
     logger.debug(
         f"Loaded instance data - launcher: {launcher}, steam_id: {steam_id}, gog_id: {gog_id}, epic_id: {epic_id}"
@@ -92,7 +91,6 @@ def get_env(instance_dir: Path) -> dict:
         "app": app,
         "wine": wine,
         "prefix": prefix,
-        "launch_option_type": launch_option_type,
     }
 
 
@@ -128,21 +126,11 @@ def launch_instance(
     steam_id: Optional[int],
     runner: Optional[str] = None,
     app: Optional[str] = None,
-    launch_option_type: Optional[str] = None,
 ) -> None:
     logger.info("Starting Mod Organizer 2")
     if launcher == "steam":
-        if launch_option_type:
-            # Use steam:// protocol to launch with specific launch option type
-            steam_url = f"steam://launch/{steam_id}/{launch_option_type}"
-            cmd = ["xdg-open", steam_url]
-            logger.trace(
-                f"Launching via Steam with launch option type {launch_option_type}: {cmd}"
-            )
-        else:
-            # Fallback to default launch
-            cmd = ["steam", "-applaunch", f"{steam_id}"]
-            logger.trace(f"Launching via Steam (default): {cmd}")
+        cmd = ["steam", "-applaunch", f"{steam_id}"]
+        logger.trace(f"Launching via Steam: {cmd}")
         subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     elif launcher in ["heroic", "gog", "epic"]:
         cmd = (
@@ -265,7 +253,6 @@ def main(url: str, log_level: str) -> None:
             env_info.get("steam_id"),
             env_info.get("runner"),
             env_info.get("app"),
-            env_info.get("launch_option_type"),
         )
         if wait_for_instance(instance_dir, timeout=60):
             import time

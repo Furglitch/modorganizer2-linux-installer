@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ -z "${STEAM_COMPAT_INSTALL_PATH:-}" ]]; then
+    printf 'Error: STEAM_COMPAT_INSTALL_PATH not set\n' >&2
+    exit 1
+fi
+
+# XXX: If we were to store these details in the game's directory and read them
+# from there we would only need a single wrapper script for all games.
+# Alterntatively we could write the templated wrapper script into the game's
+# directory itself (similar to the mo2-redirector.exe).
+proton="@@PROTON_PATH@@"
+app="$STEAM_COMPAT_INSTALL_PATH/@@SOURCE_EXECUTABLE@@"
+mo2="$STEAM_COMPAT_INSTALL_PATH/@@TARGET_EXECUTABLE@@"
+
+should_redirect() {
+    [[ $1 == $app ]]
+}
+
+case "${1-}" in
+    run|waitforexitandrun)
+        if should_redirect "${2:-}"; then
+            # XXX: Not sure if we should be passing the rest of the arguments
+            # to mo2, would it know what to do with them? They could just be
+            # arbitary arguments ment for the game itself. Feels like something
+            # that should be configured in mo2's launch options for the game so
+            # ignoring them for now.
+            exec "$proton" "$1" "$mo2"
+        else
+            exec "$proton" "$@"
+        fi
+        ;;
+    *)
+        exec "$proton" "$@"
+        ;;
+esac
