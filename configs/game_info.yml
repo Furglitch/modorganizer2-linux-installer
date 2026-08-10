@@ -463,6 +463,8 @@ games:
       epic: ac82db5035584c7f8a2c548d98c86b2c
     subdirectory: Skyrim Special Edition
     executable: SkyrimSELauncher.exe
+    launch_options:
+      osarch: "64"
     tricks:
       - "xaudio2_7=native"
       - "xact"
