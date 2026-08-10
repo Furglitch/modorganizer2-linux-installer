@@ -479,7 +479,7 @@ def match_instances(
         logger.debug("No game or directory criteria provided. Returning all instances.")
 
     for instance in state_file.instances:
-        if game and instance.nexus_slug != game:
+        if game and instance.game != game:
             logger.trace(
                 f"Instance index {instance.index} does not match game slug '{game}'. Skipping."
             )
