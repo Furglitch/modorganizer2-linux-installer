@@ -7,10 +7,9 @@ This is used to add the MO2 instance link to the launch options of the desired g
 ## Structure
 
 - **editor.py** - High-level wrapper/dispatcher providing a unified interface
-- **steam.py** - Steam-specific implementation (appinfo.vdf parsing)
+- **steam.py** - Steam-specific implementation (Proton compatibility tool wrapper)
 - **epic.py** - Epic Games (Heroic) implementation (JSON-based)
 - **gog.py** - GOG Games (Heroic) implementation (JSON-based)
-- **appinfo.py** - VDF parser library for Steam
 
 ## Usage
 
@@ -42,7 +41,6 @@ add_launch_option(
 remove_launch_option(
     launcher="steam",
     game_id=1091500,
-    index=5  # For Steam (required)
 )
 
 remove_launch_option(
@@ -101,6 +99,3 @@ PYTHONPATH=src:src/mo2-lint python3 -m util.launch_opt.editor remove -l gog <GOG
 
 For more options, use `--help` on any command.
 
-## Attribution
-
-`appinfo.py` is sourced from [tralph3/Steam-Metadata-Editor](https://github.com/tralph3/Steam-Metadata-Editor) and is distributed under the GNU General Public License v3.0.

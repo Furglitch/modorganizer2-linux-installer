@@ -85,10 +85,6 @@ class InstanceData:
         Installation path of the game associated with this MO2 instance.
     game_executable : str
         Executable filename for the game.
-    launch_option_index : int
-        The index of the associated launch option in the Steam appinfo.vdf file.
-    launch_option_type : str
-        The type of the launch option (e.g., 'OPTION3', 'none', 'default').
     script_extender : Optional[str]
         The version string of the installed script extender, or None if not installed.
     script_extender_files : Optional[list[str]]
@@ -111,8 +107,6 @@ class InstanceData:
     launcher_ids: var.LauncherIDs = None
     game_path: Path = None
     game_executable: str = None
-    launch_option_index: int = None
-    launch_option_type: str = None
     script_extender: Optional[str] = None
     script_extender_files: Optional[list[str]] = None
     plugins: Optional[list[str]] = None
@@ -131,8 +125,6 @@ class InstanceData:
             launcher_ids=var.LauncherIDs.from_dict(data.get("launcher_ids")),
             game_path=Path(data.get("game_path")),
             game_executable=data.get("game_executable"),
-            launch_option_index=data.get("launch_option_index"),
-            launch_option_type=data.get("launch_option_type"),
             script_extender=data.get("script_extender"),
             script_extender_files=data.get("script_extender_files"),
             plugins=data.get("plugins"),
@@ -150,8 +142,6 @@ class InstanceData:
             "launcher_ids": var.LauncherIDs.to_dict(data.launcher_ids),
             "game_path": str(data.game_path),
             "game_executable": data.game_executable,
-            "launch_option_index": data.launch_option_index,
-            "launch_option_type": data.launch_option_type,
             "script_extender": data.script_extender,
             "script_extender_files": data.script_extender_files,
             "plugins": data.plugins,
@@ -176,8 +166,6 @@ class InstanceData:
             logger.warning("InstanceData: Game install path is not set.")
         if not self.game_executable:
             logger.warning("InstanceData: Game executable is not set.")
-        if not self.launch_option_index:
-            logger.warning("InstanceData: Launch option index is not set.")
         if self.plugins is None:
             self.plugins = []
         elif any(plugin not in var.plugin_info for plugin in self.plugins):
@@ -352,11 +340,10 @@ def remove_instance(instance: InstanceData, types: list[str] = ["symlink", "stat
         game_id = getattr(instance.launcher_ids, launcher, None)
 
         if launcher and game_id:
-            if launcher == "steam" and instance.launch_option_index is not None:
+            if launcher == "steam":
                 remove_launch_option(
                     launcher=launcher,
                     game_id=game_id,
-                    index=instance.launch_option_index,
                 )
             elif launcher == "epic":
                 remove_launch_option(
