@@ -16,7 +16,7 @@ jobs:
     if: contains(github.event.issue.title, '[Game]')
     steps:
       - name:  Update new game title
-        uses:  actions/github-script@v9.0.0
+        uses:  actions/github-script@v9
         with:
           script:  |
             const body = context.payload.issue.body || '';
