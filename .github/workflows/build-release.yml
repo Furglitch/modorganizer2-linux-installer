@@ -22,7 +22,7 @@ jobs:
     steps:
       - name: Check for existing tag
         id: check_tag
-        uses: actions/github-script@v9.0.0
+        uses: actions/github-script@v9
         with:
           script: |
             const tag = '${{inputs.version}}';
@@ -82,7 +82,7 @@ jobs:
     steps:
       - name: Create Release Tag
         id: create_tag
-        uses: actions/github-script@v9.0.0
+        uses: actions/github-script@v9
         with:
           script: |
             await github.rest.git.createRef({
