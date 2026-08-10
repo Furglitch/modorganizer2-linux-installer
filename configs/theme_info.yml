@@ -1,0 +1,82 @@
+schema: 7.0.0
+
+themes:
+
+  # included in MO2
+  '1809':
+    stylesheet: '1809 Dark Mode.qss'
+  dark:
+    stylesheet: 'dark.qss'
+  dracula:
+    stylesheet: 'dracula.qss'
+  night-eyes:
+    stylesheet: 'Night Eyes.qss'
+  paper-automata:
+    stylesheet: 'Paper Automata.qss'
+  paper-mono-black:
+    stylesheet: 'Paper Black Mono.qss'
+  paper-dark:
+    stylesheet: 'Paper Dark.qss'
+  paper-light:
+    stylesheet: 'Paper Light.qss'
+  paper-mono-white:
+    stylesheet: 'Paper White Mono.qss'
+  parchment:
+    stylesheet: 'Parchment v1.1 by Bob.qss'
+  skyrim:
+    stylesheet: 'skyrim.qss'
+  transparent-fo3:
+    stylesheet: 'Transparent-Style-FO3-Trosski.qss'
+  transparent-fo4:
+    stylesheet: 'Transparent-Style-FO4-Trosski.qss'
+  transparent-morrowind:
+    stylesheet: 'Transparent-Style-Morrowind.qss'
+  transparent-skyrim:
+    stylesheet: 'Transparent-Style-Skyrim-Trosski.qss'
+  transparent-starfield:
+    stylesheet: 'Transparent-Style-Starfield-Trosski.qss'
+  vs15:
+    stylesheet: 'vs15 Dark.qss'
+  vs15-green:
+    stylesheet: 'vs15 Dark-Green.qss'
+  vs15-orange:
+    stylesheet: 'vs15 Dark-Orange.qss'
+  vs15-pink:
+    stylesheet: 'vs15 Dark-Pink.qss'
+  vs15-purple:
+    stylesheet: 'vs15 Dark-Purple.qss'
+  vs15-red:
+    stylesheet: 'vs15 Dark-Red.qss'
+  vs15-yellow:
+    stylesheet: 'vs15 Dark-Yellow.qss'
+
+  # nexus downloads
+  fluency-dark:
+    nexus:
+      slug: 'skyrimspecialedition'
+      mod_id: 71449
+      file_id: 446685
+    root: '.'
+    stylesheet: 'Fluency Dark.qss'
+  fluency-midnight:
+    parent: 'fluency-dark'
+    root: '.'
+    stylesheet: 'Fluency Midnight.qss'
+  fluency-white:
+    parent: 'fluency-dark'
+    root: '.'
+    stylesheet: 'Fluency White.qss'
+  catppuccin-latte:
+    nexus:
+      slug: 'site'
+      mod_id: 2068
+      file_id: 8416
+    root: 'stylesheets/'
+    stylesheet: 'Catppuccin Latte.qss'
+  catppuccin-mocha:
+    nexus:
+      slug: 'site'
+      mod_id: 2068
+      file_id: 8417
+    root: 'stylesheets/'
+    stylesheet: 'Catppuccin Mocha.qss'
