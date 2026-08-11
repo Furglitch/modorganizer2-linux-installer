@@ -24,6 +24,7 @@ def update_tricks():
 
 def update(
     directory: Path,
+    theme: Optional[str] = None,
     mo2_archive: Optional[Path] = None,
     mo2_checksum: Optional[str] = None,
 ):
@@ -38,6 +39,7 @@ def update(
             "game_info_path": None,
             "log_level": None,
             "script_extender": None,
+            "theme": theme,
             "plugins": [],
             "mo2_archive": mo2_archive,
             "mo2_checksum": mo2_checksum,

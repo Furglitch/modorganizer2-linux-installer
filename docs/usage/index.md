@@ -116,6 +116,8 @@ mo2-lint update <directory> [options]
 >   ```
 >
 > - `--mo2-checksum <sha256>` - The expected SHA-256 checksum of the `--mo2-archive` file. Required when `--mo2-archive` is used; the archive is verified against it before extraction.
+>
+> - `--theme <name>`, `-t <name>` - Apply a theme to the instance during the update. More information on themes can be found in the [Themes](./themes) section of the documentation.
 
 > **Note:** If the instance is pinned, the MO2 version will not be updated by a normal `update`. Run `mo2-lint unpin <directory>` first **or** supply `--mo2-archive`, which overrides the pin for that update (and re-pins the instance afterward).
 
