@@ -60,23 +60,20 @@ themes:
     stylesheet: 'Fluency Dark.qss'
   fluency-midnight:
     parent: 'fluency-dark'
-    root: '.'
     stylesheet: 'Fluency Midnight.qss'
   fluency-white:
     parent: 'fluency-dark'
-    root: '.'
     stylesheet: 'Fluency White.qss'
   catppuccin-latte:
     nexus:
       slug: 'site'
       mod_id: 2068
-      file_id: 8416
+      file_id: 8417
     root: 'stylesheets/'
     stylesheet: 'Catppuccin Latte.qss'
   catppuccin-mocha:
+    parent: 'catppuccin-latte'
     nexus:
-      slug: 'site'
-      mod_id: 2068
-      file_id: 8417
+      file_id: 8416
     root: 'stylesheets/'
     stylesheet: 'Catppuccin Mocha.qss'
