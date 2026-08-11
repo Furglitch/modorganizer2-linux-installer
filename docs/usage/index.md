@@ -44,6 +44,8 @@ mo2-lint install <game> <directory> [options]
 >
 > - `--mo2-checksum <sha256>` - The expected SHA-256 checksum of the `--mo2-archive` file. Required when `--mo2-archive` is used; the archive is verified against it before extraction.
 >
+> - `--theme <name>`, `-t <name>` - Apply a theme to the new instance. More information on themes can be found in the [Themes](./themes) section of the documentation.
+>
 > - `--custom <path/to/file.yml>` - **[Advanced users only, unsupported]** Use a custom game info file. See [Adding Custom Games](./custom-games) for details.
 
 After installation, **launch the game through Steam or Heroic** to confirm the launch option was created. You should see a "Launch Mod Organizer" entry alongside the default launch option.
