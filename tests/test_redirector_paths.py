@@ -2,12 +2,14 @@
 
 import json
 import sys
+import tempfile
 from pathlib import Path
 from unittest import TestCase, mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from redirector import game_dir_matches, get_instance_info, posix_to_wine, wine_io_path
+from shared.mo2_ini import update_mo2_ini
 
 
 class RedirectorPathTests(TestCase):
@@ -122,3 +124,13 @@ class RedirectorPathTests(TestCase):
             game_exe == "/home/deck/.steam/steam/steamapps/common/Cyberpunk 2077/"
             "bin/x64/Cyberpunk2077.exe"
         )
+
+    def test_update_mo2_ini_sets_theme_style(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            ini_path = Path(temp_dir) / "ModOrganizer.ini"
+            ini_path.write_text("[Settings]\nstyle=\n", encoding="utf-8")
+
+            assert update_mo2_ini(Path(temp_dir), theme_stylesheet="dark.qss")
+
+            contents = ini_path.read_text(encoding="utf-8")
+            assert "style=dark.qss" in contents

@@ -364,10 +364,7 @@ def main(argv: list[str]) -> int:
         if launcher_args and game_executable:
             logger.info(f"Updating INI with {len(launcher_args)} launcher arguments")
             try:
-                try:
-                    from .mo2_ini import update_mo2_ini  # noqa: PLC0415
-                except ImportError:
-                    from mo2_ini import update_mo2_ini  # noqa: PLC0415
+                from shared.mo2_ini import update_mo2_ini
 
                 # mo2_exe is Wine format, convert to POSIX for INI update
                 mo2_dir_path = wine_io_path(mo2_exe).parent

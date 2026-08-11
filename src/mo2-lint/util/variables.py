@@ -25,6 +25,8 @@ class Input:
         Terminal log level.
     script_extender: bool, optional
         Whether to install a script extender.
+    theme: str, optional
+        Included MO2 theme slug to apply during installation.
     plugins: Tuple[str, ...], optional
         Plugin identifiers to install.
 
@@ -39,6 +41,7 @@ class Input:
     game_info_path: Optional[Path] = None
     log_level: Optional[str] = "INFO"
     script_extender: Optional[bool] = None
+    theme: Optional[str] = None
     plugins: Optional[Tuple[str, ...]] = field(default_factory=tuple)
     mo2_archive: Optional[Path] = None
     mo2_checksum: Optional[str] = None
@@ -735,6 +738,78 @@ class ResourceInfo:
 resource_info: ResourceInfo = None
 
 
+@dataclass
+class Theme:
+    """
+    Stores information about a Mod Organizer 2 theme.
+
+    Parameters
+    -----------
+    parent : str, optional
+        Parent theme key used for inheritance.
+    stylesheet : str, optional
+        The stylesheet filename associated with the theme.
+    nexus : dict, optional
+        Nexus download metadata for themes that are not bundled with MO2.
+    root : str, optional
+        Root directory inside the downloaded archive.
+    """
+
+    parent: Optional[str] = None
+    stylesheet: Optional[str] = None
+    nexus: Optional[dict[str, int | str]] = None
+    root: Optional[str] = None
+
+    @classmethod
+    def from_dict(cls, data: "dict[str, any] | Theme") -> "Theme":
+        if isinstance(data, cls):
+            return data
+        return cls(
+            parent=data.get("parent") or None,
+            stylesheet=data.get("stylesheet") or None,
+            nexus=data.get("nexus") or None,
+            root=data.get("root") or None,
+        )
+
+
+theme_info: dict[str, Theme] = {}
+
+
+def resolve_theme(slug: str, _seen: Optional[set[str]] = None) -> Theme | None:
+    """
+    Resolve a theme entry, following parent references until all inherited
+    values are filled in.
+    """
+
+    global theme_info
+    if slug not in theme_info:
+        return None
+
+    seen = _seen or set()
+    if slug in seen:
+        logger.critical(f"Theme inheritance cycle detected for '{slug}'.")
+        raise SystemExit(1)
+    seen.add(slug)
+
+    source = theme_info[slug]
+    current = Theme(
+        parent=source.parent,
+        stylesheet=source.stylesheet,
+        nexus=dict(source.nexus) if source.nexus else None,
+        root=source.root,
+    )
+    if current.parent:
+        parent = resolve_theme(current.parent, seen)
+        if parent:
+            if current.stylesheet is None:
+                current.stylesheet = parent.stylesheet
+            if current.nexus is None:
+                current.nexus = dict(parent.nexus) if parent.nexus else None
+            if current.root is None:
+                current.root = parent.root
+    return current
+
+
 def load_resource_info(path: Optional[Path] = None):
     """
     Loads information from a resource_info.yml file into global resource_info variable.
@@ -765,6 +840,35 @@ def load_resource_info(path: Optional[Path] = None):
         java=java if "java" in locals() else None,
     )
     logger.trace(f"Loaded resource_info: {resource_info}")
+
+
+def load_theme_info(path: Optional[Path] = None):
+    """
+    Loads information from a theme_info.yml file into the global theme_info variable.
+
+    Parameters
+    -----------
+    path : Path, optional
+        Path to theme_info YAML file. If not provided, defaults to the ~/.config/mo2-lint/theme_info.yml file.
+    """
+
+    global theme_info
+    if not path:
+        path = Path("~/.config/mo2-lint/theme_info.yml").expanduser()
+        if not path.exists():
+            logger.warning(
+                f"Theme info YAML file not found at {path}. Unable to load theme information."
+            )
+            logger.warning("Using built-in theme_info.yml as fallback.")
+            path = internal_file("cfg", "theme_info.yml")
+    logger.debug(f"Loading theme info from {path}")
+    with open(path, "r", encoding="utf-8") as file:
+        yml = yaml.load(file.read(), Loader=yaml.SafeLoader)
+    logger.trace(f"Parsed theme info YAML: {yml}")
+    theme_info = {}
+    for key, value in yml.get("themes", {}).items():
+        theme_info[key] = Theme.from_dict(value)
+    logger.trace(f"Loaded theme_info: {theme_info}")
 
 
 @dataclass

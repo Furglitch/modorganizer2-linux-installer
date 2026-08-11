@@ -55,7 +55,12 @@ def pull_config():
     Before that, copies default configuration files from internal storage if not already present.
     """
     logger.info("Pulling latest configuration files from GitHub.")
-    for config in {"game_info.yml", "resource_info.yml", "plugin_info.yml"}:
+    for config in {
+        "game_info.yml",
+        "resource_info.yml",
+        "plugin_info.yml",
+        "theme_info.yml",
+    }:
         logger.debug(f"Processing config file: {config}")
         config_path = Path("~/.config/mo2-lint/", config).expanduser()
         dest = None
@@ -133,6 +138,7 @@ def pre_init():
     var.load_games_info()
     var.load_resource_info()
     var.load_plugin_info()
+    var.load_theme_info()
     global game_list, plugin_list
     game_list = ", ".join(var.games_info.keys())
     plugin_list = ", ".join(var.plugin_info.keys())
@@ -253,6 +259,13 @@ click_opt_game = click.option(
     type=str,
     help=f"Target game for the Mod Organizer 2 instance.\nOptions: [{game_list}]",
 )
+click_opt_theme = click.option(
+    "--theme",
+    "-t",
+    type=click.Choice(list(var.theme_info.keys()), case_sensitive=False),
+    default=None,
+    help=f"Apply an included MO2 theme during installation.\nOptions: [{', '.join(var.theme_info.keys())}]",
+)
 click_opt_directory = click.option(
     "--directory",
     "-d",
@@ -341,6 +354,7 @@ def cli(ctx):
 @click_log_level
 @click_unattended
 @click_opt_game_info
+@click_opt_theme
 @click.option(
     "--launcher",
     "-L",
@@ -373,6 +387,7 @@ def install(
     launcher: Optional[str],
     script_extender: bool,
     plugin: tuple[str],
+    theme: Optional[str],
     mo2_archive: Optional[str],
     mo2_checksum: Optional[str],
     log_level,
@@ -397,6 +412,7 @@ def install(
         log_level,
         script_extender,
         plugin,
+        theme,
         launcher,
         Path(mo2_archive) if mo2_archive else None,
         mo2_checksum,

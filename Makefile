@@ -17,6 +17,7 @@ mo2-lint: redirector nxm-handler
 		--hidden-import websockets \
 		--hidden-import yaml \
 		--add-data "src/mo2-lint:src" \
+		--add-data "src/shared:src/shared" \
 		--add-data "configs:cfg" \
 		--add-data "dist:dist" \
 		--runtime-hook "build/runtime_hooks.py" \
@@ -35,6 +36,7 @@ mo2-lint_only:
 		--hidden-import websockets \
 		--hidden-import yaml \
 		--add-data "src/mo2-lint:src" \
+		--add-data "src/shared:src/shared" \
 		--add-data "configs:cfg" \
 		--add-data "dist:dist" \
 		--runtime-hook "build/runtime_hooks.py" \
@@ -48,6 +50,7 @@ nxm-handler:
 		--hidden-import protontricks \
 		--hidden-import pydantic_core \
 		--add-data "src/nxm-handler:src" \
+		--add-data "src/shared:src/shared" \
 		--runtime-hook "build/runtime_hooks.py" \
 		--additional-hooks-dir "build/hooks" \
 		src/nxm-handler/__init__.py
@@ -64,8 +67,15 @@ redirector: setup-wine-python
 	echo "Building redirector..."; \
 	WINEPREFIX="$$WINEPREFIX" WINEARCH=win64 wine "C:\\python313\\python.exe" -m pip install -q --upgrade pip pyinstaller loguru pyyaml 2>&1 | grep -v '^[0-9a-f]*:' || true; \
 	WINEPREFIX="$$WINEPREFIX" WINEARCH=win64 wine "C:\\python313\\python.exe" -m PyInstaller --onefile --noconsole --name mo2-redirector.exe \
-		--paths src --hidden-import loguru --hidden-import yaml --hidden-import configparser \
-		--add-data "configs;cfg" --icon .github/README/logo.ico src/redirector/__init__.py 2>&1 | grep -E '(Building|WARNING|ERROR|completed)' || true
+		--paths src \
+		--hidden-import loguru \
+		--hidden-import yaml \
+		--hidden-import configparser \
+		--add-data "configs;cfg" \
+		--add-data "src/shared;src/shared" \
+		--icon .github/README/logo.ico \
+		src/redirector/__init__.py 2>&1 | \
+		grep -E '(Building|WARNING|ERROR|completed)' || true
 	@chmod +x dist/mo2-redirector.exe 2>/dev/null || true
 	@echo "Done. Verify: file dist/mo2-redirector.exe"
 
