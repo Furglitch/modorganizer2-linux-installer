@@ -133,7 +133,7 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 ENV PATH="${HOME}/.local/bin:${PATH}"
 
 COPY . .
-RUN chown -R docker:docker /tmp/mo2-lint
+RUN chown -R docker:docker /tmp/mo2-lint /home/docker
 
 COPY docker/entrypoint.sh /entrypoint.sh
 COPY docker/validate.sh /validate.sh
