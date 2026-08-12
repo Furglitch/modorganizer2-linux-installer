@@ -10,6 +10,7 @@ from util import lang, variables as var, state_file as state
 from util.checksum import compare_checksum
 from util.download import download as dl, download_nexus as nexus_dl
 from util.state_file import symlink_instance
+from shared.mo2_ini import update_mo2_ini
 import json
 import stat
 import ssl
@@ -20,6 +21,62 @@ ssl_context = ssl.create_default_context(cafile=certifi.where())
 cache_dir: Path = Path("~/.cache/mo2-lint").expanduser()
 download_dir = cache_dir / "downloads"
 extract_dir = download_dir / "extracted"
+
+
+def install_theme(theme_slug: str, destination: Path) -> bool:
+    """
+    Download and install a theme selected via --theme.
+    """
+
+    theme = var.resolve_theme(theme_slug)
+    if not theme:
+        logger.critical(f"Theme '{theme_slug}' is not recognized.")
+        raise SystemExit(1)
+
+    if not theme.stylesheet:
+        logger.critical(f"Theme '{theme_slug}' does not define a stylesheet.")
+        raise SystemExit(1)
+
+    if theme.nexus:
+        cache_dir = download_dir / "themes" / theme_slug
+        logger.info(f"Downloading Nexus theme '{theme_slug}'")
+        downloaded = nexus_dl(
+            theme.nexus.get("slug"),
+            theme.nexus.get("mod_id"),
+            theme.nexus.get("file_id"),
+            cache_dir,
+        )
+        if not downloaded:
+            logger.critical(f"Failed to download theme '{theme_slug}' from Nexus.")
+            raise SystemExit(1)
+
+        extracted = extract(
+            downloaded, extract_dir / "themes" / theme_slug / downloaded.stem
+        )
+        if not extracted or not extracted.exists():
+            logger.critical(f"Failed to extract theme '{theme_slug}'.")
+            raise SystemExit(1)
+
+        root = Path(theme.root) if theme.root else Path(".")
+        source = extracted if str(root) == "." else extracted / root
+        install_destination = destination / "stylesheets"
+        logger.debug(
+            f"Installing Nexus theme '{theme_slug}' from {source} to {install_destination}"
+        )
+        install(source, install_destination, None)
+    else:
+        logger.debug(
+            f"Theme '{theme_slug}' is bundled with MO2; only applying stylesheet"
+        )
+
+    if update_mo2_ini(destination, theme_stylesheet=theme.stylesheet):
+        logger.info(
+            f"Applied MO2 theme '{theme_slug}' using stylesheet '{theme.stylesheet}'"
+        )
+        return True
+
+    logger.warning(f"Failed to update ModOrganizer.ini for theme '{theme_slug}'.")
+    return False
 
 
 def download_mod_organizer():
@@ -33,6 +90,7 @@ def download_mod_organizer():
     checksum_internal = var.resource_info.mod_organizer.checksum_internal
     local_archive = var.input_params.mo2_archive
     destination = var.input_params.directory
+    theme = getattr(var.input_params, "theme", None)
 
     if local_archive:
         local_archive = Path(local_archive)
@@ -69,6 +127,9 @@ def download_mod_organizer():
             destination.mkdir(parents=True, exist_ok=True)
     logger.debug(f"Installing Mod Organizer 2 to {destination}")
     install(extracted, destination, None)
+    if theme:
+        install_theme(theme, destination)
+
     logger.success("Mod Organizer 2 download and installation complete.")
 
 
