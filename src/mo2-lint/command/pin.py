@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-from loguru import logger
 from pathlib import Path
+
+from loguru import logger
 from util import state_file as state
 
 

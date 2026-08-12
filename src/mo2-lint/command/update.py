@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 
-from loguru import logger
 from pathlib import Path
-from typing import Optional
+
+from loguru import logger
 from step.external_resources import download_mod_organizer
-from util import state_file as state, variables as var
 from step.launch_opt import add_launch_opt, remove_launch_opt
-from util.redirector.install import install as install_redirector
+from util import state_file as state
+from util import variables as var
 from util.nexus.install_handler import install as install_handler
+from util.redirector.install import install as install_redirector
 from util.wine import protontricks, winetricks
 
 
@@ -24,9 +25,9 @@ def update_tricks():
 
 def update(
     directory: Path,
-    theme: Optional[str] = None,
-    mo2_archive: Optional[Path] = None,
-    mo2_checksum: Optional[str] = None,
+    theme: str | None = None,
+    mo2_archive: Path | None = None,
+    mo2_checksum: str | None = None,
 ):
     """
     Updates the MO2 instance located at the given directory and refreshes the launch option.

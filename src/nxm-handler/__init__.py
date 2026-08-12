@@ -1,20 +1,21 @@
 #!/usr/bin/env python3
 
-from loguru import logger
-from pathlib import Path
-from typing import Optional
-from shared.logger import add_loggers, remove_loggers
-import protontricks_util as protontricks
-import state_file as state
-import click
 import os
-import psutil
 import subprocess
+from pathlib import Path
+
+import click
+import protontricks_util as protontricks
+import psutil
+import state_file as state
+from loguru import logger
+
+from shared.logger import add_loggers, remove_loggers
 
 version = "3.0.0"
 
 
-def get_instance_dir(url: str) -> Optional[Path]:
+def get_instance_dir(url: str) -> Path | None:
     logger.debug(f"Received URL: {url}")
     if not url.startswith("nxm://"):
         logger.warning("Invalid NXM URL format.")
@@ -125,10 +126,10 @@ def check_instance(instance_dir: Path) -> bool:
 
 def launch_instance(
     launcher: str,
-    steam_id: Optional[int],
-    runner: Optional[str] = None,
-    app: Optional[str] = None,
-    launch_option_type: Optional[str] = None,
+    steam_id: int | None,
+    runner: str | None = None,
+    app: str | None = None,
+    launch_option_type: str | None = None,
 ) -> None:
     logger.info("Starting Mod Organizer 2")
     if launcher == "steam":
@@ -220,9 +221,7 @@ def send_url(instance_dir: Path, url: str, env_info: dict) -> None:
         try:
             logger.debug(f"Executing handler command: {cmd}")
             logger.trace(f"Environment: WINEPREFIX={env.get('WINEPREFIX')}")
-            subprocess.run(
-                cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env
-            )
+            subprocess.run(cmd, capture_output=True, check=False, text=True, env=env)
         except Exception:
             logger.exception("Failed to execute handler command")
     else:

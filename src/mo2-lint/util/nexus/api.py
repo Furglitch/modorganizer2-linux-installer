@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 
+import json
+import webbrowser
+from uuid import UUID
+from uuid import uuid4 as new_uuid
+
+import websockets.sync.client as websockets
 from loguru import logger
 from pydantic_core import from_json
 from util import state_file as state
-from uuid import UUID, uuid4 as new_uuid
-import json
-import webbrowser
-import websockets.sync.client as websockets
 
 
 def id() -> UUID:
@@ -48,11 +50,10 @@ def connection_token() -> str:
         The Nexus connection token.
     """
 
-    if state.state_file.nexus_api:
-        if state.state_file.nexus_api.connection_token:
-            connection_token = state.state_file.nexus_api.connection_token
-            logger.trace("Found existing Nexus connection token in state file.")
-            return connection_token
+    if state.state_file.nexus_api and state.state_file.nexus_api.connection_token:
+        connection_token = state.state_file.nexus_api.connection_token
+        logger.trace("Found existing Nexus connection token in state file.")
+        return connection_token
 
     connection_token = request_connection_token()
     state.state_file.nexus_api.connection_token = connection_token
@@ -103,11 +104,10 @@ def api_key() -> str:
         The Nexus API key.
     """
 
-    if state.state_file.nexus_api:
-        if state.state_file.nexus_api.api_key:
-            api_key = state.state_file.nexus_api.api_key
-            logger.trace("Found existing Nexus API key in state file.")
-            return api_key
+    if state.state_file.nexus_api and state.state_file.nexus_api.api_key:
+        api_key = state.state_file.nexus_api.api_key
+        logger.trace("Found existing Nexus API key in state file.")
+        return api_key
 
     api_key = request_api_key()
     state.state_file.nexus_api.api_key = api_key

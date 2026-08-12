@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
-from typing import Optional
+
 from loguru import logger
 from pydantic_core import from_json
 
@@ -18,7 +18,7 @@ gog_data: dict = {}
 epic_data: dict = {}
 
 
-def get_wine_prefix(game_id: str | int, config_directory: Path) -> Optional[Path]:
+def get_wine_prefix(game_id: str | int, config_directory: Path) -> Path | None:
     """
     Gets the Wine prefix for a Heroic game from its configuration JSON.
 
@@ -61,7 +61,7 @@ def get_wine_prefix(game_id: str | int, config_directory: Path) -> Optional[Path
     return wine_prefix
 
 
-def get_wine_path(game_id: str | int, config_directory: Path) -> Optional[str]:
+def get_wine_path(game_id: str | int, config_directory: Path) -> str | None:
     """
     Gets the Wine binary path for a Heroic game from its configuration JSON.
 
@@ -122,7 +122,7 @@ def get_wine_path(game_id: str | int, config_directory: Path) -> Optional[str]:
 
 
 def get_libraries(
-    gog_id: Optional[int], epic_id: Optional[str], config_directory: Path
+    gog_id: int | None, epic_id: str | None, config_directory: Path
 ) -> bool:
     """
     Gets Heroic game library directories from the configuration directory.
@@ -244,10 +244,8 @@ def get_libraries(
 
 
 def get_heroic_data(
-    gog_id: Optional[int] = None, epic_id: Optional[str] = None
-) -> tuple[
-    Optional[str], Optional[str], Optional[str | int], Optional[str], Optional[Path]
-]:
+    gog_id: int | None = None, epic_id: str | None = None
+) -> tuple[str | None, str | None, str | int | None, str | None, Path | None]:
     """
     Gets Heroic game data from config directories.
 
@@ -268,12 +266,12 @@ def get_heroic_data(
     gog_data = {}
     epic_data = {}
 
-    launcher: Optional[str] = None
-    display: Optional[str] = None
-    app_id: Optional[str | int] = None
-    wine_path: Optional[str] = None
-    wine_prefix: Optional[Path] = None
-    release: Optional[str] = None
+    launcher: str | None = None
+    display: str | None = None
+    app_id: str | int | None = None
+    wine_path: str | None = None
+    wine_prefix: Path | None = None
+    release: str | None = None
 
     logger.info("Attempting to retrieve Heroic game data from config directories.")
     for i, dir in enumerate(config_directories):

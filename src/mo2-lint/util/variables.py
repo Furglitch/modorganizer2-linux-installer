@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
 from dataclasses import dataclass, field
-from loguru import logger
 from pathlib import Path
-from typing import Final, Optional, Tuple, List
-from util.internal_file import internal_file
+from typing import Final
+
 import yaml
+from loguru import logger
+from util.internal_file import internal_file
 
 
 @dataclass
@@ -38,13 +39,13 @@ class Input:
 
     game: str = None
     directory: Path = None
-    game_info_path: Optional[Path] = None
-    log_level: Optional[str] = "INFO"
-    script_extender: Optional[bool] = None
-    theme: Optional[str] = None
-    plugins: Optional[Tuple[str, ...]] = field(default_factory=tuple)
-    mo2_archive: Optional[Path] = None
-    mo2_checksum: Optional[str] = None
+    game_info_path: Path | None = None
+    log_level: str | None = "INFO"
+    script_extender: bool | None = None
+    theme: str | None = None
+    plugins: tuple[str, ...] | None = field(default_factory=tuple)
+    mo2_archive: Path | None = None
+    mo2_checksum: str | None = None
 
     def __post_init__(self):
         if not self.game:
@@ -125,9 +126,9 @@ class DownloadData:
                 - Only one of mod/file IDs is provided for nexus data
     """
 
-    checksum: Optional[str] = None
-    direct: Optional[str | dict[str, str]] = None
-    nexus: Optional[dict[str, int | str]] = None
+    checksum: str | None = None
+    direct: str | dict[str, str] | None = None
+    nexus: dict[str, int | str] | None = None
 
     @classmethod
     def from_dict(cls, data: "dict[str, any] | DownloadData") -> "DownloadData":
@@ -186,8 +187,8 @@ class FileWhitelist:
     Must contain one or both.
     """
 
-    subdirectory: Optional[str] = None
-    paths: Tuple[str, ...] = field(default_factory=tuple)
+    subdirectory: str | None = None
+    paths: tuple[str, ...] = field(default_factory=tuple)
 
     @classmethod
     def from_dict(cls, data: "dict[str, any] | FileWhitelist") -> "FileWhitelist":
@@ -232,9 +233,9 @@ class ScriptExtender:
     """
 
     version: str = None
-    runtime: str | dict[str, str | List[str]] = None
+    runtime: str | dict[str, str | list[str]] = None
     download: DownloadData = None
-    file_whitelist: Optional[FileWhitelist] = None
+    file_whitelist: FileWhitelist | None = None
 
     @classmethod
     def from_dict(cls, data: "dict[str, any] | ScriptExtender") -> "ScriptExtender":
@@ -298,9 +299,9 @@ class LauncherIDs:
         If none of the parameters [steam, gog, epic] are provided
     """
 
-    steam: Optional[int] = None
-    gog: Optional[int] = None
-    epic: Optional[str] = None
+    steam: int | None = None
+    gog: int | None = None
+    epic: str | None = None
 
     @classmethod
     def from_dict(cls, data: "dict | LauncherIDs") -> "LauncherIDs":
@@ -356,15 +357,15 @@ class AppInfo:
 
     index: int = -1
     executable: str = "mo2-redirector.exe"
-    arguments: Optional[List[str]] = None
+    arguments: list[str] | None = None
     type: str = "OPTION3"
-    oslist: List[str] = None
-    osarch: Optional[str] = None
-    description: Optional[str] = None
-    description_loc: Optional[dict[str, str]] = None
+    oslist: list[str] = None
+    osarch: str | None = None
+    description: str | None = None
+    description_loc: dict[str, str] | None = None
 
     @classmethod
-    def from_dict(cls, data: dict, index: int = None) -> "AppInfo":
+    def from_dict(cls, data: dict, index: int | None = None) -> "AppInfo":
         return cls(
             index=index,
             executable=data.get("executable", "mo2-redirector.exe"),
@@ -474,17 +475,17 @@ class GameInfo:
         If required parameters [display_name, nexus_slug, launcher_ids] are not provided
     """
 
-    parent: Optional[str] = None
-    display_name: Optional[str] = None
-    nexus_slug: Optional[str] = None
-    launcher_ids: Optional[LauncherIDs] = None
-    subdirectory: Optional[str | dict[str, str]] = None
-    executable: Optional[str | dict[str, str]] = None
-    tricks: Optional[Tuple[str, ...]] = field(default_factory=tuple)
-    launch_options: Optional[dict[str, AppInfo]] = field(default_factory=dict)
-    script_extenders: Optional[List[ScriptExtender]] = field(default_factory=list)
-    workarounds: Optional[dict] = field(default_factory=dict)
-    plugins: Optional[Tuple[str, ...]] = field(default_factory=tuple)
+    parent: str | None = None
+    display_name: str | None = None
+    nexus_slug: str | None = None
+    launcher_ids: LauncherIDs | None = None
+    subdirectory: str | dict[str, str] | None = None
+    executable: str | dict[str, str] | None = None
+    tricks: tuple[str, ...] | None = field(default_factory=tuple)
+    launch_options: dict[str, AppInfo] | None = field(default_factory=dict)
+    script_extenders: list[ScriptExtender] | None = field(default_factory=list)
+    workarounds: dict | None = field(default_factory=dict)
+    plugins: tuple[str, ...] | None = field(default_factory=tuple)
 
     @classmethod
     def from_dict(cls, data: "dict[str, any] | GameInfo") -> "GameInfo":
@@ -550,7 +551,7 @@ games_info: dict[str, GameInfo] = {}
 game_info: GameInfo = None
 
 
-def load_games_info(path: Optional[Path] = None):
+def load_games_info(path: Path | None = None):
     """
     Loads information from a game_info.yml file into the global games_info variable.
 
@@ -646,11 +647,11 @@ class Resource:
     """
 
     download_url: str = None
-    checksum: Optional[str] = None
-    path_internal: Optional[Path] = None
-    checksum_internal: Optional[str] = None
-    version: Optional[str] = None
-    file_whitelist: Optional[FileWhitelist] = None
+    checksum: str | None = None
+    path_internal: Path | None = None
+    checksum_internal: str | None = None
+    version: str | None = None
+    file_whitelist: FileWhitelist | None = None
 
     @classmethod
     def from_dict(cls, data: "dict[str, any] | Resource") -> "Resource":
@@ -704,7 +705,7 @@ class ResourceInfo:
 
     mod_organizer: Resource = None
     winetricks: Resource = None
-    java: Optional[Resource] = None
+    java: Resource | None = None
 
     @classmethod
     def from_dict(cls, data: "dict[str, any] | ResourceInfo") -> "ResourceInfo":
@@ -755,10 +756,10 @@ class Theme:
         Root directory inside the downloaded archive.
     """
 
-    parent: Optional[str] = None
-    stylesheet: Optional[str] = None
-    nexus: Optional[dict[str, int | str]] = None
-    root: Optional[str] = None
+    parent: str | None = None
+    stylesheet: str | None = None
+    nexus: dict[str, int | str] | None = None
+    root: str | None = None
 
     @classmethod
     def from_dict(cls, data: "dict[str, any] | Theme") -> "Theme":
@@ -775,7 +776,7 @@ class Theme:
 theme_info: dict[str, Theme] = {}
 
 
-def resolve_theme(slug: str, _seen: Optional[set[str]] = None) -> Theme | None:
+def resolve_theme(slug: str, _seen: set[str] | None = None) -> Theme | None:
     """
     Resolve a theme entry, following parent references until all inherited
     values are filled in.
@@ -810,7 +811,7 @@ def resolve_theme(slug: str, _seen: Optional[set[str]] = None) -> Theme | None:
     return current
 
 
-def load_resource_info(path: Optional[Path] = None):
+def load_resource_info(path: Path | None = None):
     """
     Loads information from a resource_info.yml file into global resource_info variable.
 
@@ -842,7 +843,7 @@ def load_resource_info(path: Optional[Path] = None):
     logger.trace(f"Loaded resource_info: {resource_info}")
 
 
-def load_theme_info(path: Optional[Path] = None):
+def load_theme_info(path: Path | None = None):
     """
     Loads information from a theme_info.yml file into the global theme_info variable.
 
@@ -898,11 +899,11 @@ class Plugin:
         If neither manifest nor direct is provided
     """
 
-    manifest: Optional[str] = None
-    direct: Optional[str] = None
-    checksum: Optional[str] = None
-    file_whitelist: Optional[FileWhitelist] = None
-    subdirectory: Optional[str] = None
+    manifest: str | None = None
+    direct: str | None = None
+    checksum: str | None = None
+    file_whitelist: FileWhitelist | None = None
+    subdirectory: str | None = None
 
     def __post_init__(self):
         if not (self.manifest or self.direct):
@@ -916,7 +917,7 @@ class Plugin:
 plugin_info: dict[str, Plugin] = {}
 
 
-def load_plugin_info(path: Optional[Path] = None):
+def load_plugin_info(path: Path | None = None):
     """
     Loads information from a plugin_info.yml file into the global plugin_info variable.
 

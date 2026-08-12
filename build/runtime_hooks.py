@@ -1,5 +1,5 @@
-import sys
 import os
+import sys
 
 if getattr(sys, "frozen", False):
     base = getattr(sys, "_MEIPASS", None)

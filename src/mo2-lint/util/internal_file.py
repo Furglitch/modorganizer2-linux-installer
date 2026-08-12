@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
-from loguru import logger
-from pathlib import Path
 import sys
+from pathlib import Path
+
+from loguru import logger
 
 
 def internal_file(*parts) -> Path:

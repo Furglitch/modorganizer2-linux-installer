@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 
 
-from loguru import logger
-from pathlib import Path
-from shutil import copy2
-from util import variables as var
-from shared.logger import persist_timestamp
 import subprocess
 import time
+from pathlib import Path
+from shutil import copy2
+
+from loguru import logger
+from util import variables as var
+
+from shared.logger import persist_timestamp
 
 try:
     from . import appinfo
@@ -57,13 +59,13 @@ def get_next_index(launch_options: var.AppInfo) -> int:
         return 0
 
     next_index = -1
-    for index in launch_options.keys():
+    for index in launch_options:
         next_index = max(next_index, int(index))
     return next_index + 1
 
 
 def read_internal(
-    vdf: Path = appinfo_vdf, appid: int = None, output: bool = False
+    vdf: Path = appinfo_vdf, appid: int | None = None, output: bool = False
 ) -> list[var.AppInfo]:
     """
     Read the launch options for a specific appid from the appinfo.vdf file.
@@ -101,7 +103,7 @@ def read_internal(
     sections = app.get("sections", {})
     appinfo_section = sections.get("appinfo", {})
     config = appinfo_section.get("config", {})
-    launch_opts = config["launch"] if "launch" in config else {}
+    launch_opts = config.get("launch", {})
 
     # print(f"{sections}")
     # print(f"{appinfo_section}")
@@ -135,12 +137,12 @@ def read_internal(
 def add_internal(
     vdf: Path = appinfo_vdf,
     appid: int = 0,
-    executable: Path = None,
-    arguments: list = [],
+    executable: Path | None = None,
+    arguments: list | None = None,
     label: str = "Launch Mod Organizer",
     opt_type: str = "none",
-    oslist: list[str] = None,
-    osarch: str = None,
+    oslist: list[str] | None = None,
+    osarch: str | None = None,
     no_backup: bool = False,
 ) -> int:
     """
@@ -172,6 +174,8 @@ def add_internal(
     int
         The index of the newly added launch option.
     """
+    if arguments is None:
+        arguments = []
     opts = read_internal(vdf=vdf, appid=appid)
     AppInfo = appinfo.Appinfo
     try:
@@ -284,10 +288,12 @@ def restart_steam():
     try:
         if (
             subprocess.run(
-                ["pgrep", "-x", "steamwebhelper"], capture_output=True
+                ["pgrep", "-x", "steamwebhelper"], capture_output=True, check=False
             ).returncode
             != 0
-            or subprocess.run(["pgrep", "-x", "steam"], capture_output=True).returncode
+            or subprocess.run(
+                ["pgrep", "-x", "steam"], capture_output=True, check=False
+            ).returncode
             != 0
         ):
             logger.debug("Steam is not running, no restart needed")

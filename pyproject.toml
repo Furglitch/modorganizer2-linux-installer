@@ -23,3 +23,15 @@ dependencies = [
     "send2trash>=2.0.0",
     "websockets>=17.0.1",
 ]
+
+[tool.ruff.lint]
+ignore = [
+    "BLE001",
+    "PLW0602",
+    "S110",
+    "S112",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"src/mo2-lint/__init__.py" = ["F401", "N999"]
+"src/nxm-handler/__init__.py" = ["F401", "N999"]

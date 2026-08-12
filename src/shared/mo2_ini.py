@@ -2,9 +2,10 @@
 
 """Simplified ModOrganizer.ini configuration management."""
 
-from pathlib import Path
-from loguru import logger
 import configparser
+from pathlib import Path
+
+from loguru import logger
 
 
 def normalize_path(path: str | Path) -> str:
