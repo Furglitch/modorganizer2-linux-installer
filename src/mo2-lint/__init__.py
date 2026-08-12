@@ -2,7 +2,10 @@
 
 import re
 import ssl
+import tempfile
+from getpass import getuser
 from pathlib import Path
+from shutil import copy2
 
 import certifi
 import click
@@ -18,6 +21,7 @@ from pydantic_core import from_json
 from util import lang
 from util import state_file as state
 from util import variables as var
+from util.internal_file import internal_file
 
 from shared.logger import add_loggers, remove_loggers
 
@@ -68,10 +72,6 @@ def pull_config():
         config_path = Path("~/.config/mo2-lint/", config).expanduser()
         dest = None
         if not config_path.exists():
-            from shutil import copy2
-
-            from util.internal_file import internal_file
-
             try:
                 logger.debug(
                     f"File does not exist in .config: {config_path}, copying from internal cfg"
@@ -127,6 +127,41 @@ def pull_config():
                     out_file.write(response.read())
         except Exception:
             logger.exception(f"Failed to download config file {config}")
+
+    bin_dir = Path("~/.local/bin").expanduser()
+    bin_dir.mkdir(parents=True, exist_ok=True)
+    wine2linux_path = bin_dir / "wine2linux"
+
+    if not wine2linux_path.exists():
+        try:
+            src = internal_file("cfg", "wine2linux")
+            copy2(src, wine2linux_path)
+            wine2linux_path.chmod(wine2linux_path.stat().st_mode | 0o111)
+            logger.debug(f"Installed wine2linux to {wine2linux_path}")
+        except Exception as e:
+            logger.exception(f"Failed to install wine2linux to {wine2linux_path}: {e}")
+            raise SystemExit(1)
+    else:
+        logger.trace(f"wine2linux already exists: {wine2linux_path}")
+
+    tweaks_file = internal_file("cfg", "tweaks.reg")
+    edit_file = Path(tempfile.gettempdir()) / "mo2-lint-tweaks.reg"
+    user = getuser()
+
+    try:
+        copy2(tweaks_file, edit_file)
+        txt = edit_file.read_text()
+        if user == "user":
+            logger.trace(
+                "Executing user is named user; leaving registry tweak paths unchanged"
+            )
+        else:
+            txt = txt.replace("/home/user", f"/home/{user}")
+            edit_file.write_text(txt)
+            logger.debug(f"Rewrote tweaks.reg for user {user}: {tweaks_file}")
+    except Exception as e:
+        logger.exception(f"Failed to prepare tweaks.reg at {tweaks_file}: {e}")
+        raise SystemExit(1)
 
 
 game_list = None

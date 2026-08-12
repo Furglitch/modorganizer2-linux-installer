@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import shutil
+import tempfile
 from pathlib import Path
 
 from loguru import logger
@@ -95,7 +96,13 @@ def configure():
     logger.debug(f"Configuring prefix with the following tricks: {tricks}")
     match var.launcher:
         case "steam":
-            protontricks.apply(var.game_info.launcher_ids.steam, tricks)
+            app_id = var.game_info.launcher_ids.steam
+            protontricks.apply(app_id, tricks)
+            tweaks_path = Path(tempfile.gettempdir()) / "mo2-lint-tweaks.reg"
+            if tweaks_path.exists():
+                protontricks.import_registry(app_id, tweaks_path)
+            else:
+                logger.warning(f"Registry tweak file not found: {tweaks_path}")
         case "gog" | "epic":
             prefix = var.prefix
             winetricks.apply(prefix=prefix, tricks=tricks)

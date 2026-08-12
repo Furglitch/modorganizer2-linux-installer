@@ -1,0 +1,24 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\.ini]
+@="inifile"
+"Content Type"="text/plain"
+
+[HKEY_CLASSES_ROOT\inifile\shell\open\command]
+@="/bin/sh /home/user/.local/bin/wine2linux xdg-open \"%1\""
+
+[HKEY_CLASSES_ROOT\.txt]
+@="txtfile"
+"Content Type"="text/plain"
+
+[HKEY_CLASSES_ROOT\txtfile\shell\open\command]
+@="/bin/sh /home/user/.local/bin/wine2linux xdg-open \"%1\""
+
+[HKEY_CLASSES_ROOT\folder\shell\open\command]
+@="/bin/sh /home/user/.local/bin/wine2linux xdg-open \"%1\""
+
+[HKEY_CLASSES_ROOT\folder\shell\explore\command]
+@="/bin/sh /home/user/.local/bin/wine2linux xdg-open \"%1\""
+
+[HKEY_CURRENT_USER\Software\Wine\DllOverrides]
+"explorer.exe"="native,builtin"
