@@ -1,19 +1,123 @@
 #!/usr/bin/env python3
 
-from contextlib import contextmanager
-from loguru import logger
-from pathlib import Path
-from protontricks.cli.main import main as pt
-from typing import List
-from shared.logger import remove_loggers, add_loggers
-from util import variables as var
 import os
 import re
+import shutil
+import stat
 import sys
 import threading
+from contextlib import contextmanager
+from pathlib import Path
+
+from loguru import logger
+from protontricks.cli.main import main as pt
+from util import variables as var
+
+from shared.logger import add_loggers, remove_loggers
 
 
-def run(command: List[str]) -> List[str]:
+class ProtontricksOutput(list):
+    """Captured protontricks output with the most recent error line."""
+
+    def __init__(self, *args):
+        super().__init__(*args)
+        self.error_message: str | None = None
+
+
+def is_warning_line(line: str) -> bool:
+    return re.search(r"^warning: .*$", line) is not None
+
+
+def is_noise_line(line: str) -> bool:
+    noise_patterns = (
+        r"^-+$",
+        r"^WINEPREFIX INFO:$",
+        r"^Registry info:$",
+        r"^Drive C: .*$",
+        r"^[dl-][rwx-]{9}.*$",
+        r"^protontricks - wine \d+: .*$",
+        r"^protontricks \((?:INFO|WARNING)\): .*$",
+    )
+    return any(re.search(pattern, line) for pattern in noise_patterns)
+
+
+def error_from_line(line: str) -> str | None:
+    if is_warning_line(line):
+        return None
+
+    error_patterns = (
+        r"protontricks \(ERROR\):\s*(.*)",
+        r"^(Steam app with the given app ID could not be found\..*)$",
+        r"^(.+: error: .*)$",
+        r"^([A-Za-z_][\w.]*[Ee]rror: .*)$",
+        r"^([A-Za-z_][\w.]*[Ee]xception: .*)$",
+        r"^([Ee]rror: .*)$",
+        r"(?i)^(traceback .*)$",
+        r"(?i)^(.*\b(?:failed|failure|fatal|invalid|not found|could not|unable to|isn't installed|is not installed|aborted|aborting)\b.*)$",
+    )
+    for pattern in error_patterns:
+        if match := re.search(pattern, line):
+            return match.group(1).strip()
+    return None
+
+
+def has_ignored_warning_exit(output_lines: list[str]) -> bool:
+    saw_warning = False
+    for line in output_lines:
+        if is_warning_line(line):
+            saw_warning = True
+            continue
+        if is_noise_line(line):
+            continue
+        if error_from_line(line):
+            return False
+    return saw_warning
+
+
+def error_from_output(output_lines: ProtontricksOutput) -> str | None:
+    if output_lines.error_message:
+        return output_lines.error_message
+
+    for line in reversed(output_lines):
+        if (
+            not is_warning_line(line)
+            and not is_noise_line(line)
+            and (error_message := error_from_line(line))
+        ):
+            return error_message
+    return None
+
+
+def get_winetricks_path() -> Path | None:
+    if path := os.environ.get("WINETRICKS"):
+        return Path(path).expanduser()
+
+    downloaded = Path("~/.cache/mo2-lint/downloads/winetricks").expanduser()
+    if downloaded.exists():
+        downloaded.chmod(downloaded.stat().st_mode | stat.S_IEXEC)
+        return downloaded
+    if path := shutil.which("winetricks"):
+        return Path(path)
+    return None
+
+
+@contextmanager
+def protontricks_environment():
+    original_winetricks = os.environ.get("WINETRICKS")
+    winetricks_path = get_winetricks_path()
+    if winetricks_path:
+        os.environ["WINETRICKS"] = str(winetricks_path)
+        logger.trace(f"Using winetricks executable for protontricks: {winetricks_path}")
+    try:
+        yield
+    finally:
+        if original_winetricks is None:
+            os.environ.pop("WINETRICKS", None)
+        else:
+            os.environ["WINETRICKS"] = original_winetricks
+
+
+def run(command: list[str]) -> list[str]:
     """
     Runs a protontricks command and captures its output.
 
@@ -31,26 +135,50 @@ def run(command: List[str]) -> List[str]:
     args = ["--verbose", "--no-bwrap"] + command
     logger.trace(f"Constructed protontricks command: {' '.join(args)}")
 
-    output_lines = []
+    output_lines = ProtontricksOutput()
     if args != ["--verbose"]:
+        exit_code = None
+        unexpected_error = None
         with redirect_output_to_logger() as output_lines:
             try:
-                pt(args)
+                with protontricks_environment():
+                    pt(args)
             except SystemExit as e:
-                if e.code != 0:
-                    logger.error(
-                        f"protontricks exited with code {e.code} for args: {args}"
-                    )
-            except Exception:
-                logger.exception(f"Error running protontricks with args: {args}")
+                if e.code not in (0, None):
+                    exit_code = e.code if isinstance(e.code, int) else 1
+            except Exception as e:
+                unexpected_error = e
             finally:
-                logger.success(f"Finished running protontricks with args: {args}")
+                logger.debug(f"Finished running protontricks with args: {args}")
+
+        if exit_code is not None:
+            error_message = error_from_output(output_lines)
+            if error_message is None and has_ignored_warning_exit(output_lines):
+                logger.warning(
+                    f"protontricks exited with code {exit_code} for args: {args}, ignoring warning-only output"
+                )
+                return output_lines
+
+            error_message = error_message or "Unknown protontricks error"
+            logger.error(
+                f"protontricks exited with code {exit_code} for args: {args}, error: {error_message}"
+            )
+            raise SystemExit(exit_code)
+
+        if unexpected_error is not None:
+            error_message = output_lines.error_message or str(unexpected_error)
+            logger.error(
+                f"Error running protontricks with args: {args}: {error_message}"
+            )
+            raise SystemExit(1) from unexpected_error
+
+        logger.success(f"protontricks command completed successfully: {args}")
     else:
         logger.debug("No protontricks command to run (only --verbose).")
     return output_lines
 
 
-def apply(id: int, tricks: List[str]):
+def apply(id: int, tricks: list[str]):
     """
     Applies tricks to the specified prefix.
 
@@ -121,7 +249,7 @@ def get_prefix(id: int) -> Path:
     return prefix
 
 
-def log_translation(input: str = None):
+def log_translation(input: str | None = None):
     """
     Translates protontricks log lines into more user-friendly messages and logs them.
 
@@ -178,7 +306,7 @@ def redirect_output_to_logger():
     """
 
     read_fd, write_fd = os.pipe()
-    output_lines = []
+    output_lines = ProtontricksOutput()
 
     original_stdout_fd = os.dup(sys.stdout.fileno())
     original_stderr_fd = os.dup(sys.stderr.fileno())
@@ -198,6 +326,8 @@ def redirect_output_to_logger():
             for line in reader:
                 if line := line.rstrip("\n"):
                     output_lines.append(line)
+                    if error_message := error_from_line(line):
+                        output_lines.error_message = error_message
                     logger.trace(f"protontricks: {line}")
                     try:
                         log_translation(line)

@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 
 
-import time
-
-from loguru import logger
-from pathlib import Path
-from pydantic_core import from_json
-from shutil import copy2
-from shared.logger import persist_timestamp
 import json
 import subprocess
+import time
+from pathlib import Path
+from shutil import copy2
 
+from loguru import logger
+from pydantic_core import from_json
+
+from shared.logger import persist_timestamp
 
 heroic_config_path = Path(
     "~/.config/heroic/store_cache/legendary_install_info.json"
@@ -39,7 +39,7 @@ def backup_json(json_path: Path) -> Path:
 
 
 def read_internal(
-    json_path: Path = None, epic_id: str = None, output: bool = False
+    json_path: Path | None = None, epic_id: str | None = None, output: bool = False
 ) -> list[dict]:
     """
     Read the launch options for a specific Epic game ID from the legendary_install_info.json file.
@@ -94,10 +94,10 @@ def read_internal(
 
 
 def add_internal(
-    json_path: Path = None,
-    epic_id: str = None,
-    executable: str = None,
-    arguments: list = [],
+    json_path: Path | None = None,
+    epic_id: str | None = None,
+    executable: str | None = None,
+    arguments: list | None = None,
     label: str = "Launch Mod Organizer",
     no_backup: bool = False,
 ) -> bool:
@@ -124,6 +124,8 @@ def add_internal(
     bool
         True if the launch option was added successfully, False otherwise.
     """
+    if arguments is None:
+        arguments = []
     if json_path is None:
         json_path = heroic_config_path
 
@@ -176,8 +178,8 @@ def add_internal(
 
 
 def remove_internal(
-    json_path: Path = None,
-    epic_id: str = None,
+    json_path: Path | None = None,
+    epic_id: str | None = None,
     label: str = "Launch Mod Organizer",
     no_backup: bool = False,
 ) -> bool:
@@ -251,6 +253,7 @@ def restart_heroic():
         result = subprocess.run(
             ["pgrep", "-x", "heroic"],
             capture_output=True,
+            check=False,
             text=True,
         )
         if result.returncode != 0:

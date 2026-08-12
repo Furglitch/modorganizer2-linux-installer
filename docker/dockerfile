@@ -13,6 +13,7 @@ RUN case "${DISTRO}" in \
      && apt-get install -y --no-install-recommends \
             binutils \
             ca-certificates \
+            cabextract \
             curl \
             make \
             p7zip-full \
@@ -37,6 +38,7 @@ RUN case "${DISTRO}" in \
      && apt-get install -y --no-install-recommends \
             binutils \
             ca-certificates \
+            cabextract \
             curl \
             libpython3.13 \
             make \
@@ -63,14 +65,17 @@ RUN case "${DISTRO}" in \
      && dnf install -y --setopt=install_weak_deps=False \
             binutils \
             ca-certificates \
+            cabextract \
             curl \
             make \
             p7zip \
+            procps-ng \
             psmisc \
             python3 \
             unzip \
             wget \
             wine \
+            wine.i686 \
             winetricks \
             xorg-x11-server-Xvfb \
             zenity \
@@ -82,6 +87,7 @@ RUN case "${DISTRO}" in \
      && pacman -S --noconfirm --needed \
             binutils \
             ca-certificates \
+            cabextract \
             curl \
             make \
             p7zip \
@@ -102,6 +108,7 @@ RUN case "${DISTRO}" in \
      && apk add --no-cache \
             binutils \
             ca-certificates \
+            cabextract \
             curl \
             make \
             p7zip \
@@ -150,8 +157,15 @@ RUN python3 /tmp/mo2-lint/docker/gen_appinfo.py \
 
 # Create Proton 10 stub
 RUN mkdir -p "${HOME}/.local/share/Steam/steamapps/common/Proton 10.0/files/bin" \
- && printf '#!/bin/sh\nexec wine "$@"\n' \
+ && wine_bin="$(find /usr /opt -path '*/wine/wine' -type f -perm /111 2>/dev/null | head -n 1)" \
+ && wineserver_bin="$(find /usr /opt -path '*/wine/wineserver' -type f -perm /111 2>/dev/null | head -n 1)" \
+ && if [ -z "$wine_bin" ]; then wine_bin="$(readlink -f /usr/bin/wine)"; fi \
+ && if [ -z "$wineserver_bin" ] && [ -e /usr/bin/wineserver ]; then wineserver_bin="$(readlink -f /usr/bin/wineserver)"; fi \
+ && if [ -z "$wine_bin" ] || [ -z "$wineserver_bin" ]; then echo "Unable to locate Wine binaries" && exit 1; fi \
+ && printf '#!/bin/sh\nexec "%s" "$@"\n' "$wine_bin" \
     > "${HOME}/.local/share/Steam/steamapps/common/Proton 10.0/proton" \
+ && ln -sf "$wine_bin" "${HOME}/.local/share/Steam/steamapps/common/Proton 10.0/files/bin/wine" \
+ && ln -sf "$wineserver_bin" "${HOME}/.local/share/Steam/steamapps/common/Proton 10.0/files/bin/wineserver" \
  && chmod +x "${HOME}/.local/share/Steam/steamapps/common/Proton 10.0/proton"
 
 # Create appmanifest ACF files

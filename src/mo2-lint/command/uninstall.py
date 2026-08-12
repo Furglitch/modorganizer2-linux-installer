@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 from loguru import logger
-from util.state_file import match_instances, remove_instance
 from util import lang
+from util.state_file import match_instances, remove_instance
 
 
 def uninstall(game=None, directory=None):
@@ -40,8 +40,7 @@ def uninstall(game=None, directory=None):
         logger.debug(
             f"Found {length} matching Mod Organizer 2 instances for game={game}, directory={directory}"
         )
-        for instance in matched:
-            instance_list.append(instance)
+        instance_list = matched.copy()
         instance = lang.prompt_uninstall_choice(instance_list)
         instance_path = (
             instance_list[instance - 1].instance_path
@@ -81,4 +80,3 @@ def uninstall(game=None, directory=None):
             logger.info(f"Uninstalled Mod Organizer 2 instance at {inst.instance_path}")
     else:
         logger.debug("Uninstallation aborted by user.")
-        pass

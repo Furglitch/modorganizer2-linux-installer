@@ -1,17 +1,20 @@
 #!/usr/bin/env python3
 
+import json
 from dataclasses import dataclass, field
-from loguru import logger
 from pathlib import Path
-from pydantic_core import to_json
-from send2trash import send2trash
 from shutil import rmtree
 from typing import Optional
-from util import lang, variables as var, state_file as state
+from uuid import UUID
+
+from loguru import logger
+from pydantic_core import to_json
+from send2trash import send2trash
+from util import lang
+from util import state_file as state
+from util import variables as var
 from util.launch_opt.editor import remove_launch_option
 from util.redirector.uninstall import uninstall as uninstall_redirector
-from uuid import UUID
-import json
 
 
 @dataclass
@@ -113,9 +116,9 @@ class InstanceData:
     game_executable: str = None
     launch_option_index: int = None
     launch_option_type: str = None
-    script_extender: Optional[str] = None
-    script_extender_files: Optional[list[str]] = None
-    plugins: Optional[list[str]] = None
+    script_extender: str | None = None
+    script_extender_files: list[str] | None = None
+    plugins: list[str] | None = None
 
     @classmethod
     def from_dict(cls, data: "dict[str, any] | InstanceData") -> "InstanceData":
@@ -160,7 +163,7 @@ class InstanceData:
     def __post_init__(self):
         if not self.game:
             logger.warning("InstanceData: Game is not set.")
-        elif self.game not in var.games_info.keys():
+        elif self.game not in var.games_info:
             logger.warning(
                 f"InstanceData: Game '{self.game}' is not a valid game identifier."
             )
@@ -190,7 +193,7 @@ class StateFile:
     Represents the state file JSON storing MO2 instances and Nexus API data.
     """
 
-    nexus_api: Optional[NexusAPIData] = None
+    nexus_api: NexusAPIData | None = None
     instances: list[InstanceData] = field(default_factory=list)
 
     @classmethod
@@ -247,7 +250,7 @@ def load_state_file():
 current_instance: InstanceData = None
 
 
-def set_index(index: Optional[int] = None):
+def set_index(index: int | None = None):
     """
     Sets the current instance index in the state_file.
 
@@ -279,7 +282,7 @@ def set_index(index: Optional[int] = None):
     current_instance.index = set
 
 
-def remove_instance(instance: InstanceData, types: list[str] = ["symlink", "state"]):
+def remove_instance(instance: InstanceData, types: list[str] | None = None):
     """
     Removes an instance by its index.
 
@@ -294,6 +297,8 @@ def remove_instance(instance: InstanceData, types: list[str] = ["symlink", "stat
         "state" removes the state file entry for the instance.\n
     """
 
+    if types is None:
+        types = ["symlink", "state"]
     if "symlink" in types:
         symlink_path = Path("~/.config/mo2-lint/instances").expanduser() / str(
             instance.nexus_slug
@@ -448,7 +453,7 @@ def write_state(add_current: bool = True):
 
 
 def match_instances(
-    game: Optional[str] = None, directory: Optional[Path] = None, exact: bool = False
+    game: str | None = None, directory: Path | None = None, exact: bool = False
 ) -> list[InstanceData]:
     """
     Matches instances in the state_file based on the provided game or directory.
@@ -479,7 +484,7 @@ def match_instances(
         logger.debug("No game or directory criteria provided. Returning all instances.")
 
     for instance in state_file.instances:
-        if game and instance.nexus_slug != game:
+        if game and instance.game != game:
             logger.trace(
                 f"Instance index {instance.index} does not match game slug '{game}'. Skipping."
             )

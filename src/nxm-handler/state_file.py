@@ -1,7 +1,7 @@
-from loguru import logger
-from pathlib import Path
-from typing import Optional
 import json
+from pathlib import Path
+
+from loguru import logger
 
 state_file = Path("~/.config/mo2-lint/state.json").expanduser()
 instances: list[dict] = []
@@ -22,7 +22,7 @@ def load_state() -> list[dict]:
     return instances
 
 
-def check_existing_instances(working_path: str) -> Optional[int]:
+def check_existing_instances(working_path: str) -> int | None:
     logger.debug(f"Checking for existing instances for path {working_path}")
     working_path = Path(working_path).expanduser().resolve()
     global instances

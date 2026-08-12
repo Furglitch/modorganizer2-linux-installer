@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
-from loguru import logger
 from pathlib import Path
-from typing import Optional
+
+from loguru import logger
 from util import lang
 from util.state_file import match_instances
 
 
-def list(game: Optional[str], directory: Optional[Path]):
+def list(game: str | None, directory: Path | None):
     matched = match_instances(game, directory)
     if not matched:
         logger.error(f"No MO2 instance found for game={game}, directory={directory}")

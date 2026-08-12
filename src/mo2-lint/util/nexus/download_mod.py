@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
+
 import certifi
+import requests
 from click import Path
 from loguru import logger
 from pydantic_core import from_json
-from typing import Optional
 from util import variables as var
 from util.nexus.api import api_key
-import requests
 
 
 def header() -> dict:
@@ -83,7 +83,7 @@ def nexus_download(
     mod_id: str,
     file_id: str,
     dest: Path,
-    filename: Optional[str] = None,
+    filename: str | None = None,
 ) -> str:
     """
     Downloads a mod file from Nexus Mods to the specified destination.

@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 
-from loguru import logger
+import stat
 from pathlib import Path
 from shutil import copy2
-from util import variables as var, state_file as state
+
+from loguru import logger
+from util import state_file as state
+from util import variables as var
 from util.checksum import compare_checksum
 from util.internal_file import internal_file
-import stat
 
 redirector_build = internal_file("dist", "mo2-redirector.exe")
 
@@ -28,9 +30,7 @@ def validate(redirector_path: Path) -> bool:
 
     if not redirector_path.exists():
         return False
-    if not compare_checksum(redirector_build, redirector_path):
-        return False
-    return True
+    return compare_checksum(redirector_build, redirector_path)
 
 
 def install():
@@ -39,6 +39,10 @@ def install():
     """
 
     logger.info("Installing redirector.")
+    if not state.current_instance or not state.current_instance.game_path:
+        logger.critical("Cannot install redirector because the game path is not set.")
+        raise SystemExit(1)
+
     game_install_path = (
         state.current_instance.game_path
         if state.current_instance.game_path.is_dir()

@@ -1,27 +1,31 @@
 #!usr/bin/env python3
 
-from loguru import logger
 from pathlib import Path
-from typing import Optional
-from util import variables as var, state_file as state
-from util.state_file import set_index, InstanceData
-from util.redirector.install import install as install_redirector
-from util.nexus.install_handler import install as install_handler
-from step.workarounds import apply_workarounds
-from step.load_game_info import get_launcher, get_library
-from step.external_resources import download
+
+from loguru import logger
 from step.configure_prefix import prompt as configure_prefix
+from step.external_resources import download, download_winetricks
 from step.launch_opt import add_launch_opt
+from step.load_game_info import get_launcher, get_library
+from step.workarounds import apply_workarounds
+from util import state_file as state
+from util import variables as var
+from util.nexus.install_handler import install as install_handler
+from util.redirector.install import install as install_redirector
+from util.state_file import InstanceData, set_index
 
 
 def install(
     game: str,
     directory: Path,
-    game_info_path: Optional[Path] = None,
+    game_info_path: Path | None = None,
     log_level: str = "INFO",
     script_extender: bool = False,
-    plugin: Optional[tuple[str]] = (),
-    launcher: Optional[str] = None,
+    plugin: tuple[str] | None = (),
+    theme: str | None = None,
+    launcher: str | None = None,
+    mo2_archive: Path | None = None,
+    mo2_checksum: str | None = None,
 ):
     var.set_parameters(
         {
@@ -30,7 +34,10 @@ def install(
             "game_info_path": game_info_path,
             "log_level": log_level,
             "script_extender": script_extender,
+            "theme": theme,
             "plugins": list(plugin),
+            "mo2_archive": mo2_archive,
+            "mo2_checksum": mo2_checksum,
         }
     )
     logger.debug(f"Starting installation with parameters: {var.input_params}")
@@ -45,14 +52,22 @@ def install(
             if isinstance(var.game_info.executable, dict)
             else var.game_info.executable
         )
+        game_path = get_library()
+        if game_path is None:
+            logger.critical(
+                "Could not determine the game installation path. Aborting installation before modifying the instance."
+            )
+            raise SystemExit(1)
+
         state.current_instance = InstanceData(
             index=-1,
             game=game,
             nexus_slug=var.game_info.nexus_slug,
             instance_path=directory,
+            pin=mo2_archive is not None,
             launcher=launcher,
             launcher_ids=var.LauncherIDs.from_dict(var.game_info.launcher_ids),
-            game_path=get_library(),
+            game_path=game_path,
             game_executable=executable,
             script_extender=None,
             plugins=list(plugin),
@@ -67,6 +82,7 @@ def install(
         )
         raise SystemExit(1)
 
+    download_winetricks()
     configure_prefix()
     logger.info("Prefix configuration completed")
 

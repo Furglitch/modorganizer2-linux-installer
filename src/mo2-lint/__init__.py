@@ -1,22 +1,25 @@
 #!/usr/bin/env python3
 
-from loguru import logger
-from pathlib import Path
-from pydantic_core import from_json
-from typing import Optional
-from util import lang, state_file as state, variables as var
-from shared.logger import add_loggers, remove_loggers
-from command.install import install as _install
-from command.uninstall import uninstall as _uninstall
-from command.list import list as _list
-from command.pin import pin as _pin
-from command.update import update as _update
-from packaging.version import Version as version
-import certifi
-import click
 import re
 import ssl
+from pathlib import Path
+
+import certifi
+import click
 import yaml
+from command.install import install as _install
+from command.list import list as _list
+from command.pin import pin as _pin
+from command.uninstall import uninstall as _uninstall
+from command.update import update as _update
+from loguru import logger
+from packaging.version import Version as version
+from pydantic_core import from_json
+from util import lang
+from util import state_file as state
+from util import variables as var
+
+from shared.logger import add_loggers, remove_loggers
 
 ssl_context = ssl.create_default_context(cafile=certifi.where())
 
@@ -55,12 +58,18 @@ def pull_config():
     Before that, copies default configuration files from internal storage if not already present.
     """
     logger.info("Pulling latest configuration files from GitHub.")
-    for config in {"game_info.yml", "resource_info.yml", "plugin_info.yml"}:
+    for config in (
+        "game_info.yml",
+        "resource_info.yml",
+        "plugin_info.yml",
+        "theme_info.yml",
+    ):
         logger.debug(f"Processing config file: {config}")
         config_path = Path("~/.config/mo2-lint/", config).expanduser()
         dest = None
         if not config_path.exists():
             from shutil import copy2
+
             from util.internal_file import internal_file
 
             try:
@@ -87,7 +96,8 @@ def pull_config():
         remote_raw = f"https://raw.githubusercontent.com/Furglitch/modorganizer2-linux-installer/refs/heads/main/configs/{config}"
 
         try:
-            from urllib.request import urlopen, Request
+            from urllib.request import Request, urlopen
+
             from requests import get
 
             # Check remote schema version
@@ -110,9 +120,11 @@ def pull_config():
             else:
                 config_path.parent.mkdir(parents=True, exist_ok=True)
                 req = Request(remote_raw)
-                with urlopen(req, context=ssl_context) as response:
-                    with open(config_path, "wb") as out_file:
-                        out_file.write(response.read())
+                with (
+                    urlopen(req, context=ssl_context) as response,
+                    open(config_path, "wb") as out_file,
+                ):
+                    out_file.write(response.read())
         except Exception:
             logger.exception(f"Failed to download config file {config}")
 
@@ -133,6 +145,7 @@ def pre_init():
     var.load_games_info()
     var.load_resource_info()
     var.load_plugin_info()
+    var.load_theme_info()
     global game_list, plugin_list
     game_list = ", ".join(var.games_info.keys())
     plugin_list = ", ".join(var.plugin_info.keys())
@@ -142,10 +155,10 @@ pre_init()
 
 
 def start(
-    game: Optional[str] = None,
-    directory: Optional[Path | str] = None,
-    game_info_path: Optional[Path | str] = None,
-    log_level: Optional[str] = "INFO",
+    game: str | None = None,
+    directory: Path | str | None = None,
+    game_info_path: Path | str | None = None,
+    log_level: str | None = "INFO",
     unattended: bool = False,
 ):
     """
@@ -177,30 +190,31 @@ def start(
         directory = str(directory).rstrip("/")
         directory = Path(directory).expanduser().resolve()
     if game:
+        load_games_info(game_info_path)
         if game not in var.games_info:
+            available_games = ", ".join(var.games_info.keys())
             logger.critical(
-                f"Game '{game}' not supported. Available games: {game_list}"
+                f"Game '{game}' not supported. Available games: {available_games}"
             )
             raise SystemExit(1)
-        load_game_info(game, game_info_path)
+        var.load_game_info(game)
     state.load_state_file()
     logger.debug(f"Initialization complete. Game: {game}, Directory: {directory}")
     return game or None, directory or None
 
 
 # Helper Functions
-def load_game_info(game: Optional[str], game_info_path: Optional[Path]):
+def load_games_info(game_info_path: Path | str | None):
     """
-    Loads game information, both broad and specific to the target game.
+    Loads the standard or custom game information file.
 
     Parameters:
     -----------
-    game : str, optional
-        The target game for which to load game_info.
     game_info_path : Path | str, optional
         Path to a custom game_info.yml file.
     """
     if game_info_path:
+        game_info_path = Path(game_info_path).expanduser()
         if not game_info_path.exists():
             logger.warning(
                 f"Provided game_info.yml path does not exist: {game_info_path}"
@@ -212,6 +226,20 @@ def load_game_info(game: Optional[str], game_info_path: Optional[Path]):
             var.load_games_info(game_info_path)
     else:
         var.load_games_info()
+
+
+def load_game_info(game: str | None, game_info_path: Path | str | None):
+    """
+    Loads game information, both broad and specific to the target game.
+
+    Parameters:
+    -----------
+    game : str, optional
+        The target game for which to load game_info.
+    game_info_path : Path | str, optional
+        Path to a custom game_info.yml file.
+    """
+    load_games_info(game_info_path)
     var.load_game_info(game)
 
 
@@ -237,6 +265,13 @@ click_opt_game = click.option(
     "-g",
     type=str,
     help=f"Target game for the Mod Organizer 2 instance.\nOptions: [{game_list}]",
+)
+click_opt_theme = click.option(
+    "--theme",
+    "-t",
+    type=click.Choice(["auto", *var.theme_info.keys()], case_sensitive=False),
+    default=None,
+    help=f"Apply an included MO2 theme during installation.\nOptions: [auto, {', '.join(var.theme_info.keys())}]",
 )
 click_opt_directory = click.option(
     "--directory",
@@ -271,14 +306,43 @@ def click_arg_game(required=False):
     )
 
 
+click_opt_mo2_archive = click.option(
+    "--mo2-archive",
+    "mo2_archive",
+    type=click.Path(exists=True, file_okay=True, dir_okay=False),
+    default=None,
+    help="Install MO2 from a local .zip/.7z archive instead of downloading.",
+)
+click_opt_mo2_checksum = click.option(
+    "--mo2-checksum",
+    "mo2_checksum",
+    type=str,
+    default=None,
+    help="SHA-256 checksum of the --mo2-archive file (required with it).",
+)
+
+
+def validate_mo2_archive(mo2_archive: str | None, mo2_checksum: str | None):
+    if not mo2_archive:
+        return
+    if not mo2_checksum:
+        logger.critical("--mo2-checksum is required when --mo2-archive is provided.")
+        raise SystemExit(1)
+    if Path(mo2_archive).suffix.lower() not in (".zip", ".7z"):
+        logger.critical(
+            f"--mo2-archive must be a .zip or .7z file, but got '{Path(mo2_archive).name}'."
+        )
+        raise SystemExit(1)
+
+
 class CustomCommand(click.Command):  # Move [OPTIONS] to the end in the full help text
     class MoveOptions(click.Command):
         def get_help(self, ctx):
             usage = super().get_help(ctx)
             usage = usage.replace(" [OPTIONS]", "", 1)
-            m = re.search(r"^(Usage: .+?)\n", usage, flags=re.M)
+            m = re.search(r"^(Usage: .+?)\n", usage, flags=re.MULTILINE)
             if m:
-                start, end = m.span(1)
+                _start, end = m.span(1)
                 usage = usage[:end] + " [OPTIONS]" + usage[end:]
             return usage
 
@@ -297,6 +361,7 @@ def cli(ctx):
 @click_log_level
 @click_unattended
 @click_opt_game_info
+@click_opt_theme
 @click.option(
     "--launcher",
     "-L",
@@ -318,21 +383,26 @@ def cli(ctx):
     multiple=True,
     help="Specify MO2 plugins to download and install.",
 )
+@click_opt_mo2_archive
+@click_opt_mo2_checksum
 @click_arg_game(required=True)
 @click_arg_directory(required=True)
 def install(
     game: str,
     directory: Path,
-    game_info_path: Optional[Path],
-    launcher: Optional[str],
+    game_info_path: Path | None,
+    launcher: str | None,
     script_extender: bool,
     plugin: tuple[str],
+    theme: str | None,
+    mo2_archive: str | None,
+    mo2_checksum: str | None,
     log_level,
     unattended: bool,
 ):
     game, directory = start(game, directory, game_info_path, log_level, unattended)
     logger.debug(
-        f"Running install command with game={game}, directory={directory}, game_info_path={game_info_path}, launcher={launcher}, script_extender={script_extender}, plugin={plugin}"
+        f"Running install command with game={game}, directory={directory}, game_info_path={game_info_path}, launcher={launcher}, script_extender={script_extender}, plugin={plugin}, mo2_archive={mo2_archive}"
     )
     if plugin:
         for p in plugin:
@@ -341,6 +411,7 @@ def install(
                     f"Plugin '{p}' not supported. Available plugins: {list(var.plugin_info.keys())}",
                 )
                 raise SystemExit(1)
+    validate_mo2_archive(mo2_archive, mo2_checksum)
     _install(
         game,
         directory,
@@ -348,7 +419,10 @@ def install(
         log_level,
         script_extender,
         plugin,
+        theme,
         launcher,
+        Path(mo2_archive) if mo2_archive else None,
+        mo2_checksum,
     )
     state.write_state()
 
@@ -364,7 +438,7 @@ def install(
 def uninstall(
     game: str,
     directory: Path,
-    game_info_path: Optional[Path],
+    game_info_path: Path | None,
     log_level,
     unattended: bool,
 ):
@@ -383,7 +457,7 @@ def uninstall(
 @click_unattended
 @click_opt_directory
 @click_opt_game
-def list(game: Optional[str], directory: Optional[Path], log_level, unattended: bool):
+def list(game: str | None, directory: Path | None, log_level, unattended: bool):
     game, directory = start(game, directory, log_level=log_level, unattended=unattended)
     logger.debug(f"Running list command with game={game}, directory={directory}")
     _list(game, directory)
@@ -396,7 +470,7 @@ def list(game: Optional[str], directory: Optional[Path], log_level, unattended: 
 @click_unattended
 @click_arg_directory(required=True)
 def pin(directory: Path, log_level, unattended: bool):
-    waste, directory = start(
+    _waste, directory = start(
         directory=directory, log_level=log_level, unattended=unattended
     )
     logger.debug(f"Running pin command with directory={directory}")
@@ -410,7 +484,7 @@ def pin(directory: Path, log_level, unattended: bool):
 @click_unattended
 @click_arg_directory(required=True)
 def unpin(directory: Path, log_level, unattended: bool):
-    waste, directory = start(
+    _waste, directory = start(
         directory=directory, log_level=log_level, unattended=unattended
     )
     logger.debug(f"Running unpin command with directory={directory}")
@@ -422,13 +496,49 @@ def unpin(directory: Path, log_level, unattended: bool):
 @click_help
 @click_log_level
 @click_unattended
+@click_opt_game_info
+@click_opt_theme
+@click_opt_mo2_archive
+@click_opt_mo2_checksum
 @click_arg_directory(required=True)
-def update(directory: Path, log_level, unattended: bool):
-    waste, directory = start(
-        directory=directory, log_level=log_level, unattended=unattended
+def update(
+    directory: Path,
+    game_info_path: Path | None,
+    theme: str | None,
+    mo2_archive: str | None,
+    mo2_checksum: str | None,
+    log_level,
+    unattended: bool,
+):
+    _waste, directory = start(
+        directory=directory,
+        game_info_path=game_info_path,
+        log_level=log_level,
+        unattended=unattended,
     )
-    logger.debug(f"Running update command with directory={directory}")
-    _update(directory)
+    logger.debug(
+        f"Running update command with directory={directory}, game_info_path={game_info_path}, theme={theme}, mo2_archive={mo2_archive}"
+    )
+    validate_mo2_archive(mo2_archive, mo2_checksum)
+    var.set_parameters(
+        {
+            "game": "placeholder",
+            "directory": directory,
+            "game_info_path": game_info_path,
+            "log_level": log_level,
+            "script_extender": None,
+            "theme": theme,
+            "plugins": [],
+            "mo2_archive": Path(mo2_archive) if mo2_archive else None,
+            "mo2_checksum": mo2_checksum,
+        }
+    )
+    _update(
+        directory,
+        theme,
+        Path(mo2_archive) if mo2_archive else None,
+        mo2_checksum,
+    )
 
 
 if __name__ == "__main__":

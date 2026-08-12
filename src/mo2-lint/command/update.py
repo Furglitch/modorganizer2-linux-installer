@@ -1,16 +1,34 @@
 #!/usr/bin/env python3
 
-from loguru import logger
 from pathlib import Path
+
+from loguru import logger
 from step.external_resources import download_mod_organizer
-from util import state_file as state, variables as var
 from step.launch_opt import add_launch_opt, remove_launch_opt
-from util.redirector.install import install as install_redirector
+from util import state_file as state
+from util import variables as var
 from util.nexus.install_handler import install as install_handler
+from util.redirector.install import install as install_redirector
 from util.wine import protontricks, winetricks
 
 
-def update(directory: Path):
+def update_tricks():
+    logger.info("Updating protontricks")
+    try:
+        if state.current_instance.launcher == "steam":
+            protontricks.run(["--self-update"])
+        else:
+            winetricks.run(["--self-update"])
+    except SystemExit as e:
+        logger.warning(f"Failed to update tricks helper; continuing update: {e}")
+
+
+def update(
+    directory: Path,
+    theme: str | None = None,
+    mo2_archive: Path | None = None,
+    mo2_checksum: str | None = None,
+):
     """
     Updates the MO2 instance located at the given directory and refreshes the launch option.
     """
@@ -22,7 +40,10 @@ def update(directory: Path):
             "game_info_path": None,
             "log_level": None,
             "script_extender": None,
+            "theme": theme,
             "plugins": [],
+            "mo2_archive": mo2_archive,
+            "mo2_checksum": mo2_checksum,
         }
     )
 
@@ -46,19 +67,25 @@ def update(directory: Path):
     var.load_game_info(state.current_instance.game)
 
     if state.current_instance.pin is True:
-        logger.warning(
-            "Instance is pinned. Please unpin the instance if you want to update it."
-        )
-        return
+        if mo2_archive:
+            logger.info(
+                "Instance is pinned, but a local archive was supplied; overriding the pin for this update."
+            )
+        else:
+            logger.warning(
+                "Instance is pinned. Please unpin the instance if you want to update it."
+            )
+            return
 
     logger.debug(f"Updating MO2 executable in directory: {directory}")
     download_mod_organizer()
 
-    logger.info("Updating protontricks")
-    if state.current_instance.launcher == "steam":
-        protontricks.run(["--self-update"])
-    else:
-        winetricks.run(["--self-update"])
+    if mo2_archive:
+        logger.info("Pinning instance to the supplied local archive build.")
+        state.current_instance.pin = True
+        state.write_state(add_current=True)
+
+    update_tricks()
 
     install_redirector()
     install_handler()

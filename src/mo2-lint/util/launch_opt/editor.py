@@ -1,25 +1,25 @@
 #!/usr/bin/env python3
 
-from loguru import logger
-from typing import Union, Optional
+
 import click
+from loguru import logger
 
 try:
-    from . import steam, epic, gog
+    from . import epic, gog, steam
 except Exception:
-    import steam
     import epic
     import gog
+    import steam
 
 from util import variables as var
 
 
 def read_launch_option(
     launcher: str,
-    game_id: Union[int, str],
-    game_path: str = None,
+    game_id: int | str,
+    game_path: str | None = None,
     output: bool = False,
-) -> Union[list[var.AppInfo], list[dict]]:
+) -> list[var.AppInfo] | list[dict]:
     """
     Read launch options for a game from the appropriate launcher.
 
@@ -56,16 +56,16 @@ def read_launch_option(
 
 def add_launch_option(
     launcher: str,
-    game_id: Union[int, str],
+    game_id: int | str,
     executable: str,
-    arguments: list = [],
+    arguments: list | None = None,
     label: str = "Launch Mod Organizer",
-    game_path: str = None,
+    game_path: str | None = None,
     opt_type: str = "none",
-    oslist: Optional[list[str]] = None,
-    osarch: Optional[str] = None,
+    oslist: list[str] | None = None,
+    osarch: str | None = None,
     no_backup: bool = False,
-) -> Optional[int]:
+) -> int | None:
     """
     Add a launch option for a game to the appropriate launcher.
 
@@ -98,6 +98,8 @@ def add_launch_option(
         For Steam: returns the launch option index.
         For Epic/GOG: returns True on success, False on failure.
     """
+    if arguments is None:
+        arguments = []
     if launcher == "steam":
         return steam.add_internal(
             appid=int(game_id),
@@ -142,10 +144,10 @@ def add_launch_option(
 
 def remove_launch_option(
     launcher: str,
-    game_id: Union[int, str],
-    index: Optional[int] = None,
+    game_id: int | str,
+    index: int | None = None,
     label: str = "Launch Mod Organizer",
-    game_path: str = None,
+    game_path: str | None = None,
     no_backup: bool = False,
 ) -> bool:
     """
@@ -360,8 +362,8 @@ def remove(
     launcher: str,
     game_id: str,
     game_path: str,
-    index: Optional[int],
-    label: Optional[str],
+    index: int | None,
+    label: str | None,
     no_backup: bool,
 ):
     """

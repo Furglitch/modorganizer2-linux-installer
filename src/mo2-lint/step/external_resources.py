@@ -1,18 +1,27 @@
 #!/usr/bin/env python3
 
-from loguru import logger
-from pathlib import Path
-from patoolib import extract_archive as unzip
-from shutil import copytree, copyfile as copy, rmtree
-from typing import Optional
-from urllib.request import urlopen, Request
-from util import lang, variables as var, state_file as state
-from util.checksum import compare_checksum
-from util.download import download as dl, download_nexus as nexus_dl
-from util.state_file import symlink_instance
 import json
 import ssl
+import stat
+from pathlib import Path
+from shutil import copyfile as copy
+from shutil import copytree, rmtree
+from urllib.request import Request, urlopen
+
 import certifi
+from loguru import logger
+from patoolib import extract_archive as unzip
+from util import lang
+from util import state_file as state
+from util import variables as var
+from util.checksum import compare_checksum
+from util.download import download as dl
+from util.download import download_nexus as nexus_dl
+from util.state_file import symlink_instance
+from util.theme.gtk_gen import generate_gtk_theme
+from util.theme.kde_gen import generate_kde_theme
+
+from shared.mo2_ini import update_mo2_ini
 
 ssl_context = ssl.create_default_context(cafile=certifi.where())
 
@@ -21,40 +30,149 @@ download_dir = cache_dir / "downloads"
 extract_dir = download_dir / "extracted"
 
 
+def install_theme(theme_slug: str, destination: Path) -> bool:
+    """
+    Download and install a theme selected via --theme.
+    """
+
+    theme_slug = theme_slug.lower().strip()
+    if theme_slug == "auto":
+        return install_auto_theme(destination)
+
+    theme = var.resolve_theme(theme_slug)
+    if not theme:
+        logger.critical(f"Theme '{theme_slug}' is not recognized.")
+        raise SystemExit(1)
+
+    if not theme.stylesheet:
+        logger.critical(f"Theme '{theme_slug}' does not define a stylesheet.")
+        raise SystemExit(1)
+
+    if theme.nexus:
+        cache_dir = download_dir / "themes" / theme_slug
+        logger.info(f"Downloading Nexus theme '{theme_slug}'")
+        downloaded = nexus_dl(
+            theme.nexus.get("slug"),
+            theme.nexus.get("mod_id"),
+            theme.nexus.get("file_id"),
+            cache_dir,
+        )
+        if not downloaded:
+            logger.critical(f"Failed to download theme '{theme_slug}' from Nexus.")
+            raise SystemExit(1)
+
+        extracted = extract(
+            downloaded, extract_dir / "themes" / theme_slug / downloaded.stem
+        )
+        if not extracted or not extracted.exists():
+            logger.critical(f"Failed to extract theme '{theme_slug}'.")
+            raise SystemExit(1)
+
+        root = Path(theme.root) if theme.root else Path(".")
+        source = extracted if str(root) == "." else extracted / root
+        install_destination = destination / "stylesheets"
+        logger.debug(
+            f"Installing Nexus theme '{theme_slug}' from {source} to {install_destination}"
+        )
+        install(source, install_destination, None)
+    else:
+        logger.debug(
+            f"Theme '{theme_slug}' is bundled with MO2; only applying stylesheet"
+        )
+
+    if update_mo2_ini(destination, theme_stylesheet=theme.stylesheet):
+        logger.info(
+            f"Applied MO2 theme '{theme_slug}' using stylesheet '{theme.stylesheet}'"
+        )
+        return True
+
+    logger.warning(f"Failed to update ModOrganizer.ini for theme '{theme_slug}'.")
+    return False
+
+
+def install_auto_theme(destination: Path) -> bool:
+    """
+    Install a desktop-derived theme, preferring KDE colors over GTK colors.
+    """
+
+    stylesheets_dir = destination / "stylesheets"
+
+    for theme_name, generator in (
+        ("KDE", generate_kde_theme),
+        ("GTK", generate_gtk_theme),
+    ):
+        stylesheet = generator(stylesheets_dir)
+        if not stylesheet:
+            continue
+
+        logger.info(f"Auto-selected {theme_name} theme.")
+        if update_mo2_ini(destination, theme_stylesheet=stylesheet):
+            logger.info(f"Applied MO2 auto theme using stylesheet '{stylesheet}'")
+            return True
+
+        logger.warning(
+            f"Failed to update ModOrganizer.ini for auto theme '{theme_name}'."
+        )
+        return False
+
+    logger.critical(
+        "Could not resolve --theme auto because neither KDE nor GTK theme settings were found."
+    )
+    raise SystemExit(1)
+
+
 def download_mod_organizer():
     """
     Runs the download and installation process for Mod Organizer 2.
     """
 
-    logger.info("Starting download process for Mod Organizer 2")
     url = var.resource_info.mod_organizer.download_url
     checksum = var.resource_info.mod_organizer.checksum
     path_internal = var.resource_info.mod_organizer.path_internal
     checksum_internal = var.resource_info.mod_organizer.checksum_internal
-    logger.trace(
-        f"Download info: url={url}, checksum={checksum}, path_internal={path_internal}, checksum_internal={checksum_internal}"
-    )
+    local_archive = var.input_params.mo2_archive
+    destination = var.input_params.directory
+    theme = getattr(var.input_params, "theme", None)
 
-    downloaded = dl(url, download_dir, checksum=checksum)
-    logger.debug(f"Downloaded Mod Organizer 2 to {downloaded}")
+    if local_archive:
+        local_archive = Path(local_archive)
+        logger.info(f"Installing Mod Organizer 2 from local archive: {local_archive}")
+        if not compare_checksum(local_archive, var.input_params.mo2_checksum):
+            logger.critical(
+                f"Checksum mismatch for {local_archive}. Expected {var.input_params.mo2_checksum}."
+            )
+            raise SystemExit(1)
+        downloaded = local_archive
+        destination.mkdir(parents=True, exist_ok=True)
+    else:
+        logger.info("Starting download process for Mod Organizer 2")
+        logger.trace(
+            f"Download info: url={url}, checksum={checksum}, path_internal={path_internal}, checksum_internal={checksum_internal}"
+        )
+        downloaded = dl(url, download_dir, checksum=checksum)
+        logger.debug(f"Downloaded Mod Organizer 2 to {downloaded}")
+
     extracted = extract(downloaded, extract_dir / downloaded.stem)
     if extracted and extracted.exists():
         logger.debug(f"Extracted Mod Organizer 2 to {extracted}")
-        destination = var.input_params.directory
         mo2_exec = destination / path_internal
         if (  # if ModOrganizer.exe exists in destination check if it's the same file
-            destination.exists() and mo2_exec.exists()
+            not local_archive and destination.exists() and mo2_exec.exists()
         ):
-            if not compare_checksum(mo2_exec, checksum_internal):
-                if not lang.prompt_install_mo2_checksum_fail(str(mo2_exec)):
-                    logger.info(
-                        "User chose not to overwrite existing Mod Organizer 2 executable. Skipping installation."
-                    )
-                    return
+            if not compare_checksum(
+                mo2_exec, checksum_internal
+            ) and not lang.prompt_install_mo2_checksum_fail(str(mo2_exec)):
+                logger.info(
+                    "User chose not to overwrite existing Mod Organizer 2 executable. Skipping installation."
+                )
+                return
         elif not destination.exists():
             destination.mkdir(parents=True, exist_ok=True)
     logger.debug(f"Installing Mod Organizer 2 to {destination}")
     install(extracted, destination, None)
+    if theme:
+        install_theme(theme, destination)
+
     logger.success("Mod Organizer 2 download and installation complete.")
 
 
@@ -66,7 +184,9 @@ def download_winetricks():
     url = var.resource_info.winetricks.download_url
     checksum = var.resource_info.winetricks.checksum
     logger.trace(f"Download info: url={url}, checksum={checksum}")
-    dl(url, download_dir, "winetricks", checksum=checksum)
+    downloaded = dl(url, download_dir, "winetricks", checksum=checksum)
+    if downloaded:
+        downloaded.chmod(downloaded.stat().st_mode | stat.S_IEXEC)
     logger.success("Winetricks download complete.")
 
 
@@ -138,14 +258,15 @@ def download_scriptextender():
 
     if matches:
         match_count = len(matches)
+        keys = list(matches.keys())
         if match_count < 1 or None:
             return
         elif match_count == 1:
-            choice = matches[0]
+            choice = matches[keys[0]]
         elif match_count > 1:
             choice = lang.prompt_install_scriptextender_choice(matches)
-            index = choice if (0 < choice <= match_count) else None
-            choice = matches[index]
+            index = keys[choice] if 0 <= choice < match_count else None
+            choice = matches[index] if index is not None else None
     else:
         return
     logger.debug(f"Chosen script extender entry: {choice}")
@@ -162,7 +283,6 @@ def download_scriptextender():
                 logger.warning(
                     "Both direct download and Nexus download information found for the chosen script extender. Defaulting to direct download method."
                 )
-                pass
             if isinstance(direct, dict):
                 src[0] = direct.get("url", None)
             else:
@@ -272,7 +392,7 @@ def download_scriptextender():
 
 
 def install_scriptextender(
-    source: Path, whitelist: Optional[var.FileWhitelist] = None
+    source: Path, whitelist: var.FileWhitelist | None = None
 ) -> list[str]:
     """
     Installs the downloaded script extender to the game directory.
@@ -433,7 +553,7 @@ def extract(target: Path, destination: Path) -> Path:
 
 
 def install(
-    source: Path, destination: Path, file_list: Optional[var.FileWhitelist] = None
+    source: Path, destination: Path, file_list: var.FileWhitelist | None = None
 ) -> tuple[Path, list[str]]:
     """
     Copies files from source to destination.

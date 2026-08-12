@@ -1,0 +1,130 @@
+name: Auto-Label Issues and Pull Requests
+
+on:
+  issues:
+    types: [opened, edited]
+  pull_request_target:
+    types: [opened, edited]
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+      copilot-requests: write
+      contents: read
+
+    steps:
+      - name: Install GitHub Copilot CLI
+        run: npm install -g @github/copilot
+
+      - name: Auto-Label with GitHub Copilot
+        uses: actions/github-script@v9
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COPILOT_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { execFileSync } = require("node:child_process");
+
+            const issueOrPR = context.payload.issue || context.payload.pull_request;
+            const title = issueOrPR.title || "";
+            const body = issueOrPR.body || "";
+
+            const systemPrompt = `
+            You are an AI assistant tasked with assessing GitHub Issues and Pull Requests to suggest appropriate labels based on their content. Your only task is to analyze the title and body of the issue or pull request and recommend relevant labels. You should not provide any additional commentary or explanations.
+
+            The labels listed below are available for categorization:
+
+            ### Type Labels
+            These labels indicate the nature of the issue or pull request. They should be mutually exclusive, meaning only one type label should be applied to a given issue or pull request. More than likely, they will already be applied by the issue templates.
+
+            - 'bug': [Issue] Indicates a problem or error in the code or functionality. [PR] Represents a bug fix or correction in the codebase.
+            - 'enhancement': [Issue] Suggests an improvement or new feature. [PR] Represents the addition of a new feature or enhancement to the codebase.
+            - 'documentation': [Issue] Relates to issues or pull requests that involve documentation. [PR] Represents changes or additions to the documentation.
+            - 'ci': [Issue] Pertains to continuous integration processes or configurations. [PR] Represents changes or updates to CI/CD pipelines or configurations.
+
+            ### Subtype Labels
+            These labels provide addition context about the specific area or component affected by the issue or pull request.
+            - 'actions': Relates to GitHub Actions workflows or scripts.
+            - 'installer': Pertains to the main MO2-LINT installer application. May involve issues with execution or the installation process.
+            - 'mod-organizer': Concerns the Mod Organizer 2 application itself. It may involve behavior affected by MO2-LINT, Linux, or other factors.
+            - 'nxm-handler': Involves the 'nxm://' protocol handler, which is used for one-click mod installations. Issues may involve the handler failing to receive or process requests correctly.
+            - 'redirector': Involves the redirector component of MO2-LINT, which is responsible for redirecting Steam/Heroic launcher requests to the appropriate MO2 instance. Issues may involve the redirector failing to launch the game properly.
+
+            ### Game Labels
+            These labels indicate the specific game(s) affected by the issue or pull request. More than one may apply if the issue or pull request specifies similar behavior between multiple games. The label will alway be prefixed with 'game: ' to indicate that it is a game label.
+            - 'game: cyberpunk2077'
+            - 'game: dragonage'
+            - 'game: enderal'
+            - 'game: enderal_se'
+            - 'game: fallout3'
+            - 'game: fallout3_goty'
+            - 'game: fallout4'
+            - 'game: fallout4_vr'
+            - 'game: falloutlondon'
+            - 'game: falloutnv'
+            - 'game: morrowind'
+            - 'game: oblivion'
+            - 'game: skyrim'
+            - 'game: skyrim_se'
+            - 'game: skyrim_vr'
+            - 'game: starfield'
+
+            ### Launcher Labels
+            These labels indicate the specific launcher(s) affected by the issue or pull request. More than one may apply if the issue or pull request specifies similar behavior between multiple launchers. The label will always be prefixed with 'launcher: ' to indicate that it is a launcher label.
+            - 'launcher: steam'
+            - 'launcher: gog'
+            - 'launcher: epic'
+
+            Note: The user may specify the Heroic launcher in their comment, but this launcher provides both a Epic and GOG backend. If they do not specify which backend they are using, do not specify a launcher label, and instead recommend the 'more-info-needed' label.
+
+            ### Miscellaneous Labels
+            These labels provide additional context or information about the issue/pull request. More often than not, these labels provide information about the environment or configuration of the user reporting the issue.
+
+            - 'custom': Indicates that the user is attempting to run MO2-LINT for a game that is not officially supported. This may also involve custom resources such as a custom MO2 version or game dependency. This should not be used for PR's that add support for a new game.
+            - 'flatpak': Indicates that the user is running MO2-LINT as a Flatpak application. This may involve issues with Flatpak permissions or sandboxing.
+            - 'proton-ge': Indicates that the user is running MO2-LINT under Proton-GE. This may involve issues with Proton-GE compatibility or configuration.
+            - 'steam-deck': Indicates that the user is running MO2-LINT on a Steam Deck. This may involve issues with Steam Deck compatibility or configuration.
+            `;
+
+            const userPrompt = `Title: ${title}\n\nBody:\n${body}\n\nReturn only a JSON array of relevant labels from the list above. If no labels apply, return an empty JSON array.`;
+
+            try {
+              const rawOutput = execFileSync(
+                "copilot",
+                ["--yolo", "-p", `${systemPrompt}\n\n${userPrompt}`],
+                {
+                  encoding: "utf8",
+                  env: process.env,
+                  maxBuffer: 1024 * 1024
+                }
+              ).trim();
+
+              const cleanedOutput = rawOutput.replace(/```json|```/g, "").trim();
+              const startIndex = cleanedOutput.indexOf("[");
+              const endIndex = cleanedOutput.lastIndexOf("]");
+
+              if (startIndex === -1 || endIndex === -1 || endIndex < startIndex) {
+                throw new Error(`Copilot did not return a JSON array: ${rawOutput}`);
+              }
+
+              const suggestedLabels = JSON.parse(cleanedOutput.slice(startIndex, endIndex + 1));
+
+              if (Array.isArray(suggestedLabels) && suggestedLabels.length > 0) {
+                console.log(`Applying labels: ${suggestedLabels.join(", ")}`);
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueOrPR.number,
+                  labels: suggestedLabels
+                });
+              } else {
+                console.log("No valid labels recommended.");
+              }
+            } catch (err) {
+              console.error("Failed to apply automated labels:", err);
+            }

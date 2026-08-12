@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 
-from contextlib import contextmanager
-from loguru import logger
-from protontricks.cli.main import main as pt
-from typing import List
-from shared.logger import remove_loggers, add_loggers
 import os
 import re
 import sys
 import threading
+from contextlib import contextmanager
+
+from loguru import logger
+from protontricks.cli.main import main as pt
+
+from shared.logger import add_loggers, remove_loggers
 
 
-def run(command: List[str]) -> List[str]:
+def run(command: list[str]) -> list[str]:
     """
     Runs a protontricks command and captures its output.
 
@@ -48,7 +49,7 @@ def run(command: List[str]) -> List[str]:
     return output_lines
 
 
-def log_translation(input: str = None):
+def log_translation(input: str | None = None):
     """
     Translates protontricks log lines into more user-friendly messages and logs them.
 

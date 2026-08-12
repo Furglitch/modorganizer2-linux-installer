@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
-from datetime import datetime
-from loguru import logger
-from pathlib import Path
-from typing import Optional
 import sys
+from datetime import UTC, datetime
+from pathlib import Path
 
-timestamp: Optional[str] = None
+from loguru import logger
+
+timestamp: str | None = None
 
 
 def remove_loggers() -> None:
@@ -30,16 +30,16 @@ def persist_timestamp() -> str:
     """
     global timestamp
     if not timestamp:
-        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        timestamp = datetime.now(UTC).strftime("%Y-%m-%d_%H-%M-%S")
     return timestamp
 
 
 def add_loggers(
-    log_level: Optional[str] = "INFO",
+    log_level: str | None = "INFO",
     script: str = "mo2-lint",
     process: str = "process",
     console_sink=None,
-    log_path: Optional[Path] = None,
+    log_path: Path | None = None,
 ) -> None:
     """
     Adds loggers to loguru, for file and console output.

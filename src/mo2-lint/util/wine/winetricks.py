@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 
-from loguru import logger
-from pathlib import Path
-from typing import List, Optional
-from shared.logger import remove_loggers, add_loggers
 import os
 import re
 import shutil
 import subprocess
+from pathlib import Path
+
+from loguru import logger
+
+from shared.logger import add_loggers, remove_loggers
 
 found_exec = Path(
     shutil.which("winetricks") or "~/.cache/mo2-lint/downloads/winetricks"
@@ -15,10 +16,10 @@ found_exec = Path(
 
 
 def run(
-    exec: Optional[Path] = found_exec,
-    prefix: Path = None,
-    command: List[str] = None,
-) -> List[str]:
+    exec: Path | None = found_exec,
+    prefix: Path | None = None,
+    command: list[str] | None = None,
+) -> list[str]:
     """
     Runs a winetricks command and captures its output.
 
@@ -58,7 +59,7 @@ def run(
     add_loggers(script="mo2-lint", process="winetricks")
     output_lines = []
 
-    if not cmd == [str(exec), "-q", "-f"]:
+    if cmd != [str(exec), "-q", "-f"]:
         proc = subprocess.Popen(
             cmd,
             stdout=subprocess.PIPE,
@@ -89,9 +90,9 @@ def run(
 
 
 def apply(
-    exec: Optional[Path] = found_exec,
-    prefix: Path = None,
-    tricks: List[str] = None,
+    exec: Path | None = found_exec,
+    prefix: Path | None = None,
+    tricks: list[str] | None = None,
 ):
     """
     Applies tricks to the specified prefix.
@@ -111,7 +112,7 @@ def apply(
     run(exec, prefix, tricks)
 
 
-def log_translation(input: str = None):
+def log_translation(input: str | None = None):
     """
     Translates winetricks log lines into more user-friendly messages and logs them.
 

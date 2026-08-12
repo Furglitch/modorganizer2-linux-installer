@@ -26,7 +26,13 @@ games:
     tricks:
       - "xaudio2_7=native"
       - "d3dcompiler_47"
-      - "vcrun2022"
+    workarounds:
+      - instance_files:
+        - download_url: "https://github.com/ModOrganizer2/modorganizer/releases/download/v2.5.0/Mod.Organizer-2.5.0.7z"
+          checksum: "9f20a7f2807f5b5a0f801e749d1f4f9160d32b684fe4c27a2d70b0f29fa0fc94"
+          path_internal: "uibase.dll"
+          checksum_internal: "b52ff121ab23e0e6a4cf4d12722b3447579047fdcd42582bbfcda94be7bc7c07"
+          destination: "uibase.dll"
 
   dragonage:
     display_name: 'Dragon Age: Origins - Ultimate Edition'
@@ -82,7 +88,6 @@ games:
       - "xaudio2_7=native"
       - "xact"
       - "d3dcompiler_43"
-      - "vcrun2022"
 
   fallout3:
     display_name: Fallout 3
@@ -94,7 +99,6 @@ games:
     tricks:
       - "d3dcompiler_43"
       - "d3dx9"
-      - "vcrun2022"
     script_extenders:
       - version: "1.2-b2"
         runtime:
@@ -274,7 +278,6 @@ games:
       - "xaudio2_7=native"
       - "xact"
       - "d3dcompiler_43"
-      - "vcrun2022"
     script_extenders:
       - version: "0.6.21"
         runtime:
@@ -314,7 +317,6 @@ games:
     tricks:
       - "d3dcompiler_43"
       - "d3dx9"
-      - "vcrun2022"
     script_extenders:
       - version: "6.4.4"
         runtime:
@@ -474,12 +476,13 @@ games:
       epic: ac82db5035584c7f8a2c548d98c86b2c
     subdirectory: Skyrim Special Edition
     executable: SkyrimSELauncher.exe
+    launch_options:
+      osarch: "64"
     tricks:
       - "xaudio2_7=native"
       - "xact"
       - "d3dcompiler_43"
       - "d3dcompiler_47"
-      - "vcrun2022"
     script_extenders:
       - version: "2.0.20"
         runtime:
@@ -589,8 +592,6 @@ games:
       steam: 892970
     subdirectory: Valheim
     executable: valheim.exe
-    tricks:
-      - "vcrun2022"
 
   witcher3:
     display_name: The Witcher 3
@@ -602,9 +603,6 @@ games:
       steam: The Witcher 3
       gog: The Witcher 3 Wild Hunt
     executable: bin/x64/witcher3.exe
-    tricks:
-      - "vcrun2022"
-
   witcher3_goty:
     parent: witcher3
     launcher_ids:

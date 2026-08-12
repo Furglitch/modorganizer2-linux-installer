@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 
-from loguru import logger
 from pathlib import Path
-from typing import Optional
-from util import lang, variables as var, state_file as state
+
+from loguru import logger
+from util import lang
+from util import state_file as state
+from util import variables as var
 from util.heroic.find_library import get_data as get_heroic_data
 from util.steam.find_library import get_libraries as get_steam_libraries
 
 
-def get_launcher(launcher: Optional[str] = None) -> str:
+def get_launcher(launcher: str | None = None) -> str:
     """
     Determines the launcher being used based on detected libraries.
 
@@ -154,9 +156,12 @@ def get_library() -> Path:
         if not var.heroic_config or len(var.heroic_config) < 3:
             get_heroic_data()
         if var.heroic_config and len(var.heroic_config) >= 3:
-            heroic_launcher, heroic_game_id, heroic_install_path, heroic_wine_prefix = (
-                var.heroic_config
-            )
+            (
+                _heroic_launcher,
+                _heroic_game_id,
+                heroic_install_path,
+                _heroic_wine_prefix,
+            ) = var.heroic_config
             if isinstance(heroic_install_path, dict):
                 library = heroic_install_path.get(var.launcher)
             else:

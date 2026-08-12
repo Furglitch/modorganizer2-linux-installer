@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
-from loguru import logger
-from pathlib import Path
-from util import variables as var
 import os
 import re
+from pathlib import Path
+
+from loguru import logger
+from util import variables as var
 
 steam_directories = [
     "${HOME}/.local/share/Steam",

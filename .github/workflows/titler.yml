@@ -10,13 +10,13 @@ permissions:
 
 jobs:
 
-  # Job for new pack requests with game_name
-  process-new-pack:
+  # Job for new game requests
+  process-new-game:
     runs-on: ubuntu-latest
     if: contains(github.event.issue.title, '[Game]')
     steps:
-      - name:  Update new pack title
-        uses:  actions/github-script@v9.0.0
+      - name:  Update new game title
+        uses:  actions/github-script@v9
         with:
           script:  |
             const body = context.payload.issue.body || '';
