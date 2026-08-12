@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
-from loguru import logger
-from pathlib import Path
 import hashlib
+from pathlib import Path
+
+from loguru import logger
 
 
 def get_checksum(target: Path) -> str:

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 from loguru import logger
-from util import state_file as state, variables as var
+from util import state_file as state
+from util import variables as var
 from util.launch_opt.editor import add_launch_option, remove_launch_option
 
 
@@ -10,7 +11,7 @@ def add_launch_opt():
     game_id = getattr(state.current_instance.launcher_ids, launcher, None)
     if launcher and game_id:
         label = "Mod Organizer"
-        if not launcher == "steam":
+        if launcher != "steam":
             label = "Launch " + label
         launch_index = add_launch_option(
             launcher=launcher,

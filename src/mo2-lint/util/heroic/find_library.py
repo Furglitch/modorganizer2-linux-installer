@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-from loguru import logger
 from pathlib import Path
+
+from loguru import logger
 from pydantic_core import from_json
 from util import variables as var
 
@@ -19,7 +20,7 @@ epic_data = {}
 
 
 def get_data() -> tuple[
-    str | dict[str | str],
+    str | dict[str],
     str | int | dict[str, str | int],
     Path | dict[str, Path],
     Path | dict[str, Path],

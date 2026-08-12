@@ -6,7 +6,6 @@ import os
 from hashlib import sha1
 from struct import pack, unpack
 
-
 APPINFO_29 = 0x107564429
 APPINFO_28 = 0x107564428
 
@@ -317,7 +316,7 @@ class Appinfo:
         tabs = b"\t" * number_of_tabs
 
         # Re-encode strings with their original encoding
-        for key in data.keys():
+        for key in data:
             if isinstance(data[key], dict):
                 number_of_tabs += 1
 

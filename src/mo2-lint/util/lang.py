@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
+from pathlib import Path
+
 from InquirerPy import prompt
 from loguru import logger
-from pathlib import Path
-from typing import Optional
-from util import state_file as state, variables as var
+from util import state_file as state
+from util import variables as var
 
 help_install = """Create a new Mod Organizer 2 instance.
 \nGAME                            Game for the Mod Organizer 2 instance.
@@ -146,15 +147,13 @@ def prompt_install_scriptextender_choice(script_extenders: dict) -> int:
 
     message = "Multiple script extenders are available for installation.\n  Please select one: "
     choices = []
-    idx = 0
-    for se in script_extenders.values():
-        idx += 1
+    for idx, se in enumerate(script_extenders.values(), start=1):
         version = getattr(se, "version", "Unknown Version")
         runtimes = getattr(se, "runtime", "N/A")
         runtimes = runtimes.get(var.launcher) if runtimes else None
         runtime = None
         if isinstance(runtimes, dict):
-            for key, value in runtimes.items():
+            for value in runtimes.values():
                 if isinstance(value, list):
                     runtime = ", ".join(value)
                 else:
@@ -176,7 +175,9 @@ def prompt_install_scriptextender_choice(script_extenders: dict) -> int:
 
 
 def prompt_instance_choice(
-    message: str = None, instance_list: list = [], additional_choices: list = []
+    message: str | None = None,
+    instance_list: list | None = None,
+    additional_choices: list | None = None,
 ) -> int | str:
     """
     Prompts the user to choose an instance from a list.
@@ -195,6 +196,10 @@ def prompt_instance_choice(
     int | str
         The index of the selected instance.
     """
+    if additional_choices is None:
+        additional_choices = []
+    if instance_list is None:
+        instance_list = []
     if message is None:
         message = "Select the instance to use: "
     if var.unattended:
@@ -239,7 +244,7 @@ def prompt_instance_choice_existing(
         "name": "instance_option",
     }
     result = prompt([msg])
-    if not result["instance_option"] == "Create new instance":
+    if result["instance_option"] != "Create new instance":
         result["instance_option"] = Path(result["instance_option"].split(" at ")[1])
     logger.debug(f"User chose: {result['instance_option']}")
     return result["instance_option"]
@@ -310,7 +315,7 @@ def prompt_instance_conflict() -> bool:
 
 
 def prompt_launcher_choice(
-    steam_path: Optional[str], gog_path: Optional[str], epic_path: Optional[str]
+    steam_path: str | None, gog_path: str | None, epic_path: str | None
 ) -> str:
     """
     Prompts the user to choose which launcher to use.
@@ -390,9 +395,7 @@ def prompt_uninstall_trash() -> bool:
     result = prompt([msg])
     permanent_delete = result["trash_choice"] == "Delete Permanently"
     logger.debug(f"User chose permanent delete: {permanent_delete}")
-    if permanent_delete:
-        return True
-    return False
+    return bool(permanent_delete)
 
 
 def prompt_uninstall_trash_confirm() -> bool:

@@ -1,22 +1,25 @@
 #!/usr/bin/env python3
 
-from loguru import logger
-from pathlib import Path
-from pydantic_core import from_json
-from typing import Optional
-from util import lang, state_file as state, variables as var
-from shared.logger import add_loggers, remove_loggers
-from command.install import install as _install
-from command.uninstall import uninstall as _uninstall
-from command.list import list as _list
-from command.pin import pin as _pin
-from command.update import update as _update
-from packaging.version import Version as version
-import certifi
-import click
 import re
 import ssl
+from pathlib import Path
+
+import certifi
+import click
 import yaml
+from command.install import install as _install
+from command.list import list as _list
+from command.pin import pin as _pin
+from command.uninstall import uninstall as _uninstall
+from command.update import update as _update
+from loguru import logger
+from packaging.version import Version as version
+from pydantic_core import from_json
+from util import lang
+from util import state_file as state
+from util import variables as var
+
+from shared.logger import add_loggers, remove_loggers
 
 ssl_context = ssl.create_default_context(cafile=certifi.where())
 
@@ -55,17 +58,18 @@ def pull_config():
     Before that, copies default configuration files from internal storage if not already present.
     """
     logger.info("Pulling latest configuration files from GitHub.")
-    for config in {
+    for config in (
         "game_info.yml",
         "resource_info.yml",
         "plugin_info.yml",
         "theme_info.yml",
-    }:
+    ):
         logger.debug(f"Processing config file: {config}")
         config_path = Path("~/.config/mo2-lint/", config).expanduser()
         dest = None
         if not config_path.exists():
             from shutil import copy2
+
             from util.internal_file import internal_file
 
             try:
@@ -92,7 +96,8 @@ def pull_config():
         remote_raw = f"https://raw.githubusercontent.com/Furglitch/modorganizer2-linux-installer/refs/heads/main/configs/{config}"
 
         try:
-            from urllib.request import urlopen, Request
+            from urllib.request import Request, urlopen
+
             from requests import get
 
             # Check remote schema version
@@ -115,9 +120,11 @@ def pull_config():
             else:
                 config_path.parent.mkdir(parents=True, exist_ok=True)
                 req = Request(remote_raw)
-                with urlopen(req, context=ssl_context) as response:
-                    with open(config_path, "wb") as out_file:
-                        out_file.write(response.read())
+                with (
+                    urlopen(req, context=ssl_context) as response,
+                    open(config_path, "wb") as out_file,
+                ):
+                    out_file.write(response.read())
         except Exception:
             logger.exception(f"Failed to download config file {config}")
 
@@ -148,10 +155,10 @@ pre_init()
 
 
 def start(
-    game: Optional[str] = None,
-    directory: Optional[Path | str] = None,
-    game_info_path: Optional[Path | str] = None,
-    log_level: Optional[str] = "INFO",
+    game: str | None = None,
+    directory: Path | str | None = None,
+    game_info_path: Path | str | None = None,
+    log_level: str | None = "INFO",
     unattended: bool = False,
 ):
     """
@@ -197,7 +204,7 @@ def start(
 
 
 # Helper Functions
-def load_games_info(game_info_path: Optional[Path | str]):
+def load_games_info(game_info_path: Path | str | None):
     """
     Loads the standard or custom game information file.
 
@@ -221,7 +228,7 @@ def load_games_info(game_info_path: Optional[Path | str]):
         var.load_games_info()
 
 
-def load_game_info(game: Optional[str], game_info_path: Optional[Path | str]):
+def load_game_info(game: str | None, game_info_path: Path | str | None):
     """
     Loads game information, both broad and specific to the target game.
 
@@ -315,7 +322,7 @@ click_opt_mo2_checksum = click.option(
 )
 
 
-def validate_mo2_archive(mo2_archive: Optional[str], mo2_checksum: Optional[str]):
+def validate_mo2_archive(mo2_archive: str | None, mo2_checksum: str | None):
     if not mo2_archive:
         return
     if not mo2_checksum:
@@ -333,9 +340,9 @@ class CustomCommand(click.Command):  # Move [OPTIONS] to the end in the full hel
         def get_help(self, ctx):
             usage = super().get_help(ctx)
             usage = usage.replace(" [OPTIONS]", "", 1)
-            m = re.search(r"^(Usage: .+?)\n", usage, flags=re.M)
+            m = re.search(r"^(Usage: .+?)\n", usage, flags=re.MULTILINE)
             if m:
-                start, end = m.span(1)
+                _start, end = m.span(1)
                 usage = usage[:end] + " [OPTIONS]" + usage[end:]
             return usage
 
@@ -383,13 +390,13 @@ def cli(ctx):
 def install(
     game: str,
     directory: Path,
-    game_info_path: Optional[Path],
-    launcher: Optional[str],
+    game_info_path: Path | None,
+    launcher: str | None,
     script_extender: bool,
     plugin: tuple[str],
-    theme: Optional[str],
-    mo2_archive: Optional[str],
-    mo2_checksum: Optional[str],
+    theme: str | None,
+    mo2_archive: str | None,
+    mo2_checksum: str | None,
     log_level,
     unattended: bool,
 ):
@@ -431,7 +438,7 @@ def install(
 def uninstall(
     game: str,
     directory: Path,
-    game_info_path: Optional[Path],
+    game_info_path: Path | None,
     log_level,
     unattended: bool,
 ):
@@ -450,7 +457,7 @@ def uninstall(
 @click_unattended
 @click_opt_directory
 @click_opt_game
-def list(game: Optional[str], directory: Optional[Path], log_level, unattended: bool):
+def list(game: str | None, directory: Path | None, log_level, unattended: bool):
     game, directory = start(game, directory, log_level=log_level, unattended=unattended)
     logger.debug(f"Running list command with game={game}, directory={directory}")
     _list(game, directory)
@@ -463,7 +470,7 @@ def list(game: Optional[str], directory: Optional[Path], log_level, unattended: 
 @click_unattended
 @click_arg_directory(required=True)
 def pin(directory: Path, log_level, unattended: bool):
-    waste, directory = start(
+    _waste, directory = start(
         directory=directory, log_level=log_level, unattended=unattended
     )
     logger.debug(f"Running pin command with directory={directory}")
@@ -477,7 +484,7 @@ def pin(directory: Path, log_level, unattended: bool):
 @click_unattended
 @click_arg_directory(required=True)
 def unpin(directory: Path, log_level, unattended: bool):
-    waste, directory = start(
+    _waste, directory = start(
         directory=directory, log_level=log_level, unattended=unattended
     )
     logger.debug(f"Running unpin command with directory={directory}")
@@ -496,14 +503,14 @@ def unpin(directory: Path, log_level, unattended: bool):
 @click_arg_directory(required=True)
 def update(
     directory: Path,
-    game_info_path: Optional[Path],
-    theme: Optional[str],
-    mo2_archive: Optional[str],
-    mo2_checksum: Optional[str],
+    game_info_path: Path | None,
+    theme: str | None,
+    mo2_archive: str | None,
+    mo2_checksum: str | None,
     log_level,
     unattended: bool,
 ):
-    waste, directory = start(
+    _waste, directory = start(
         directory=directory,
         game_info_path=game_info_path,
         log_level=log_level,

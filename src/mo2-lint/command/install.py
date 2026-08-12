@@ -1,30 +1,31 @@
 #!usr/bin/env python3
 
-from loguru import logger
 from pathlib import Path
-from typing import Optional
-from util import variables as var, state_file as state
-from util.state_file import set_index, InstanceData
-from util.redirector.install import install as install_redirector
-from util.nexus.install_handler import install as install_handler
-from step.workarounds import apply_workarounds
-from step.load_game_info import get_launcher, get_library
-from step.external_resources import download, download_winetricks
+
+from loguru import logger
 from step.configure_prefix import prompt as configure_prefix
+from step.external_resources import download, download_winetricks
 from step.launch_opt import add_launch_opt
+from step.load_game_info import get_launcher, get_library
+from step.workarounds import apply_workarounds
+from util import state_file as state
+from util import variables as var
+from util.nexus.install_handler import install as install_handler
+from util.redirector.install import install as install_redirector
+from util.state_file import InstanceData, set_index
 
 
 def install(
     game: str,
     directory: Path,
-    game_info_path: Optional[Path] = None,
+    game_info_path: Path | None = None,
     log_level: str = "INFO",
     script_extender: bool = False,
-    plugin: Optional[tuple[str]] = (),
-    theme: Optional[str] = None,
-    launcher: Optional[str] = None,
-    mo2_archive: Optional[Path] = None,
-    mo2_checksum: Optional[str] = None,
+    plugin: tuple[str] | None = (),
+    theme: str | None = None,
+    launcher: str | None = None,
+    mo2_archive: Path | None = None,
+    mo2_checksum: str | None = None,
 ):
     var.set_parameters(
         {

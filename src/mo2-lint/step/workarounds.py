@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
 
-from loguru import logger
 from pathlib import Path
 from shutil import copyfile
+
+from loguru import logger
+from util import state_file as state
+from util import variables as var
 from util.checksum import compare_checksum
-from util import variables as var, state_file as state
 from util.internal_file import internal_file
 
 
 def apply_instance_files(files: list[dict]):
-    from .external_resources import download_dir, extract, extract_dir
     from util.download import download
+
+    from .external_resources import download_dir, extract, extract_dir
 
     instance_path = Path(state.current_instance.instance_path)
     workaround_dir = download_dir / "workarounds"

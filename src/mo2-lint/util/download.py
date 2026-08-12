@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 
-from loguru import logger
+import ssl
 from pathlib import Path
-from typing import Optional
+
+import certifi
+from loguru import logger
 from util.checksum import compare_checksum
 from util.nexus.download_mod import nexus_download as nexus_dl
-import ssl
-import certifi
 
 ssl_context = ssl.create_default_context(cafile=certifi.where())
 
 
 def download(
-    url: str, dest: Path, filename: Optional[str] = None, checksum: Optional[str] = None
+    url: str, dest: Path, filename: str | None = None, checksum: str | None = None
 ) -> Path:
     """
     Downloads a file from the specified URL to the destination directory.
@@ -48,12 +48,14 @@ def download(
 
     for i in range(attempts):
         try:
-            from urllib.request import urlopen, Request
+            from urllib.request import Request, urlopen
 
             req = Request(url)
-            with urlopen(req, context=ssl_context) as response:
-                with open(export, "wb") as out_file:
-                    out_file.write(response.read())
+            with (
+                urlopen(req, context=ssl_context) as response,
+                open(export, "wb") as out_file,
+            ):
+                out_file.write(response.read())
             if export.exists() and checksum:
                 if compare_checksum(export, checksum):
                     logger.trace(
@@ -82,8 +84,8 @@ def download_nexus(
     mod_id: int,
     file_id: int,
     dest: Path,
-    filename: Optional[str] = None,
-    checksum: Optional[str] = None,
+    filename: str | None = None,
+    checksum: str | None = None,
 ) -> Path:
     """
     Downloads a file from Nexus Mods.

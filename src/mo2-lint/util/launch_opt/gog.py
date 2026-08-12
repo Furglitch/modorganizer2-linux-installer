@@ -4,10 +4,12 @@
 import json
 import subprocess
 import time
-from loguru import logger
 from pathlib import Path
-from pydantic_core import from_json
 from shutil import copy2
+
+from loguru import logger
+from pydantic_core import from_json
+
 from shared.logger import persist_timestamp
 
 
@@ -68,9 +70,9 @@ def find_gog_info_file(game_path: Path, game_id: str) -> Path | None:
 
 
 def read_internal(
-    info_path: Path = None,
-    game_path: Path = None,
-    game_id: str = None,
+    info_path: Path | None = None,
+    game_path: Path | None = None,
+    game_id: str | None = None,
     output: bool = False,
 ) -> list[dict]:
     """
@@ -133,11 +135,11 @@ def read_internal(
 
 
 def add_internal(
-    info_path: Path = None,
-    game_path: Path = None,
-    game_id: str = None,
-    executable: str = None,
-    arguments: str = None,
+    info_path: Path | None = None,
+    game_path: Path | None = None,
+    game_id: str | None = None,
+    executable: str | None = None,
+    arguments: str | None = None,
     label: str = "Launch Mod Organizer",
     is_primary: bool = False,
     is_hidden: bool = False,
@@ -237,9 +239,9 @@ def add_internal(
 
 
 def remove_internal(
-    info_path: Path = None,
-    game_path: Path = None,
-    game_id: str = None,
+    info_path: Path | None = None,
+    game_path: Path | None = None,
+    game_id: str | None = None,
     label: str = "Launch Mod Organizer",
     no_backup: bool = False,
 ) -> bool:
@@ -312,6 +314,7 @@ def restart_heroic():
         result = subprocess.run(
             ["pgrep", "-x", "heroic"],
             capture_output=True,
+            check=False,
             text=True,
         )
         if result.returncode != 0:

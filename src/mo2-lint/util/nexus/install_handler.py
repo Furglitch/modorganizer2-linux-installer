@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 
-from loguru import logger
-from pathlib import Path
-from shutil import copy2
-from util.checksum import compare_checksum
-from util.internal_file import internal_file
 import shutil
 import stat
 import subprocess
+from pathlib import Path
+from shutil import copy2
+
+from loguru import logger
+from util.checksum import compare_checksum
+from util.internal_file import internal_file
 
 
 def install():

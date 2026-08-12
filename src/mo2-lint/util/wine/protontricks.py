@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 
-from contextlib import contextmanager
-from loguru import logger
-from pathlib import Path
-from protontricks.cli.main import main as pt
-from typing import List
-from shared.logger import remove_loggers, add_loggers
-from util import variables as var
 import os
 import re
 import shutil
 import stat
 import sys
 import threading
+from contextlib import contextmanager
+from pathlib import Path
+
+from loguru import logger
+from protontricks.cli.main import main as pt
+from util import variables as var
+
+from shared.logger import add_loggers, remove_loggers
 
 
 class ProtontricksOutput(list):
@@ -60,7 +61,7 @@ def error_from_line(line: str) -> str | None:
     return None
 
 
-def has_ignored_warning_exit(output_lines: List[str]) -> bool:
+def has_ignored_warning_exit(output_lines: list[str]) -> bool:
     saw_warning = False
     for line in output_lines:
         if is_warning_line(line):
@@ -78,9 +79,12 @@ def error_from_output(output_lines: ProtontricksOutput) -> str | None:
         return output_lines.error_message
 
     for line in reversed(output_lines):
-        if not is_warning_line(line) and not is_noise_line(line):
-            if error_message := error_from_line(line):
-                return error_message
+        if (
+            not is_warning_line(line)
+            and not is_noise_line(line)
+            and (error_message := error_from_line(line))
+        ):
+            return error_message
     return None
 
 
@@ -113,7 +117,7 @@ def protontricks_environment():
             os.environ["WINETRICKS"] = original_winetricks
 
 
-def run(command: List[str]) -> List[str]:
+def run(command: list[str]) -> list[str]:
     """
     Runs a protontricks command and captures its output.
 
@@ -174,7 +178,7 @@ def run(command: List[str]) -> List[str]:
     return output_lines
 
 
-def apply(id: int, tricks: List[str]):
+def apply(id: int, tricks: list[str]):
     """
     Applies tricks to the specified prefix.
 
@@ -245,7 +249,7 @@ def get_prefix(id: int) -> Path:
     return prefix
 
 
-def log_translation(input: str = None):
+def log_translation(input: str | None = None):
     """
     Translates protontricks log lines into more user-friendly messages and logs them.
 
