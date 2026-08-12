@@ -1,0 +1,10 @@
+#!/bin/sh
+
+APP="$1"
+WINPATH="$2"
+
+WINPATH="${WINPATH#\"}"
+WINPATH="${WINPATH%\"}"
+
+UNIXPATH="$(printf '%s' "$WINPATH" | sed -e 's/\\/\//g' -e 's/^[A-Za-z]://')"
+exec "$APP" "$UNIXPATH"

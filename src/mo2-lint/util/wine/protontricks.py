@@ -194,6 +194,23 @@ def apply(id: int, tricks: list[str]):
     run([f"{id}", "-q", "--force"] + tricks)
 
 
+def import_registry(id: int, registry_file: Path):
+    """
+    Imports a registry file into the specified Proton prefix.
+
+    Parameters
+    ----------
+    id : int
+        The Proton prefix ID.
+    registry_file : Path
+        The registry file to import.
+    """
+
+    registry_file = Path(registry_file).expanduser().resolve()
+    logger.debug(f"Importing registry file into prefix ID {id}: {registry_file}")
+    run(["-c", f'wine regedit /C "{registry_file}"', f"{id}"])
+
+
 def check_prefix(id: int) -> bool:
     """
     Checks if a Proton prefix exists for the given ID.
