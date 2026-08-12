@@ -40,6 +40,14 @@ def lighten_rgb(rgb_str: str, factor: float = 0.2) -> str:
 
 def _copy_font_file(font_name: str, output_dir: Path) -> None:
     try:
+        matched_family = subprocess.check_output(
+            ["fc-match", "-f", "%{family[0]}\n", font_name], text=True
+        ).strip()
+        if matched_family.casefold() != font_name.casefold():
+            logger.debug(
+                f"Font '{font_name}' resolved to '{matched_family}'; skipping font copy."
+            )
+            return
         font_file = subprocess.check_output(
             ["fc-match", "-f", "%{file}\n", font_name], text=True
         ).strip()
