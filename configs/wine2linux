@@ -16,8 +16,15 @@ fi
 
 LAUNCH_CLIENT="${STEAM_RUNTIME_LAUNCH_SCRIPT:-$PRESSURE_VESSEL_RUNTIME_BASE/pressure-vessel/bin/steam-runtime-launch-client}"
 
-if [ -x "$LAUNCH_CLIENT" ]; then
-  exec "$LAUNCH_CLIENT" --alongside-steam -- gio open "$UNIXPATH"
-else
+if [ ! -x "$LAUNCH_CLIENT" ]; then
   exec "$APP" "$UNIXPATH"
 fi
+
+if [ -f "$UNIXPATH" ] && [ ! -s "$UNIXPATH" ]; then
+  DEFAULT_APP="$("$LAUNCH_CLIENT" --alongside-steam -- gio mime text/plain 2>/dev/null | sed -n '1s/.*: //p')"
+  if [ -n "$DEFAULT_APP" ]; then
+    exec "$LAUNCH_CLIENT" --alongside-steam -- gtk-launch "$DEFAULT_APP" "$UNIXPATH"
+  fi
+fi
+
+exec "$LAUNCH_CLIENT" --alongside-steam -- gio open "$UNIXPATH"
