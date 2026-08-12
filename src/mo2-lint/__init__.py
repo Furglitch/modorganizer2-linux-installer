@@ -262,9 +262,9 @@ click_opt_game = click.option(
 click_opt_theme = click.option(
     "--theme",
     "-t",
-    type=click.Choice(list(var.theme_info.keys()), case_sensitive=False),
+    type=click.Choice(["auto", *var.theme_info.keys()], case_sensitive=False),
     default=None,
-    help=f"Apply an included MO2 theme during installation.\nOptions: [{', '.join(var.theme_info.keys())}]",
+    help=f"Apply an included MO2 theme during installation.\nOptions: [auto, {', '.join(var.theme_info.keys())}]",
 )
 click_opt_directory = click.option(
     "--directory",

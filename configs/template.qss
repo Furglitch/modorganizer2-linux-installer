@@ -1,0 +1,154 @@
+/* ###### Global ###### */
+QWidget {
+    background-color: ${WINDOW_BG};
+    color: ${WINDOW_FG};
+    font-family: ${FONT_FAMILY};
+}
+
+/* ###### Lists / Views ###### */
+QTreeView, QListView, QTableView {
+    background-color: ${VIEW_BG};
+    color: ${VIEW_FG};
+    alternate-background-color: ${ALTERNATE_ROW_COLOR};
+    gridline-color: ${BORDER_COLOR};
+}
+QHeaderView::section {
+    background-color: ${VIEW_BG};
+    color: ${VIEW_FG};
+    border: 1px solid ${BORDER_COLOR};
+}
+
+/* ###### Buttons ###### */
+QPushButton {
+    background-color: ${BUTTON_BG};
+    color: ${BUTTON_FG};
+    border: 1px solid ${BORDER_COLOR};
+}
+QPushButton:hover {
+    background-color: ${BUTTON_HOVER};
+}
+QPushButton:focus {
+    border: 1px solid ${BUTTON_FOCUS};
+}
+
+/* ###### Line edits / text fields ###### */
+QLineEdit, QTextEdit, QPlainTextEdit {
+    background-color: ${VIEW_BG};
+    color: ${VIEW_FG};
+    border: 1px solid ${BORDER_COLOR};
+}
+QLineEdit:focus, QTextEdit:focus, QPlainTextEdit:focus {
+    border: 1px solid ${BUTTON_FOCUS};
+}
+
+/* ###### Tooltips ###### */
+QToolTip {
+    background-color: ${TOOLTIP_BG};
+    color: ${TOOLTIP_FG};
+    border: 1px solid ${BORDER_COLOR};
+}
+
+/* ###### Tabs ###### */
+QTabWidget::pane {
+    border: 1px solid ${BORDER_COLOR};
+    background: ${WINDOW_BG};
+}
+QTabBar::tab {
+    background: ${BUTTON_BG};
+    color: ${BUTTON_FG};
+    border: 1px solid ${BORDER_COLOR};
+    padding: 4px;
+}
+QTabBar::tab:selected {
+    background: ${BUTTON_HOVER};
+    color: ${BUTTON_FG};
+}
+
+QTabBar::tab:!selected {
+    margin-top: 2px; /* slight offset for unselected tabs */
+}
+
+/* ###### Group boxes ###### */
+QGroupBox {
+    background-color: ${WINDOW_BG};
+    border: 1px solid ${BORDER_COLOR};
+    margin-top: 6px;
+}
+QGroupBox:title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 2px;
+    color: ${WINDOW_FG};
+}
+
+/* ###### Scrollbars ###### */
+QScrollBar:vertical {
+    background: ${SCROLLBAR_BG};
+    width: 12px;
+    margin: 0px;
+}
+QScrollBar::handle:vertical {
+    background: ${SCROLLBAR_HANDLE};
+    min-height: 20px;
+    border-radius: 0px;
+}
+QScrollBar::handle:vertical:hover {
+    background: ${SCROLLBAR_HANDLE_HOVER};
+}
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical {
+    background: ${SCROLLBAR_BG};
+}
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+QScrollBar:horizontal {
+    background: ${SCROLLBAR_BG};
+    height: 12px;
+    margin: 0px;
+}
+QScrollBar::handle:horizontal {
+    background: ${SCROLLBAR_HANDLE};
+    min-width: 20px;
+    border-radius: 0px;
+}
+QScrollBar::handle:horizontal:hover {
+    background: ${SCROLLBAR_HANDLE_HOVER};
+}
+QScrollBar::add-page:horizontal,
+QScrollBar::sub-page:horizontal {
+    background: ${SCROLLBAR_BG};
+}
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal {
+    width: 0px;
+}
+
+/* ###### Headers ###### */
+QHeaderView::section {
+    background-color: ${VIEW_BG};
+    color: ${VIEW_FG};
+    border: 1px solid ${BORDER_COLOR};
+    padding: 2px;
+}
+
+/* ###### Checkboxes / radio buttons ###### */
+QCheckBox, QRadioButton {
+    color: ${WINDOW_FG};
+    background-color: ${WINDOW_BG};
+}
+
+/* ###### Combo boxes ###### */
+QComboBox {
+    background-color: ${BUTTON_BG};
+    color: ${BUTTON_FG};
+    border: 1px solid ${BORDER_COLOR};
+}
+QComboBox QAbstractItemView {
+    background-color: ${VIEW_BG};
+    color: ${VIEW_FG};
+    selection-background-color: ${SELECTION_BG};
+    selection-color: ${SELECTION_FG};
+}

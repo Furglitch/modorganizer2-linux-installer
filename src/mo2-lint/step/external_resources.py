@@ -1,20 +1,27 @@
 #!/usr/bin/env python3
 
-from loguru import logger
-from pathlib import Path
-from patoolib import extract_archive as unzip
-from shutil import copytree, copyfile as copy, rmtree
-from typing import Optional
-from urllib.request import urlopen, Request
-from util import lang, variables as var, state_file as state
-from util.checksum import compare_checksum
-from util.download import download as dl, download_nexus as nexus_dl
-from util.state_file import symlink_instance
-from shared.mo2_ini import update_mo2_ini
 import json
-import stat
 import ssl
+import stat
+from pathlib import Path
+from shutil import copyfile as copy
+from shutil import copytree, rmtree
+from urllib.request import Request, urlopen
+
 import certifi
+from loguru import logger
+from patoolib import extract_archive as unzip
+from util import lang
+from util import state_file as state
+from util import variables as var
+from util.checksum import compare_checksum
+from util.download import download as dl
+from util.download import download_nexus as nexus_dl
+from util.state_file import symlink_instance
+from util.theme.gtk_gen import generate_gtk_theme
+from util.theme.kde_gen import generate_kde_theme
+
+from shared.mo2_ini import update_mo2_ini
 
 ssl_context = ssl.create_default_context(cafile=certifi.where())
 
@@ -27,6 +34,10 @@ def install_theme(theme_slug: str, destination: Path) -> bool:
     """
     Download and install a theme selected via --theme.
     """
+
+    theme_slug = theme_slug.lower().strip()
+    if theme_slug == "auto":
+        return install_auto_theme(destination)
 
     theme = var.resolve_theme(theme_slug)
     if not theme:
@@ -79,6 +90,37 @@ def install_theme(theme_slug: str, destination: Path) -> bool:
     return False
 
 
+def install_auto_theme(destination: Path) -> bool:
+    """
+    Install a desktop-derived theme, preferring KDE colors over GTK colors.
+    """
+
+    stylesheets_dir = destination / "stylesheets"
+
+    for theme_name, generator in (
+        ("KDE", generate_kde_theme),
+        ("GTK", generate_gtk_theme),
+    ):
+        stylesheet = generator(stylesheets_dir)
+        if not stylesheet:
+            continue
+
+        logger.info(f"Auto-selected {theme_name} theme.")
+        if update_mo2_ini(destination, theme_stylesheet=stylesheet):
+            logger.info(f"Applied MO2 auto theme using stylesheet '{stylesheet}'")
+            return True
+
+        logger.warning(
+            f"Failed to update ModOrganizer.ini for auto theme '{theme_name}'."
+        )
+        return False
+
+    logger.critical(
+        "Could not resolve --theme auto because neither KDE nor GTK theme settings were found."
+    )
+    raise SystemExit(1)
+
+
 def download_mod_organizer():
     """
     Runs the download and installation process for Mod Organizer 2.
@@ -117,12 +159,13 @@ def download_mod_organizer():
         if (  # if ModOrganizer.exe exists in destination check if it's the same file
             not local_archive and destination.exists() and mo2_exec.exists()
         ):
-            if not compare_checksum(mo2_exec, checksum_internal):
-                if not lang.prompt_install_mo2_checksum_fail(str(mo2_exec)):
-                    logger.info(
-                        "User chose not to overwrite existing Mod Organizer 2 executable. Skipping installation."
-                    )
-                    return
+            if not compare_checksum(
+                mo2_exec, checksum_internal
+            ) and not lang.prompt_install_mo2_checksum_fail(str(mo2_exec)):
+                logger.info(
+                    "User chose not to overwrite existing Mod Organizer 2 executable. Skipping installation."
+                )
+                return
         elif not destination.exists():
             destination.mkdir(parents=True, exist_ok=True)
     logger.debug(f"Installing Mod Organizer 2 to {destination}")
@@ -240,7 +283,6 @@ def download_scriptextender():
                 logger.warning(
                     "Both direct download and Nexus download information found for the chosen script extender. Defaulting to direct download method."
                 )
-                pass
             if isinstance(direct, dict):
                 src[0] = direct.get("url", None)
             else:
@@ -308,7 +350,7 @@ def download_scriptextender():
 
 
 def install_scriptextender(
-    source: Path, whitelist: Optional[var.FileWhitelist] = None
+    source: Path, whitelist: var.FileWhitelist | None = None
 ) -> list[str]:
     """
     Installs the downloaded script extender to the game directory.
@@ -469,7 +511,7 @@ def extract(target: Path, destination: Path) -> Path:
 
 
 def install(
-    source: Path, destination: Path, file_list: Optional[var.FileWhitelist] = None
+    source: Path, destination: Path, file_list: var.FileWhitelist | None = None
 ) -> tuple[Path, list[str]]:
     """
     Copies files from source to destination.
