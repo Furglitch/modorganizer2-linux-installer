@@ -1,10 +1,23 @@
 #!/bin/sh
 
 APP="$1"
-WINPATH="$2"
-
-WINPATH="${WINPATH#\"}"
+WINPATH="${2#\"}"
 WINPATH="${WINPATH%\"}"
 
-UNIXPATH="$(printf '%s' "$WINPATH" | sed -e 's/\\/\//g' -e 's/^[A-Za-z]://')"
-exec "$APP" "$UNIXPATH"
+DRIVE="$(printf '%s' "$WINPATH" | cut -c1 | tr 'A-Z' 'a-z')"
+REST="$(printf '%s' "$WINPATH" | cut -c3- | sed 's/\\/\//g')"
+DOSDEVICE="$WINEPREFIX/dosdevices/${DRIVE}:"
+
+if [ -L "$DOSDEVICE" ]; then
+  UNIXPATH="$(readlink -f "$DOSDEVICE")$REST"
+else
+  UNIXPATH="$REST"
+fi
+
+LAUNCH_CLIENT="${STEAM_RUNTIME_LAUNCH_SCRIPT:-$PRESSURE_VESSEL_RUNTIME_BASE/pressure-vessel/bin/steam-runtime-launch-client}"
+
+if [ -x "$LAUNCH_CLIENT" ]; then
+  exec "$LAUNCH_CLIENT" --alongside-steam -- gio open "$UNIXPATH"
+else
+  exec "$APP" "$UNIXPATH"
+fi
