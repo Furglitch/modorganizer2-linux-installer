@@ -18,6 +18,8 @@ from util.checksum import compare_checksum
 from util.download import download as dl
 from util.download import download_nexus as nexus_dl
 from util.state_file import symlink_instance
+from util.theme.gtk_gen import generate_gtk_theme
+from util.theme.kde_gen import generate_kde_theme
 
 from shared.mo2_ini import update_mo2_ini
 
@@ -32,6 +34,10 @@ def install_theme(theme_slug: str, destination: Path) -> bool:
     """
     Download and install a theme selected via --theme.
     """
+
+    theme_slug = theme_slug.lower().strip()
+    if theme_slug == "auto":
+        return install_auto_theme(destination)
 
     theme = var.resolve_theme(theme_slug)
     if not theme:
@@ -82,6 +88,37 @@ def install_theme(theme_slug: str, destination: Path) -> bool:
 
     logger.warning(f"Failed to update ModOrganizer.ini for theme '{theme_slug}'.")
     return False
+
+
+def install_auto_theme(destination: Path) -> bool:
+    """
+    Install a desktop-derived theme, preferring KDE colors over GTK colors.
+    """
+
+    stylesheets_dir = destination / "stylesheets"
+
+    for theme_name, generator in (
+        ("KDE", generate_kde_theme),
+        ("GTK", generate_gtk_theme),
+    ):
+        stylesheet = generator(stylesheets_dir)
+        if not stylesheet:
+            continue
+
+        logger.info(f"Auto-selected {theme_name} theme.")
+        if update_mo2_ini(destination, theme_stylesheet=stylesheet):
+            logger.info(f"Applied MO2 auto theme using stylesheet '{stylesheet}'")
+            return True
+
+        logger.warning(
+            f"Failed to update ModOrganizer.ini for auto theme '{theme_name}'."
+        )
+        return False
+
+    logger.critical(
+        "Could not resolve --theme auto because neither KDE nor GTK theme settings were found."
+    )
+    raise SystemExit(1)
 
 
 def download_mod_organizer():

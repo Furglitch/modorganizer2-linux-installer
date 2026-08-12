@@ -49,3 +49,9 @@ For example, to install Mod Organizer 2 with the Fluency Dark theme, you would u
 ```bash
 mo2-lint install -t fluency-dark
 ```
+
+## Desktop Environment Themes
+
+Using `--theme auto` will also create a theme based on your current desktop environment's color scheme. This allows for a more integrated look and feel with your operating system.
+
+This feature currently works with KDE and GTK desktop environments by pulling from the ~/.config/kdeglobals or ~/.config/gtk-3.0/colors.css files, respectively.
