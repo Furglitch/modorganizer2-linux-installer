@@ -225,7 +225,7 @@ class ScriptExtenderDependency:
     """
 
     download: DownloadData = None
-    file_whitelist: Optional[FileWhitelist] = None
+    file_whitelist: FileWhitelist | None = None
 
     @classmethod
     def from_dict(
@@ -279,7 +279,7 @@ class ScriptExtender:
     runtime: str | dict[str, str | list[str]] = None
     download: DownloadData = None
     file_whitelist: FileWhitelist | None = None
-    requires: Optional[List[ScriptExtenderDependency]] = field(default_factory=list)
+    requires: list[ScriptExtenderDependency] | None = field(default_factory=list)
 
     @classmethod
     def from_dict(cls, data: "dict[str, any] | ScriptExtender") -> "ScriptExtender":
