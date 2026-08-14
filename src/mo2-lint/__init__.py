@@ -62,6 +62,27 @@ def pull_config():
     Before that, copies default configuration files from internal storage if not already present.
     """
     logger.info("Pulling latest configuration files from GitHub.")
+    settings_path = Path("~/.config/mo2-lint/settings.toml").expanduser()
+    if not settings_path.exists():
+        try:
+            logger.debug(
+                f"Settings file does not exist in .config: {settings_path}, copying from internal cfg"
+            )
+            src = internal_file("cfg", "settings.toml")
+            settings_path.parent.mkdir(parents=True, exist_ok=True)
+            copy2(src, settings_path)
+            logger.trace(f"Copied src={src} to dest={settings_path}")
+        except Exception as e:
+            logger.exception(
+                f"Failed to copy internal settings.toml to .config folder: {e}"
+            )
+            logger.critical(
+                "Failed to set up settings.toml. Please ensure the application has permission to write to ~/.config/mo2-lint/ and try again."
+            )
+            raise SystemExit(1)
+    else:
+        logger.trace(f"Settings file already exists: {settings_path}")
+
     for config in (
         "game_info.yml",
         "resource_info.yml",
@@ -175,8 +196,11 @@ def pre_init():
     """
     remove_loggers()
     add_loggers(log_level="TRACE", script="mo2-lint", process="pre-check")
-    check_update()
-    pull_config()  # Temporarily disable for development
+    var.load_settings()
+    if var.settings.check_updates:
+        check_update()
+    if var.settings.refresh_configs:
+        pull_config()  # Temporarily disable for development
     var.load_games_info()
     var.load_resource_info()
     var.load_plugin_info()
@@ -285,7 +309,9 @@ click_log_level = click.option(
     "-l",
     "log_level",
     type=click.Choice(["DEBUG", "INFO", "TRACE"], case_sensitive=False),
-    default="INFO",
+    default=var.settings.log_level
+    if var.settings and var.settings.log_level
+    else "INFO",
     show_default=True,
     help="Set the logging level.",
 )
@@ -305,7 +331,7 @@ click_opt_theme = click.option(
     "--theme",
     "-t",
     type=click.Choice(["auto", *var.theme_info.keys()], case_sensitive=False),
-    default=None,
+    default=var.settings.theme if var.settings and var.settings.theme else None,
     help=f"Apply an included MO2 theme during installation.\nOptions: [auto, {', '.join(var.theme_info.keys())}]",
 )
 click_opt_directory = click.option(
@@ -323,10 +349,11 @@ click_unattended = click.option(
 )
 
 
-def click_arg_directory(required=False):
+def click_arg_directory(required=False, default=None):
     return click.argument(
         "directory",
         required=required,
+        default=default,
         type=click.Path(file_okay=False, dir_okay=True),
         metavar="[DIRECTORY]",
     )
@@ -401,7 +428,7 @@ def cli(ctx):
     "--launcher",
     "-L",
     type=click.Choice(["steam", "gog", "epic"], case_sensitive=False),
-    default=None,
+    default=var.settings.launcher if var.settings and var.settings.launcher else None,
     help="Force a specific launcher instead of auto-detecting.",
 )
 @click.option(
@@ -416,15 +443,18 @@ def cli(ctx):
     "-p",
     type=str,
     multiple=True,
+    default=tuple(var.settings.plugins)
+    if var.settings and var.settings.plugins
+    else (),
     help="Specify MO2 plugins to download and install.",
 )
 @click_opt_mo2_archive
 @click_opt_mo2_checksum
 @click_arg_game(required=True)
-@click_arg_directory(required=True)
+@click_arg_directory(required=False)
 def install(
     game: str,
-    directory: Path,
+    directory: Path | None,
     game_info_path: Path | None,
     launcher: str | None,
     script_extender: bool,

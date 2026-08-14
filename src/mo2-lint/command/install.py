@@ -15,9 +15,48 @@ from util.redirector.install import install as install_redirector
 from util.state_file import InstanceData, set_index
 
 
+def get_install_dir(
+    game: str,
+    directory: Path | None,
+    launcher: str | None,
+) -> Path | None:
+    if directory:
+        return Path(directory).expanduser().resolve()
+
+    if not var.settings or not var.settings.root_folder:
+        return None
+
+    root_folder = var.settings.root_folder.expanduser().resolve()
+    folder_name = var.settings.folder_name
+    if not folder_name:
+        return root_folder
+
+    resolved_launcher = launcher or var.settings.launcher
+    if "{launcher}" in folder_name and not resolved_launcher:
+        resolved_launcher = get_launcher()
+    if "{launcher}" in folder_name and not resolved_launcher:
+        logger.critical(
+            "folder_name uses the {launcher} placeholder, but no launcher could be determined."
+        )
+        raise SystemExit(1)
+
+    try:
+        rendered_folder_name = folder_name.format(
+            game=game,
+            launcher=resolved_launcher or "",
+        )
+    except KeyError as error:
+        logger.critical(f"Unknown folder_name placeholder: {error.args[0]}")
+        raise SystemExit(1)
+    if not rendered_folder_name:
+        return root_folder
+
+    return root_folder / rendered_folder_name
+
+
 def install(
     game: str,
-    directory: Path,
+    directory: Path | None,
     game_info_path: Path | None = None,
     log_level: str = "INFO",
     script_extender: bool = False,
@@ -27,6 +66,7 @@ def install(
     mo2_archive: Path | None = None,
     mo2_checksum: str | None = None,
 ):
+    directory = get_install_dir(game, directory, launcher)
     var.set_parameters(
         {
             "game": game,
