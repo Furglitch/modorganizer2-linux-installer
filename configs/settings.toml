@@ -1,5 +1,5 @@
 [installer]
-log_level = ''                          # Example: 'info', 'debug', 'trace'
+log_level = 'info'                          # Example: 'info', 'debug', 'trace'
 check_updates = true                    # Set false to skip the startup GitHub version check.
 refresh_configs = true                  # Set false to skip pulling remote config files on startup.
 

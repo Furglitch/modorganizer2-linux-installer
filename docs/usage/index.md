@@ -22,7 +22,7 @@ mo2-lint install <game> <directory> [options]
 > #### Parameters
 >
 > - `<game>` - The game identifier (e.g. `skyrim`, `fallout4`). Run `mo2-lint install --help` for the full list of supported games. **Required**.
-> - `<directory>` - The path where the MO2 instance will be created. **Optional**, defaults to '~/Games/MO2-LINT' if not specified in command. Default can be changed in the settings file at `~/.config/mo2-lint/settings.toml` under `[installer]` as `install_directory`. If the directory already exists, it must be empty.
+> - `<directory>` - The path where the MO2 instance will be created. **Optional**. If omitted, MO2-LINT uses the values from `~/.config/mo2-lint/settings.toml` under `[instance.folders]` to build the final path. `root_folder` sets the base directory, and `folder_name` supports `{game}` and `{launcher}` placeholders. If the directory already exists, it must be empty.
 
 > #### Options
 > - `--plugin <plugin>`, `-p <plugin>` - Install a plugin into the new MO2 instance. Can be specified multiple times:
@@ -116,9 +116,32 @@ mo2-lint update <directory> [options]
 >
 > - `--mo2-checksum <sha256>` - The expected SHA-256 checksum of the `--mo2-archive` file. Required when `--mo2-archive` is used; the archive is verified against it before extraction.
 >
-> - `--theme <name>`, `-t <name>` - Apply a theme to the instance during the update. More information on themes can be found in the [Themes](./themes) section of the documentation. A default can be set in the settings file at `~/.config/mo2-lint/settings.toml` under `[installer]` as `launcher`.
+> - `--theme <name>`, `-t <name>` - Apply a theme to the instance during the update. More information on themes can be found in the [Themes](./themes) section of the documentation. A default can be set in the settings file at `~/.config/mo2-lint/settings.toml` under `[instance]` as `theme`.
 
 > **Note:** If the instance is pinned, the MO2 version will not be updated by a normal `update`. Run `mo2-lint unpin <directory>` first **or** supply `--mo2-archive`, which overrides the pin for that update (and re-pins the instance afterward).
+
+## The Settings File
+
+MO2-LINT reads its configuration from `~/.config/mo2-lint/settings.toml`.
+
+> #### `[installer]`
+>
+> - `log_level` - Default log level for commands when `--log-level` is not provided. 'INFO' if unset.
+> - `check_updates` - Set to `false` to skip the startup GitHub version check.
+> - `refresh_configs` - Set to `false` to skip pulling remote config files on startup.
+
+> #### `[instance]`
+>
+> - `launcher` - Default launcher to use when one is not provided with --launcher. Can be left blank to auto-detect based on installed launchers. If the selected game is not available on the selected launcher, MO2-LINT will fall back to auto-detection.
+> - `theme` - Default theme to apply when one is not provided with --theme. Can be left blank for no theme.
+> - `plugins` - Default plugins to install with new instances when not provided with --plugin. Can be left blank for no plugins.
+
+> #### `[instance.folders]`
+>
+> - `root_folder` - Base directory for new instances.
+> - `folder_name` - Instance folder template. Supports `{game}` and `{launcher}` placeholders.
+>
+> For example, a `root_folder` of `~/Games` and a `folder_name` of `mo2-{game}` will install a Fallout 4 instance at `~/Games/mo2-fallout4`.
 
 ## The Instance State File
 
