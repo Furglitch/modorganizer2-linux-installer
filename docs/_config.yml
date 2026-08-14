@@ -1,7 +1,36 @@
 title: Mod Organizer 2 Linux Installer
 remote_theme: furglitch/furglitch.github.io
 repository: furglitch/modorganizer2-linux-installer
-baseurl: "modorganizer2-linux-installer"
+# baseurl: "modorganizer2-linux-installer"
 
 plugins:
   - jekyll-remote-theme
+
+
+nav_sort: default
+back_to_top: true
+back_to_top_text: "Back to top"
+heading_anchors: true
+
+footer_content: "Copyright &copy; 2026 Furglitch. Distributed under the <a href=\"https://github.com/furglitch/modorganizer2-linux-installer/blob/main/LICENSE\">GPL-3.0 License</a>."
+
+callouts_level: loud
+callouts:
+  note:
+    title: Note
+    color: grey-lt
+  tip:
+    title: Tip
+    color: green
+  warning:
+    title: Warning
+    color: yellow
+  danger:
+    title: Danger
+    color: red
+  unsupported:
+    title: Unsupported
+    color: red
+  advanced:
+    title: Advanced
+    color: purple

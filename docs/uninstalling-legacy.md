@@ -1,31 +1,42 @@
 ---
-title: Uninstalling v6 Instances
+title: Uninstalling Legacy (v6) Instances
 layout: default
-nav_order: 1
-parent: Installation
+nav_order: 8
+description: "How to remove pre-7.0.0 instances and migrate a modlist to v7."
 ---
 
-# Uninstalling v6 Instances
+# Uninstalling Legacy (v6) Instances
 
 With the release of MO2-LINT v7, support for v6 instances and earlier versions has been removed. If you have existing v6 instances, this page explains how to remove them and migrate your modlist to v7.
 
-## Removing a v6 Instance
+## Table of contents
+{: .no_toc .text-delta }
 
-V6 instances are not tracked by a state file, so there is no automated way to remove them. You will need to clean them up manually:
+1. TOC
+{:toc}
+
+---
+
+## Removing a v6 instance
+
+v6 instances are not tracked by a state file, so there is no automated way to remove them. You will need to clean them up manually:
 
 1. Remove the following files and directories, if they exist:
-  - `~/.config/modorganizer2/`
-  - `~/.local/share/applications/modorganizer2-nxm-handler.desktop`
-  - `~/.local/share/modorganizer2/`
+   - `~/.config/modorganizer2/`
+   - `~/.local/share/applications/modorganizer2-nxm-handler.desktop`
+   - `~/.local/share/modorganizer2/`
 2. In your game install, remove the `modorganizer2` folder and restore the backed-up executable which the redirector replaced (starting with `_`). Additionally, it's recommended to run a validation from Steam or Heroic to ensure all game files are intact after removing the redirector.
-3. Remove any existing Mod Organizer 2 installs from your system. This includes any directories where you installed MO2, as well as any shortcuts or launchers you may have created for it. (Optionally, look at 'Migrating Your Modlist to v7' below if you want to keep your existing modlist and profiles)
-4. Optionally, create a backup of your game's prefix directory, which contains your save games and settings (unless stored in the MO2 instance)
+3. Remove any existing Mod Organizer 2 installs from your system. This includes any directories where you installed MO2, as well as any shortcuts or launchers you may have created for it.
+4. Optionally, create a backup of your game's prefix directory, which contains your save games and settings (unless stored in the MO2 instance).
 
-## Migrating Your Modlist to v7
+{: .tip }
+> If you want to keep your existing modlist and profiles, you can migrate them to a new v7 instance before removing the v6 instance. See [Migrating your modlist to v7](#migrating-your-modlist-to-v7) below for instructions.
+
+## Migrating your modlist to v7
 
 Before removing the v6 instance, transfer your modlist to a new v7 instance:
 
-1. Create the v7 instance using `mo2-lint install` as described in the [Installation Guide](../).
+1. Create the v7 instance using [`mo2-lint install`](./guide/install).
 2. Copy the following folders from the v6 instance directory to the v7 instance directory:
    - `mods/` - your installed mods
    - `profiles/` - your load order and profile settings
