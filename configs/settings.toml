@@ -1,10 +1,13 @@
 [installer]
-log_level = ''                       # Example: 'info', 'debug', 'trace'
+log_level = ''                          # Example: 'info', 'debug', 'trace'
 
 [instance]
-launcher = ''                        # Example: 'steam', 'gog', 'epic'
-theme = ''                           # Example: 'paper-dark'
-plugins = []                         # Example: [ "root-builder", "auto-activator", "fomod-plus", "nxm-collection-dl" ]
+launcher = ''                           # Example: 'steam', 'gog', 'epic'
+theme = ''                              # Example: 'paper-dark'
+plugins = []                            # Example: [ "root-builder", "auto-activator", "fomod-plus", "nxm-collection-dl" ]
 
 [instance.folders]
-root_folder = '~/Games/MO2-LINT'
+root_folder = '~/Games/mo2-lint'        # Where the instance folder will be created.
+folder_name = 'mo2-{game}-{launcher}'   # The actual instance folder name. Placeholders: {game}, {launcher}
+
+# i.e. root_folder = '~/Games/mo2-lint' and folder_name = 'mo2-{game}-{launcher}' will create the instance folder at '~/Games/mo2-lint/mo2-{game}-{launcher}'

@@ -449,15 +449,10 @@ def cli(ctx):
 @click_opt_mo2_archive
 @click_opt_mo2_checksum
 @click_arg_game(required=True)
-@click_arg_directory(
-    required=False,
-    default=var.settings.root_folder
-    if var.settings and var.settings.root_folder
-    else None,
-)
+@click_arg_directory(required=False)
 def install(
     game: str,
-    directory: Path,
+    directory: Path | None,
     game_info_path: Path | None,
     launcher: str | None,
     script_extender: bool,

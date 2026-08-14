@@ -82,6 +82,7 @@ class InstallerSettings:
     launcher: str | None = None
     theme: str | None = None
     plugins: tuple[str, ...] = field(default_factory=tuple)
+    folder_name: str | None = None
     log_level: str | None = None
     games: dict[str, GameSettings] = field(default_factory=dict)
 
@@ -137,6 +138,7 @@ def load_settings(path: Path | None = None):
     launcher = instance.get("launcher") or installer.get("launcher") or None
     theme = instance.get("theme") or installer.get("themes") or None
     plugins = tuple(instance.get("plugins") or installer.get("plugins") or ())
+    folder_name = folders.get("folder_name") or None
     games = {
         key: GameSettings(script_extender_version=value.get("script_extender_version"))
         for key, value in (toml_data.get("games", {}) or {}).items()
@@ -147,6 +149,7 @@ def load_settings(path: Path | None = None):
         launcher=launcher,
         theme=theme,
         plugins=plugins,
+        folder_name=folder_name,
         log_level=installer.get("log_level") or None,
         games=games,
     )
