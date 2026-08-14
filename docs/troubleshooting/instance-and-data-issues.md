@@ -34,7 +34,7 @@ Pinned instances won't update their MO2 version. Unpin first:
 mo2-lint unpin /path/to/instance
 ```
 
-See [Managing Instances](../guide/managing-instances.html#pin) for more on pinning.
+See [Managing Instances](../guide/managing-instances#pin) for more on pinning.
 
 ## Preserving save data across a prefix reset
 

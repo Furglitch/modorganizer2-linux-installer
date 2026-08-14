@@ -38,7 +38,7 @@ Yes. Each `mo2-lint install` creates a separate, independent instance, including
 
 **Which version of Proton should I use?**
 
-Proton 11.0 is the only officially tested and supported version. Earlier versions may work but aren't guaranteed. See [Setting up Proton](../getting-started/proton-setup.html).
+Proton 11.0 is the only officially tested and supported version. Earlier versions may work but aren't guaranteed. See [Setting up Proton](../getting-started/proton-setup).
 
 **Do I need to launch the game before running MO2-LINT?**
 
@@ -54,7 +54,7 @@ MO2-LINT locates games by searching your Steam or Heroic library. Common causes:
 - You're using a non-standard install (e.g. a cracked version with a non-native shortcut)
 - You're using a sandboxed launcher (e.g. Flatpak Steam) without the proper permissions
 
-See [Installation Issues](../troubleshooting/installation-issues.html#game-not-found) for the full walkthrough.
+See [Installation Issues](../troubleshooting/installation-issues#game-not-found) for the full walkthrough.
 
 ## Tips and tricks
 
@@ -80,7 +80,7 @@ Add this to the game's launch options to skip MO2 in Gaming/Big Picture mode whi
 
 **MO2 launches but immediately closes. What should I do?**
 
-Usually a launch settings problem. See [Launch & Proton Issues](../troubleshooting/launch-issues.html).
+Usually a launch settings problem. See [Launch & Proton Issues](../troubleshooting/launch-issues).
 
 **Something broke after updating MO2-LINT. What should I do?**
 

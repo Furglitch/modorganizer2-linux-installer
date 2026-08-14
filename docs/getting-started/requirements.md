@@ -32,7 +32,7 @@ You need at least one of:
 
 ## Compatibility Layer
 
-See [Setting up Proton](./proton-setup.html).
+See [Setting up Proton](./proton-setup).
 
 ### Supported Versions
 
@@ -54,4 +54,4 @@ See [Setting up Proton](./proton-setup.html).
 
 ---
 
-Once these are in place, continue to [Installing MO2-LINT](./installing.html).
+Once these are in place, continue to [Installing MO2-LINT](./installing).

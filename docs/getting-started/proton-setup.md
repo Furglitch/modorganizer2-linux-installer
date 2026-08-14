@@ -59,4 +59,4 @@ This makes *all* Steam games use Proton 11 by default.
 
 ---
 
-Continue to [First Launch](./first-launch.html) to verify everything is wired up correctly.
+Continue to [First Launch](./first-launch) to verify everything is wired up correctly.

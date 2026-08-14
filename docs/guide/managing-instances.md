@@ -45,7 +45,7 @@ mo2-lint uninstall [options]
 
 ## `pin`
 
-Prevents an instance's MO2 version from being changed by [`update`](./update.html). Useful when a newer MO2 version breaks compatibility with specific mods or plugins.
+Prevents an instance's MO2 version from being changed by [`update`](./update). Useful when a newer MO2 version breaks compatibility with specific mods or plugins.
 
 ```bash
 mo2-lint pin <directory>

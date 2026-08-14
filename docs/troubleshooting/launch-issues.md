@@ -67,7 +67,7 @@ MO2-LINT currently only supports Proton 11.0.
 - **Steam**: Properties → Compatibility → Force use of specific Steam Play compatibility tool → Proton 11.0
 - **Heroic**: Settings → Wine → Wine Version → Proton - Proton 11.0
 
-See [Setting up Proton](../getting-started/proton-setup.html) for full steps.
+See [Setting up Proton](../getting-started/proton-setup) for full steps.
 
 ## Prefix not initialized
 

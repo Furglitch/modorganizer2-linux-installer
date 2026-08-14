@@ -7,7 +7,7 @@ parent: Getting Started
 
 # Installing MO2-LINT
 
-Make sure you've covered the [Requirements](./requirements.html) page first.
+Make sure you've covered the [Requirements](./requirements) page first.
 
 ## Table of contents
 {: .no_toc .text-delta }
@@ -22,7 +22,7 @@ Make sure you've covered the [Requirements](./requirements.html) page first.
 Grab the latest v7 release from the [GitHub Releases page](https://github.com/Furglitch/modorganizer2-linux-installer/releases). The file is named `mo2-lint`, with no file extension.
 
 {: .warning }
-> Only versions 7.0.0 and above are supported. If you have an existing v6 instance, see [Uninstalling Legacy (v6) Instances](../uninstalling-legacy.html) first.
+> Only versions 7.0.0 and above are supported. If you have an existing v6 instance, see [Uninstalling Legacy (v6) Instances](../uninstalling-legacy) first.
 
 ## 2. Make sure it's executable
 
@@ -60,4 +60,4 @@ mo2-lint <command> [options]
 
 ---
 
-Continue to [Setting up Proton](./proton-setup.html). This is required before your first `install`.
+Continue to [Setting up Proton](./proton-setup). This is required before your first `install`.

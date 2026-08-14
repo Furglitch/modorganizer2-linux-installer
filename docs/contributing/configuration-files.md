@@ -272,7 +272,7 @@ plugins:
 
 ## `theme_info.yml`
 
-Defines themes available via `--theme`/`-t` on [`install`](../guide/install.html) and [`update`](../guide/update.html).
+Defines themes available via `--theme`/`-t` on [`install`](../guide/install) and [`update`](../guide/update).
 
 ```yaml
 schema:

@@ -7,7 +7,7 @@ parent: CLI Guide
 
 # Themes
 
-`--theme` is supported by both [`install`](./install.html) and [`update`](./update.html), applying a theme to the Mod Organizer 2 instance.
+`--theme` is supported by both [`install`](./install) and [`update`](./update), applying a theme to the Mod Organizer 2 instance.
 
 ```bash
 mo2-lint install -t fluency-dark

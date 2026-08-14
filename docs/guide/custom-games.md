@@ -16,4 +16,4 @@ The `install` command supports custom games via the `--custom` flag, pointing to
 mo2-lint install --custom ~/my_custom_games.yaml <game> <directory>
 ```
 
-For the structure of the custom game definition file, see [Configuration Files](../contributing/configuration-files.html) in the Contributing section.
+For the structure of the custom game definition file, see [Configuration Files](../contributing/configuration-files) in the Contributing section.

@@ -22,14 +22,14 @@ Every MO2-LINT command accepts these two global options:
 
 | Command | Purpose |
 |:--|:--|
-| [`install`](./install.html) | Create a new MO2 instance for a game. |
-| [`update`](./update.html) | Refresh an existing instance's MO2 build and launch option. |
-| [`uninstall` / `list` / `pin` / `unpin`](./managing-instances.html) | Remove, list, and lock instances. |
+| [`install`](./install) | Create a new MO2 instance for a game. |
+| [`update`](./update) | Refresh an existing instance's MO2 build and launch option. |
+| [`uninstall` / `list` / `pin` / `unpin`](./managing-instances) | Remove, list, and lock instances. |
 
 ## Reference
 
 | Page | Covers |
 |:--|:--|
-| [Configuration](./configuration.html) | `settings.toml` and the instance state file. |
-| [Themes](./themes.html) | Applying built-in and Nexus themes, plus desktop-matching themes. |
-| [Custom Games](./custom-games.html) | Advanced/unsupported `--custom` game definitions. |
+| [Configuration](./configuration) | `settings.toml` and the instance state file. |
+| [Themes](./themes) | Applying built-in and Nexus themes, plus desktop-matching themes. |
+| [Custom Games](./custom-games) | Advanced/unsupported `--custom` game definitions. |

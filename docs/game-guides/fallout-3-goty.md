@@ -31,4 +31,4 @@ Fallout 3 GOTY received an anniversary update in 2024, but most of the modding c
    ```
 
 {: .tip }
-> Once patching is confirmed successful, run the [`install`](../guide/install.html) command as normal.
+> Once patching is confirmed successful, run the [`install`](../guide/install) command as normal.

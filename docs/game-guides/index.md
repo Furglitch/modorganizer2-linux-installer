@@ -17,11 +17,11 @@ Some games need additional setup or have specific quirks when used with MO2-LINT
 
 | Game | Notes |
 |:--|:--|
-| [Cyberpunk 2077](./cyberpunk-2077.html) | DLL override needed for some mods/scripts. |
-| [Fallout 3](./fallout-3-goty.html) | Downgrading GOTY's anniversary update for mod compatibility. |
-| [Fallout 4](./fallout-4.html) | Script Extender and ENB caveats. |
-| [Fallout London](./fallout-london.html) | One-Click Edition setup and NXM handler limitations. |
-| [Oblivion](./oblivion.html) | Script Extender caveats. |
+| [Cyberpunk 2077](./cyberpunk-2077) | DLL override needed for some mods/scripts. |
+| [Fallout 3](./fallout-3-goty) | Downgrading GOTY's anniversary update for mod compatibility. |
+| [Fallout 4](./fallout-4) | Script Extender and ENB caveats. |
+| [Fallout London](./fallout-london) | One-Click Edition setup and NXM handler limitations. |
+| [Oblivion](./oblivion) | Script Extender caveats. |
 
 ## Contributing a guide
 

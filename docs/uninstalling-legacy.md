@@ -36,7 +36,7 @@ v6 instances are not tracked by a state file, so there is no automated way to re
 
 Before removing the v6 instance, transfer your modlist to a new v7 instance:
 
-1. Create the v7 instance using [`mo2-lint install`](./guide/install.html).
+1. Create the v7 instance using [`mo2-lint install`](./guide/install).
 2. Copy the following folders from the v6 instance directory to the v7 instance directory:
    - `mods/` - your installed mods
    - `profiles/` - your load order and profile settings

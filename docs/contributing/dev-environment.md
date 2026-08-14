@@ -68,4 +68,4 @@ make mo2-lint_only
 
 ## Next step
 
-Set up the [test environment](./testing.html) before submitting changes.
+Set up the [test environment](./testing) before submitting changes.

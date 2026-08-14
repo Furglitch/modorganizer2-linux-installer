@@ -31,8 +31,8 @@ Pull requests that fail on any of these checks will not be accepted or reviewed 
 
 | Page | Covers |
 |:--|:--|
-| [Development Environment](./dev-environment.html) | Prerequisites, cloning, running from source, building. |
-| [Testing](./testing.html) | The Docker-based multi-distro test suite. |
-| [Pull Request Guidelines](./pull-requests.html) | What to check before opening a PR. |
-| [Adding a New Game](./adding-a-game.html) | Steps to add support for a new game. |
-| [Configuration Files](./configuration-files.html) | Reference for the YAML files under `configs/`. |
+| [Development Environment](./dev-environment) | Prerequisites, cloning, running from source, building. |
+| [Testing](./testing) | The Docker-based multi-distro test suite. |
+| [Pull Request Guidelines](./pull-requests) | What to check before opening a PR. |
+| [Adding a New Game](./adding-a-game) | Steps to add support for a new game. |
+| [Configuration Files](./configuration-files) | Reference for the YAML files under `configs/`. |

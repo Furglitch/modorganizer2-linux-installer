@@ -26,10 +26,10 @@ mo2-lint update <directory> [options]
     --mo2-archive ~/Downloads/Mod.Organizer-2.5.2.7z \
     --mo2-checksum <sha256>
   ```
-  The instance is automatically [pinned](./managing-instances.html#pin) afterward, so a later `update` won't overwrite your chosen build.
+  The instance is automatically [pinned](./managing-instances#pin) afterward, so a later `update` won't overwrite your chosen build.
 
 `--theme <name>`, `-t <name>`
-: Apply a theme to the instance. See [Themes](./themes.html). Default settable via `[instance].theme`.
+: Apply a theme to the instance. See [Themes](./themes). Default settable via `[instance].theme`.
 
 {: .warning }
 > If the instance is **pinned**, `update` will not change the MO2 version. Either run `mo2-lint unpin <directory>` first, or supply `--mo2-archive`, which overrides the pin for that update (and re-pins the instance afterward).

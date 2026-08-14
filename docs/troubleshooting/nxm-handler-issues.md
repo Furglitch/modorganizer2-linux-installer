@@ -65,4 +65,4 @@ sudo ln -s /usr/bin/qtpaths6 /usr/bin/qtpaths
 
 ## Fallout London note
 
-The NXM handler doesn't recognize Fallout London instances. See the [Fallout London Game Guide](../game-guides/fallout-london.html) for details and the manual-download workaround.
+The NXM handler doesn't recognize Fallout London instances. See the [Fallout London Game Guide](../game-guides/fallout-london) for details and the manual-download workaround.
