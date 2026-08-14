@@ -6,7 +6,7 @@
 
 MO2-LINT aims to make installing [Mod Organizer 2](https://github.com/ModOrganizer2/modorganizer) on Linux systems easier and more accessible, providing a simple process to set up a fully functional Mod Organizer 2 installation with minimal user input.
 
-[Get Started](./getting-started/) | [View the CLI Guide](./guide/) | [GitHub Releases](https://github.com/furglitch/modorganizer2-linux-installer/releases)<br/>
+[Get Started](https://furglitch.github.io/modorganizer2-linux-installer/getting-started/) | [View the CLI Guide](https://furglitch.github.io/modorganizer2-linux-installer/guide/) | [GitHub Releases](https://github.com/furglitch/modorganizer2-linux-installer/releases)<br/>
 
 ---
 
@@ -32,19 +32,19 @@ MO2-LINT aims to make installing [Mod Organizer 2](https://github.com/ModOrganiz
 | Game | Notes |
 |:--|:--|
 | Baldur's Gate 3 | |
-| Cyberpunk 2077 | See [Game Guide](./game-guides/cyberpunk-2077/) |
+| Cyberpunk 2077 | See [Game Guide](https://furglitch.github.io/modorganizer2-linux-installer/game-guides/cyberpunk-2077/) |
 | Dragon Age: Origins - Ultimate Edition | |
 | Dragon Age 2 - Ultimate Edition | |
 | Enderal: Forgotten Stories | |
 | Enderal: Forgotten Stories - Special Edition | |
 | Fallout 3 | |
-| Fallout 3 - Game of the Year Edition | See [Game Guide](./game-guides/fallout-3-goty/) |
-| Fallout 4 | See [Game Guide](./game-guides/fallout-4/) |
+| Fallout 3 - Game of the Year Edition | See [Game Guide](https://furglitch.github.io/modorganizer2-linux-installer/game-guides/fallout-3-goty/) |
+| Fallout 4 | See [Game Guide](https://furglitch.github.io/modorganizer2-linux-installer/game-guides/fallout-4/) |
 | Fallout 4 VR | |
-| Fallout London | See [Game Guide](./game-guides/fallout-london/) |
+| Fallout London | See [Game Guide](https://furglitch.github.io/modorganizer2-linux-installer/game-guides/fallout-london/) |
 | Fallout New Vegas | |
 | Morrowind | |
-| Oblivion | See [Game Guide](./game-guides/oblivion/) |
+| Oblivion | See [Game Guide](https://furglitch.github.io/modorganizer2-linux-installer/game-guides/oblivion/) |
 | Skyrim | |
 | Skyrim Special Edition | |
 | Skyrim VR | |
@@ -70,9 +70,9 @@ MO2-LINT aims to make installing [Mod Organizer 2](https://github.com/ModOrganiz
 
 Originally developed by [rockerbacon](https://github.com/rockerbacon) as a Bash script, MO2-LINT has since been maintained by [furglitch](https://github.com/furglitch) and fully rewritten in Python for maintainability, extensibility, and cross-distro compatibility.
 
-[Getting Started]: ./getting-started/
-[CLI Guide]: ./guide/
-[Game Guides]: ./game-guides/
-[Troubleshooting]: ./troubleshooting/
-[FAQ]: ./faq/
-[Contributing]: ./contributing/
+[Getting Started]: https://furglitch.github.io/modorganizer2-linux-installer/getting-started/
+[CLI Guide]: https://furglitch.github.io/modorganizer2-linux-installer/guide/
+[Game Guides]: https://furglitch.github.io/modorganizer2-linux-installer/game-guides/
+[Troubleshooting]: https://furglitch.github.io/modorganizer2-linux-installer/troubleshooting/
+[FAQ]: https://furglitch.github.io/modorganizer2-linux-installer/faq/
+[Contributing]: https://furglitch.github.io/modorganizer2-linux-installer/contributing/
