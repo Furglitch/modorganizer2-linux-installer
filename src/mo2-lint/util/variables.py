@@ -83,6 +83,8 @@ class InstallerSettings:
     theme: str | None = None
     plugins: tuple[str, ...] = field(default_factory=tuple)
     folder_name: str | None = None
+    check_updates: bool = True
+    refresh_configs: bool = True
     log_level: str | None = None
     games: dict[str, GameSettings] = field(default_factory=dict)
 
@@ -150,6 +152,8 @@ def load_settings(path: Path | None = None):
         theme=theme,
         plugins=plugins,
         folder_name=folder_name,
+        check_updates=installer.get("check_updates", True),
+        refresh_configs=installer.get("refresh_configs", True),
         log_level=installer.get("log_level") or None,
         games=games,
     )

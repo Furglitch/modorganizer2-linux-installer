@@ -196,9 +196,11 @@ def pre_init():
     """
     remove_loggers()
     add_loggers(log_level="TRACE", script="mo2-lint", process="pre-check")
-    check_update()
-    pull_config()  # Temporarily disable for development
     var.load_settings()
+    if var.settings.check_updates:
+        check_update()
+    if var.settings.refresh_configs:
+        pull_config()  # Temporarily disable for development
     var.load_games_info()
     var.load_resource_info()
     var.load_plugin_info()
