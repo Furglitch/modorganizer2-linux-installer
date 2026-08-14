@@ -1,0 +1,10 @@
+[installer]
+log_level = ''                       # Example: 'info', 'debug', 'trace'
+
+[instance]
+launcher = ''                        # Example: 'steam', 'gog', 'epic'
+theme = ''                           # Example: 'paper-dark'
+plugins = []                         # Example: [ "root-builder", "auto-activator", "fomod-plus", "nxm-collection-dl" ]
+
+[instance.folders]
+root_folder = '~/Games/MO2-LINT'

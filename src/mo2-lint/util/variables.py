@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Final
@@ -58,16 +59,34 @@ class Input:
             raise SystemExit(1)
         if not self.directory:
             logger.critical(
-                "variables.Input: 'directory' parameter is required but was not provided."
+                "variables.Input: 'directory' is required. Set install_directory in settings.toml or pass a directory to the install command."
             )
             logger.critical(
-                "This should not happen. Please report this to the developer."
+                "This is expected when neither source provides a directory. Please set one of them and try again."
             )
             raise SystemExit(1)
 
 
 input_params: Input = None
 unattended: bool = False
+
+
+@dataclass
+class GameSettings:
+    script_extender_version: str | None = None
+
+
+@dataclass
+class InstallerSettings:
+    root_folder: Path | None = None
+    launcher: str | None = None
+    theme: str | None = None
+    plugins: tuple[str, ...] = field(default_factory=tuple)
+    log_level: str | None = None
+    games: dict[str, GameSettings] = field(default_factory=dict)
+
+
+settings: InstallerSettings | None = None
 
 
 def set_parameters(args: Input | dict):
@@ -85,6 +104,53 @@ def set_parameters(args: Input | dict):
         input_params = Input(**args)
     elif isinstance(args, Input):
         input_params = args
+
+
+def load_settings(path: Path | None = None):
+    """
+    Loads settings from ~/.config/mo2-lint/settings.toml.
+
+    Parameters
+    -----------
+    path : Path, optional
+        Path to the settings TOML file. If not provided, defaults to ~/.config/mo2-lint/settings.toml.
+    """
+
+    global settings
+    if not path:
+        path = Path("~/.config/mo2-lint/settings.toml").expanduser()
+
+    if not path.exists():
+        logger.warning(f"Settings TOML file not found at {path}. Using empty settings.")
+        settings = InstallerSettings()
+        return
+
+    logger.debug(f"Loading settings from {path}")
+    with open(path, "rb") as file:
+        toml_data = tomllib.load(file)
+    logger.trace(f"Parsed settings TOML: {toml_data}")
+
+    installer = toml_data.get("installer", {}) or {}
+    instance = toml_data.get("instance", {}) or {}
+    folders = instance.get("folders", {}) or {}
+    root_folder = folders.get("root_folder") or installer.get("install_directory")
+    launcher = instance.get("launcher") or installer.get("launcher") or None
+    theme = instance.get("theme") or installer.get("themes") or None
+    plugins = tuple(instance.get("plugins") or installer.get("plugins") or ())
+    games = {
+        key: GameSettings(script_extender_version=value.get("script_extender_version"))
+        for key, value in (toml_data.get("games", {}) or {}).items()
+        if isinstance(value, dict)
+    }
+    settings = InstallerSettings(
+        root_folder=Path(root_folder).expanduser() if root_folder else None,
+        launcher=launcher,
+        theme=theme,
+        plugins=plugins,
+        log_level=installer.get("log_level") or None,
+        games=games,
+    )
+    logger.trace(f"Loaded settings: {settings}")
 
 
 @dataclass

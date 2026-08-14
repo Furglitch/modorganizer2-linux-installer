@@ -20,22 +20,21 @@ mo2-lint install <game> <directory> [options]
 ```
 
 > #### Parameters
-> `<game>` and `<directory>` are required.
 >
-> - `<game>` - The game identifier (e.g. `skyrim`, `fallout4`). Run `mo2-lint install --help` for the full list of supported games.
-> - `<directory>` - The path where the MO2 instance will be created.
+> - `<game>` - The game identifier (e.g. `skyrim`, `fallout4`). Run `mo2-lint install --help` for the full list of supported games. **Required**.
+> - `<directory>` - The path where the MO2 instance will be created. **Optional**, defaults to '~/Games/MO2-LINT' if not specified in command. Default can be changed in the settings file at `~/.config/mo2-lint/settings.toml` under `[installer]` as `install_directory`. If the directory already exists, it must be empty.
 
 > #### Options
 > - `--plugin <plugin>`, `-p <plugin>` - Install a plugin into the new MO2 instance. Can be specified multiple times:
 >   ```bash
 >   mo2-lint install skyrim /path/to/instance -p root-builder -p nxm-collection-dl
 >   ```
->   Run `mo2-lint install --help` for the list of available plugins.
+>   Run `mo2-lint install --help` for the list of available plugins. A default list can be set in the settings file at `~/.config/mo2-lint/settings.toml` under `[installer]` as `plugins`.
 >
 > - `--script-extender`, `-s` - Install the script extender for the game (e.g. SKSE for Skyrim, F4SE for Fallout 4), if one is available. If multiple versions exist, you will be prompted to choose. Ignored if the game has no script extender.
 >   - If you need different script extender versions across instances, omit this flag and configure the script extender via the `root-builder` plugin instead.
 >
-> - `--launcher <launcher>`, `-L <launcher>` - Force a specific launcher (`steam`, `gog`, or `epic`) instead of auto-detecting.
+> - `--launcher <launcher>`, `-L <launcher>` - Force a specific launcher (`steam`, `gog`, or `epic`) instead of auto-detecting. A default can be set in the settings file at `~/.config/mo2-lint/settings.toml` under `[installer]` as `launcher`.
 >
 > - `--mo2-archive <path/to/archive>` - Install Mod Organizer 2 from a local `.zip`/`.7z` archive instead of downloading the bundled version. Useful for offline installs or holding an instance at a specific MO2 build. Requires `--mo2-checksum`. The instance is automatically pinned (see [`pin`](#pin)) so a later `update` will not overwrite your chosen build.
 >   ```bash
@@ -44,7 +43,7 @@ mo2-lint install <game> <directory> [options]
 >
 > - `--mo2-checksum <sha256>` - The expected SHA-256 checksum of the `--mo2-archive` file. Required when `--mo2-archive` is used; the archive is verified against it before extraction.
 >
-> - `--theme <name>`, `-t <name>` - Apply a theme to the new instance. More information on themes can be found in the [Themes](./themes) section of the documentation.
+> - `--theme <name>`, `-t <name>` - Apply a theme to the new instance. A default can be set in the settings file at `~/.config/mo2-lint/settings.toml` under `[installer]` as `themes`. More information on themes can be found in the [Themes](./themes) section of the documentation.
 >
 > - `--custom <path/to/file.yml>` - **[Advanced users only, unsupported]** Use a custom game info file. See [Adding Custom Games](./custom-games) for details.
 
@@ -117,7 +116,7 @@ mo2-lint update <directory> [options]
 >
 > - `--mo2-checksum <sha256>` - The expected SHA-256 checksum of the `--mo2-archive` file. Required when `--mo2-archive` is used; the archive is verified against it before extraction.
 >
-> - `--theme <name>`, `-t <name>` - Apply a theme to the instance during the update. More information on themes can be found in the [Themes](./themes) section of the documentation.
+> - `--theme <name>`, `-t <name>` - Apply a theme to the instance during the update. More information on themes can be found in the [Themes](./themes) section of the documentation. A default can be set in the settings file at `~/.config/mo2-lint/settings.toml` under `[installer]` as `launcher`.
 
 > **Note:** If the instance is pinned, the MO2 version will not be updated by a normal `update`. Run `mo2-lint unpin <directory>` first **or** supply `--mo2-archive`, which overrides the pin for that update (and re-pins the instance afterward).
 
