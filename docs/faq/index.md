@@ -1,81 +1,87 @@
 ---
 title: FAQ
 layout: default
-nav_order: 5
-parent: Mod Organizer 2 Linux Installer
+nav_order: 6
+description: "Frequently asked questions about MO2-LINT."
 ---
 
 # Frequently Asked Questions
 
+## Table of contents
+{: .no_toc .text-delta }
+
+1. TOC
+{:toc}
+
+---
+
 ## General
 
-### What is MO2-LINT?
+**What is MO2-LINT?**
 
-MO2-LINT (Mod Organizer 2 Linux Installer) automates the installation and configuration of [Mod Organizer 2](https://github.com/Modorganizer2/modorganizer) on Linux. It handles Proton prefix setup, Steam/Heroic launch option configuration, registration of the nxm:// protocol, and optional plugin and script extender installation.
+MO2-LINT (Mod Organizer 2 Linux Installer) automates installing and configuring [Mod Organizer 2](https://github.com/Modorganizer2/modorganizer) on Linux. It handles Proton prefix setup, Steam/Heroic launch option configuration, `nxm://` protocol registration, and optional plugin and script extender installation.
 
-### Is Mod Organizer 2 itself included?
+**Is Mod Organizer 2 itself included?**
 
-No. MO2-LINT downloads and installs the latest version of Mod Organizer 2 automatically when you run the `install` command. You do not need to download MO2 separately.
+No, a copy of MO2 is not bundled into MO2-LINT. MO2-LINT downloads and installs the latest MO2 automatically when you run `install`. You don't need to download it separately.
 
-### What launchers are supported?
+**What launchers are supported?**
 
 - **Steam** - fully supported
 - **Heroic Games Launcher** - supported for GOG and Epic Games Store titles
 
-### Can I have multiple MO2 instances?
+**Can I have multiple MO2 instances?**
 
-Yes. Each `mo2-lint install` creates a separate, independent instance. For technical reasons, instances are currently limited to one per game.
-
----
+Yes. Each `mo2-lint install` creates a separate, independent instance, including multiple instances of the same game. However, Nexus' "Mod Manager Download" button can only target one instance per game at a time; installing a second instance of the same game prompts you to confirm switching the NXM handler link to it.
 
 ## Installation
 
-### Which version of Proton should I use?
+**Which version of Proton should I use?**
 
-Proton 10.0 is the only officially tested and supported version. Earlier versions may work but are not guaranteed. See [Setting up Proton](../installation/#setting-up-proton) for step-by-step setup instructions.
+Proton 11.0 is the only officially tested and supported version. Earlier versions may work but aren't guaranteed. See [Setting up Proton](../getting-started/proton-setup.html).
 
-### Do I need to launch the game before running MO2-LINT?
+**Do I need to launch the game before running MO2-LINT?**
 
-Yes. Launch the game at least once through Steam or Heroic before running `mo2-lint install`. This allows the launcher to initialize the Proton prefix that MO2-LINT requires.
+Yes, at least once through Steam or Heroic, so the launcher can initialize the Proton prefix MO2-LINT depends on.
 
-### I'm getting a "game not found" error during install. What do I do?
+**I'm getting a "game not found" error. What do I do?**
 
 MO2-LINT locates games by searching your Steam or Heroic library. Common causes:
 
-- The game has not been launched yet (Proton prefix not initialized)
-- The game is installed in a non-standard library location
-- You are using a launcher that is not supported
-- You are using a non-standard installation of the game (e.g. cracked version with a non-native launch shortcut)
+- The game hasn't been launched yet (Proton prefix not initialized)
+- It's installed in a non-standard library location
+- You're using an unsupported launcher
+- You're using a non-standard install (e.g. a cracked version with a non-native shortcut)
+- You're using a sandboxed launcher (e.g. Flatpak Steam) without the proper permissions
 
-Verify the game is visible in your launcher and has been launched at least once. If it is installed in a non-standard location, check that the launcher knows about that library path.
+See [Installation Issues](../troubleshooting/installation-issues.html#game-not-found) for the full walkthrough.
 
----
+## Tips and tricks
 
-## Tips and Tricks
+**How do I get MO2 to only open in Desktop Mode on Steam Deck?**
 
-### How do I get MO2 to only open in Desktop Mode on Steam Deck?
+Add this to the game's launch options to skip MO2 in Gaming/Big Picture mode while still opening it in Desktop Mode:
 
-Steam Deck users can modify the launch options for their game to skip MO2 when in Gaming/Big Picture mode, but still open MO2 in Desktop Mode. The following line should be added:
 ```
 %command% $([ -z "$KDE_FULL_SESSION" ] && echo 'moshortcut://"SKSE"' )
 ```
 
-**Only compatible with SteamOS environments**
+{: .warning }
+> Only SteamOS environments are supported.
 
-**Note:** This is written prior to the release of the Steam Machine and Steam Frame, so may require adjustments once those are available. Please report any issues you encounter with this approach.
-
----
+{: .note }
+> Written prior to the Steam Machine/Steam Frame release, so may need adjustment once those are available. If you are using a Steam Machine or Steam Frame, please report your findings to the [GitHub Issues](https://github.com/furglitch/modorganizer2-linux-installer/issues) page.
 
 ## Troubleshooting
 
-### Where are the log files?
+**Where are the log files?**
 
-Logs are stored at `~/.cache/mo2-lint/logs/`. Include these when reporting issues.
+`~/.cache/mo2-lint/logs/`. Include these when reporting issues.
 
-### MO2 launches but immediately closes. What should I do?
+**MO2 launches but immediately closes. What should I do?**
 
-This is usually a launch settings problem. See the [Troubleshooting](../troubleshooting/) page for common causes, including `gamemoderun` interference and Flatpak Steam permission issues.
+Usually a launch settings problem. See [Launch & Proton Issues](../troubleshooting/launch-issues.html).
 
-### Something broke after updating MO2-LINT. What should I do?
+**Something broke after updating MO2-LINT. What should I do?**
 
-Run `mo2-lint update /path/to/instance` to refresh the instance with the new version's configuration. If the problem persists, check the [GitHub Issues](https://github.com/furglitch/modorganizer2-linux-installer/issues) page or open a new report with your log files attached.
+Run `mo2-lint update /path/to/instance` to refresh the instance with the new version's configuration. If it persists, check [GitHub Issues](https://github.com/furglitch/modorganizer2-linux-installer/issues) or open a new report with your log files attached.

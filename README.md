@@ -4,55 +4,75 @@
 
 <br clear="left"/>
 
-Mod Organizer 2 Linux Installer (MO2-LINT, for short) aims to make installing [Mod Organizer 2] on Linux systems easier and more accessible, providing a simple process to set up a fully functional Mod Organizer 2 installation with minimal user input.
+MO2-LINT aims to make installing [Mod Organizer 2](https://github.com/ModOrganizer2/modorganizer) on Linux systems easier and more accessible, providing a simple process to set up a fully functional Mod Organizer 2 installation with minimal user input.
 
-Originally developed by [rockerbacon][@rockerbacon] as a Bash script, it has since been maintained by [furglitch][@furglitch] and fully rewritten in Python to improve maintainability, extensibility, and cross-distro compatibility.
+[Get Started](./getting-started/) | [View the CLI Guide](./guide/) | [GitHub Releases](https://github.com/furglitch/modorganizer2-linux-installer/releases)<br/>
 
-## Features
-- Automated installation and removal of Mod Organizer 2 and its dependencies
-- Support for multiple instances of Mod Organizer 2
-- No additional installations required beyond the installer itself
-- Easy-to-use command-line interface
-- Automatic handling of the Nexus Mods 'Mod Manager Download' button via a custom NXM handler
-- Automatic setup of various plugins for Mod Organizer 2
-- Implements various workarounds to improve compatibility with certain mods
+---
+
+## Why MO2-LINT?
+
+| | |
+|:--|:--|
+| **Totally Automated** | `mo2-lint install` sets up Proton, downloads MO2, registers launch options, and wires up the NXM handler. |
+| **Multiple Instances** | Run separate MO2 instances for each game, each independently tracked and updatable. |
+| **Easy-to-Use** | The CLI interface is designed to be as user friendly as possible, with clear commands and options. |
+| **Nexus Integration** | The bundled NXM handler makes the "Mod Manager Download" button on Nexus Mods work out of the box. |
+| **Script Extenders** | Optionally install the game's script extender (SKSE, F4SE, etc.) during setup. |
+| **MO2 Plugins & Themes** | Optionally install community plugins and themes for Mod Organizer during setup. |
+| **Compatibility Workarounds** | Ships fixes for known Proton/Wine quirks per-game, so you don't have to hunt them down yourself. |
 
 ### Supported Games
 
-| Game                     | Gameplay          | Script Extender                                          | ENB                                                            |
-|:-------------------------|:------------------|:---------------------------------------------------------|:---------------------------------------------------------------|
-| Cyberpunk 2077           | Working*          | N/A                                                      | Not Tested                                                     |
-| Dragon Age: Origins      | Working*          | N/A                                                      | N/A                                                            |
-| Enderal                  | Working*          | Working*                                                 | Working*                                                       |
-| Enderal Special Edition  | Working*          | Working*                                                 | Not Tested                                                     |
-| Fallout 3                | Working*          | Working*                                                 | Not Tested                                                     |
-| Fallout 3 GOTY           | Working*          | Working*                                                 | Not Tested                                                     |
-| Fallout 4                | Working*          | Some F4SE plugins may not work. See [#32]*               | ≤ v0.393 may need `EnablePostPassShader` disabled. See [#95]*  |
-| Fallout London           | Not Tested        | Not Tested                                               | Not Tested                                                     |
-| Fallout New Vegas        | Fullscreen Only*  | Working*                                                 | Working*                                                       |
-| Morrowind                | Not Tested*       | Not Tested                                               | Not Tested                                                     |
-| Oblivion                 | Working*          | Some xOBSE plugins may require manual setup. See [#63]*  | Not Tested                                                     |
-| Skyrim                   | Working*          | Working*                                                 | Working*                                                       |
-| Skyrim Special Edition   | Working*          | Working*                                                 | Working*                                                       |
-| Starfield                | Working*          | Working*                                                 | Not Tested                                                     |
+<br clear="left"/>
 
-<sub>* Game last tested with a pre 7.0.0 version of MO2-LINT. Issues may arise, please report if you encounter any problems with a supported game.</sub><br>
+<details open markdown="1">
+<summary>Click to collapse the compatibility table</summary>
 
-## Getting Started
-To get started with MO2-LINT, please refer to the [Installation Guide] for detailed instructions on how to install and use the installer.
+| Game | Notes |
+|:--|:--|
+| Baldur's Gate 3 | |
+| Cyberpunk 2077 | See [Game Guide](./game-guides/cyberpunk-2077/) |
+| Dragon Age: Origins - Ultimate Edition | |
+| Dragon Age 2 - Ultimate Edition | |
+| Enderal: Forgotten Stories | |
+| Enderal: Forgotten Stories - Special Edition | |
+| Fallout 3 | |
+| Fallout 3 - Game of the Year Edition | See [Game Guide](./game-guides/fallout-3-goty/) |
+| Fallout 4 | See [Game Guide](./game-guides/fallout-4/) |
+| Fallout 4 VR | |
+| Fallout London | See [Game Guide](./game-guides/fallout-london/) |
+| Fallout New Vegas | |
+| Morrowind | |
+| Oblivion | See [Game Guide](./game-guides/oblivion/) |
+| Skyrim | |
+| Skyrim Special Edition | |
+| Skyrim VR | |
+| Starfield | |
+| Subnautica | |
+| Valheim | |
+| The Witcher 3: Wild Hunt | |
+| The Witcher 3: Wild Hunt - Game of the Year Edition | |
 
-## Contributing
-Contributions to MO2-LINT are welcome! If you would like to contribute, please read the [Contributing Guide] for more information on how to get involved.
+</details>
 
+> Setting up a specific game? Check the [Game Guides] section first. Some games need extra steps before or after `install`.
 
+## Where to go next
 
-[Mod Organizer 2]: https://github.com/Modorganizer2/modorganizer
-[@rockerbacon]: https://github.com/rockerbacon
-[@furglitch]: https://github.com/furglitch
+- **New here?** Start with [Getting Started], which covers prerequisites, installing the binary, setting up Proton, and the first `install`.
+- **Already installed?** Jump to the [CLI Guide] for every command, option, and file configuration.
+- **Installing a specific game?** Check [Game Guides] for per-game notes before you run `install`.
+- **Something not working?** Head to [Troubleshooting] or the [FAQ].
+- **Want to help?** See [Contributing] to learn how to get involved with the project.
 
-[Installation Guide]: https://wiki.furglitch.com/modorganizer2-linux-installer/installation/
-[Contributing Guide]: https://wiki.furglitch.com/modorganizer2-linux-installer/contributing/
+## Credits
 
-[#32]: https://github.com/furglitch/modorganizer2-linux-installer/issues/32
-[#63]: https://github.com/furglitch/modorganizer2-linux-installer/issues/63#issuecomment-643690247
-[#95]: https://github.com/furglitch/modorganizer2-linux-installer/issues/95
+Originally developed by [rockerbacon](https://github.com/rockerbacon) as a Bash script, MO2-LINT has since been maintained by [furglitch](https://github.com/furglitch) and fully rewritten in Python for maintainability, extensibility, and cross-distro compatibility.
+
+[Getting Started]: ./getting-started/
+[CLI Guide]: ./guide/
+[Game Guides]: ./game-guides/
+[Troubleshooting]: ./troubleshooting/
+[FAQ]: ./faq/
+[Contributing]: ./contributing/
