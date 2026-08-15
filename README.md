@@ -60,6 +60,8 @@ MO2-LINT aims to make installing [Mod Organizer 2](https://github.com/ModOrganiz
 
 ## Where to go next
 
+Check out the documentation at [docs.furglitch.com](https://docs.furglitch.com/modorganizer2-linux-installer/) for more information.
+
 - **New here?** Start with [Getting Started], which covers prerequisites, installing the binary, setting up Proton, and the first `install`.
 - **Already installed?** Jump to the [CLI Guide] for every command, option, and file configuration.
 - **Installing a specific game?** Check [Game Guides] for per-game notes before you run `install`.
