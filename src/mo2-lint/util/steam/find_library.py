@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import os
 import re
 from pathlib import Path
 
@@ -8,9 +7,12 @@ from loguru import logger
 from util import variables as var
 
 steam_directories = [
-    "${HOME}/.local/share/Steam",
-    "${HOME}/.steam/root",
-    "${HOME}/.var/app/com.valvesoftware.Steam/.local/share/Steam",
+    "~/.steam/root",
+    "~/.steam/steam",
+    "~/.local/share/Steam",
+    "~/.var/app/com.valvesoftware.Steam/.local/share/Steam",
+    "~/snap/steam/common/.local/share/Steam",
+    "~/.snap/steam/common/.local/share/Steam",
 ]
 
 
@@ -51,7 +53,7 @@ def get_libraries() -> list[Path]:
     )
     for dir in steam_directories:
         logger.trace(f"Checking Steam directory: {dir}")
-        dir = Path(os.path.expandvars(dir)).resolve()
+        dir = Path(dir).expanduser().resolve()
         if dir.exists():
             library = dir if Path(dir / "steamapps").exists() else dir / "steam"
             library_list = library / "steamapps" / "libraryfolders.vdf"
