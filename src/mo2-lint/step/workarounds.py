@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import shutil
+import subprocess
 from pathlib import Path
 from shutil import copyfile
 
@@ -51,6 +53,65 @@ def apply_instance_files(files: list[dict]):
         logger.trace(f"Copied instance workaround file from {src} to {dest}")
 
 
+def apply_flatpak_filesystem_overrides():
+    if not state.current_instance:
+        return
+
+    launcher = state.current_instance.launcher
+    launcher_id = {
+        "steam": "com.valvesoftware.Steam",
+        "gog": "com.heroicgameslauncher.hgl",
+        "epic": "com.heroicgameslauncher.hgl",
+    }.get(launcher)
+    if not launcher_id:
+        return
+
+    flatpak = shutil.which("flatpak")
+    if not flatpak:
+        logger.debug(
+            "Flatpak is not available on this system; skipping sandbox overrides."
+        )
+        return
+
+    filesystem_paths: list[Path] = []
+    if state.current_instance.instance_path:
+        filesystem_paths.append(Path(state.current_instance.instance_path))
+    if state.current_instance.game_path:
+        filesystem_paths.append(Path(state.current_instance.game_path))
+    filesystem_paths.append(Path("~/.config/mo2-lint").expanduser())
+
+    seen: set[Path] = set()
+    for filesystem_path in filesystem_paths:
+        resolved_path = filesystem_path.expanduser().resolve()
+        if resolved_path in seen:
+            continue
+        seen.add(resolved_path)
+
+        command = [
+            flatpak,
+            "override",
+            "--user",
+            f"--filesystem={resolved_path}",
+            launcher_id,
+        ]
+        logger.debug(
+            f"Applying Flatpak filesystem override for {launcher_id}: {resolved_path}"
+        )
+        result = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if result.returncode != 0:
+            logger.critical(
+                f"Failed to apply Flatpak filesystem override for {launcher_id} at {resolved_path}: {result.stderr.strip() or result.stdout.strip() or 'unknown error'}"
+            )
+            raise SystemExit(1)
+
+    logger.success(f"Applied Flatpak filesystem overrides for {launcher_id}.")
+
+
 def apply_workarounds():
     if var.game_info.workarounds:
         logger.info(f"Applying workarounds for {var.game_info.display_name}")
@@ -82,3 +143,18 @@ def apply_workarounds():
                 if t == "instance_files":
                     logger.debug(f"Copying instance files for workaround: {w}")
                     apply_instance_files(w)
+
+    launcher_id = {
+        "steam": "com.valvesoftware.Steam",
+        "gog": "com.heroicgameslauncher.hgl",
+        "epic": "com.heroicgameslauncher.hgl",
+    }.get(state.current_instance.launcher)
+    if launcher_id and shutil.which("flatpak"):
+        installed = subprocess.run(
+            ["flatpak", "info", launcher_id],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if installed.returncode == 0:
+            apply_flatpak_filesystem_overrides()

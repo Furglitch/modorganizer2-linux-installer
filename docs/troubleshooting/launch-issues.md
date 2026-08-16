@@ -34,13 +34,14 @@ VARIABLE=value VARIABLE2=value %command% --flag
 
 ## Flatpak Steam issues
 
-If Steam is installed via Flatpak, MO2 may not have access to necessary files. Grant it access to your home directory:
+If Steam or Heroic is installed via Flatpak, MO2-LINT applies filesystem overrides during install so the sandbox can see the instance directory, the redirector in the game folder, and `~/.config/mo2-lint`.
+
+If you need to apply the override manually, grant the launcher access to the relevant paths:
 
 ```bash
-flatpak override --user --filesystem=home com.valvesoftware.Steam
+flatpak override --user --filesystem=/path/to/instance --filesystem=/path/to/game --filesystem=~/.config/mo2-lint com.valvesoftware.Steam
+flatpak override --user --filesystem=/path/to/instance --filesystem=/path/to/game --filesystem=~/.config/mo2-lint com.heroicgameslauncher.hgl
 ```
-
-If the MO2 instance lives outside `$HOME`, replace `home` with the appropriate path, e.g. `--filesystem=/path/to/directory`.
 
 ## GameMode interference
 
