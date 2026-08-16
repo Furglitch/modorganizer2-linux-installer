@@ -16,7 +16,23 @@ try:
 except Exception:
     import appinfo
 
-appinfo_vdf = Path("~/.steam/steam/appcache/appinfo.vdf").expanduser()
+steam_appinfo_roots = [
+    Path("~/.steam/steam"),
+    Path("~/.local/share/Steam"),
+    Path("~/.var/app/com.valvesoftware.Steam/.steam"),
+]
+
+
+def resolve_appinfo_vdf() -> Path:
+    for root in steam_appinfo_roots:
+        appinfo_path = root.expanduser() / "appcache" / "appinfo.vdf"
+        if appinfo_path.exists():
+            return appinfo_path
+
+    return steam_appinfo_roots[0].expanduser() / "appcache" / "appinfo.vdf"
+
+
+appinfo_vdf = resolve_appinfo_vdf()
 
 
 def backup_vdf(vdf_path: Path) -> Path:
