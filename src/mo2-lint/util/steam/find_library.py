@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 import re
 from pathlib import Path
 
@@ -48,10 +49,12 @@ def get_libraries() -> list[Path]:
     """
 
     libraries = []
+    steam_dir = os.environ.get("STEAM_DIR") or None
+    search_directories = [steam_dir] if steam_dir else steam_directories
     logger.debug(
-        f"Searching {len(steam_directories)} potential Steam directories for library folders."
+        f"Searching {len(search_directories)} potential Steam directories for library folders."
     )
-    for dir in steam_directories:
+    for dir in search_directories:
         logger.trace(f"Checking Steam directory: {dir}")
         dir = Path(dir).expanduser().resolve()
         if dir.exists():
