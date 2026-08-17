@@ -406,112 +406,88 @@ class LauncherIDs:
 
 
 @dataclass
-class AppInfo:
+class ProtonWrapper:
     """
-    Data class for storing appinfo.vdf data for a specific game.
+    Additional parameters required to setup the Steam Proton wrapper before MO2 can be installed, and to launch protontricks.
 
     Parameters
     -----------
-    index : int
-        Numeric index for the launch option.
-    executable : str
-        Path to the desired executable, relative to the game's install directory. Default is "mo2-redirector.exe".
-    arguments : list[str], optional
-        List of launch arguments to use with the executable.
-    type : str, optional
-        Type of launch option (e.g., "default", "none", "vr", "server", "OPTION1", "OPTION2", "OPTION3"). Default is "OPTION3".
-    oslist : list[str], optional
-        List of operating systems the launch option is valid for. e.g. 'windows', 'linux', 'macos'.
-    osarch : str, optional
-        OS architecture the launch option is valid for (e.g., "32", "64").
-    description : str, optional
-        Label for the launch option, shown in the Steam UI.
+    tool_id : int
+        The Steam compatibility tool ID for the Proton wrapper.
+    tool_path : Path
+        Where the compatibility tool is installed.
+    proton_version : str
+        Which Proton version the compatibility tool uses.
+    proton_path : Path
+        Where Proton is installed for the Proton version at the time the compatibility tool was installed.
+        Steam can move Proton after the compatibility tool was installed.
+    pinned : bool
+        True if the Proton version should be considered to be pinned (for example if the user specified the specific Proton version to use when installing). Pinned Proton versions should not be automatically updated to the current default Proton version when updating MO2.
     """
 
-    index: int = -1
-    executable: str = "mo2-redirector.exe"
-    arguments: list[str] | None = None
-    type: str = "OPTION3"
-    oslist: list[str] = None
-    osarch: str | None = None
-    description: str | None = None
-    description_loc: dict[str, str] | None = None
+    tool_id: str
+    tool_path: Path
+    proton_version: str
+    proton_path: Path
+    pinned: bool
 
     @classmethod
-    def from_dict(cls, data: dict, index: int | None = None) -> "AppInfo":
+    def from_dict(cls, data: "ProtonWrapper | dict | None") -> "ProtonWrapper | None":
+        if data is None:
+            return None
+        if isinstance(data, cls):
+            return data
+
+        tool_path = data.get("tool_path")
+        if tool_path is not None:
+            tool_path = Path(tool_path)
+
+        proton_path = data.get("proton_path")
+        if proton_path is not None:
+            proton_path = Path(proton_path)
+
         return cls(
-            index=index,
-            executable=data.get("executable", "mo2-redirector.exe"),
-            arguments=data.get("arguments") or None,
-            type=data.get("type", "none"),
-            oslist=data.get("oslist", []),
-            osarch=data.get("osarch") or (data.get("config", {}).get("osarch") or None),
-            description=data.get("description") or None,
-            description_loc=data.get("description_loc") or None,
+            tool_id=data.get("tool_id"),
+            tool_path=tool_path,
+            proton_version=data.get("proton_version"),
+            proton_path=proton_path,
+            pinned=bool(data.get("pinned", False)),
         )
 
     @classmethod
-    def to_dict(cls, data: "AppInfo") -> dict[str, any]:
-        result = {
-            "index": data.index,
-            "executable": data.executable,
-            "arguments": data.arguments,
-            "type": data.type,
-        }
-        if data.description:
-            result["description"] = data.description
-        if data.description_loc:
-            result["description_loc"] = data.description_loc
-        if data.osarch:
-            result["config"] = {
-                "oslist": data.oslist,
-                "osarch": data.osarch,
-            }
-        else:
-            result["config"] = {
-                "oslist": data.oslist,
-            }
+    def to_dict(cls, data: "ProtonWrapper | None") -> dict[str, any] | None:
+        if data is None:
+            return None
 
-        return result
+        return {
+            "tool_id": data.tool_id,
+            "tool_path": data.tool_path,
+            "proton_version": data.proton_version,
+            "proton_path": data.proton_path,
+            "pinned": data.pinned,
+        }
 
     def __post_init__(self):
-        if self.index is None or self.index < 0:
-            logger.critical(
-                "AppInfo: 'index' parameter is required but was not provided."
-            )
-            logger.critical(
-                "This should not happen. Please report this to the developer."
-            )
-        if not self.executable:
-            logger.critical(
-                "AppInfo: 'executable' parameter is required but was not provided."
-            )
-            logger.critical(
-                "This should not happen. Please report this to the developer."
-            )
-        if self.osarch and self.osarch not in ("32", "64"):
-            logger.critical(
-                "AppInfo: 'osarch' parameter must be either '32' or '64' if provided."
-            )
-            logger.critical(
-                "This should not happen. Please report this to the developer."
-            )
-        if self.type not in (
-            "default",
-            "none",
-            "vr",
-            "server",
-            "OPTION1",
-            "OPTION2",
-            "OPTION3",
-        ):
-            logger.critical(
-                "AppInfo: 'type' parameter must be one of 'default', 'none', 'vr', 'server', 'OPTION1', 'OPTION2', or 'OPTION3'."
-            )
+        bug = False
+        required = [
+            "tool_id",
+            "tool_path",
+            "proton_version",
+            "proton_path",
+            "pinned",
+        ]
+
+        for name in required:
+            if getattr(self, name, None) is None:
+                logger.critical(
+                    f"ProtonWrapper: '{name}' parameter is required but not provided."
+                )
+
+        if bug:
+            # Only show this once at the end, instead once per missing field
             logger.critical(
                 "This should not happen. Please report this to the developer."
             )
-            raise SystemExit(1)
 
 
 @dataclass
@@ -555,7 +531,7 @@ class GameInfo:
     subdirectory: str | dict[str, str] | None = None
     executable: str | dict[str, str] | None = None
     tricks: tuple[str, ...] | None = field(default_factory=tuple)
-    launch_options: dict[str, AppInfo] | None = field(default_factory=dict)
+    launch_options: dict[str, ProtonWrapper] | None = field(default_factory=dict)
     script_extenders: list[ScriptExtender] | None = field(default_factory=list)
     workarounds: dict | None = field(default_factory=dict)
     plugins: tuple[str, ...] | None = field(default_factory=tuple)

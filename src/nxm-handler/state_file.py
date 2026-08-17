@@ -38,16 +38,17 @@ def check_existing_instances(working_path: str) -> int | None:
 
 
 def game_data(instance: int) -> dict:
-    """Returns launcher, steam_ID, gog_ID, epic_ID, launch_option_type for given instance index."""
+    """Returns launcher, steam_id, gog_id, epic_id for given instance index."""
     global instances
     for inst in instances:
         if int(inst.get("index")) == instance:
             launcher_ids = inst.get("launcher_ids", {})
+            proton_wrapper = inst.get("proton_wrapper", {})
             return {
                 "launcher": inst.get("launcher", ""),
                 "steam_id": launcher_ids.get("steam", ""),
                 "gog_id": launcher_ids.get("gog", ""),
                 "epic_id": launcher_ids.get("epic", ""),
-                "launch_option_type": inst.get("launch_option_type"),
+                "proton_version": proton_wrapper.get("proton_version", None),
             }
     return {}

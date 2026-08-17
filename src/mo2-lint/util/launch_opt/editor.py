@@ -12,6 +12,7 @@ except Exception:
     import steam
 
 from util import variables as var
+from util import state_file as state
 
 
 def read_launch_option(
@@ -19,7 +20,7 @@ def read_launch_option(
     game_id: int | str,
     game_path: str | None = None,
     output: bool = False,
-) -> list[var.AppInfo] | list[dict]:
+) -> list[dict]:
     """
     Read launch options for a game from the appropriate launcher.
 
@@ -36,11 +37,11 @@ def read_launch_option(
 
     Returns:
     --------
-    list[var.AppInfo] | list[dict]
+    list[dict]
         Launch options for the specified game.
     """
     if launcher == "steam":
-        return steam.read_internal(appid=int(game_id), output=output)
+        return []
     elif launcher == "epic":
         return epic.read_internal(epic_id=str(game_id), output=output)
     elif launcher == "gog":
@@ -61,11 +62,9 @@ def add_launch_option(
     arguments: list | None = None,
     label: str = "Launch Mod Organizer",
     game_path: str | None = None,
-    opt_type: str = "none",
-    oslist: list[str] | None = None,
-    osarch: str | None = None,
+    proton_wrapper: var.ProtonWrapper | None = None,
     no_backup: bool = False,
-) -> int | None:
+) -> bool:
     """
     Add a launch option for a game to the appropriate launcher.
 
@@ -83,43 +82,40 @@ def add_launch_option(
         Display name for the launch option.
     game_path : str
         The game's installation directory (required for GOG).
-    opt_type : str
-        Type of launch option (Steam only: 'default', 'none', 'vr', 'server').
-    oslist : list[str]
-        Supported operating systems (Steam only).
-    osarch : str
-        OS architecture (Steam only).
+    proton_wrapper : ProtonWrapper
+        Additional details to setup the Steam Proton wrapper.
     no_backup : bool
         Skip creating a backup before modifying.
 
     Returns:
     --------
-    int | bool
-        For Steam: returns the launch option index.
-        For Epic/GOG: returns True on success, False on failure.
+    bool
+        returns True on success, False on failure.
     """
     if arguments is None:
         arguments = []
     if launcher == "steam":
+        if not proton_wrapper:
+            logger.error(
+                "Cannot configure Steam Proton wrapper: parameters not defined"
+            )
+            return False
         return steam.add_internal(
             appid=int(game_id),
-            executable=executable,
-            arguments=arguments,
             label=label,
-            opt_type=opt_type,
-            oslist=oslist,
-            osarch=osarch,
-            no_backup=no_backup,
+            wrapper=proton_wrapper,
+            game_executable=state.current_instance.game_executable,
+            mo2_executable=executable,
+            arguments=arguments,
         )
     elif launcher == "epic":
-        result = epic.add_internal(
+        return epic.add_internal(
             epic_id=str(game_id),
             executable=executable,
             arguments=arguments,
             label=label,
             no_backup=no_backup,
         )
-        return None if result else False
     elif launcher == "gog":
         from pathlib import Path
 
@@ -128,7 +124,7 @@ def add_launch_option(
             return False
         # For GOG, arguments should be a string, not a list
         args_str = " ".join(arguments) if arguments else None
-        result = gog.add_internal(
+        return gog.add_internal(
             game_path=Path(game_path),
             game_id=str(game_id),
             executable=executable,
@@ -136,7 +132,6 @@ def add_launch_option(
             label=label,
             no_backup=no_backup,
         )
-        return None if result else False
     else:
         logger.error(f"Unsupported launcher type: {launcher}")
         return False
@@ -145,9 +140,9 @@ def add_launch_option(
 def remove_launch_option(
     launcher: str,
     game_id: int | str,
-    index: int | None = None,
     label: str = "Launch Mod Organizer",
     game_path: str | None = None,
+    proton_wrapper: var.ProtonWrapper | None = None,
     no_backup: bool = False,
 ) -> bool:
     """
@@ -159,12 +154,12 @@ def remove_launch_option(
         The launcher type ("steam", "epic", or "gog").
     game_id : int | str
         Game identifier (appid for Steam, epic_id for Epic, game_id for GOG).
-    index : int
-        Launch option index (Steam only, required for Steam).
     label : str
         Launch option name (Epic/GOG only).
     game_path : str
         The game's installation directory (required for GOG).
+    proton_wrapper : ProtonWrapper
+        Additional parameters for the Steam Proton wrapper that was installed.
     no_backup : bool
         Skip creating a backup before modifying.
 
@@ -174,12 +169,7 @@ def remove_launch_option(
         True if the launch option was removed successfully, False otherwise.
     """
     if launcher == "steam":
-        if index is None:
-            logger.error("Steam requires an index to remove a launch option")
-            return False
-        return steam.remove_internal(
-            appid=int(game_id), index=index, no_backup=no_backup
-        )
+        return steam.remove_internal(appid=int(game_id), wrapper=proton_wrapper)
     elif launcher == "epic":
         return epic.remove_internal(
             epic_id=str(game_id), label=label, no_backup=no_backup
@@ -276,20 +266,6 @@ def read(launcher: str, game_id: str, game_path: str):
     multiple=True,
     help="Arguments to pass to the executable. Can be specified multiple times.",
 )
-@click.option(
-    "--type",
-    "-t",
-    "opt_type",
-    default="default",
-    help="Launch option type (Steam only: 'default', 'none', 'vr', 'server').",
-)
-@click.option(
-    "--oslist",
-    "-o",
-    multiple=True,
-    help="Supported operating systems (Steam only). Can be specified multiple times.",
-)
-@click.option("--osarch", "-s", help="OS architecture (Steam only, e.g., '32', '64').")
 @click_opt_no_backup
 def add(
     launcher: str,
@@ -298,9 +274,6 @@ def add(
     label: str,
     game_path: str,
     arguments: tuple,
-    opt_type: str,
-    oslist: tuple,
-    osarch: str,
     no_backup: bool,
 ):
     """
@@ -319,13 +292,10 @@ def add(
         label=label,
         game_path=game_path,
         arguments=list(arguments),
-        opt_type=opt_type,
-        oslist=list(oslist) if oslist else None,
-        osarch=osarch,
         no_backup=no_backup,
     )
     if launcher.lower() == "steam" and result is not None:
-        print(f"Added launch option with index: {result}")
+        print(f"Successfully added compatibility tool: {label}")
     elif result is not False:
         print(f"Successfully added launch option: {label}")
     else:
@@ -348,12 +318,6 @@ def add(
     help="Game installation directory (required for GOG).",
 )
 @click.option(
-    "--index",
-    "-i",
-    type=int,
-    help="Launch option index (Required for Steam).",
-)
-@click.option(
     "--label",
     help="Launch option name (Required for Epic/GOG).",
 )
@@ -362,7 +326,6 @@ def remove(
     launcher: str,
     game_id: str,
     game_path: str,
-    index: int | None,
     label: str | None,
     no_backup: bool,
 ):
@@ -371,9 +334,6 @@ def remove(
 
     GAME_ID: Steam AppID (integer), Epic game ID (string), or GOG game ID (string)
     """
-    if launcher.lower() == "steam" and index is None:
-        click.echo("Error: --index is required for Steam", err=True)
-        raise SystemExit(1)
     if launcher.lower() in ["epic", "gog"] and label is None:
         label = "Custom Launch Option"
     if launcher.lower() == "gog" and not game_path:
@@ -384,7 +344,6 @@ def remove(
         launcher=launcher.lower(),
         game_id=game_id,
         game_path=game_path,
-        index=index,
         label=label,
         no_backup=no_backup,
     )

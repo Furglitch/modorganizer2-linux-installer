@@ -107,20 +107,12 @@ Custom Steam launch options for the game:
       arguments:
         - <argument_1>
         - <argument_2>
-      type: <type>
-      oslist:
-        - <os_1>
-        - <os_2>
-      osarch: <osarch>
 ```
 
 | Field | Required | Description | Default | Options |
 |:--|:--|:--|:--|:--|
-| `label` | No | Label shown for the launch option in Steam. | "Launch Mod Organizer" | |
+| `label` | No | Label shown for the launch option in Steam. | "MO2 *<Game Name>*" | |
 | `arguments` | If applicable | Command-line arguments passed on launch. | | |
-| `type` | No | Launch option type. | `OPTION3` | `default`, `none`, `vr`, `OPTION1`, `OPTION2`, `OPTION3` |
-| `oslist` | If applicable | Operating systems to apply the option for. Applies to all if unset. | | |
-| `osarch` | If applicable | Architecture to apply the option for. | | `32`, `64` |
 
 ### `script_extenders`
 

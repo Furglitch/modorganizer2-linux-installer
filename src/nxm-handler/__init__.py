@@ -48,7 +48,7 @@ def get_env(instance_dir: Path) -> dict:
     steam_id = int(info.get("steam_id")) if info.get("steam_id") else None
     gog_id = int(info.get("gog_id")) if info.get("gog_id") else None
     epic_id = info.get("epic_id", "")
-    launch_option_type = info.get("launch_option_type")
+    proton_version = info.get("proton_version", None)
 
     logger.debug(
         f"Loaded instance data - launcher: {launcher}, steam_id: {steam_id}, gog_id: {gog_id}, epic_id: {epic_id}"
@@ -93,7 +93,7 @@ def get_env(instance_dir: Path) -> dict:
         "app": app,
         "wine": wine,
         "prefix": prefix,
-        "launch_option_type": launch_option_type,
+        "proton_version": proton_version,
     }
 
 
@@ -129,32 +129,23 @@ def launch_instance(
     steam_id: int | None,
     runner: str | None = None,
     app: str | None = None,
-    launch_option_type: str | None = None,
 ) -> None:
-    logger.info("Starting Mod Organizer 2")
+    cmd = "xdg-open"
     if launcher == "steam":
-        if launch_option_type:
-            # Use steam:// protocol to launch with specific launch option type
-            steam_url = f"steam://launch/{steam_id}/{launch_option_type}"
-            cmd = ["xdg-open", steam_url]
-            logger.trace(
-                f"Launching via Steam with launch option type {launch_option_type}: {cmd}"
-            )
-        else:
-            # Fallback to default launch
-            cmd = ["steam", "-applaunch", f"{steam_id}"]
-            logger.trace(f"Launching via Steam (default): {cmd}")
-        subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        url = f"steam://launch/{steam_id}"
     elif launcher in ["heroic", "gog", "epic"]:
-        cmd = (
+        url = (
             "heroic://launch"
             + f"?appName={app}"
             + f"&launcher={runner}"
             + "&arg=--override-exe mo2-redirector.exe"
         )
-        cmd = ["xdg-open", cmd]
-        logger.trace(f"Launching via Heroic: {cmd}")
-        subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+    logger.info("Starting Mod Organizer 2")
+    logger.trace(f"Launching via {launcher}: {cmd} {url}")
+    subprocess.Popen(
+        [cmd, url], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+    )
 
 
 def wait_for_instance(instance_dir: Path, timeout: int = 60) -> bool:
@@ -201,10 +192,21 @@ def send_url(instance_dir: Path, url: str, env_info: dict) -> None:
     release = env_info.get("release")
     wine = env_info.get("wine")
     prefix = env_info.get("prefix")
+    proton_version = env_info.get("proton_version")
 
     if launcher == "steam":
-        cmd = f"wine '{handler}' '{url}'"
-        protontricks.run(["-c", cmd, str(steam_id)])
+        cmd = ["-c", f"wine '{handler}' '{url}'", str(steam_id)]
+        env = {}
+        if proton_version:
+            env["PROTON_VERSION"] = proton_version
+            logger.info(f"Using Proton version {proton_version}")
+        else:
+            # Older installs that are not using the wrapper do not have a
+            # Proton version. These will continue to work, at least until
+            # Steam resets the launch options.
+            logger.warning("Proton version for protontricks not found")
+
+        protontricks.run(cmd, env)
     elif launcher in ["heroic", "gog", "epic"]:
         if release == "stable":
             cmd = [f"{wine}", f"{handler}", f"{url}"]
@@ -264,7 +266,6 @@ def main(url: str, log_level: str) -> None:
             env_info.get("steam_id"),
             env_info.get("runner"),
             env_info.get("app"),
-            env_info.get("launch_option_type"),
         )
         if wait_for_instance(instance_dir, timeout=60):
             import time

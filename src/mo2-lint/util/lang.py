@@ -58,12 +58,13 @@ def prompt_prefix_init() -> bool:
 
     match state.current_instance.launcher:
         case "steam":
-            instructions = """Before continuing, please ensure your Steam prefix is set up correctly:
+            proton_version = state.current_instance.proton_wrapper.proton_version
+            instructions = f"""Before continuing, please ensure your Steam prefix is set up correctly:
 
   1. Right-click on the game in your Steam library.
   2. Select 'Properties', and navigate to the 'Compatibility' tab.
   3. Check the box for 'Force the use of a specific Steam Play compatibility tool', if it's not already checked.
-  4. From the dropdown menu, select your preferred Proton version. Proton 10.0 is the supported and recommended version.
+  4. From the dropdown menu, select Proton version {proton_version} (specify --proton-version when installing to change this).
   5. If you haven't already, launch the game once to allow Steam to set up the prefix, then exit completely.
   6. Do not launch the game again until the installation process is finished."""
         case "gog" | "epic":

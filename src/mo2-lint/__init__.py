@@ -347,6 +347,15 @@ click_unattended = click.option(
     default=False,
     help="Run without interactive prompts, using defaults for all choices.",
 )
+click_opt_proton_version = click.option(
+    "--proton-version",
+    is_flag=False,
+    # This needs to be None so we can tell if the user is explicitly setting a
+    # specific Proton version (pinned), or if they want the default Proton
+    # version (unpinned).
+    default=None,
+    help="Pin to a specific version of Proton (Steam only).",
+)
 
 
 def click_arg_directory(required=False, default=None):
@@ -448,6 +457,7 @@ def cli(ctx):
     else (),
     help="Specify MO2 plugins to download and install.",
 )
+@click_opt_proton_version
 @click_opt_mo2_archive
 @click_opt_mo2_checksum
 @click_arg_game(required=True)
@@ -460,6 +470,7 @@ def install(
     script_extender: bool,
     plugin: tuple[str],
     theme: str | None,
+    proton_version: str | None,
     mo2_archive: str | None,
     mo2_checksum: str | None,
     log_level,
@@ -486,6 +497,7 @@ def install(
         plugin,
         theme,
         launcher,
+        proton_version,
         Path(mo2_archive) if mo2_archive else None,
         mo2_checksum,
     )
@@ -563,6 +575,7 @@ def unpin(directory: Path, log_level, unattended: bool):
 @click_unattended
 @click_opt_game_info
 @click_opt_theme
+@click_opt_proton_version
 @click_opt_mo2_archive
 @click_opt_mo2_checksum
 @click_arg_directory(required=True)
@@ -570,6 +583,7 @@ def update(
     directory: Path,
     game_info_path: Path | None,
     theme: str | None,
+    proton_version: str | None,
     mo2_archive: str | None,
     mo2_checksum: str | None,
     log_level,
@@ -601,6 +615,7 @@ def update(
     _update(
         directory,
         theme,
+        proton_version,
         Path(mo2_archive) if mo2_archive else None,
         mo2_checksum,
     )
