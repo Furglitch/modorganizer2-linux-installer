@@ -17,6 +17,26 @@ Covers problems with Nexus Mods' "Mod Manager Download" button not reaching MO2.
 
 ---
 
+## Ensure Nexus downloads are enabled in Mod Organizer
+
+Navigate to Mod Organizer's settings, by clicking the wrench (🛠️) icon above your modlist, then open the "Nexus" tab.
+
+### Under 'Nexus Connection'
+
+If the text box does not say `Connected.`, click the 'Connect to Nexus' button and authorize in your browser.
+
+{: .note }
+> If the 'Connect to Nexus' button is not available (greyed out), click the 'Enter API Key Manually' button, then the 'Open Browser' button. Log in to Nexus Mods, then scroll until you see 'Mod Organizer 2' (Not 'Mod Organizer 2 Linux Installer'). Click 'Request Api Key', then copy the key (two squares) and paste it into the 'Enter API key here' box in Mod Organizer. Click 'OK' to save.
+
+Once connected, you should see `Connected.` in the 'Nexus Connection' section.
+
+### Under 'Options'
+
+Click 'Associate with "Download with manager" links'. There will be no visual change, so maybe click it again to ensure it registered properly.
+
+{: .note }
+> Downloads still will not work at this point. When you click 'Ok' to save settings, Mod Organizer will prompt you to restart. If you don't restart, the changes won't take effect.
+
 ## Premium-only downloads
 
 If you see a message like:
