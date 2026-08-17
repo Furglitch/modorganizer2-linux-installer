@@ -8,6 +8,7 @@ from shutil import copy2
 
 from loguru import logger
 from util import variables as var
+from util.steam.find_library import get_libraries as get_steam_libraries
 
 from shared.logger import persist_timestamp
 
@@ -16,7 +17,22 @@ try:
 except Exception:
     import appinfo
 
-appinfo_vdf = Path("~/.steam/steam/appcache/appinfo.vdf").expanduser()
+
+def resolve_appinfo_vdf() -> Path:
+    steam_roots = get_steam_libraries()
+
+    for root in steam_roots:
+        appinfo_path = root.expanduser() / "appcache" / "appinfo.vdf"
+        if appinfo_path.exists():
+            return appinfo_path
+
+    if steam_roots:
+        return steam_roots[0].expanduser() / "appcache" / "appinfo.vdf"
+
+    return Path("~/.steam/steam").expanduser() / "appcache" / "appinfo.vdf"
+
+
+appinfo_vdf = resolve_appinfo_vdf()
 
 
 def backup_vdf(vdf_path: Path) -> Path:

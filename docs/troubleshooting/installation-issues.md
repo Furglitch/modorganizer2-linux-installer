@@ -35,6 +35,16 @@ MO2-LINT searches your Steam and Heroic libraries for the specified game. If it 
   mo2-lint install <game> <directory> --launcher steam
   ```
 
+## Steam directory override
+
+If MO2-LINT does not detect your Steam installation automatically, set `STEAM_DIR` to the Steam root before running `install`.
+
+When `STEAM_DIR` is set, MO2-LINT uses that directory instead of trying its built-in Steam path list. This is useful for non-standard installs and sandboxed setups such as Flatpak or Snap.
+
+```bash
+STEAM_DIR="/path/to/Steam" mo2-lint install <game> <directory>
+```
+
 ## Permission denied
 
 Check you have write access to the target directory:
