@@ -27,7 +27,7 @@ def run(command: list[str]) -> list[str]:
         The output lines from the protontricks command.
     """
 
-    args = ["--verbose"] + command
+    args = ["--verbose", "--no-bwrap"] + command
     logger.trace(f"Constructed protontricks command: {' '.join(args)}")
 
     output_lines = []
