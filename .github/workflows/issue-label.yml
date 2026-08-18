@@ -35,7 +35,7 @@ jobs:
             const body = issueOrPR.body || "";
 
             const systemPrompt = `
-            You are an AI assistant tasked with assessing GitHub Issues and Pull Requests to suggest appropriate labels based on their content. Your only task is to analyze the title and body of the issue or pull request and recommend relevant labels. You should not provide any additional commentary or explanations.
+            You are tasked with assessing GitHub Issues and Pull Requests to suggest appropriate labels based on their content. Your only task is to analyze the title and body of the issue or pull request and recommend relevant labels. You should not provide any additional commentary or explanations.
 
             The labels listed below are available for categorization:
 

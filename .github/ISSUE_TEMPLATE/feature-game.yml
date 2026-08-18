@@ -17,14 +17,6 @@ body:
     validations:
       required: true
   - type: dropdown
-    id: mo2_version
-    attributes:
-      label: MO2 version
-      options:
-        - "2.5.2"
-    validations:
-      required: true
-  - type: dropdown
     id: support
     attributes:
       label: Native or Plugin?
