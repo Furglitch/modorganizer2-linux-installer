@@ -50,8 +50,20 @@ jobs:
           export WINEARCH=win64
           make _build
 
-      - name: Upload Artifact
+      - name: Upload MO2-LINT Artifact
         uses: actions/upload-artifact@v7
         with:
           name: mo2-lint_artifact
           path: dist/mo2-lint
+
+      - name: Upload NXM-HANDLER Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: nxm-handler_artifact
+          path: dist/nxm-handler
+
+      - name: Upload REDIRECTOR Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: redirector_artifact
+          path: dist/mo2-redirector.exe
