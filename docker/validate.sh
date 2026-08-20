@@ -23,6 +23,9 @@ INSTANCES_DIR="$HOME/.config/mo2-lint/instances"
 MO2_DIR="$HOME/Games/mo2-lint_oblivion-steam"
 MO2_DIR_EPIC="$HOME/Games/mo2-lint_oblivion-epic"
 MO2_DIR_GOG="$HOME/Games/mo2-lint_oblivion-gog"
+PROTON_VERSION="Proton 10.0"
+PROTON_DIR="$HOME/.local/share/Steam/steamapps/$PROTON_VERSION"
+PROTON_WRAPPER_DIR="$HOME/.local/share/Steam/compatibilitytools.d/mo2_22330_redirector"
 LOGS_DIR="$HOME/.cache/mo2-lint/logs"
 NXM_HANDLER="$HOME/.local/share/mo2-lint/nxm-handler"
 DESKTOP_FILE="$HOME/.local/share/applications/mo2lint_nxm-handler.desktop"
@@ -112,6 +115,67 @@ PYEOF
     fi
 else
     warn "Skipping instance checks (state.json missing)"
+fi
+
+# --- #
+
+header "Steam Proton Wrapper"
+
+if [[ -d "$PROTON_WRAPPER_DIR" ]]; then
+    pass "Steam Proton wrapper directory: $PROTON_WRAPPER_DIR"
+else
+    fail "Steam Proton wrapper directory not found: $PROTON_WRAPPER_DIR"
+fi
+
+PROTON_WRAPPER_FILES=(proton compatibilitytool.vdf toolmanifest.vdf)
+
+for file in "${PROTON_WRAPPER_FILES[@]}"; do
+    if [[ -f "$PROTON_WRAPPER_DIR/$file" ]]; then
+        pass "Proton wrapper file: $file"
+    else
+        fail "Proton wrapper file not found: $file"
+    fi
+done
+
+line="$(grep '^proton=' "$PROTON_WRAPPER_DIR/proton")"
+if [[ $line == "proton=\"$PROTON_DIR/proton\"" ]]; then
+    pass "Proton wrapper proton: $line"
+else
+    pass "Proton wrapper has incorrect proton: $line"
+fi
+
+line="$(grep '^app=' "$PROTON_WRAPPER_DIR/proton")"
+if [[ $line == "app=\"\$STEAM_COMPAT_INSTALL_PATH/OblivionLauncher.exe\"" ]]; then
+    pass "Proton wrapper app: $line"
+else
+    pass "Proton wrapper has incorrect app: $line"
+fi
+
+line="$(grep '^proton=' "$PROTON_WRAPPER_DIR/proton")"
+if [[ $line == "mo2=\"\$STEAM_COMPAT_INSTALL_PATH/mo2-redirector.exe\"" ]]; then
+    pass "Proton wrapper mo2: $line"
+else
+    pass "Proton wrapper has incorrect mo2: $line"
+fi
+
+line="$(grep '"require_tool_appid"' "$PROTON_WRAPPER_DIR/toolmanifest.vdf")"
+if [[ $line == '  "require_tool_appid" "1628350"' ]]; then
+    pass "Proton wrapper has correct require_tool_appid"
+else
+    fail "Proton wrapper incorrect require_tool_appid: $line"
+fi
+
+if grep -Fq '"mo2_22330_redirector"' "$PROTON_WRAPPER_DIR/compatibilitytool.vdf"; then
+    pass "Proton wrapper has correct tool ID"
+else
+    fail "Proton wrapper does not have the correct tool ID"
+fi
+
+line="$(grep '"display_name"' "$PROTON_WRAPPER_DIR/compatibilitytool.vdf")"
+if [[ $line == '      "display_name" "MO2 The Elder Scrolls IV: Oblivion"' ]]; then
+    pass "Proton wrapper has the correct display name"
+else
+    fail "Proton wrapper display name incorrect: $line"
 fi
 
 # --- #
