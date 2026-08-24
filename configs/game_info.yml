@@ -500,6 +500,20 @@ games:
             - "Data"
             - "skse64_1_6_1170.dll"
             - "skse64_loader.exe"
+      - version: "2.3.0"
+        runtime:
+          steam:
+            - "1.7.99"
+        download:
+          nexus:
+            mod: 30379
+            file: 792372
+        file_whitelist:
+          subdirectory: skse64_2_03_00
+          paths:
+            - "Data"
+            - "skse64_1_7_99.dll"
+            - "skse64_loader.exe"
 
   skyrim_ae:
     display_name: 'The Elder Scrolls V: Skyrim - Anniversary Edition (Heroic)'
