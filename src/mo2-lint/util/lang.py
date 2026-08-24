@@ -63,7 +63,7 @@ def prompt_prefix_init() -> bool:
   1. Right-click on the game in your Steam library.
   2. Select 'Properties', and navigate to the 'Compatibility' tab.
   3. Check the box for 'Force the use of a specific Steam Play compatibility tool', if it's not already checked.
-  4. From the dropdown menu, select your preferred Proton version. Proton 10.0 is the supported and recommended version.
+  4. From the dropdown menu, select your preferred Proton version. Proton 11.0 is the supported and recommended version.
   5. If you haven't already, launch the game once to allow Steam to set up the prefix, then exit completely.
   6. Do not launch the game again until the installation process is finished."""
         case "gog" | "epic":
@@ -72,7 +72,7 @@ def prompt_prefix_init() -> bool:
   1. Right-click on the game in your Heroic library.
   2. Select 'Settings', and navigate to the 'WINE' tab.
   3. Under 'Wine Version', select your preferred Wine/Proton version.
-     * Proton - Proton 10.0 is the currently supported and recommended version.
+     * Proton - Proton 11.0 is the currently supported and recommended version.
      * If Proton versions are not available, you will need to enable "Allow using Valve Proton builds to run games"
        in Heroic's Settings, under the 'Advanced' tab. Then, ensure that Proton is downloaded and installed in Steam.
   4. Optional: Navigate to the 'OTHER' tab and check 'Use Steam Runtime'. This is recommended and may help with compatibility.
