@@ -500,7 +500,15 @@ games:
             - "Data"
             - "skse64_1_6_1170.dll"
             - "skse64_loader.exe"
-      - version: "2.2.6" # For GOG
+
+  skyrim_ae:
+    display_name: 'The Elder Scrolls V: Skyrim - Anniversary Edition (Heroic)'
+    parent: skyrim_se
+    launcher_ids:
+      steam: null
+    subdirectory: Skyrim Anniversary Edition
+    script_extenders:
+      - version: "2.2.6"
         runtime:
           gog:
             - "1.6.1179"
