@@ -24,8 +24,8 @@
     "advertiseAvxForRosetta": false,
     "enableQuickSavesMenu": false,
     "wineVersion": {
-      "bin": "/home/docker/.local/share/Steam/steamapps/common/Proton 10.0/proton",
-      "name": "Proton 10.0",
+      "bin": "/home/docker/.local/share/Steam/steamapps/common/Proton 11.0/proton",
+      "name": "Proton 11.0",
       "type": "proton"
     },
     "winePrefix": "/home/docker/Games/heroic/.prefixes/The Elder Scrolls IV Oblivion",
