@@ -23,10 +23,10 @@ SECTION_END = b"\x08"
 
 # App IDs
 STEAM_PLAY_APPID = 891390
-PROTON_APPID = 2805730  # Proton 10.0
-PROTON_KEY = "proton_10"
-PROTON_ALIASES = "proton-10,proton_10"
-PROTON_NAME = "Proton 10.0"
+PROTON_APPID = 2805730  # Proton 11.0
+PROTON_KEY = "proton_11"
+PROTON_ALIASES = "proton-11,proton_11"
+PROTON_NAME = "Proton 11.0"
 GAME_APPID = 22330  # Oblivion GOTY
 
 
