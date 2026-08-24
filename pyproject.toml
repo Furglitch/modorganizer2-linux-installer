@@ -18,7 +18,7 @@ dependencies = [
     "pyinstaller>=6.22.0",
     "pyinstaller-hooks-contrib>=2026.6",
     "pyyaml>=6.0.3",
-    "ruff==0.16.3",
+    "ruff==0.16.4",
     "requests>=2.34.2",
     "send2trash>=2.0.0",
     "websockets>=17.0.1",
