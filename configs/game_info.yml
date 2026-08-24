@@ -520,6 +520,8 @@ games:
     parent: skyrim_se
     launcher_ids:
       steam: null
+      gog: 1711230643
+      epic: ac82db5035584c7f8a2c548d98c86b2c
     subdirectory: Skyrim Anniversary Edition
     script_extenders:
       - version: "2.2.6"
