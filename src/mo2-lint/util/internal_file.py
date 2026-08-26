@@ -5,6 +5,13 @@ from pathlib import Path
 
 from loguru import logger
 
+# Bundle directory names (from the PyInstaller --add-data flags) mapped to their
+# equivalents in the source tree, for when the script is run unfrozen.
+_SOURCE_LAYOUT = {
+    "cfg": "configs",
+    "src": "src/mo2-lint",
+}
+
 
 def internal_file(*parts) -> Path:
     """
@@ -21,6 +28,17 @@ def internal_file(*parts) -> Path:
         The full path to the internal file's temporary location.
     """
 
-    path = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve()))
-    logger.trace(f"Accessing internal file: {path.joinpath(*parts)}")
-    return path.joinpath(*parts)
+    meipass = getattr(sys, "_MEIPASS", None)
+    if meipass is not None:
+        path = Path(meipass).joinpath(*parts)
+    else:
+        # Unfrozen: resolve against the repository root, remapping the bundle
+        # directory names onto their source-tree equivalents.
+        root = Path(__file__).resolve().parents[3]
+        remapped = list(parts)
+        if remapped:
+            remapped[0] = _SOURCE_LAYOUT.get(remapped[0], remapped[0])
+        path = root.joinpath(*remapped)
+
+    logger.trace(f"Accessing internal file: {path}")
+    return path
