@@ -316,7 +316,24 @@ def restart_steam():
             return
         logger.info("Restarting Steam to apply launch option changes...")
         subprocess.Popen(["killall", "steam", "steamwebhelper"])
-        time.sleep(5)  # Wait for processes to terminate
+
+        for _ in range(30):  # Wait 30s for processes to terminate
+            if (
+                subprocess.run(
+                    ["pgrep", "-x", "steamwebhelper"], capture_output=True, check=False
+                ).returncode
+                != 0
+                and subprocess.run(
+                    ["pgrep", "-x", "steam"], capture_output=True, check=False
+                ).returncode
+                != 0
+            ):
+                break
+            time.sleep(1)
+        else:
+            logger.warning(
+                "Timed out waiting for Steam to terminate, proceeding anyway..."
+            )
         subprocess.Popen(
             ["steam", "-silent"],
             stdout=subprocess.DEVNULL,
