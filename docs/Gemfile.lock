@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/benbalter/jekyll-remote-theme.git
-  revision: 2c68b743fe71de71b1e8f78ae3fec2fbaf028c66
+  revision: 1914c8947c78b0526184ac9a436f93caf75c71b6
   specs:
     jekyll-remote-theme (0.5.2)
       addressable (~> 2.0)
@@ -26,10 +26,10 @@ GEM
     ffi (1.17.4-arm64-darwin)
     ffi (1.17.4-x86_64-linux-gnu)
     forwardable-extended (2.6.0)
-    google-protobuf (4.35.1-arm64-darwin)
+    google-protobuf (4.36.1-arm64-darwin)
       bigdecimal
       rake (~> 13.3)
-    google-protobuf (4.35.1-x86_64-linux-gnu)
+    google-protobuf (4.36.1-x86_64-linux-gnu)
       bigdecimal
       rake (~> 13.3)
     http_parser.rb (0.8.1)
@@ -54,7 +54,7 @@ GEM
       safe_yaml (~> 1.0)
       terminal-table (>= 1.8, < 4.0)
       webrick (~> 1.7)
-    jekyll-include-cache (0.2.1)
+    jekyll-include-cache (0.2.2)
       jekyll (>= 3.7, < 5.0)
     jekyll-sass-converter (3.1.0)
       sass-embedded (~> 1.75)
@@ -86,11 +86,11 @@ GEM
       ffi (~> 1.0)
     rexml (3.4.4)
     rouge (4.7.0)
-    rubyzip (3.4.1)
+    rubyzip (3.5.0)
     safe_yaml (1.0.5)
-    sass-embedded (1.102.0-arm64-darwin)
+    sass-embedded (1.103.1-arm64-darwin)
       google-protobuf (~> 4.31)
-    sass-embedded (1.102.0-x86_64-linux-gnu)
+    sass-embedded (1.103.1-x86_64-linux-gnu)
       google-protobuf (~> 4.31)
     terminal-table (3.0.2)
       unicode-display_width (>= 1.1.1, < 3)

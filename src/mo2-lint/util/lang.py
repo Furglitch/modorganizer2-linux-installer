@@ -73,7 +73,7 @@ def prompt_prefix_init() -> bool:
   1. Right-click on the game in your Heroic library.
   2. Select 'Settings', and navigate to the 'WINE' tab.
   3. Under 'Wine Version', select your preferred Wine/Proton version.
-     * Proton - Proton 10.0 is the currently supported and recommended version.
+     * Proton - Proton 11.0 is the currently supported and recommended version.
      * If Proton versions are not available, you will need to enable "Allow using Valve Proton builds to run games"
        in Heroic's Settings, under the 'Advanced' tab. Then, ensure that Proton is downloaded and installed in Steam.
   4. Optional: Navigate to the 'OTHER' tab and check 'Use Steam Runtime'. This is recommended and may help with compatibility.
