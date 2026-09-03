@@ -26,7 +26,18 @@ To see what games are supported, run `mo2-lint install --help`. You can also see
 {: .warning }
 > Always launch MO2 **through Steam or Heroic**, not by running the executable directly through Wine or Protontricks. MO2-LINT registers a launch option in your launcher; running the binary manually skips Proton/prefix setup entirely.
 
-After installing, launch the game through your launcher. You should see a **"Launch Mod Organizer"** entry alongside the game's default launch option.
+### Steam
+
+After installing, head to the game's **Properties** in your Steam library. Under the **Compatibility** tab, check the box for **"Force the use of a specific Steam Play compatibility tool"** and select the Proton version created by the installer, named 'MO2 <game>' (e.g. 'MO2 Fallout 4')
+
+{: .warning }
+> Make sure that you have at least one other game that has the original Proton version selected in its compatibility settings. Otherwise, Steam may consider the original unused and remove it, which will also break the MO2 Proton version. You can use a 'non-Steam game' for this purpose.
+
+After choosing the Proton version, launch the game as you normally would.
+
+### Heroic
+
+After installing, you should see a **"Launch Mod Organizer"** entry alongside the game's default launch option.
 
 ## 4. Confirm it worked
 

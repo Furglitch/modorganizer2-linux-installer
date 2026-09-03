@@ -14,6 +14,7 @@ from util.nexus.install_handler import install as install_handler
 from util.redirector.install import install as install_redirector
 from util.state_file import InstanceData, set_index
 from util.steam.proton_wrapper import resolve as resolve_proton_wrapper
+from util.lang import post_install_steam, post_install_heroic
 
 
 def get_install_dir(
@@ -160,3 +161,9 @@ def install(
     apply_workarounds()
     logger.info("Workarounds applied")
     logger.success("Installation completed successfully")
+
+    display_name = var.game_info.display_name
+    if launcher == "steam":
+        print(post_install_steam.format(game=display_name))
+    elif launcher in ["gog", "epic"]:
+        print(post_install_heroic)

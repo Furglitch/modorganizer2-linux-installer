@@ -18,6 +18,30 @@ help_pin = """Pin the Mod Organizer 2 installation in the specified directory, p
 help_unpin = """Unpin the Mod Organizer 2 installation in the specified directory, allowing updates."""
 help_update = """Update the Mod Organizer 2 installation in the specified directory, as well as the launch option for the game."""
 
+post_install_heroic = """Your Mod Organizer 2 instance has been created successfully.
+
+A launch option has been added to your game in Heroic, chosen in the 'Launch Options...' menu of the game, labeled 'Launch Mod Organizer'.
+If you do not see the launch option, please restart Heroic and check again.
+
+Additionally, certain games may require additional configuration or workarounds to function properly.
+Please refer to the documentation (link below) for your specific game for any additional steps that may be required.
+https://docs.furglitch.com/modorganizer2-linux-installer/game-guides/
+"""
+
+post_install_steam = """Your Mod Organizer 2 instance has been created successfully.
+
+If you haven't already, please ensure your game prefix is set up correctly before launching the game.
+In the game's properties, under the 'Compatibility' tab, check the box for 'Force the use of a specific Steam Play compatibility tool' and select the Proton version created by this installer, named 'MO2 {game}'.
+
+Ensure that you have at least one other game that has the original Proton version selected, otherwise it may be removed and the MO2 Proton version will break.
+
+After that, you may launch the game as you normally would, and the Mod Organizer 2 instance will be launched instead of the game directly.
+
+Additionally, certain games may require additional configuration or workarounds to function properly.
+Please refer to the documentation (link below) for your specific game for any additional steps that may be required.
+https://docs.furglitch.com/modorganizer2-linux-installer/game-guides/
+"""
+
 
 def list_instances(instance_list: list) -> list:
     """
