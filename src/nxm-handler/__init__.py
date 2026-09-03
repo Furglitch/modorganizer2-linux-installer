@@ -48,6 +48,7 @@ def get_env(instance_dir: Path) -> dict:
     steam_id = int(info.get("steam_id")) if info.get("steam_id") else None
     gog_id = int(info.get("gog_id")) if info.get("gog_id") else None
     epic_id = info.get("epic_id", "")
+    launch_option_type = info.get("launch_option_type")
     proton_version = info.get("proton_version", None)
 
     logger.debug(
@@ -93,6 +94,7 @@ def get_env(instance_dir: Path) -> dict:
         "app": app,
         "wine": wine,
         "prefix": prefix,
+        "launch_option_type": launch_option_type,
         "proton_version": proton_version,
     }
 
@@ -129,17 +131,13 @@ def launch_instance(
     steam_id: int | None,
     runner: str | None = None,
     app: str | None = None,
+    launch_option_type: str | None = None,
 ) -> None:
     cmd = "xdg-open"
     if launcher == "steam":
         url = f"steam://launch/{steam_id}"
     elif launcher in ["heroic", "gog", "epic"]:
-        url = (
-            "heroic://launch"
-            + f"?appName={app}"
-            + f"&launcher={runner}"
-            + "&arg=--override-exe mo2-redirector.exe"
-        )
+        url = "heroic://launch" + f"?appName={app}" + f"&launcher={runner}"
 
     logger.info("Starting Mod Organizer 2")
     logger.trace(f"Launching via {launcher}: {cmd} {url}")
@@ -266,6 +264,7 @@ def main(url: str, log_level: str) -> None:
             env_info.get("steam_id"),
             env_info.get("runner"),
             env_info.get("app"),
+            env_info.get("launch_option_type"),
         )
         if wait_for_instance(instance_dir, timeout=60):
             import time
