@@ -14,7 +14,7 @@ from util.steam.path import find_steam_root
 from util.steam.proton import find_proton, read_require_tool_appid
 
 
-default_proton_version = "Proton 10.0"
+default_proton_version = "Proton 11.0"
 
 # Use a magic marker file to track that a directory is a proton wrapper managed by our application. We do not want to accidentally delete someone's home directory because of a corrupted state file.
 marker_name = ".mo2-lint-proton-wrapper"
@@ -68,7 +68,7 @@ def resolve(appid: int, proton_version: str | None = None) -> var.ProtonWrapper 
     appid : int
         The Steam appid the Proton wrapper belongs to.
     proton_version : str
-        The proton version to look for (matches the directory name) for example "Proton 10.0".
+        The proton version to look for (matches the directory name) for example "Proton 11.0".
         If None the default Proton version will be used.
     """
 
@@ -141,7 +141,7 @@ def render(
         The executable to run (relative to the game dir) instead of the
         source_executable. This is normally mo2-redirector.exe.
     proton_version : str
-        The proton version to look for (matches the directory name) for example "Proton 10.0"
+        The proton version to look for (matches the directory name) for example "Proton 11.0"
     """
 
     require_tool_appid = read_require_tool_appid(proton_path)
