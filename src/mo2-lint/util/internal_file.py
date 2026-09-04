@@ -8,7 +8,7 @@ from loguru import logger
 
 def internal_file(*parts) -> Path:
     """
-    Get the path to an internal file within the package.
+    Resolves the path to an internal file. Pulls from temporary location if running in a bundle, otherwise resolves relative to the repository root.
 
     Parameters
     ----------
@@ -21,6 +21,19 @@ def internal_file(*parts) -> Path:
         The full path to the internal file's temporary location.
     """
 
-    path = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve()))
-    logger.trace(f"Accessing internal file: {path.joinpath(*parts)}")
-    return path.joinpath(*parts)
+    if getattr(sys, "_MEIPASS", None):
+        path = Path(sys._MEIPASS)
+    else:
+        repo_root = Path(__file__).resolve().parents[3]
+        if parts and parts[0] == "cfg":
+            path = repo_root / "configs"
+            parts = parts[1:]
+        elif parts and parts[0] == "src":
+            path = repo_root / "src" / "mo2-lint"
+            parts = parts[1:]
+        else:
+            path = repo_root
+
+    resolved = path.joinpath(*parts)
+    logger.trace(f"Accessing internal file: {resolved}")
+    return resolved
