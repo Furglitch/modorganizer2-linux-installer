@@ -47,6 +47,7 @@ MO2-LINT aims to make installing [Mod Organizer 2](https://github.com/ModOrganiz
 | Oblivion | See [Game Guide](https://furglitch.github.io/modorganizer2-linux-installer/game-guides/oblivion/) |
 | Skyrim | |
 | Skyrim Special Edition | |
+| Skyrim Anniversary Edition (Heroic) | See [Game Guide](./game-guides/skyrim-ae-heroic/) |
 | Skyrim VR | |
 | Starfield | |
 | Subnautica | |
