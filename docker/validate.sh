@@ -23,7 +23,7 @@ INSTANCES_DIR="$HOME/.config/mo2-lint/instances"
 MO2_DIR="$HOME/Games/mo2-lint_oblivion-steam"
 MO2_DIR_EPIC="$HOME/Games/mo2-lint_oblivion-epic"
 MO2_DIR_GOG="$HOME/Games/mo2-lint_oblivion-gog"
-PROTON_VERSION="Proton 10.0"
+PROTON_VERSION="Proton 11.0"
 PROTON_DIR="$HOME/.local/share/Steam/steamapps/$PROTON_VERSION"
 PROTON_WRAPPER_DIR="$HOME/.local/share/Steam/compatibilitytools.d/mo2_22330_redirector"
 LOGS_DIR="$HOME/.cache/mo2-lint/logs"
@@ -159,7 +159,7 @@ else
 fi
 
 line="$(grep '"require_tool_appid"' "$PROTON_WRAPPER_DIR/toolmanifest.vdf")"
-if [[ $line == '  "require_tool_appid" "1628350"' ]]; then
+if [[ $line == '  "require_tool_appid" "4183110"' ]]; then
     pass "Proton wrapper has correct require_tool_appid"
 else
     fail "Proton wrapper incorrect require_tool_appid: $line"
