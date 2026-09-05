@@ -156,7 +156,7 @@ def install(
     logger.info("Redirector installation completed")
 
     add_launch_opt()
-    logger.info("Launch options configured")
+    logger.info("Launch method configured")
 
     apply_workarounds()
     logger.info("Workarounds applied")

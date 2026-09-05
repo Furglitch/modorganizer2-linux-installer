@@ -14,7 +14,7 @@ MO2-LINT aims to make installing [Mod Organizer 2](https://github.com/ModOrganiz
 
 | | |
 |:--|:--|
-| **Totally Automated** | `mo2-lint install` sets up Proton, downloads MO2, registers launch options, and wires up the NXM handler. |
+| **Totally Automated** | `mo2-lint install` sets up Proton, downloads MO2, registers compatibility tools, and wires up the NXM handler. |
 | **Multiple Instances** | Run separate MO2 instances for each game, each independently tracked and updatable. |
 | **Easy-to-Use** | The CLI interface is designed to be as user friendly as possible, with clear commands and options. |
 | **Nexus Integration** | The bundled NXM handler makes the "Mod Manager Download" button on Nexus Mods work out of the box. |

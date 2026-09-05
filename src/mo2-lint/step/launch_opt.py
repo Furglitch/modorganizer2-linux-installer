@@ -33,10 +33,13 @@ def add_launch_opt():
             proton_wrapper=state.current_instance.proton_wrapper,
         )
 
-        logger.info(f"Added launch option for {launcher} game ID {game_id}")
+        if launcher == "steam":
+            logger.info(f"Added compatibility tool for {launcher} game ID {game_id}")
+        else:
+            logger.info(f"Added launch option for {launcher} game ID {game_id}")
     else:
         logger.warning(
-            f"Launcher '{launcher}' is not supported for launch options, or launcher ID is missing"
+            f"Launcher '{launcher}' is not supported for launcher configuration, or launcher ID is missing"
         )
 
 
@@ -65,8 +68,11 @@ def remove_launch_opt():
                 else None,
                 label="Launch Mod Organizer",
             )
-        logger.info(f"Removed launch option for {launcher} game ID {game_id}")
+        if launcher == "steam":
+            logger.info(f"Removed compatibility tool for {launcher} game ID {game_id}")
+        else:
+            logger.info(f"Removed launch option for {launcher} game ID {game_id}")
     else:
         logger.warning(
-            f"Launcher '{launcher}' is not supported for launch options, or launcher ID is missing"
+            f"Launcher '{launcher}' is not supported for launcher configuration, or launcher ID is missing"
         )

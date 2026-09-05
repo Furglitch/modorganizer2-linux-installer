@@ -7,7 +7,7 @@ parent: CLI Guide
 
 # `update`
 
-Updates the MO2 executable and NXM handler for an existing instance, and refreshes its launch option.
+Updates the MO2 executable and NXM handler for an existing instance, and refreshes the launcher configuration for that instance.
 
 ```bash
 mo2-lint update <directory> [options]

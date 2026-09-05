@@ -24,7 +24,7 @@ def add_internal(
     Parameters:
     -----------
     appid : int
-        The Steam appid for which to add the launch option.
+        The Steam appid for which to add the compatibility tool.
     label : str
         The display name for the Steam compatibility tool.
     wrapper : ProtonWrapper
@@ -69,19 +69,19 @@ def add_internal(
 
 def remove_internal(appid: int, wrapper: var.ProtonWrapper | None) -> bool:
     """
-    Remove a launch option by index for a specific Steam game ID from the appinfo.vdf file.
+    Remove a compatibility tool by index for a specific Steam game ID from the appinfo.vdf file.
 
     Parameters:
     -----------
     appid : int
-        The Steam appid for which to remove the launch option.
+        The Steam appid for which to remove the compatibility tool.
     wrapper : ProtonWrapper
         Parameters for the Steam Proton wrapper that was installed.
 
     Returns:
     --------
     bool
-        True if the launch option was removed successfully, False otherwise.
+        True if the compatibility tool was removed successfully, False otherwise.
     """
 
     if not wrapper:
@@ -115,7 +115,7 @@ def restart_steam():
         ):
             logger.debug("Steam is not running, no restart needed")
             return
-        logger.info("Restarting Steam to apply launch option changes...")
+        logger.info("Restarting Steam to apply compatibility tool changes...")
         subprocess.Popen(["killall", "steam", "steamwebhelper"])
         time.sleep(5)  # Wait for processes to terminate
         subprocess.Popen(

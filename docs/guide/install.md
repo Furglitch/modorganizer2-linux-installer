@@ -60,6 +60,6 @@ mo2-lint install <game> <directory> [options]
 
 ## After installing
 
-At the end of the installation process, MO2-LINT will print instructions for launching the new instance. The instructions vary depending on the detected launcher (Steam, GOG, or Epic).
+At the end of the installation process, MO2-LINT will print instructions for launching the new instance. For Steam, the instance uses a modified Proton layer; for Heroic, it adds a launcher launch option.
 
 You can proceed to step 3 of the [First Launch](../getting-started/first-launch#3-launch-through-steam-or-heroic) guide.

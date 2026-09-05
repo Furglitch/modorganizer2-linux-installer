@@ -23,7 +23,7 @@ Every MO2-LINT command accepts these two global options:
 | Command | Purpose |
 |:--|:--|
 | [`install`](./install) | Create a new MO2 instance for a game. |
-| [`update`](./update) | Refresh an existing instance's MO2 build and launch option. |
+| [`update`](./update) | Refresh an existing instance's MO2 build and launch configuration. |
 | [`uninstall` / `list` / `pin` / `unpin`](./managing-instances) | Remove, list, and lock instances. |
 
 ## Reference

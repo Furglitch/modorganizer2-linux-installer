@@ -32,7 +32,7 @@ def update(
     mo2_checksum: str | None = None,
 ):
     """
-    Updates the MO2 instance located at the given directory and refreshes the launch option.
+    Updates the MO2 instance located at the given directory and refreshes the launcher configuration.
     """
 
     var.set_parameters(

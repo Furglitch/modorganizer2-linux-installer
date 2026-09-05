@@ -16,7 +16,7 @@ help_uninstall = """Uninstall an existing Mod Organizer 2 instance."""
 help_list = """List existing Mod Organizer 2 instances."""
 help_pin = """Pin the Mod Organizer 2 installation in the specified directory, preventing updates."""
 help_unpin = """Unpin the Mod Organizer 2 installation in the specified directory, allowing updates."""
-help_update = """Update the Mod Organizer 2 installation in the specified directory, as well as the launch option for the game."""
+help_update = """Update the Mod Organizer 2 installation in the specified directory, and refresh the launcher configuration for the game."""
 
 post_install_heroic = """Your Mod Organizer 2 instance has been created successfully.
 
@@ -30,6 +30,7 @@ https://docs.furglitch.com/modorganizer2-linux-installer/game-guides/
 
 post_install_steam = """Your Mod Organizer 2 instance has been created successfully.
 
+For Steam, this instance uses a custom Proton compatibility tool instead of a launch option.
 If you haven't already, please ensure your game prefix is set up correctly before launching the game.
 In the game's properties, under the 'Compatibility' tab, check the box for 'Force the use of a specific Steam Play compatibility tool' and select the Proton version created by this installer, named 'MO2 {game}'.
 
@@ -82,13 +83,12 @@ def prompt_prefix_init() -> bool:
 
     match state.current_instance.launcher:
         case "steam":
-            proton_version = state.current_instance.proton_wrapper.proton_version
             instructions = f"""Before continuing, please ensure your Steam prefix is set up correctly:
 
   1. Right-click on the game in your Steam library.
   2. Select 'Properties', and navigate to the 'Compatibility' tab.
   3. Check the box for 'Force the use of a specific Steam Play compatibility tool', if it's not already checked.
-  4. From the dropdown menu, select Proton version {proton_version} (specify --proton-version when installing to change this).
+  4. From the dropdown menu, select the custom MO2 Proton tool created by this installer (named 'MO2 {state.current_instance.game}' or the value from --proton-version if you changed it).
   5. If you haven't already, launch the game once to allow Steam to set up the prefix, then exit completely.
   6. Do not launch the game again until the installation process is finished."""
         case "gog" | "epic":
