@@ -13,6 +13,8 @@ from util import variables as var
 from util.nexus.install_handler import install as install_handler
 from util.redirector.install import install as install_redirector
 from util.state_file import InstanceData, set_index
+from util.steam.proton_wrapper import resolve as resolve_proton_wrapper
+from util.lang import post_install_steam, post_install_heroic
 
 
 def get_install_dir(
@@ -63,6 +65,7 @@ def install(
     plugin: tuple[str] | None = (),
     theme: str | None = None,
     launcher: str | None = None,
+    proton_version: str | None = None,
     mo2_archive: Path | None = None,
     mo2_checksum: str | None = None,
 ):
@@ -87,17 +90,33 @@ def install(
 
     if not state.match_instances(directory=directory):
         launcher = get_launcher(launcher)
+
         executable = (
             var.game_info.executable.get(launcher)
             if isinstance(var.game_info.executable, dict)
             else var.game_info.executable
         )
+
         game_path = get_library()
         if game_path is None:
             logger.critical(
                 "Could not determine the game installation path. Aborting installation before modifying the instance."
             )
             raise SystemExit(1)
+
+        proton_wrapper = None
+        if launcher == "steam":
+            appid = var.game_info.launcher_ids.steam
+            proton_wrapper = resolve_proton_wrapper(appid, proton_version)
+
+            if not proton_wrapper:
+                logger.critical(
+                    "Could not resolve Steam Proton wrapper. Aborting installation because MO2 will not launch through Steam without the Proton wrapper."
+                )
+                raise SystemExit(1)
+
+            if proton_version:
+                proton_wrapper.pinned = True
 
         state.current_instance = InstanceData(
             index=-1,
@@ -109,6 +128,7 @@ def install(
             launcher_ids=var.LauncherIDs.from_dict(var.game_info.launcher_ids),
             game_path=game_path,
             game_executable=executable,
+            proton_wrapper=proton_wrapper,
             script_extender=None,
             plugins=list(plugin),
         )
@@ -136,8 +156,14 @@ def install(
     logger.info("Redirector installation completed")
 
     add_launch_opt()
-    logger.info("Launch options configured")
+    logger.info("Launch method configured")
 
     apply_workarounds()
     logger.info("Workarounds applied")
     logger.success("Installation completed successfully")
+
+    display_name = var.game_info.display_name
+    if launcher == "steam":
+        print(post_install_steam.format(game=display_name))
+    elif launcher in ["gog", "epic"]:
+        print(post_install_heroic)

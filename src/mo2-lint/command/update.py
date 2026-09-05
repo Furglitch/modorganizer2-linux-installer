@@ -10,6 +10,7 @@ from util import variables as var
 from util.nexus.install_handler import install as install_handler
 from util.redirector.install import install as install_redirector
 from util.wine import protontricks, winetricks
+from util.steam import proton_wrapper
 
 
 def update_tricks():
@@ -26,11 +27,12 @@ def update_tricks():
 def update(
     directory: Path,
     theme: str | None = None,
+    proton_version: str | None = None,
     mo2_archive: Path | None = None,
     mo2_checksum: str | None = None,
 ):
     """
-    Updates the MO2 instance located at the given directory and refreshes the launch option.
+    Updates the MO2 instance located at the given directory and refreshes the launcher configuration.
     """
 
     var.set_parameters(
@@ -77,6 +79,34 @@ def update(
             )
             return
 
+    update_launcher = True
+    old_proton_wrapper = state.current_instance.proton_wrapper
+    new_proton_wrapper = None
+
+    if state.current_instance.launcher == "steam":
+        # Cannot trust the cached proton_path in state as it might have changed.
+        # So refresh the details for the proton wrapper.
+
+        appid = state.current_instance.launcher_ids.steam
+
+        if proton_version:
+            # User has requested a specific Proton version for update so pin it
+            pinned = True
+        else:
+            # Check if the old wrapper has a pinned version, if so keep it
+            pinned = bool(old_proton_wrapper and old_proton_wrapper.pinned)
+            if pinned:
+                proton_version = old_proton_wrapper.proton_version
+
+        new_proton_wrapper = proton_wrapper.resolve(appid, proton_version)
+        if new_proton_wrapper:
+            new_proton_wrapper.pinned = pinned
+        else:
+            update_launcher = False
+            logger.warning(
+                "Could not resolve Steam Proton wrapper. Proton wrapper will not be updated."
+            )
+
     logger.debug(f"Updating MO2 executable in directory: {directory}")
     download_mod_organizer()
 
@@ -90,5 +120,11 @@ def update(
     install_redirector()
     install_handler()
 
-    remove_launch_opt()
-    add_launch_opt()
+    if update_launcher:
+        # Keep the old paths for the Proton wrapper when removing
+        remove_launch_opt()
+
+        # Swap to the new paths (and possibly new Proton version)
+        state.current_instance.proton_wrapper = new_proton_wrapper
+        add_launch_opt()
+        state.write_state()

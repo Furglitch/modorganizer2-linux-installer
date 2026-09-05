@@ -13,3 +13,7 @@ heroic-epic: # Sourced from legendary/core.py in Heroic-Games-Launcher/legendary
   - "-epiclocale="
   - "-epicsandboxid="
   - "-epicdeploymentid="
+
+subnautica:
+  - "-silent-crashes"
+  - "-vrmode"

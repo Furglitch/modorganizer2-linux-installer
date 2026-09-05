@@ -261,15 +261,29 @@ def split_arguments(
     if not prefixes:
         return [], args
 
-    launcher_args = []
-    other_args = []
+    launcher_args: list[str] = []
+    other_args: list[str] = []
 
-    for arg in args:
+    i = 0
+    while i < len(args):
+        arg = args[i]
         if any(arg.startswith(prefix) for prefix in prefixes):
             launcher_args.append(arg)
             logger.debug(f"Extracted launcher arg: {arg}")
+
+            # Check if next argument is a value (not starting with "-")
+            if i + 1 < len(args):
+                next_arg = args[i + 1]
+                if not str(next_arg).startswith("-"):
+                    launcher_args.append(next_arg)
+                    logger.debug(f"Also extracted launcher value: {next_arg}")
+                    i += 2
+                    continue
+
+            i += 1
         else:
             other_args.append(arg)
+            i += 1
 
     return launcher_args, other_args
 
