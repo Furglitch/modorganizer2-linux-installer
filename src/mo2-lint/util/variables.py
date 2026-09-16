@@ -535,6 +535,7 @@ class GameInfo:
     script_extenders: list[ScriptExtender] | None = field(default_factory=list)
     workarounds: dict | None = field(default_factory=dict)
     plugins: tuple[str, ...] | None = field(default_factory=tuple)
+    proton_executable: str | dict[str, str] | None = None
 
     @classmethod
     def from_dict(cls, data: "dict[str, any] | GameInfo") -> "GameInfo":
@@ -558,6 +559,7 @@ class GameInfo:
             else None,
             workarounds=data.get("workarounds") or {},
             plugins=tuple(data.get("plugins") or ()),
+            proton_executable=data.get("proton_executable") or None,
         )
 
     def __post_init__(self):

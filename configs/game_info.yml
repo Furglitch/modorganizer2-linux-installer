@@ -9,7 +9,7 @@ games:
       steam: 1086940
       gog: 1456460669
     subdirectory: Baldurs Gate 3
-    executable: bin/bg3.exe
+    executable: bin/bg3
     plugins:
       - "bg3-plugin"
       - "root-builder"
@@ -23,6 +23,7 @@ games:
       epic: 77f2b98e2cef40c8a7437518bf420e47
     subdirectory: Cyberpunk 2077
     executable: bin/x64/Cyberpunk2077.exe
+    proton_executable: REDprelauncher.exe
     tricks:
       - "xaudio2_7=native"
       - "d3dcompiler_47"
@@ -41,7 +42,7 @@ games:
       steam: 47810
       gog: 1949616134
     subdirectory: Dragon Age Ultimate Edition
-    executable: DAOriginsLauncher.exe # UPDATE
+    executable: DAOriginsLauncher.exe # TODO: UPDATE
     tricks:
       - "xaudio2_7=native"
       - "d3dcompiler_43"
@@ -610,6 +611,7 @@ games:
       steam: The Witcher 3
       gog: The Witcher 3 Wild Hunt
     executable: bin/x64/witcher3.exe
+    proton_executable: REDprelauncher.exe
   witcher3_goty:
     parent: witcher3
     launcher_ids:

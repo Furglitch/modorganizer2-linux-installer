@@ -52,11 +52,14 @@ def add_internal(
     logger.debug(f"  MO2 Executable: {mo2_executable}")
     logger.debug(f"  Arguments: {arguments or '(none)'}")
 
+    source_exe = getattr(var.game_info, "proton_executable", None)
+    source_exe = str(source_exe) if source_exe else game_executable
+
     success = proton_wrapper.install(
         appid=appid,
         display_name=label,
         wrapper=wrapper,
-        source_executable=game_executable,
+        source_executable=source_exe,
         target_executable=mo2_executable,
     )
 
