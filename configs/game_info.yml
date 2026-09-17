@@ -10,6 +10,7 @@ games:
       gog: 1456460669
     subdirectory: Baldurs Gate 3
     executable: bin/bg3
+    proton_executable: Launcher/LariLauncher.exe
     plugins:
       - "bg3-plugin"
       - "root-builder"
@@ -612,6 +613,7 @@ games:
       gog: The Witcher 3 Wild Hunt
     executable: bin/x64/witcher3.exe
     proton_executable: REDprelauncher.exe
+
   witcher3_goty:
     parent: witcher3
     launcher_ids:
