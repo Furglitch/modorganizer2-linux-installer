@@ -5,6 +5,7 @@ from pathlib import Path
 from loguru import logger
 from step.external_resources import download_mod_organizer
 from step.launch_opt import add_launch_opt, remove_launch_opt
+from step.configure_prefix import get_default_tricks
 from util import state_file as state
 from util import variables as var
 from util.nexus.install_handler import install as install_handler
@@ -13,13 +14,48 @@ from util.wine import protontricks, winetricks
 from util.steam import proton_wrapper
 
 
+def _parse_installed_tricks(output: list[str]) -> set[str]:
+    """Filter protontricks/winetricks output to extract installed trick names."""
+    return {
+        line.strip()
+        for line in output
+        if line.strip()
+        and not line.startswith(
+            (
+                "protontricks",
+                "Executing",
+                "---",
+                "warning",
+                "Using",
+                "WINEPREFIX",
+                "Registry",
+                "Drive",
+            )
+        )
+    }
+
+
 def update_tricks():
     logger.info("Updating protontricks")
     try:
         if state.current_instance.launcher == "steam":
-            protontricks.run(["--self-update"])
+            appid = state.current_instance.launcher_ids.steam
+            output = protontricks.run([f"{appid}", "list-installed"])
+            installed = _parse_installed_tricks(output)
+            desired = get_default_tricks() + list(var.game_info.tricks)
+            missing = [t for t in desired if t not in installed]
+            if missing:
+                logger.info(f"Installing missing tricks: {missing}")
+            protontricks.apply(appid, desired)
         else:
-            winetricks.run(["--self-update"])
+            prefix = state.current_instance.instance_path / "prefix"
+            output = winetricks.run(prefix=prefix, command=["list-installed"])
+            installed = _parse_installed_tricks(output)
+            desired = get_default_tricks() + list(var.game_info.tricks)
+            missing = [t for t in desired if t not in installed]
+            if missing:
+                logger.info(f"Installing missing tricks: {missing}")
+            winetricks.apply(prefix=prefix, tricks=desired)
     except SystemExit as e:
         logger.warning(f"Failed to update tricks helper; continuing update: {e}")
 
