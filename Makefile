@@ -18,6 +18,7 @@ mo2-lint: redirector nxm-handler
 		--hidden-import yaml \
 		--add-data "src/mo2-lint:src" \
 		--add-data "src/shared:src/shared" \
+		--add-data "src/steam-proton-wrapper:steam-proton-wrapper" \
 		--add-data "configs:cfg" \
 		--add-data "dist:dist" \
 		--runtime-hook "build/runtime_hooks.py" \
@@ -37,6 +38,7 @@ mo2-lint_only:
 		--hidden-import yaml \
 		--add-data "src/mo2-lint:src" \
 		--add-data "src/shared:src/shared" \
+		--add-data "src/steam-proton-wrapper:steam-proton-wrapper" \
 		--add-data "configs:cfg" \
 		--add-data "dist:dist" \
 		--runtime-hook "build/runtime_hooks.py" \

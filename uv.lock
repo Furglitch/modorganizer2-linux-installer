@@ -203,6 +203,7 @@ dependencies = [
     { name = "requests" },
     { name = "ruff" },
     { name = "send2trash" },
+    { name = "vdf" },
     { name = "websockets" },
 ]
 
@@ -224,6 +225,7 @@ requires-dist = [
     { name = "requests", specifier = ">=2.34.2" },
     { name = "ruff", specifier = "==0.16.5" },
     { name = "send2trash", specifier = ">=2.0.0" },
+    { name = "vdf", specifier = ">=3.4" },
     { name = "websockets", specifier = ">=17.0.1" },
 ]
 

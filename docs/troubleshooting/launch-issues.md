@@ -73,3 +73,9 @@ See [Setting up Proton](../getting-started/proton-setup) for full steps.
 ## Prefix not initialized
 
 Launch the game at least once through Steam/Heroic **before** installing MO2-LINT, so the launcher can set up the Proton prefix with its default dependencies.
+
+## 'Could not start <flag>' errors
+
+Mod Organizer 2 attempts to filter out launch flags, as they are known to be interpreted as an executable.
+
+If you see an error like `Could not start -silent-crashes` or `Could not start --vr`, please report it on the [GitHub Issues](https://github.com/furglitch/modorganizer2-linux-installer/issues) page. We will add the flag to the list of known launch arguments and update the redirector.

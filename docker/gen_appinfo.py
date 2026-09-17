@@ -125,7 +125,7 @@ def _proton_entry() -> bytes:
 def _game_entry() -> bytes:
     """
     Oblivion entry - mo2-lint/steam.py reads config.installdir and
-    config.launch to display and add launch options.
+    config.launch to display and add compatibility tools.
     """
     return _entry(
         GAME_APPID,

@@ -32,7 +32,7 @@ mo2-lint list [options]
 
 ## `uninstall`
 
-Removes an existing instance, unregisters the launch option, and removes it from the state file. Without options, lists all instances and lets you pick one or more to remove.
+Removes an existing instance, unregisters its launcher configuration, and removes it from the state file. Without options, lists all instances and lets you pick one or more to remove.
 
 ```bash
 mo2-lint uninstall [options]

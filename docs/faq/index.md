@@ -19,7 +19,7 @@ description: "Frequently asked questions about MO2-LINT."
 
 **What is MO2-LINT?**
 
-MO2-LINT (Mod Organizer 2 Linux Installer) automates installing and configuring [Mod Organizer 2](https://github.com/Modorganizer2/modorganizer) on Linux. It handles Proton prefix setup, Steam/Heroic launch option configuration, `nxm://` protocol registration, and optional plugin and script extender installation.
+MO2-LINT (Mod Organizer 2 Linux Installer) automates installing and configuring [Mod Organizer 2](https://github.com/Modorganizer2/modorganizer) on Linux. It handles Proton prefix setup, Steam compatibility layer setup / Heroic launch option configuration, `nxm://` protocol registration, and optional plugin and script extender installation.
 
 **Is Mod Organizer 2 itself included?**
 

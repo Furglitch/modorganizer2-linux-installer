@@ -60,4 +60,6 @@ mo2-lint install <game> <directory> [options]
 
 ## After installing
 
-**Launch the game through Steam or Heroic** to confirm the launch option was created. You should see a **"Launch Mod Organizer"** entry alongside the default one.
+At the end of the installation process, MO2-LINT will print instructions for launching the new instance. For Steam, the instance uses a modified Proton layer; for Heroic, it adds a launcher launch option.
+
+You can proceed to step 3 of the [First Launch](../getting-started/first-launch#3-launch-through-steam-or-heroic) guide.

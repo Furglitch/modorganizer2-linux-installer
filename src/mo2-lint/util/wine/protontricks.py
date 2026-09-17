@@ -12,6 +12,7 @@ from pathlib import Path
 from loguru import logger
 from protontricks.cli.main import main as pt
 from util import variables as var
+from util import state_file as state
 
 from shared.logger import add_loggers, remove_loggers
 
@@ -101,20 +102,64 @@ def get_winetricks_path() -> Path | None:
     return None
 
 
+def get_proton_version() -> str | None:
+    if not state.current_instance:
+        logger.warning("Cannot get proton_version: current_instance not set")
+        return None
+
+    if state.current_instance.launcher != "steam":
+        logger.trace("Launcher is not Steam: proton_version not required")
+        return None
+
+    if state.current_instance.proton_wrapper is None:
+        logger.error("Cannot get proton_version: proton_wrapper is not set")
+        return None
+
+    proton_version = state.current_instance.proton_wrapper.proton_version
+    if not proton_version:
+        logger.error("Cannot get proton_version: proton_version is not set")
+
+    return proton_version
+
+
 @contextmanager
 def protontricks_environment():
-    original_winetricks = os.environ.get("WINETRICKS")
-    winetricks_path = get_winetricks_path()
-    if winetricks_path:
-        os.environ["WINETRICKS"] = str(winetricks_path)
-        logger.trace(f"Using winetricks executable for protontricks: {winetricks_path}")
+    missing = object()
+    original = {}
+
+    def setenv(key, value):
+        if key not in original:
+            original[key] = os.environ.get(key, missing)
+
+        if value is None:
+            os.environ.pop(key, None)
+        else:
+            os.environ[key] = str(value)
+
     try:
+        winetricks_path = get_winetricks_path()
+        if winetricks_path:
+            setenv("WINETRICKS", winetricks_path)
+            logger.trace(
+                f"Using winetricks executable for protontricks: {winetricks_path}"
+            )
+
+        # Need to override the PROTON_VERSION for Steam games because the wrapper
+        # does not contain all the proton binaries that protontricks requires.
+        # If the Steam app's compatability tool has been changed to the wrapper
+        # then protontricks will fail without setting this.
+        proton_version = get_proton_version()
+        if proton_version:
+            setenv("PROTON_VERSION", proton_version)
+            logger.trace(f"Using proton version for protontricks: {proton_version}")
+
         yield
     finally:
-        if original_winetricks is None:
-            os.environ.pop("WINETRICKS", None)
-        else:
-            os.environ["WINETRICKS"] = original_winetricks
+        for key, value in original.items():
+            if value is missing:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
 
 
 def run(command: list[str]) -> list[str]:

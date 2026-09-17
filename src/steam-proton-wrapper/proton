@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ -z "${STEAM_COMPAT_INSTALL_PATH:-}" ]]; then
+    printf 'Error: STEAM_COMPAT_INSTALL_PATH not set\n' >&2
+    exit 1
+fi
+
+proton="@@PROTON_PATH@@/proton"
+app="$STEAM_COMPAT_INSTALL_PATH/@@SOURCE_EXECUTABLE@@"
+mo2="$STEAM_COMPAT_INSTALL_PATH/@@TARGET_EXECUTABLE@@"
+
+should_redirect() {
+    [[ $1 == $app ]]
+}
+
+case "${1-}" in
+    run|waitforexitandrun)
+        if should_redirect "${2:-}"; then
+            cmd="$1"
+            shift 2
+            exec "$proton" "$cmd" "$mo2" "$@"
+        else
+            exec "$proton" "$@"
+        fi
+        ;;
+    *)
+        exec "$proton" "$@"
+        ;;
+esac
