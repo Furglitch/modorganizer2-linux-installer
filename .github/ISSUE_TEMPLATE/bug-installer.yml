@@ -69,7 +69,8 @@ body:
       description: How is the game installed / launched?
       options:
         - "Steam"
-        - "Heroic Games Launcher"
+        - "Heroic - GOG"
+        - "Heroic - Epic"
         - "Other (describe in Additional Info)"
     validations:
       required: true
