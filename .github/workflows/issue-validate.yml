@@ -63,6 +63,8 @@ jobs:
 
             Your bug report did not pass validation checks and has been automatically closed.
 
+            Please carefully go through the bug report template and either open a new issue or edit this one.
+
             *This is an automated action.*`;
 
             await github.rest.issues.createComment({
