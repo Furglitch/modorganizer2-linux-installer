@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import shlex
 from pathlib import Path
 from shutil import rmtree
 from stat import S_IXGRP, S_IXOTH, S_IXUSR
@@ -157,8 +156,8 @@ def render(
         "@@PROTON_VERSION@@": str(proton_version),
         "@@PROTON_PATH@@": str(proton_path),
         "@@REQUIRE_TOOL_APPID@@": str(require_tool_appid or ""),
-        "@@SOURCE_EXECUTABLE@@": shlex.quote(str(source_executable)),
-        "@@TARGET_EXECUTABLE@@": shlex.quote(str(target_executable)),
+        "@@SOURCE_EXECUTABLE@@": str(source_executable),
+        "@@TARGET_EXECUTABLE@@": str(target_executable),
     }
 
     target.mkdir(parents=True, exist_ok=True)
