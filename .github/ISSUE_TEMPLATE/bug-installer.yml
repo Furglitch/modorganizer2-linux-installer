@@ -16,11 +16,14 @@ body:
           required: true
         - label: I have confirmed that my issue has not already been reported.
           required: true
+        - label: I have confirmed that I will not be reading the template or documentation and my report is incomplete.
+          required: false
   - type: dropdown
     id: version
     attributes:
       label: Installer version
       options:
+        - "7.0.0-b1"
         - "7.0.0-rc1"
         - "7.0.0-rc2"
         - "7.0.0-rc3"
@@ -69,7 +72,8 @@ body:
       description: How is the game installed / launched?
       options:
         - "Steam"
-        - "Heroic Games Launcher"
+        - "Heroic - GOG"
+        - "Heroic - Epic"
         - "Other (describe in Additional Info)"
     validations:
       required: true
@@ -93,7 +97,7 @@ body:
     id: logs
     attributes:
       label: Logs
-      description: Please include the logs here. You can find your log files in `~/.cache/mo2-lint/logs/`. *Drag & drop or pastebin urls only*. No pasting logs or snippets, or your issue will be ignored.
+      description: Please include the logs here. You can find your log files in `~/.cache/mo2-lint/logs/`. *Drag & drop or pastebin urls only*. Plain text will cause your issue to be closed automatically, with the exception of `N/A` for no logs available.
       placeholder: Drag & drop any relevant log files here.
     validations:
       required: true
