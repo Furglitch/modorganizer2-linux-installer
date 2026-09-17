@@ -1,0 +1,72 @@
+name: Validate Bug Report
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    if: contains(github.event.issue.labels.*.name, 'bug')
+    steps:
+      - name: Check traps and close if triggered
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const body = context.payload.issue.body || '';
+
+            let trapTriggered = false;
+
+            // "I will not be reading the template"
+            const trapCheckbox = /- \[X\] .*I have confirmed that I will not be reading the template or documentation and my report is incomplete.*/i;
+            if (trapCheckbox.test(body)) {
+              trapTriggered = true;
+              console.log('TRAP TRIGGERED: User checked the trap checkbox.');
+            }
+
+            // Fake Version 7.0.0-b1
+            const fakeVersion = /7\.0\.0-b1/;
+            if (fakeVersion.test(body)) {
+              trapTriggered = true;
+              console.log('TRAP TRIGGERED: User selected the fake version (7.0.0-b1).');
+            }
+
+            if (!trapTriggered) {
+              console.log('No traps triggered. Issue is valid.');
+              return;
+            }
+
+            const issueNumber = context.payload.issue.number;
+
+            const commentBody = `## 🃏 You activated my trap card!
+
+            Your bug report did not pass validation checks and has been automatically closed.
+
+            *This is an automated action.*`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              body: commentBody
+            });
+
+            // Add the 'invalid' label
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              labels: ['invalid']
+            });
+
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issueNumber,
+              state: 'closed',
+              state_reason: 'not_planned'
+            });

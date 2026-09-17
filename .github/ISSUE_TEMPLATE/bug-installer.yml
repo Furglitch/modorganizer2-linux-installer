@@ -16,11 +16,14 @@ body:
           required: true
         - label: I have confirmed that my issue has not already been reported.
           required: true
+        - label: I have confirmed that I will not be reading the template or documentation and my report is incomplete.
+          required: false
   - type: dropdown
     id: version
     attributes:
       label: Installer version
       options:
+        - "7.0.0-b1"
         - "7.0.0-rc1"
         - "7.0.0-rc2"
         - "7.0.0-rc3"
