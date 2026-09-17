@@ -54,5 +54,14 @@ def install():
             subprocess.run(
                 [mime, "default", output.name, "x-scheme-handler/nxm"], check=True
             )
+            update = shutil.which("update-desktop-database")
+            if update:
+                subprocess.run(
+                    [
+                        update,
+                        str(Path("~/.local/share/applications").expanduser()),
+                    ],
+                    check=False,
+                )
 
     logger.success("NXM Handler installation complete.")
