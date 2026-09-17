@@ -332,7 +332,7 @@ click_opt_theme = click.option(
     "-t",
     type=click.Choice(["auto", *var.theme_info.keys()], case_sensitive=False),
     default=var.settings.theme if var.settings and var.settings.theme else None,
-    help=f"Apply an included MO2 theme during installation.\nOptions: [auto, {', '.join(var.theme_info.keys())}]",
+    help="Apply an included MO2 theme during installation.",
 )
 click_opt_directory = click.option(
     "--directory",
@@ -425,7 +425,8 @@ def cli(ctx):
 
 
 @cli.command(
-    cls=CustomCommand.MoveOptions, help=lang.help_install.format(list=game_list)
+    cls=CustomCommand.MoveOptions,
+    help=lang.help_install.format(list=game_list, plugin_list=plugin_list),
 )
 @click_version
 @click_help
@@ -450,7 +451,7 @@ def cli(ctx):
 @click.option(
     "--plugin",
     "-p",
-    type=str,
+    type=click.Choice(list(var.plugin_info.keys()), case_sensitive=False),
     multiple=True,
     default=tuple(var.settings.plugins)
     if var.settings and var.settings.plugins
@@ -480,13 +481,6 @@ def install(
     logger.debug(
         f"Running install command with game={game}, directory={directory}, game_info_path={game_info_path}, launcher={launcher}, script_extender={script_extender}, plugin={plugin}, mo2_archive={mo2_archive}"
     )
-    if plugin:
-        for p in plugin:
-            if p not in var.plugin_info:
-                logger.critical(
-                    f"Plugin '{p}' not supported. Available plugins: {list(var.plugin_info.keys())}",
-                )
-                raise SystemExit(1)
     validate_mo2_archive(mo2_archive, mo2_checksum)
     _install(
         game,
