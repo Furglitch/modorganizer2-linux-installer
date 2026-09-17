@@ -35,6 +35,23 @@ jobs:
               console.log('TRAP TRIGGERED: User selected the fake version (7.0.0-b1).');
             }
 
+            // Logs validation
+            const logsSection = body.match(/### Logs\s*\n\n([^#]*)/);
+            if (logsSection) {
+              const logsContent = logsSection[1].trim();
+
+              // Allow empty or N/A
+              const isEmpty = !logsContent || /^(n\/a|none|empty|no logs|not applicable)$/i.test(logsContent);
+
+              // Has any URLs (file attachments or pastebin)
+              const hasUrls = /https?:\/\/[^\s)]+/.test(logsContent);
+
+              if (!isEmpty && !hasUrls) {
+                trapTriggered = true;
+                console.log('TRAP TRIGGERED: User pasted plain text in logs field.');
+              }
+            }
+
             if (!trapTriggered) {
               console.log('No traps triggered. Issue is valid.');
               return;

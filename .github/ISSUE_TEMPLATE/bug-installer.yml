@@ -97,7 +97,7 @@ body:
     id: logs
     attributes:
       label: Logs
-      description: Please include the logs here. You can find your log files in `~/.cache/mo2-lint/logs/`. *Drag & drop or pastebin urls only*. No pasting logs or snippets, or your issue will be ignored.
+      description: Please include the logs here. You can find your log files in `~/.cache/mo2-lint/logs/`. *Drag & drop or pastebin urls only*. Plain text will cause your issue to be closed automatically, with the exception of `N/A` for no logs available.
       placeholder: Drag & drop any relevant log files here.
     validations:
       required: true
