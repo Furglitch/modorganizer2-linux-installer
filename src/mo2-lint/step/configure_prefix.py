@@ -136,8 +136,9 @@ def _set_vcredist_overrides(app_id: int | None = None):
             )
     else:
         prefix = var.prefix
-        winetricks_path = shutil.which("winetricks") or (
-            Path.home() / ".cache" / "mo2-lint" / "downloads" / "winetricks"
+        winetricks_path = Path(
+            shutil.which("winetricks")
+            or Path.home() / ".cache" / "mo2-lint" / "downloads" / "winetricks"
         )
         for dll in vcrun_dlls:
             winetricks.run(
