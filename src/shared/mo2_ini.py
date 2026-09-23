@@ -7,6 +7,12 @@ from pathlib import Path
 
 from loguru import logger
 
+launchers: dict[str, str] = {
+    "steam": "Steam",
+    "gog": "GOG",
+    "epic": "Epic Games",
+}
+
 
 def normalize_path(path: str | Path) -> str:
     """
@@ -35,12 +41,17 @@ def update_mo2_ini(
     game_executable: str | None = None,
     launcher_args: list[str] | None = None,
     theme_stylesheet: str | None = None,
+    game_name: str | None = None,
+    game_path: str | None = None,
+    launcher_type: str | None = None,
 ) -> bool:
     """
-    Update ModOrganizer.ini with launcher arguments for the game executable.
+    Update ModOrganizer.ini with launcher arguments and general game metadata.
 
     Creates or updates the customExecutables section to include launcher arguments
-    that games need (like Epic auth tokens). If the INI doesn't exist, creates it.
+    that games need (like Epic auth tokens), and the General section with game
+    metadata (display name, install path, launcher edition). If the INI doesn't
+    exist, creates it.
 
     Parameters:
     -----------
@@ -52,6 +63,13 @@ def update_mo2_ini(
         List of arguments from the launcher to pass to the game.
     theme_stylesheet : str, optional
         Theme stylesheet filename to store in the Settings section.
+    game_name : str, optional
+        Display name of the game (e.g. "Enderal: Forgotten Stories - Special Edition").
+    game_path : str, optional
+        Game install path in Wine/Windows format with escaped backslashes
+        (e.g. "S:\\\\steamapps\\\\common\\\\Enderal Special Edition").
+    launcher_type : str, optional
+        The launcher/storefront type, e.g. "Steam", "GOG", or "Epic Games".
 
     Returns:
     --------
@@ -75,10 +93,23 @@ def update_mo2_ini(
     else:
         logger.debug(f"INI file does not exist, will create new: {ini_path}")
 
+    # --- [General] section ---
+    if "General" not in config:
+        config.add_section("General")
+
+    if game_name is not None:
+        config.set("General", "gameName", game_name)
+    if game_path is not None:
+        config.set("General", "gamePath", game_path)
+    if launcher_type is not None:
+        config.set("General", "game_edition", launcher_type)
+
+    # --- [customExecutables] section ---
     if "customExecutables" not in config:
         config.add_section("customExecutables")
         config.set("customExecutables", "size", "0")
 
+    # --- [Settings] section ---
     if "Settings" not in config:
         config.add_section("Settings")
 
@@ -89,13 +120,13 @@ def update_mo2_ini(
     section = config["customExecutables"]
     size = int(section.get("size", 0))
 
-    game_name = Path(game_executable).name if game_executable else None
+    exe_name = Path(game_executable).name if game_executable else None
     updated = False
 
-    if game_name and game_executable:
+    if exe_name and game_executable:
         for i in range(1, size + 1):
             binary = section.get(f"{i}\\binary", "")
-            if Path(binary.replace("\\\\", "\\")).name.lower() == game_name.lower():
+            if Path(binary.replace("\\\\", "\\")).name.lower() == exe_name.lower():
                 logger.info(f"Updating existing executable #{i}")
                 section[f"{i}\\arguments"] = args_string
                 section[f"{i}\\binary"] = normalize_path(game_executable)

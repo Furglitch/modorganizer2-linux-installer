@@ -172,7 +172,7 @@ else
 fi
 
 line="$(grep '"display_name"' "$PROTON_WRAPPER_DIR/compatibilitytool.vdf")"
-if [[ $line == '      "display_name" "MO2 The Elder Scrolls IV: Oblivion"' ]]; then
+if [[ $line == '      "display_name" "MO2 Oblivion"' ]]; then
     pass "Proton wrapper has the correct display name"
 else
     fail "Proton wrapper display name incorrect: $line"
