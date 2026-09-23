@@ -747,6 +747,10 @@ class ResourceInfo:
         Resource instance for Winetricks.
     java : Resource, optional
         Resource instance for Java.
+    vcredist_x86 : Resource, optional
+        Resource instance for the x86 VC++ Redistributable.
+    vcredist_x64 : Resource, optional
+        Resource instance for the x64 VC++ Redistributable.
 
     Raises
     -------
@@ -757,6 +761,8 @@ class ResourceInfo:
     mod_organizer: Resource = None
     winetricks: Resource = None
     java: Resource | None = None
+    vcredist_x86: Resource | None = None
+    vcredist_x64: Resource | None = None
 
     @classmethod
     def from_dict(cls, data: "dict[str, any] | ResourceInfo") -> "ResourceInfo":
@@ -766,6 +772,12 @@ class ResourceInfo:
             mod_organizer=Resource.from_dict(data.get("mod_organizer")),
             winetricks=Resource.from_dict(data.get("winetricks")),
             java=Resource.from_dict(data.get("java")) if "java" in data else None,
+            vcredist_x86=Resource.from_dict(data.get("vcredist_x86"))
+            if "vcredist_x86" in data
+            else None,
+            vcredist_x64=Resource.from_dict(data.get("vcredist_x64"))
+            if "vcredist_x64" in data
+            else None,
         )
 
     def __post_init__(self):
@@ -879,17 +891,15 @@ def load_resource_info(path: Path | None = None):
     with open(path, "r", encoding="utf-8") as file:
         yml = yaml.load(file.read(), yaml.SafeLoader)
     logger.trace(f"Parsed resource info YAML: {yml}")
+    resources = {}
     for key, value in yml.get("resources", {}).items():
-        if key == "mod_organizer":
-            mod_organizer = Resource.from_dict(value)
-        elif key == "winetricks":
-            winetricks = Resource.from_dict(value)
-        elif key == "java":
-            java = Resource.from_dict(value)
+        resources[key] = Resource.from_dict(value)
     resource_info = ResourceInfo(
-        mod_organizer=mod_organizer,
-        winetricks=winetricks,
-        java=java if "java" in locals() else None,
+        mod_organizer=resources.get("mod_organizer"),
+        winetricks=resources.get("winetricks"),
+        java=resources.get("java"),
+        vcredist_x86=resources.get("vcredist_x86"),
+        vcredist_x64=resources.get("vcredist_x64"),
     )
     logger.trace(f"Loaded resource_info: {resource_info}")
 

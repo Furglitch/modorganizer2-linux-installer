@@ -11,7 +11,8 @@ from loguru import logger
 from shared.logger import add_loggers, remove_loggers
 
 found_exec = Path(
-    shutil.which("winetricks") or "~/.cache/mo2-lint/downloads/winetricks"
+    shutil.which("winetricks")
+    or Path.home() / ".cache" / "mo2-lint" / "downloads" / "winetricks"
 )
 
 

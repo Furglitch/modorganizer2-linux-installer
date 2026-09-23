@@ -113,6 +113,12 @@ def pull_config():
         else:
             logger.trace(f"Config file already exists: {config_path}")
 
+        if not var.settings.refresh_configs:
+            logger.debug(
+                f"refresh_configs is disabled; skipping GitHub pull for {config}"
+            )
+            continue
+
         # Check if yml schema version is incompatbile (remote yaml has higher version number than local script)
         remote_raw = f"https://raw.githubusercontent.com/Furglitch/modorganizer2-linux-installer/refs/heads/main/configs/{config}"
 
@@ -199,8 +205,7 @@ def pre_init():
     var.load_settings()
     if var.settings.check_updates:
         check_update()
-    if var.settings.refresh_configs:
-        pull_config()  # Temporarily disable for development
+    pull_config()
     var.load_games_info()
     var.load_resource_info()
     var.load_plugin_info()

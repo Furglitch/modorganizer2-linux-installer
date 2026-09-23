@@ -9,6 +9,7 @@ from step.load_game_info import get_launcher
 from util import lang
 from util import state_file as state
 from util import variables as var
+from util.download import download
 from util.heroic.find_library import get_data as get_heroic_data
 from util.wine import protontricks, winetricks
 
@@ -16,7 +17,6 @@ default_tricks = [
     "win10",
     "arial",
     "fontsmooth=rgb",
-    "vcrun2022",
 ]
 
 yes = ("", "y", "yes")
@@ -88,6 +88,94 @@ def load_prefix() -> Path:
     return prefix
 
 
+def _run_vcredist_installer(installer_path: Path, app_id: int | None = None):
+    try:
+        if app_id is not None:
+            protontricks.run(
+                ["-c", f'wine "{installer_path}" /quiet /norestart', str(app_id)]
+            )
+        else:
+            prefix = var.prefix
+            winetricks_path = Path(
+                shutil.which("winetricks")
+                or Path.home() / ".cache" / "mo2-lint" / "downloads" / "winetricks"
+            )
+            winetricks.run(
+                winetricks_path, prefix, [f"wine {installer_path} /quiet /norestart"]
+            )
+    except SystemExit:
+        logger.info(
+            "vcredist installer finished (exit code indicates reboot or already installed)."
+        )
+
+
+def _set_vcredist_overrides(app_id: int | None = None):
+    """Set DLL overrides for all VC++ runtime libraries."""
+    vcrun_dlls = [
+        "concrt140",
+        "msvcp140",
+        "msvcp140_1",
+        "msvcp140_2",
+        "msvcp140_atomic_wait",
+        "msvcp140_codecvt_ids",
+        "vcamp140",
+        "vccorlib140",
+        "vcomp140",
+        "vcruntime140",
+        "vcruntime140_1",
+    ]
+
+    logger.info("Setting DLL overrides for VC++ runtime libraries...")
+    if app_id is not None:
+        for dll in vcrun_dlls:
+            protontricks.run(
+                [
+                    "-c",
+                    f'wine reg add "HKEY_CURRENT_USER\\Software\\Wine\\DllOverrides" /v {dll} /d native,builtin /f',
+                    str(app_id),
+                ]
+            )
+    else:
+        prefix = var.prefix
+        winetricks_path = Path(
+            shutil.which("winetricks")
+            or Path.home() / ".cache" / "mo2-lint" / "downloads" / "winetricks"
+        )
+        for dll in vcrun_dlls:
+            winetricks.run(
+                winetricks_path,
+                prefix,
+                [
+                    f'reg add "HKEY_CURRENT_USER\\Software\\Wine\\DllOverrides" /v {dll} /d native,builtin /f'
+                ],
+            )
+
+
+def install_vcredist():
+    cache_dir = Path.home() / ".cache" / "mo2-lint" / "downloads" / "vcredist"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+
+    app_id = var.game_info.launcher_ids.steam if var.launcher == "steam" else None
+
+    for arch, resource_key in [("x86", "vcredist_x86"), ("x64", "vcredist_x64")]:
+        resource = getattr(var.resource_info, resource_key, None)
+        if not resource or not resource.download_url:
+            logger.error(f"No {resource_key} URL configured in resource_info.yml.")
+            continue
+
+        logger.info(f"Downloading VC++ Redistributable ({arch})...")
+        installer_path = download(
+            resource.download_url, cache_dir, f"VC_redist.{arch}.exe"
+        )
+        if installer_path:
+            logger.info(f"Installing VC++ Redistributable ({arch})...")
+            _run_vcredist_installer(installer_path, app_id)
+        else:
+            logger.error(f"Failed to download vcredist {arch} installer.")
+
+    _set_vcredist_overrides(app_id)
+
+
 def configure():
     """
     Run the necessary winetricks/protontricks for the selected game launcher.
@@ -98,6 +186,7 @@ def configure():
         case "steam":
             app_id = var.game_info.launcher_ids.steam
             protontricks.apply(app_id, tricks)
+            install_vcredist()
             tweaks_path = Path(tempfile.gettempdir()) / "mo2-lint-tweaks.reg"
             if tweaks_path.exists():
                 protontricks.import_registry(app_id, tweaks_path)
@@ -106,6 +195,7 @@ def configure():
         case "gog" | "epic":
             prefix = var.prefix
             winetricks.apply(prefix=prefix, tricks=tricks)
+            install_vcredist()
 
 
 def prompt():
