@@ -184,7 +184,7 @@ wheels = [
 
 [[package]]
 name = "modorganizer2-linux-installer"
-version = "7.0.0rc7"
+version = "7.0.0"
 source = { virtual = "." }
 dependencies = [
     { name = "certifi" },
