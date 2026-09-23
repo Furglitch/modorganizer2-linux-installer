@@ -4,17 +4,12 @@ import os
 import re
 import shutil
 import stat
+import subprocess
 import sys
-import threading
-from contextlib import contextmanager
 from pathlib import Path
 
 from loguru import logger
-from protontricks.cli.main import main as pt
-from util import variables as var
 from util import state_file as state
-
-from shared.logger import add_loggers, remove_loggers
 
 
 class ProtontricksOutput(list):
@@ -122,46 +117,6 @@ def get_proton_version() -> str | None:
     return proton_version
 
 
-@contextmanager
-def protontricks_environment():
-    missing = object()
-    original = {}
-
-    def setenv(key, value):
-        if key not in original:
-            original[key] = os.environ.get(key, missing)
-
-        if value is None:
-            os.environ.pop(key, None)
-        else:
-            os.environ[key] = str(value)
-
-    try:
-        winetricks_path = get_winetricks_path()
-        if winetricks_path:
-            setenv("WINETRICKS", winetricks_path)
-            logger.trace(
-                f"Using winetricks executable for protontricks: {winetricks_path}"
-            )
-
-        # Need to override the PROTON_VERSION for Steam games because the wrapper
-        # does not contain all the proton binaries that protontricks requires.
-        # If the Steam app's compatability tool has been changed to the wrapper
-        # then protontricks will fail without setting this.
-        proton_version = get_proton_version()
-        if proton_version:
-            setenv("PROTON_VERSION", proton_version)
-            logger.trace(f"Using proton version for protontricks: {proton_version}")
-
-        yield
-    finally:
-        for key, value in original.items():
-            if value is missing:
-                os.environ.pop(key, None)
-            else:
-                os.environ[key] = value
-
-
 def run(command: list[str]) -> list[str]:
     """
     Runs a protontricks command and captures its output.
@@ -182,19 +137,53 @@ def run(command: list[str]) -> list[str]:
 
     output_lines = ProtontricksOutput()
     if args != ["--verbose"]:
-        exit_code = None
-        unexpected_error = None
-        with redirect_output_to_logger() as output_lines:
+        # PATCH: run protontricks as an isolated subprocess instead of calling
+        # protontricks.cli.main.main() in-process. Calling it repeatedly
+        # in-process (once per DLL override, etc.) corrupts shared state
+        # (fd handling / threading) after the first call and crashes with a
+        # silent exit code 1 on the second invocation. A fresh subprocess per
+        # call sidesteps that entirely.
+        env = os.environ.copy()
+        winetricks_path = get_winetricks_path()
+        if winetricks_path:
+            env["WINETRICKS"] = str(winetricks_path)
+            logger.trace(
+                f"Using winetricks executable for protontricks: {winetricks_path}"
+            )
+        proton_version = get_proton_version()
+        if proton_version:
+            env["PROTON_VERSION"] = proton_version
+            logger.trace(f"Using proton version for protontricks: {proton_version}")
+
+        proc = subprocess.run(
+            [
+                sys.executable,
+                "-c",
+                "import sys; from protontricks.cli.main import main as pt; pt(sys.argv[1:])",
+            ]
+            + args,
+            capture_output=True,
+            text=True,
+            errors="replace",
+            env=env,
+        )
+        for raw_line in (proc.stdout or "").splitlines() + (
+            proc.stderr or ""
+        ).splitlines():
+            line = raw_line.rstrip("\n")
+            if not line:
+                continue
+            output_lines.append(line)
+            if error_message := error_from_line(line):
+                output_lines.error_message = error_message
+            logger.trace(f"protontricks: {line}")
             try:
-                with protontricks_environment():
-                    pt(args)
-            except SystemExit as e:
-                if e.code not in (0, None):
-                    exit_code = e.code if isinstance(e.code, int) else 1
-            except Exception as e:
-                unexpected_error = e
-            finally:
-                logger.debug(f"Finished running protontricks with args: {args}")
+                log_translation(line)
+            except Exception:
+                logger.exception(f"Error translating protontricks log line: {line}.")
+
+        logger.debug(f"Finished running protontricks with args: {args}")
+        exit_code = proc.returncode if proc.returncode != 0 else None
 
         if exit_code is not None:
             error_message = error_from_output(output_lines)
@@ -209,13 +198,6 @@ def run(command: list[str]) -> list[str]:
                 f"protontricks exited with code {exit_code} for args: {args}, error: {error_message}"
             )
             raise SystemExit(exit_code)
-
-        if unexpected_error is not None:
-            error_message = output_lines.error_message or str(unexpected_error)
-            logger.error(
-                f"Error running protontricks with args: {args}: {error_message}"
-            )
-            raise SystemExit(1) from unexpected_error
 
         logger.success(f"protontricks command completed successfully: {args}")
     else:
@@ -359,64 +341,3 @@ def log_translation(input: str | None = None):
         translated = f"End of protontricks process (PID: {pid_info})"
         logger.debug(translated)
         return
-
-
-@contextmanager
-def redirect_output_to_logger():
-    """
-    Context manager to redirect stdout and stderr to the logger.
-    """
-
-    read_fd, write_fd = os.pipe()
-    output_lines = ProtontricksOutput()
-
-    original_stdout_fd = os.dup(sys.stdout.fileno())
-    original_stderr_fd = os.dup(sys.stderr.fileno())
-    original_stdout_file = os.fdopen(original_stdout_fd, "w", buffering=1)
-
-    level = var.input_params.log_level if var.input_params else "INFO"
-    remove_loggers()
-    add_loggers(
-        log_level=level,
-        script="mo2-lint",
-        process="protontricks",
-        console_sink=original_stdout_file,
-    )
-
-    def reader_thread():
-        with os.fdopen(read_fd, "r", buffering=1) as reader:
-            for line in reader:
-                if line := line.rstrip("\n"):
-                    output_lines.append(line)
-                    if error_message := error_from_line(line):
-                        output_lines.error_message = error_message
-                    logger.trace(f"protontricks: {line}")
-                    try:
-                        log_translation(line)
-                    except Exception:
-                        logger.exception(
-                            f"Error translating protontricks log line: {line}."
-                        )
-
-    reader = threading.Thread(target=reader_thread, daemon=True)
-    reader.start()
-
-    try:
-        os.dup2(write_fd, sys.stdout.fileno())
-        os.dup2(write_fd, sys.stderr.fileno())
-
-        yield output_lines
-
-    finally:
-        sys.stdout.flush()
-        sys.stderr.flush()
-        os.dup2(original_stdout_fd, sys.stdout.fileno())
-        os.dup2(original_stderr_fd, sys.stderr.fileno())
-        os.close(write_fd)
-        os.close(original_stderr_fd)
-
-        reader.join()
-
-        remove_loggers()
-        original_stdout_file.close()
-        add_loggers(log_level=level, script="mo2-lint", process="installer")
