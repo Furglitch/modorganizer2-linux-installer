@@ -4,6 +4,7 @@ from pathlib import Path
 
 from loguru import logger
 from step.configure_prefix import prompt as configure_prefix
+from shared.mo2_ini import launchers, normalize_path, update_mo2_ini
 from step.external_resources import download, download_winetricks
 from step.launch_opt import add_launch_opt
 from step.load_game_info import get_launcher, get_library
@@ -121,6 +122,7 @@ def install(
         state.current_instance = InstanceData(
             index=-1,
             game=game,
+            display_name=var.game_info.display_name,
             nexus_slug=var.game_info.nexus_slug,
             instance_path=directory,
             pin=mo2_archive is not None,
@@ -148,6 +150,14 @@ def install(
 
     download()
     logger.info("Download phase completed")
+
+    # Write [General] section with game metadata
+    update_mo2_ini(
+        directory,
+        game_name=var.game_info.display_name,
+        game_path=normalize_path(game_path),
+        launcher_type=launchers.get(launcher.lower() if launcher else "", ""),
+    )
 
     install_handler()
     logger.info("Installation handler completed")

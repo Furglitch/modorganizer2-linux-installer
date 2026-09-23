@@ -172,9 +172,11 @@ def load_launcher_prefixes() -> list[str]:
         return []
 
 
-def get_instance_info(game_dir: Path) -> tuple[Path | None, str | None]:
+def get_instance_info(
+    game_dir: Path,
+) -> tuple[Path | None, str | None, str | None, str | None, str | None]:
     """
-    Retrieves the ModOrganizer.exe path and game executable from the state file.
+    Retrieves MO2 instance details from the state file.
 
     Parameters:
     -----------
@@ -183,23 +185,24 @@ def get_instance_info(game_dir: Path) -> tuple[Path | None, str | None]:
 
     Returns:
     --------
-    tuple[Path | None, str | None]
-        Tuple of (mo2_exe_path as Wine path, game_executable_path as POSIX str),
-        or (None, None) if an error occurred
+    tuple[Path | None, str | None, str | None, str | None, str | None]
+        Tuple of (mo2_exe_path as Wine path, game_executable_path as POSIX str,
+        launcher_key, game_path as POSIX str, display_name),
+        or (None,)*5 if an error occurred
     """
     # Read state file using an explicit Wine path. Converting Z:/home/... to
     # /home/... inside Wine can accidentally resolve against Proton's game drive.
     state_file_path = wine_io_path(STATE_FILE)
     if not state_file_path.is_file():
         logger.error(f"State file not found: {STATE_FILE} (host: {state_file_path})")
-        return None, None
+        return (None,) * 5
 
     try:
         with open(state_file_path, encoding="utf-8") as f:
             state = json.load(f)
     except Exception as e:
         logger.error(f"Failed to read state file: {e}")
-        return None, None
+        return (None,) * 5
 
     # Convert Wine path to POSIX for comparison
     game_dir_posix = wine_to_posix(game_dir)
@@ -219,6 +222,8 @@ def get_instance_info(game_dir: Path) -> tuple[Path | None, str | None]:
                 game_dir, game_path
             ):
                 game_exe = instance.get("game_executable", "")
+                launcher = instance.get("launcher", "")
+                display_name = instance.get("display_name") or ""
 
                 # Build full POSIX path to game executable
                 if game_exe:
@@ -229,15 +234,23 @@ def get_instance_info(game_dir: Path) -> tuple[Path | None, str | None]:
 
                 logger.debug(f"Found MO2 instance: {mo2_exe_wine}")
                 logger.debug(f"Game executable: {game_exe}")
+                logger.debug(f"Launcher: {launcher}")
+                logger.debug(f"Display name: {display_name}")
 
                 # Return Wine path string for mo2_exe so subprocess can use it directly
-                return Path(mo2_exe_wine), game_exe
+                return (
+                    Path(mo2_exe_wine),
+                    game_exe,
+                    launcher,
+                    str(game_path),
+                    display_name,
+                )
         except Exception as e:
             logger.trace(f"Instance check failed: {e}")
             continue
 
     logger.error(f"No instance found for: {game_dir_posix}")
-    return None, None
+    return (None,) * 5
 
 
 def split_arguments(
@@ -363,7 +376,9 @@ def main(argv: list[str]) -> int:
         logger.trace(f"Other args: {other_args}")
 
         # Find MO2 instance for this game
-        mo2_exe, game_executable = get_instance_info(game_dir)
+        mo2_exe, game_executable, launcher, game_path_posix, display_name = (
+            get_instance_info(game_dir)
+        )
         if not mo2_exe:
             logger.error("Failed to find MO2 instance")
             return 1
@@ -374,15 +389,27 @@ def main(argv: list[str]) -> int:
             logger.error(f"MO2 executable not found: {mo2_exe} (host: {mo2_exe_path})")
             return 1
 
-        # Update ModOrganizer.ini with launcher arguments if present
+        # Convert game install path to Wine format for the INI
+        game_path_wine = posix_to_wine(game_path_posix) if game_path_posix else None
+
+        # Update ModOrganizer.ini with launcher arguments and game metadata
         if launcher_args and game_executable:
             logger.info(f"Updating INI with {len(launcher_args)} launcher arguments")
             try:
-                from shared.mo2_ini import update_mo2_ini
+                from shared.mo2_ini import launchers, update_mo2_ini
 
-                # mo2_exe is Wine format, convert to POSIX for INI update
+                launcher_display = launchers.get(
+                    launcher.lower() if launcher else "", ""
+                )
                 mo2_dir_path = wine_io_path(mo2_exe).parent
-                update_mo2_ini(mo2_dir_path, game_executable, launcher_args)
+                update_mo2_ini(
+                    mo2_dir_path,
+                    game_executable,
+                    launcher_args,
+                    game_name=display_name,
+                    game_path=game_path_wine,
+                    launcher_type=launcher_display,
+                )
             except Exception as e:
                 logger.warning(f"Failed to update INI: {e}")
 

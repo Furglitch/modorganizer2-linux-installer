@@ -105,6 +105,7 @@ class InstanceData:
 
     index: int = None
     game: str = None
+    display_name: str | None = None
     nexus_slug: str = None
     instance_path: Path = None
     pin: bool = False
@@ -124,6 +125,7 @@ class InstanceData:
         return cls(
             index=data.get("index"),
             game=data.get("game"),
+            display_name=data.get("display_name") or None,
             nexus_slug=data.get("nexus_slug"),
             instance_path=Path(data.get("instance_path")),
             pin=data.get("pin", False),
@@ -142,6 +144,7 @@ class InstanceData:
         return {
             "index": data.index,
             "game": data.game,
+            "display_name": data.display_name,
             "nexus_slug": data.nexus_slug,
             "instance_path": str(data.instance_path),
             "pin": data.pin,

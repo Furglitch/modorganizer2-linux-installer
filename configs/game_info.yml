@@ -37,20 +37,20 @@ games:
           destination: "uibase.dll"
 
   dragonage:
-    display_name: 'Dragon Age: Origins - Ultimate Edition'
+    display_name: 'Dragon Age: Origins' # Ultimate Edition
     nexus_slug: dragonage
     launcher_ids:
       steam: 47810
       gog: 1949616134
     subdirectory: Dragon Age Ultimate Edition
-    executable: DAOriginsLauncher.exe # TODO: UPDATE
+    executable: DAOriginsLauncher.exe
     tricks:
       - "xaudio2_7=native"
       - "d3dcompiler_43"
       - "d3dx9"
 
   dragonage2:
-    display_name: 'Dragon Age II - Ultimate Edition'
+    display_name: 'Dragon Age 2' # Ultimate Edition
     nexus_slug: dragonage2
     launcher_ids:
       steam: 1238040
@@ -59,7 +59,7 @@ games:
     executable: DragonAge2.exe
 
   enderal:
-    display_name: 'Enderal: Forgotten Stories'
+    display_name: 'Enderal'
     nexus_slug: enderal
     launcher_ids:
       steam: 933480
@@ -80,7 +80,7 @@ games:
         - "dxvk.conf": "dxvk.conf"
 
   enderal_se:
-    display_name: 'Enderal: Forgotten Stories - Special Edition'
+    display_name: 'Enderal Special Edition'
     nexus_slug: enderalspecialedition
     launcher_ids:
       steam: 976620
@@ -92,7 +92,7 @@ games:
       - "d3dcompiler_43"
 
   fallout3:
-    display_name: Fallout 3
+    display_name: 'Fallout 3'
     nexus_slug: fallout3
     launcher_ids:
       steam: 22300
@@ -150,7 +150,6 @@ games:
             - "fose_loader.exe"
 
   fallout3_goty:
-    display_name: Fallout 3 - Game of the Year Edition
     parent: fallout3
     nexus_slug: fallout3
     executable:
@@ -167,7 +166,7 @@ games:
       epic: fallout3
 
   fallout4:
-    display_name: Fallout 4
+    display_name: 'Fallout 4'
     nexus_slug: fallout4
     launcher_ids:
       steam: 377160
@@ -268,7 +267,7 @@ games:
             - "f4se_loader.exe"
 
   fallout4_vr:
-    display_name: Fallout 4 VR
+    display_name: 'Fallout 4 VR'
     nexus_slug: fallout4
     launcher_ids:
       steam: 611660
@@ -296,7 +295,7 @@ games:
 
   falloutlondon:
     parent: fallout4
-    display_name: 'Fallout: London'
+    display_name: 'Fallout 4 London'
     nexus_slug: fallout4london
     launcher_ids:
       steam: null
@@ -306,7 +305,7 @@ games:
     script_extenders: null
 
   falloutnv:
-    display_name: 'Fallout: New Vegas'
+    display_name: 'New Vegas'
     nexus_slug: newvegas
     launcher_ids:
       steam: 22380
@@ -339,13 +338,12 @@ games:
 
   falloutnv_ru:
     parent: falloutnv
-    display_name: 'Fallout: New Vegas (Russian)'
     launcher_ids:
       steam: 22490
     subdirectory: Fallout New Vegas enplczru
 
   morrowind:
-    display_name: 'The Elder Scrolls III: Morrowind'
+    display_name: 'Morrowind'
     nexus_slug: morrowind
     launcher_ids:
       steam: 22320
@@ -366,7 +364,7 @@ games:
           direct: "https://github.com/MWSE/MWSE/releases/download/build-automatic/mwse.zip"
 
   oblivion:
-    display_name: 'The Elder Scrolls IV: Oblivion'
+    display_name: 'Oblivion'
     nexus_slug: oblivion
     launcher_ids:
       steam: 22330
@@ -422,7 +420,7 @@ games:
       epic: Oblivion GOTY Spanish/OblivionLauncher.exe
 
   skyrim:
-    display_name: 'The Elder Scrolls V: Skyrim'
+    display_name: 'Skyrim'
     nexus_slug: skyrim
     launcher_ids:
       steam: 72850
@@ -455,7 +453,7 @@ games:
         - "dxvk.conf": "dxvk.conf"
 
   skyrim_se:
-    display_name: 'The Elder Scrolls V: Skyrim - Special Edition'
+    display_name: 'Skyrim Special Edition'
     nexus_slug: skyrimspecialedition
     launcher_ids:
       steam: 489830
@@ -513,8 +511,7 @@ games:
             - "skse64_1_7_99.dll"
             - "skse64_loader.exe"
 
-  skyrim_ae:
-    display_name: 'The Elder Scrolls V: Skyrim - Anniversary Edition (Heroic)'
+  skyrim_ae: # Heroic Only
     parent: skyrim_se
     launcher_ids:
       steam: null
@@ -538,7 +535,7 @@ games:
 
   skyrim_vr:
     parent: skyrim_se
-    display_name: 'The Elder Scrolls V: Skyrim VR'
+    display_name: 'Skyrim VR'
     launcher_ids:
       steam: 611670
     subdirectory: SkyrimVR
@@ -561,7 +558,7 @@ games:
             - "sksevr_steam_loader.dll"
 
   starfield:
-    display_name: Starfield
+    display_name: 'Starfield'
     nexus_slug: starfield
     launcher_ids:
       steam: 1716740
@@ -586,7 +583,7 @@ games:
             - "sfse_loader.exe"
 
   subnautica:
-    display_name: Subnautica
+    display_name: 'Subnautica'
     nexus_slug: subnautica
     launcher_ids:
       steam: 264710
@@ -595,7 +592,7 @@ games:
     executable: Subnautica.exe
 
   valheim:
-    display_name: Valheim
+    display_name: 'Valheim'
     nexus_slug: valheim
     launcher_ids:
       steam: 892970
@@ -603,7 +600,7 @@ games:
     executable: valheim.exe
 
   witcher3:
-    display_name: The Witcher 3
+    display_name: 'The Witcher 3: Wild Hunt'
     nexus_slug: witcher3
     launcher_ids:
       steam: 292030
