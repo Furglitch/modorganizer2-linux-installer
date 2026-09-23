@@ -167,8 +167,16 @@ def prompt_install_scriptextender_choice(script_extenders: dict) -> int:
         f"Prompting user to select script extender from {len(script_extenders)} options"
     )
     if var.unattended:
-        logger.debug("Unattended mode: auto-selecting first script extender (index 0)")
-        return 0
+        # Entries are listed oldest-first in game_info.yml (see skyrim_se: 2.0.20,
+        # 2.2.6, 2.3.0). Picking index 0 silently installs the OLDEST script
+        # extender build, which is a version mismatch against any recent game
+        # install and makes the extender refuse to load. Pick the newest
+        # matching entry instead.
+        index = len(script_extenders) - 1
+        logger.debug(
+            f"Unattended mode: auto-selecting newest script extender (index {index})"
+        )
+        return index
 
     message = "Multiple script extenders are available for installation.\n  Please select one: "
     choices = []
