@@ -22,6 +22,7 @@ Some games need additional setup or have specific quirks when used with MO2-LINT
 | [Fallout 4](./fallout-4) | Script Extender and ENB caveats. |
 | [Fallout London](./fallout-london) | One-Click Edition setup and NXM handler limitations. |
 | [Oblivion](./oblivion) | Script Extender caveats. |
+| [Skyrim AE](./skyrim-ae-heroic) | Slug is only for Heroic installs |
 
 ## Contributing a guide
 

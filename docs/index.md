@@ -42,22 +42,22 @@ MO2-LINT aims to make installing [Mod Organizer 2](https://github.com/ModOrganiz
 | Game | Notes |
 |:--|:--|
 | Baldur's Gate 3 | |
-| Cyberpunk 2077 | See [Game Guide](./game-guides/cyberpunk-2077/) |
+| Cyberpunk 2077 | See [Game Guide](./game-guides/cyberpunk-2077) |
 | Dragon Age: Origins - Ultimate Edition | |
 | Dragon Age 2 - Ultimate Edition | |
 | Enderal: Forgotten Stories | |
 | Enderal: Forgotten Stories - Special Edition | |
 | Fallout 3 | |
-| Fallout 3 - Game of the Year Edition | See [Game Guide](./game-guides/fallout-3-goty/) |
-| Fallout 4 | See [Game Guide](./game-guides/fallout-4/) |
+| Fallout 3 - Game of the Year Edition | See [Game Guide](./game-guides/fallout-3-goty) |
+| Fallout 4 | See [Game Guide](./game-guides/fallout-4) |
 | Fallout 4 VR | |
-| Fallout London | See [Game Guide](./game-guides/fallout-london/) |
+| Fallout London | See [Game Guide](./game-guides/fallout-london) |
 | Fallout New Vegas | |
 | Morrowind | |
-| Oblivion | See [Game Guide](./game-guides/oblivion/) |
+| Oblivion | See [Game Guide](./game-guides/oblivion) |
 | Skyrim | |
 | Skyrim Special Edition | |
-| Skyrim Anniversary Edition (Heroic) | See [Game Guide](./game-guides/skyrim-ae-heroic/) |
+| Skyrim Anniversary Edition (Heroic) | See [Game Guide](./game-guides/skyrim-ae-heroic) |
 | Skyrim VR | |
 | Starfield | |
 | Subnautica | |
