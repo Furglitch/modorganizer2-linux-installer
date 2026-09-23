@@ -96,8 +96,9 @@ def _run_vcredist_installer(installer_path: Path, app_id: int | None = None):
             )
         else:
             prefix = var.prefix
-            winetricks_path = shutil.which("winetricks") or (
-                Path.home() / ".cache" / "mo2-lint" / "downloads" / "winetricks"
+            winetricks_path = Path(
+                shutil.which("winetricks")
+                or Path.home() / ".cache" / "mo2-lint" / "downloads" / "winetricks"
             )
             winetricks.run(
                 winetricks_path, prefix, [f"wine {installer_path} /quiet /norestart"]
