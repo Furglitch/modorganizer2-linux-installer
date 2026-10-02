@@ -155,13 +155,20 @@ def run(command: list[str]) -> list[str]:
             env["PROTON_VERSION"] = proton_version
             logger.trace(f"Using proton version for protontricks: {proton_version}")
 
-        proc = subprocess.run(
-            [
+        if getattr(sys, "frozen", False):
+            # sys.executable is the frozen mo2-lint binary, not a Python
+            # interpreter; re-run it in protontricks bridge mode instead.
+            env["MO2_LINT_PROTONTRICKS_BRIDGE"] = "1"
+            base_command = [sys.executable]
+        else:
+            base_command = [
                 sys.executable,
                 "-c",
                 "import sys; from protontricks.cli.main import main as pt; pt(sys.argv[1:])",
             ]
-            + args,
+
+        proc = subprocess.run(
+            base_command + args,
             capture_output=True,
             text=True,
             errors="replace",
