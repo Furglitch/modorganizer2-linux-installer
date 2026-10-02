@@ -167,8 +167,11 @@ def prompt_install_scriptextender_choice(script_extenders: dict) -> int:
         f"Prompting user to select script extender from {len(script_extenders)} options"
     )
     if var.unattended:
-        logger.debug("Unattended mode: auto-selecting first script extender (index 0)")
-        return 0
+        index = len(script_extenders) - 1
+        logger.debug(
+            f"Unattended mode: auto-selecting newest script extender (index {index})"
+        )
+        return index
 
     message = "Multiple script extenders are available for installation.\n  Please select one: "
     choices = []
