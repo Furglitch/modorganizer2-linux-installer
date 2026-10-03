@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 import re
 import ssl
 import tempfile
@@ -214,6 +215,26 @@ def pre_init():
     game_list = ", ".join(var.games_info.keys())
     plugin_list = ", ".join(var.plugin_info.keys())
 
+
+def run_protontricks_bridge():
+    """
+    Runs the protontricks CLI instead of the MO2-LINT CLI.
+
+    In a frozen (PyInstaller) build, sys.executable is the mo2-lint binary itself,
+    so protontricks cannot be launched with `sys.executable -c ...`. Instead, the
+    protontricks wrapper re-executes this binary with MO2_LINT_PROTONTRICKS_BRIDGE
+    set, and the arguments are forwarded to protontricks.
+    """
+    import sys
+
+    from protontricks.cli.main import main as protontricks_main
+
+    protontricks_main(sys.argv[1:])
+    raise SystemExit(0)
+
+
+if os.environ.get("MO2_LINT_PROTONTRICKS_BRIDGE") == "1":
+    run_protontricks_bridge()
 
 pre_init()
 
