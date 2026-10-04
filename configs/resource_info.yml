@@ -28,7 +28,13 @@ resources:
     version: "latest-autobuild"
     download_url: "https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks"
 
-  # Fallback for hosts without cabextract (e.g. SteamOS)
+  # Fallbacks for hosts without 7z or cabextract (e.g. SteamOS)
+  sevenzip:
+    version: "26.03"
+    download_url: "https://github.com/ip7z/7zip/releases/download/26.03/7z2603-linux-x64.tar.xz"
+    checksum: "dc99eff5008f1ab79bd7084c68513701547a808a89502bf4133683535ab3c695"
+    path_internal: "7zzs"
+
   cabextract:
     version: "1.9-3"
     download_url: "https://deb.debian.org/debian/pool/main/c/cabextract/cabextract_1.9-3_amd64.deb"
@@ -42,6 +48,27 @@ resources:
     fallback_url: "https://snapshot.debian.org/archive/debian/20230611T000000Z/pool/main/libm/libmspack/libmspack0_0.11-1_amd64.deb"
     checksum: "6695d3b9cc51a874feec328b40df0a59a2849c3fcc8cff77aa5f8d9f8e43fdca"
     path_internal: "./usr/lib/x86_64-linux-gnu/libmspack.so.0.1.0"
+
+  sevenzip_arm64:
+    version: "26.03"
+    download_url: "https://github.com/ip7z/7zip/releases/download/26.03/7z2603-linux-arm64.tar.xz"
+    checksum: "2389ba20e4d8295e8709c20b6263b69bd1ec4972fe38a04ad7a1badbf595b996"
+    path_internal: "7zzs"
+
+  # Debian Bookworm builds require only glibc >= 2.17 and the private libmspack below.
+  cabextract_arm64:
+    version: "1.9-3"
+    download_url: "https://deb.debian.org/debian/pool/main/c/cabextract/cabextract_1.9-3_arm64.deb"
+    fallback_url: "https://snapshot.debian.org/archive/debian/20230611T000000Z/pool/main/c/cabextract/cabextract_1.9-3_arm64.deb"
+    checksum: "2570119b64f1eaf76be5f063530f399015eee3746b4ed835c3aacbb18f343d70"
+    path_internal: "./usr/bin/cabextract"
+
+  libmspack_arm64:
+    version: "0.11-1"
+    download_url: "https://deb.debian.org/debian/pool/main/libm/libmspack/libmspack0_0.11-1_arm64.deb"
+    fallback_url: "https://snapshot.debian.org/archive/debian/20230611T000000Z/pool/main/libm/libmspack/libmspack0_0.11-1_arm64.deb"
+    checksum: "2fab09fba7e20c8e7d69941f43694b0a22c133eaa9b5449ef0730940971d7dbb"
+    path_internal: "./usr/lib/aarch64-linux-gnu/libmspack.so.0.1.0"
 
   vcredist_x86:
     version: "14.44.35211"

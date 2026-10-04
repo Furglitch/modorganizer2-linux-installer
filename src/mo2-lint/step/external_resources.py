@@ -272,7 +272,38 @@ def discard_tool_cache(tool: str, root: Path):
 
 
 def tool_resource(name: str) -> var.Resource | None:
-    return getattr(var.resource_info, name)
+    suffix = "_arm64" if host.is_arm64() else ""
+    return getattr(var.resource_info, name + suffix)
+
+
+def download_7zip() -> Path | None:
+    """Download or reuse the official static 7-Zip executable."""
+    resource = tool_resource("sevenzip")
+    if not resource:
+        logger.error("No sevenzip resource configured in resource_info.yml.")
+        return None
+    root = extract_dir / "7zip" / Path(resource.download_url).stem
+    binary = root / resource.path_internal
+    if binary.exists():
+        if validate_tool(binary, "i"):
+            return binary
+        discard_tool_cache("7z", root)
+    downloaded = download_tool_resource(resource)
+    if not downloaded:
+        return None
+    try:
+        with tarfile.open(downloaded) as archive:
+            archive.extract(str(resource.path_internal), root, filter="data")
+        binary.chmod(binary.stat().st_mode | stat.S_IEXEC)
+    except (OSError, tarfile.TarError, KeyError) as error:
+        logger.error(f"Failed to extract 7-Zip from {downloaded}: {error}")
+        discard_tool_cache("7z", root)
+        return None
+    if not validate_tool(binary, "i"):
+        discard_tool_cache("7z", root)
+        return None
+    logger.success("7-Zip download complete.")
+    return binary
 
 
 def debian_payload(package: Path) -> bytes:
@@ -348,9 +379,9 @@ def download_cabextract() -> Path | None:
 
 
 def download_archive_tools():
-    """Ensure winetricks has cabextract before configuring the prefix."""
+    """Ensure winetricks and patool have archive tools before configuring the prefix."""
     add_tools_to_path()
-    for tool, argument in (("cabextract", "--version"),):
+    for tool, argument in (("7z", "i"), ("cabextract", "--version")):
         link = tools_dir / tool
         if (
             link.is_symlink()
@@ -358,17 +389,17 @@ def download_archive_tools():
             and not validate_tool(link, argument)
         ):
             discard_tool_cache(tool, link.resolve().parent)
-    missing = [tool for tool in ("cabextract",) if not shutil.which(tool)]
+    missing = [tool for tool in ("7z", "cabextract") if not shutil.which(tool)]
     if not missing:
-        logger.debug("cabextract found on PATH")
+        logger.debug("7z and cabextract found on PATH")
         return
-    if not host.is_x86_64():
+    if not (host.is_x86_64() or host.is_arm64()):
         logger.critical(
-            f"Automatic cabextract downloads currently support x86_64 only. Please install the missing host tools: {', '.join(missing)}."
+            f"Automatic archive-tool downloads support x86_64 and ARM64 only. Please install the missing host tools: {', '.join(missing)}."
         )
         raise SystemExit(1)
     tools_dir.mkdir(parents=True, exist_ok=True)
-    for tool, download in (("cabextract", download_cabextract),):
+    for tool, download in (("7z", download_7zip), ("cabextract", download_cabextract)):
         if tool in missing and (binary := download()):
             link = tools_dir / tool
             link.unlink(missing_ok=True)

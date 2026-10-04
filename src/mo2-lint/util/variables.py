@@ -755,6 +755,8 @@ class ResourceInfo:
         Resource instance for the x86 VC++ Redistributable.
     vcredist_x64 : Resource, optional
         Resource instance for the x64 VC++ Redistributable.
+    sevenzip : Resource, optional
+        Resource instance for 7-Zip, used when 7z is not installed on the host.
     libmspack : Resource, optional
         Private library dependency for the downloaded cabextract.
     cabextract : Resource, optional
@@ -771,8 +773,12 @@ class ResourceInfo:
     java: Resource | None = None
     vcredist_x86: Resource | None = None
     vcredist_x64: Resource | None = None
+    sevenzip: Resource | None = None
     cabextract: Resource | None = None
     libmspack: Resource | None = None
+    sevenzip_arm64: Resource | None = None
+    cabextract_arm64: Resource | None = None
+    libmspack_arm64: Resource | None = None
 
     @classmethod
     def from_dict(cls, data: "dict[str, any] | ResourceInfo") -> "ResourceInfo":
@@ -788,8 +794,20 @@ class ResourceInfo:
             vcredist_x64=Resource.from_dict(data.get("vcredist_x64"))
             if "vcredist_x64" in data
             else None,
+            sevenzip=Resource.from_dict(data.get("sevenzip"))
+            if "sevenzip" in data
+            else None,
             libmspack=Resource.from_dict(data.get("libmspack"))
             if "libmspack" in data
+            else None,
+            sevenzip_arm64=Resource.from_dict(data.get("sevenzip_arm64"))
+            if "sevenzip_arm64" in data
+            else None,
+            cabextract_arm64=Resource.from_dict(data.get("cabextract_arm64"))
+            if "cabextract_arm64" in data
+            else None,
+            libmspack_arm64=Resource.from_dict(data.get("libmspack_arm64"))
+            if "libmspack_arm64" in data
             else None,
             cabextract=Resource.from_dict(data.get("cabextract"))
             if "cabextract" in data
@@ -929,8 +947,12 @@ def load_resource_info(path: Path | None = None):
         java=resources.get("java"),
         vcredist_x86=resources.get("vcredist_x86"),
         vcredist_x64=resources.get("vcredist_x64"),
+        sevenzip=resources.get("sevenzip"),
         cabextract=resources.get("cabextract"),
         libmspack=resources.get("libmspack"),
+        sevenzip_arm64=resources.get("sevenzip_arm64"),
+        cabextract_arm64=resources.get("cabextract_arm64"),
+        libmspack_arm64=resources.get("libmspack_arm64"),
     )
     logger.trace(f"Loaded resource_info: {resource_info}")
 

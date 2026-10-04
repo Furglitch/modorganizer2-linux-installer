@@ -46,7 +46,18 @@ def verify():
         subprocess.run(["cabextract", "-q", "-d", str(cab_out), str(cab)], check=True)
         assert (cab_out / "sample.txt").read_bytes() == payload
 
-        print("Pinned downloads, cache reuse and CAB extraction passed.")
+        archive = root / "sample.7z"
+        subprocess.run(
+            ["7z", "a", str(archive), str(cab_out / "sample.txt")],
+            check=True,
+            capture_output=True,
+        )
+        extracted = root / "7z-out"
+        resources.unzip(str(archive), outdir=str(extracted), verbosity=-1)
+        assert (extracted / "sample.txt").read_bytes() == payload
+        print(
+            "Pinned downloads, cache reuse, CAB extraction and patool .7z extraction passed."
+        )
 
 
 if __name__ == "__main__":

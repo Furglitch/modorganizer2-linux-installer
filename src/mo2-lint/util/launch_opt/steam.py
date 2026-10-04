@@ -6,8 +6,9 @@ import time
 
 from loguru import logger
 from util import variables as var
-
 from util.steam import proton_wrapper
+
+from shared import host
 
 
 def add_internal(
@@ -105,6 +106,12 @@ def restart_steam():
     """
     Restart Steam and steamwebhelper processes to reload appinfo.vdf changes.
     """
+    if host.is_steam_frame():
+        # Steam runs the whole VR session on the Steam Frame; killing it ends the session.
+        logger.warning(
+            "Not restarting Steam on the Steam Frame. Reboot the headset for Steam to pick up the new compatibility tool."
+        )
+        return
     try:
         if (
             subprocess.run(
