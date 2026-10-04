@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
 
+import io
 import json
+import os
+import shlex
+import shutil
 import ssl
 import stat
+import subprocess
+import tarfile
 from pathlib import Path
 from shutil import copyfile as copy
 from shutil import copytree, rmtree
@@ -21,6 +27,7 @@ from util.state_file import symlink_instance
 from util.theme.gtk_gen import generate_gtk_theme
 from util.theme.kde_gen import generate_kde_theme
 
+from shared import host
 from shared.mo2_ini import update_mo2_ini
 
 ssl_context = ssl.create_default_context(cafile=certifi.where())
@@ -28,6 +35,7 @@ ssl_context = ssl.create_default_context(cafile=certifi.where())
 cache_dir: Path = Path("~/.cache/mo2-lint").expanduser()
 download_dir = cache_dir / "downloads"
 extract_dir = download_dir / "extracted"
+tools_dir = download_dir / "bin" / host.machine()
 
 
 def install_theme(theme_slug: str, destination: Path) -> bool:
@@ -188,6 +196,189 @@ def download_winetricks():
     if downloaded:
         downloaded.chmod(downloaded.stat().st_mode | stat.S_IEXEC)
     logger.success("Winetricks download complete.")
+
+
+def add_tools_to_path():
+    """
+    Appends the downloaded tools directory to PATH, so host-installed tools take priority.
+    """
+    path = os.environ.get("PATH", "")
+    if str(tools_dir) not in path.split(os.pathsep):
+        os.environ["PATH"] = os.pathsep.join(filter(None, (path, str(tools_dir))))
+        logger.trace(f"Added {tools_dir} to PATH")
+
+
+def download_tool_resource(resource: var.Resource) -> Path | None:
+    """Verify cached packages and try the pinned mirror, then its snapshot fallback."""
+    for url in filter(None, (resource.download_url, resource.fallback_url)):
+        cached = download_dir / url.rsplit("/", 1)[-1]
+        if (
+            cached.exists()
+            and resource.checksum
+            and not compare_checksum(cached, resource.checksum)
+        ):
+            logger.warning(
+                f"Discarding archive-tool download with an invalid checksum: {cached}"
+            )
+            cached.unlink()
+        downloaded = dl(url, download_dir, checksum=resource.checksum)
+        # dl() immediately returns existing files: another process may have populated
+        # the cache after our check above, so verify that return path as well.
+        if (
+            downloaded
+            and resource.checksum
+            and not compare_checksum(downloaded, resource.checksum)
+        ):
+            downloaded.unlink(missing_ok=True)
+            downloaded = None
+        if downloaded:
+            return downloaded
+        logger.warning(f"Archive-tool download failed: {url}")
+    return None
+
+
+def validate_tool(binary: Path, argument: str) -> bool:
+    """Check executable startup and report expected failures without a traceback."""
+    try:
+        result = subprocess.run(
+            [str(binary), argument],
+            capture_output=True,
+            timeout=15,
+            check=False,
+            text=True,
+        )
+    except (OSError, subprocess.SubprocessError) as error:
+        logger.error(
+            f"Downloaded archive tool cannot run: {binary}: {error}. Install this tool with your package manager and try again."
+        )
+        return False
+    if result.returncode:
+        detail = (result.stderr or result.stdout).strip()
+        logger.error(
+            f"Downloaded archive tool cannot run: {binary} (exit {result.returncode}): {detail}. The cabextract fallback requires glibc 2.17 or newer; install a host copy with your package manager if needed."
+        )
+        return False
+    return True
+
+
+def discard_tool_cache(tool: str, root: Path):
+    """Remove a broken private extraction and its link so it can be rebuilt."""
+    root = root.resolve()
+    if root != extract_dir.resolve() and root.is_relative_to(extract_dir.resolve()):
+        rmtree(root, ignore_errors=True)
+    link = tools_dir / tool
+    if link.is_symlink():
+        link.unlink(missing_ok=True)
+
+
+def tool_resource(name: str) -> var.Resource | None:
+    return getattr(var.resource_info, name)
+
+
+def debian_payload(package: Path) -> bytes:
+    """Read data.tar.* from Debian's ar container; Python handles its compression."""
+    with package.open("rb") as stream:
+        if stream.read(8) != b"!<arch>\n":
+            raise ValueError("Not a Debian ar package")
+        while header := stream.read(60):
+            if len(header) != 60 or header[58:] != b"`\n":
+                raise ValueError("Invalid Debian ar member header")
+            name = header[:16].decode("ascii").strip().rstrip("/")
+            size = int(header[48:58])
+            if size < 0:
+                raise ValueError("Invalid Debian ar member size")
+            if name.startswith("data.tar"):
+                payload = stream.read(size)
+                if len(payload) != size:
+                    raise ValueError("Truncated Debian data archive")
+                return payload
+            stream.seek(size + size % 2, 1)
+    raise ValueError("Debian package has no data archive")
+
+
+def extract_debian_resource(resource: var.Resource, root: Path) -> Path | None:
+    """Extract one pinned Debian package member without external archive tools."""
+    downloaded = download_tool_resource(resource)
+    if not downloaded:
+        return None
+    try:
+        with tarfile.open(fileobj=io.BytesIO(debian_payload(downloaded))) as archive:
+            archive.extract(str(resource.path_internal), root, filter="data")
+    except (OSError, ValueError, tarfile.TarError, KeyError) as error:
+        logger.error(f"Failed to extract archive-tool package {downloaded}: {error}")
+        return None
+    return root / resource.path_internal
+
+
+def download_cabextract() -> Path | None:
+    """Cache Debian cabextract and its private libmspack, leaving the host unchanged."""
+    cab, mspack = tool_resource("cabextract"), tool_resource("libmspack")
+    if not cab or not mspack:
+        logger.error("cabextract and libmspack resources are not configured.")
+        return None
+    root = (
+        extract_dir / "cabextract" / host.machine() / f"{cab.version}-{mspack.version}"
+    )
+    wrapper = root / "cabextract"
+    if wrapper.exists():
+        if validate_tool(wrapper, "--version"):
+            return wrapper
+        discard_tool_cache("cabextract", root)
+    binary = extract_debian_resource(cab, root)
+    library = extract_debian_resource(mspack, root)
+    if not binary or not library:
+        discard_tool_cache("cabextract", root)
+        return None
+    binary.chmod(binary.stat().st_mode | stat.S_IEXEC)
+    link = library.parent / "libmspack.so.0"
+    if not link.is_symlink():
+        link.symlink_to(library.name)
+    wrapper.write_text(
+        "#!/bin/sh\n"
+        f"export LD_LIBRARY_PATH={shlex.quote(str(library.parent))}${{LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}}\n"
+        f'exec {shlex.quote(str(binary))} "$@"\n',
+        encoding="utf-8",
+    )
+    wrapper.chmod(wrapper.stat().st_mode | stat.S_IEXEC)
+    if not validate_tool(wrapper, "--version"):
+        discard_tool_cache("cabextract", root)
+        return None
+    logger.success("cabextract download complete.")
+    return wrapper
+
+
+def download_archive_tools():
+    """Ensure winetricks has cabextract before configuring the prefix."""
+    add_tools_to_path()
+    for tool, argument in (("cabextract", "--version"),):
+        link = tools_dir / tool
+        if (
+            link.is_symlink()
+            and shutil.which(tool) == str(link)
+            and not validate_tool(link, argument)
+        ):
+            discard_tool_cache(tool, link.resolve().parent)
+    missing = [tool for tool in ("cabextract",) if not shutil.which(tool)]
+    if not missing:
+        logger.debug("cabextract found on PATH")
+        return
+    if not host.is_x86_64():
+        logger.critical(
+            f"Automatic cabextract downloads currently support x86_64 only. Please install the missing host tools: {', '.join(missing)}."
+        )
+        raise SystemExit(1)
+    tools_dir.mkdir(parents=True, exist_ok=True)
+    for tool, download in (("cabextract", download_cabextract),):
+        if tool in missing and (binary := download()):
+            link = tools_dir / tool
+            link.unlink(missing_ok=True)
+            link.symlink_to(binary)
+    missing = [tool for tool in missing if not shutil.which(tool)]
+    if missing:
+        logger.critical(
+            f"Required tools could not be found or downloaded: {', '.join(missing)}. Please install them with your package manager and try again."
+        )
+        raise SystemExit(1)
 
 
 def download_java():

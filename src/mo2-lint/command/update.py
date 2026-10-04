@@ -3,7 +3,7 @@
 from pathlib import Path
 
 from loguru import logger
-from step.external_resources import download_mod_organizer
+from step.external_resources import download_archive_tools, download_mod_organizer
 from step.launch_opt import add_launch_opt, remove_launch_opt
 from step.configure_prefix import get_default_tricks
 from util import state_file as state
@@ -142,6 +142,8 @@ def update(
             logger.warning(
                 "Could not resolve Steam Proton wrapper. Proton wrapper will not be updated."
             )
+
+    download_archive_tools()
 
     logger.debug(f"Updating MO2 executable in directory: {directory}")
     download_mod_organizer()

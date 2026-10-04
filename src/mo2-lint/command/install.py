@@ -5,7 +5,11 @@ from pathlib import Path
 from loguru import logger
 from step.configure_prefix import prompt as configure_prefix
 from shared.mo2_ini import launchers, normalize_path, update_mo2_ini
-from step.external_resources import download, download_winetricks
+from step.external_resources import (
+    download,
+    download_archive_tools,
+    download_winetricks,
+)
 from step.launch_opt import add_launch_opt
 from step.load_game_info import get_launcher, get_library
 from step.workarounds import apply_workarounds
@@ -144,6 +148,7 @@ def install(
         )
         raise SystemExit(1)
 
+    download_archive_tools()
     download_winetricks()
     configure_prefix()
     logger.info("Prefix configuration completed")

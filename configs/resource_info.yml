@@ -28,6 +28,21 @@ resources:
     version: "latest-autobuild"
     download_url: "https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks"
 
+  # Fallback for hosts without cabextract (e.g. SteamOS)
+  cabextract:
+    version: "1.9-3"
+    download_url: "https://deb.debian.org/debian/pool/main/c/cabextract/cabextract_1.9-3_amd64.deb"
+    fallback_url: "https://snapshot.debian.org/archive/debian/20230611T000000Z/pool/main/c/cabextract/cabextract_1.9-3_amd64.deb"
+    checksum: "0b02139c1bc170c6ee107fd480da5d290bdeba7cbbb881d95d9ff6544ccda748"
+    path_internal: "./usr/bin/cabextract"
+
+  libmspack:
+    version: "0.11-1"
+    download_url: "https://deb.debian.org/debian/pool/main/libm/libmspack/libmspack0_0.11-1_amd64.deb"
+    fallback_url: "https://snapshot.debian.org/archive/debian/20230611T000000Z/pool/main/libm/libmspack/libmspack0_0.11-1_amd64.deb"
+    checksum: "6695d3b9cc51a874feec328b40df0a59a2849c3fcc8cff77aa5f8d9f8e43fdca"
+    path_internal: "./usr/lib/x86_64-linux-gnu/libmspack.so.0.1.0"
+
   vcredist_x86:
     version: "14.44.35211"
     download_url: "https://download.visualstudio.microsoft.com/download/pr/7ebf5fdb-36dc-4145-b0a0-90d3d5990a61/0C09F2611660441084CE0DF425C51C11E147E6447963C3690F97E0B25C55ED64/VC_redist.x86.exe"
