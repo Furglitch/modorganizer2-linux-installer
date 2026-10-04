@@ -17,7 +17,12 @@ permissions:
 
 jobs:
   archive-tools:
-    runs-on: ubuntu-latest
+    name: Archive tools (${{ matrix.runner }})
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-latest, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v7

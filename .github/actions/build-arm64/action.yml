@@ -1,0 +1,25 @@
+name: Build ARM64 MO2-LINT
+description: Build native Linux binaries with the shared Windows redirector and verify the frozen bundle.
+runs:
+  using: composite
+  steps:
+    - name: Install uv
+      uses: astral-sh/setup-uv@v7
+    - name: Download REDIRECTOR Artifact
+      uses: actions/download-artifact@v8
+      with:
+        name: redirector_artifact
+        path: dist
+    - name: Build ARM64 binaries
+      shell: bash
+      run: |
+        make nxm-handler mo2-lint_only
+        mv dist/mo2-lint dist/mo2-lint-aarch64
+    - name: Verify frozen ARM64 entry points and bundled files
+      shell: bash
+      run: |
+        MO2_LINT_PROTONTRICKS_BRIDGE=1 ./dist/mo2-lint-aarch64 --version
+        mkdir -p "$HOME/.config/mo2-lint"
+        printf '[installer]\ncheck_updates = false\nrefresh_configs = false\n' > "$HOME/.config/mo2-lint/settings.toml"
+        ./dist/mo2-lint-aarch64 --help
+        uv run --locked python tests/verify_frozen_build.py dist/mo2-lint-aarch64
