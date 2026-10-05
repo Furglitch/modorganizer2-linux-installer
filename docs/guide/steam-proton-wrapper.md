@@ -14,7 +14,7 @@ This installer provides a custom Steam compatibility tool (a thin Proton wrapper
 
 **Key facts**
 
-- **Tool ID**: `mo2_<appid>_redirector` (installed to `compatibilitytools.d/mo2_<appid>_redirector`)
+- **Tool ID**: `mo2_<appid>_proton_redirector` (installed to `compatibilitytools.d/mo2_<appid>_proton_redirector`)
 - **Marker file**: `.mo2-lint-proton-wrapper` inside the installed tool folder
 - **Default Proton version**: Proton 11.0 (overrideable with `--proton-version` during `mo2-lint install`)
 
@@ -27,7 +27,7 @@ The wrapper drops a small script and metadata into a compatibility tool director
 When you run `mo2-lint install` for a Steam game the installer will:
 
 - Resolve a Proton runtime directory (default: `Proton 11.0`).
-- Render the bundled wrapper template and write it to `~/.local/share/Steam/compatibilitytools.d/mo2_<appid>_redirector`.
+- Render the bundled wrapper template and write it to `~/.local/share/Steam/compatibilitytools.d/mo2_<appid>_proton_redirector`.
 - Add the redirector's metadata so Steam shows the tool in the compatibility dropdown.
 - Restart Steam automatically (or ask you to) so the change is picked up.
 
@@ -52,7 +52,7 @@ If you run `protontricks` yourself outside of `mo2-lint`, set `PROTON_VERSION` t
 
 ## Reverting / Uninstalling
 
-- To remove the wrapper and restore the previous behaviour, either use `mo2-lint uninstall` for the instance you created or remove the compatibility tool directory `~/.local/share/Steam/compatibilitytools.d/mo2_<appid>_redirector` manually and restart Steam.
+- To remove the wrapper and restore the previous behaviour, either use `mo2-lint uninstall` for the instance you created or remove the compatibility tool directory `~/.local/share/Steam/compatibilitytools.d/mo2_<appid>_proton_redirector` manually and restart Steam.
 - If Steam removes the original Proton runtime while you were using the wrapper, reinstall the original Proton runtime from Steam and reassign it to at least one game to prevent automatic cleanup.
 
 ## Troubleshooting
