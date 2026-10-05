@@ -30,7 +30,7 @@ def format_tool_id(appid: int) -> str:
     """
     Gets the compatibility tool ID for a Steam appid.
     """
-    return f"mo2_{appid}_redirector"
+    return f"mo2_{appid}_proton_redirector"
 
 
 def resolve_tool_path(appid: int, tools_dir: Path | None = None) -> Path | None:

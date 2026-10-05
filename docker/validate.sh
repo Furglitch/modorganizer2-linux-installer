@@ -25,7 +25,7 @@ MO2_DIR_EPIC="$HOME/Games/mo2-lint_oblivion-epic"
 MO2_DIR_GOG="$HOME/Games/mo2-lint_oblivion-gog"
 PROTON_VERSION="Proton 11.0"
 PROTON_DIR="$HOME/.local/share/Steam/steamapps/$PROTON_VERSION"
-PROTON_WRAPPER_DIR="$HOME/.local/share/Steam/compatibilitytools.d/mo2_22330_redirector"
+PROTON_WRAPPER_DIR="$HOME/.local/share/Steam/compatibilitytools.d/mo2_22330_proton_redirector"
 LOGS_DIR="$HOME/.cache/mo2-lint/logs"
 NXM_HANDLER="$HOME/.local/share/mo2-lint/nxm-handler"
 DESKTOP_FILE="$HOME/.local/share/applications/mo2lint_nxm-handler.desktop"
@@ -165,7 +165,7 @@ else
     fail "Proton wrapper incorrect require_tool_appid: $line"
 fi
 
-if grep -Fq '"mo2_22330_redirector"' "$PROTON_WRAPPER_DIR/compatibilitytool.vdf"; then
+if grep -Fq '"mo2_22330_proton_redirector"' "$PROTON_WRAPPER_DIR/compatibilitytool.vdf"; then
     pass "Proton wrapper has correct tool ID"
 else
     fail "Proton wrapper does not have the correct tool ID"
