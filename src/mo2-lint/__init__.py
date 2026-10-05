@@ -229,6 +229,9 @@ def run_protontricks_bridge():
 
     from protontricks.cli.main import main as protontricks_main
 
+    from shared import protontricks_arm64
+
+    protontricks_arm64.apply()
     protontricks_main(sys.argv[1:])
     raise SystemExit(0)
 

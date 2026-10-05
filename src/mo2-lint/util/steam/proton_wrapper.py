@@ -5,15 +5,17 @@ from shutil import rmtree
 from stat import S_IXGRP, S_IXOTH, S_IXUSR
 
 from loguru import logger
-
 from util import variables as var
 from util.internal_file import internal_file
 from util.steam.find_library import get_libraries
 from util.steam.path import find_steam_root
 from util.steam.proton import find_proton, read_require_tool_appid
 
+from shared import host
 
 default_proton_version = "Proton 11.0"
+# On ARM64 Linux (e.g. the Steam Frame) Steam only runs the ARM64 builds of Proton.
+default_proton_version_arm64 = "Proton 11.0 (ARM64)"
 
 # Use a magic marker file to track that a directory is a proton wrapper managed by our application. We do not want to accidentally delete someone's home directory because of a corrupted state file.
 marker_name = ".mo2-lint-proton-wrapper"
@@ -78,7 +80,9 @@ def resolve(appid: int, proton_version: str | None = None) -> var.ProtonWrapper 
         return None
 
     if not proton_version:
-        proton_version = default_proton_version
+        proton_version = (
+            default_proton_version_arm64 if host.is_arm64() else default_proton_version
+        )
 
     libraries = get_libraries()
     if not libraries:

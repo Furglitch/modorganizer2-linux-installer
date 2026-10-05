@@ -9,6 +9,7 @@ from contextlib import contextmanager
 from loguru import logger
 from protontricks.cli.main import main as pt
 
+from shared import protontricks_arm64
 from shared.logger import add_loggers, remove_loggers
 
 
@@ -57,7 +58,17 @@ def run(command: list[str], env: dict[str, str] | None = None) -> list[str]:
     if args != ["--verbose"]:
         with redirect_output_to_logger() as output_lines:
             try:
-                with environment(env):
+                overrides = dict(env or {})
+                runtime = {
+                    "STEAM_RUNTIME": overrides.get(
+                        "STEAM_RUNTIME", os.environ.get("STEAM_RUNTIME")
+                    )
+                }
+                if runtime["STEAM_RUNTIME"] is not None:
+                    protontricks_arm64.sanitize_environment(runtime)
+                overrides.update(runtime)
+                with environment(overrides):
+                    protontricks_arm64.apply()
                     pt(args)
             except SystemExit as e:
                 if e.code != 0:

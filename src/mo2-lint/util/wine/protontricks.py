@@ -11,6 +11,8 @@ from pathlib import Path
 from loguru import logger
 from util import state_file as state
 
+from shared import protontricks_arm64
+
 
 class ProtontricksOutput(list):
     """Captured protontricks output with the most recent error line."""
@@ -144,6 +146,7 @@ def run(command: list[str]) -> list[str]:
         # silent exit code 1 on the second invocation. A fresh subprocess per
         # call sidesteps that entirely.
         env = os.environ.copy()
+        protontricks_arm64.sanitize_environment(env)
         winetricks_path = get_winetricks_path()
         if winetricks_path:
             env["WINETRICKS"] = str(winetricks_path)
@@ -164,11 +167,15 @@ def run(command: list[str]) -> list[str]:
             base_command = [
                 sys.executable,
                 "-c",
-                "import sys; from protontricks.cli.main import main as pt; pt(sys.argv[1:])",
+                (
+                    "import sys; from shared import protontricks_arm64; protontricks_arm64.apply(); "
+                    "from protontricks.cli.main import main as pt; pt(sys.argv[1:])"
+                ),
             ]
 
         proc = subprocess.run(
             base_command + args,
+            check=False,
             capture_output=True,
             text=True,
             errors="replace",

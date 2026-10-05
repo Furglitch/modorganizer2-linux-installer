@@ -64,14 +64,17 @@ class ArchiveToolTests(unittest.TestCase):
         with (
             patch.object(resources.host, "machine", return_value="x86_64"),
             patch.object(resources, "download_cabextract", return_value=cab),
+            patch.object(resources, "download_7zip") as get_7zip,
         ):
             resources.download_archive_tools()
+        get_7zip.assert_not_called()
         self.assertEqual(resources.shutil.which("7z"), str(old))
         self.assertEqual((self.bin / "cabextract").resolve(), cab)
 
     def test_failed_download_stops_before_prefix_configuration(self):
         with (
             patch.object(resources.host, "machine", return_value="x86_64"),
+            patch.object(resources, "download_7zip", return_value=None),
             patch.object(resources, "download_cabextract", return_value=None),
             self.assertRaises(SystemExit) as error,
         ):
@@ -81,7 +84,7 @@ class ArchiveToolTests(unittest.TestCase):
     def test_unsupported_architecture_does_not_fetch_x86_tools(self):
         with (
             patch.object(resources.host, "machine", return_value="riscv64"),
-            patch.object(resources, "download_cabextract") as download,
+            patch.object(resources, "download_7zip") as download,
             self.assertRaises(SystemExit),
         ):
             resources.download_archive_tools()
@@ -121,7 +124,14 @@ class ArchiveToolTests(unittest.TestCase):
     def test_refreshed_config_preserves_overrides_and_fills_bundled_tools(self):
         bundled = var.internal_file("cfg", "resource_info.yml")
         data = yaml.safe_load(bundled.read_text())
-        for tool in ("cabextract", "libmspack"):
+        for tool in (
+            "cabextract",
+            "sevenzip",
+            "libmspack",
+            "cabextract_arm64",
+            "sevenzip_arm64",
+            "libmspack_arm64",
+        ):
             data["resources"].pop(tool)
         data["resources"]["winetricks"]["version"] = "user override"
         refreshed = self.root / "resource_info.yml"
@@ -130,6 +140,7 @@ class ArchiveToolTests(unittest.TestCase):
             var.load_resource_info(refreshed)
             self.assertEqual(var.resource_info.winetricks.version, "user override")
             self.assertIsNotNone(var.resource_info.cabextract)
+            self.assertIsNotNone(var.resource_info.sevenzip)
             self.assertIsNotNone(var.resource_info.libmspack)
 
     def package(self, name, member, content, deb=False):
@@ -160,6 +171,22 @@ class ArchiveToolTests(unittest.TestCase):
             path_internal=member,
             version="test",
         )
+
+    def test_corrupt_extraction_is_rebuilt_without_redownloading_verified_package(self):
+        resource = self.package("7zip.tar.xz", "7zzs", b"#!/bin/sh\nexit 0\n")
+        root = resources.extract_dir / "7zip" / "7zip.tar"
+        broken = self.executable(root, "7zzs")
+        broken.write_bytes(b"truncated executable")
+        self.bin.mkdir()
+        (self.bin / "7z").symlink_to(broken)
+        self.executable(self.root / "host", "cabextract")
+        with (
+            patch.object(resources.host, "machine", return_value="x86_64"),
+            patch.object(var, "resource_info", SimpleNamespace(sevenzip=resource)),
+        ):
+            resources.download_archive_tools()
+        self.assertEqual(broken.read_bytes(), b"#!/bin/sh\nexit 0\n")
+        self.assertTrue((self.bin / "7z").exists())
 
     def test_debian_cabextract_cache_and_private_library_environment(self):
         cab = self.package(
