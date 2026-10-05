@@ -1,0 +1,31 @@
+name: Archive Tool Tests
+
+on:
+  pull_request:
+    paths:
+      - "src/**"
+      - "configs/**"
+      - "tests/**"
+      - "pyproject.toml"
+      - "uv.lock"
+      - ".python-version"
+      - ".github/workflows/unit-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  archive-tools:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+      - name: Run offline regression tests
+        env:
+          PYTHONPATH: src/mo2-lint:src
+        run: uv run --locked python -m unittest discover -s tests
+      - name: Verify pinned downloads and archive extraction
+        env:
+          PYTHONPATH: src/mo2-lint:src
+        run: uv run --locked python tests/verify_archive_tools.py

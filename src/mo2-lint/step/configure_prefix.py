@@ -23,13 +23,7 @@ yes = ("", "y", "yes")
 
 
 def get_default_tricks() -> list[str]:
-    tricks = list(default_tricks)
-    if shutil.which("cabextract") is None and "arial" in tricks:
-        logger.warning(
-            "cabextract was not found on the host system; skipping the arial winetricks trick."
-        )
-        tricks.remove("arial")
-    return tricks
+    return list(default_tricks)
 
 
 def load_prefix() -> Path:

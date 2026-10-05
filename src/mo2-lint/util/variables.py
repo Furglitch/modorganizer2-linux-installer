@@ -680,6 +680,8 @@ class Resource:
     -----------
     download_url : str
         Direct download URL for the resource.
+    fallback_url : str, optional
+        Alternate mirror for the same checksum-pinned resource.
     checksum : str, optional
         SHA-256 checksum of the resource file.
     path_internal : Path, optional
@@ -703,6 +705,7 @@ class Resource:
     checksum_internal: str | None = None
     version: str | None = None
     file_whitelist: FileWhitelist | None = None
+    fallback_url: str | None = None
 
     @classmethod
     def from_dict(cls, data: "dict[str, any] | Resource") -> "Resource":
@@ -710,6 +713,7 @@ class Resource:
             return data
         return cls(
             download_url=data.get("download_url"),
+            fallback_url=data.get("fallback_url"),
             version=data.get("version") if "version" in data else None,
             checksum=data.get("checksum") if "checksum" in data else None,
             path_internal=data.get("path_internal")
@@ -751,6 +755,10 @@ class ResourceInfo:
         Resource instance for the x86 VC++ Redistributable.
     vcredist_x64 : Resource, optional
         Resource instance for the x64 VC++ Redistributable.
+    libmspack : Resource, optional
+        Private library dependency for the downloaded cabextract.
+    cabextract : Resource, optional
+        Resource instance for cabextract, used when it is not installed on the host.
 
     Raises
     -------
@@ -763,6 +771,8 @@ class ResourceInfo:
     java: Resource | None = None
     vcredist_x86: Resource | None = None
     vcredist_x64: Resource | None = None
+    cabextract: Resource | None = None
+    libmspack: Resource | None = None
 
     @classmethod
     def from_dict(cls, data: "dict[str, any] | ResourceInfo") -> "ResourceInfo":
@@ -777,6 +787,12 @@ class ResourceInfo:
             else None,
             vcredist_x64=Resource.from_dict(data.get("vcredist_x64"))
             if "vcredist_x64" in data
+            else None,
+            libmspack=Resource.from_dict(data.get("libmspack"))
+            if "libmspack" in data
+            else None,
+            cabextract=Resource.from_dict(data.get("cabextract"))
+            if "cabextract" in data
             else None,
         )
 
@@ -894,12 +910,27 @@ def load_resource_info(path: Path | None = None):
     resources = {}
     for key, value in yml.get("resources", {}).items():
         resources[key] = Resource.from_dict(value)
+
+    # A refreshed config can predate resources this version needs, so fill gaps from the bundled copy
+    bundled = internal_file("cfg", "resource_info.yml")
+    if path.resolve() != bundled.resolve():
+        with open(bundled, "r", encoding="utf-8") as file:
+            defaults = yaml.load(file.read(), yaml.SafeLoader)
+        for key, value in defaults.get("resources", {}).items():
+            if key not in resources:
+                logger.debug(
+                    f"Resource '{key}' missing from {path}; using bundled default"
+                )
+                resources[key] = Resource.from_dict(value)
+
     resource_info = ResourceInfo(
         mod_organizer=resources.get("mod_organizer"),
         winetricks=resources.get("winetricks"),
         java=resources.get("java"),
         vcredist_x86=resources.get("vcredist_x86"),
         vcredist_x64=resources.get("vcredist_x64"),
+        cabextract=resources.get("cabextract"),
+        libmspack=resources.get("libmspack"),
     )
     logger.trace(f"Loaded resource_info: {resource_info}")
 

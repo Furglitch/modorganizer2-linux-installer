@@ -48,7 +48,7 @@ See [Setting up Proton](./proton-setup).
 |:--|:--|:--|:--|
 | xdg-mime | Sends Nexus Mods downloads to MO2 via the `nxm://` handler. Allows MO2 to use your default applications for folders and various file types. | Included by default on many distros. | Required |
 | procps | Provides `pgrep`, used to auto-restart Steam/Heroic while adding launch options. | Included by default on many distros. Fedora known not to. | Required |
-| cabextract | Used by *protontricks* to extract files for the `arial` font trick. Without it, MO2 may render with a visual bug. | Most distros don't include this by default. | Recommended |
+| cabextract | Used by *winetricks* to extract fonts and DirectX components (`arial`, `d3dcompiler_43`, `d3dx9`, `xact`, etc.). | Most distros don't include this by default. MO2-LINT downloads it if it isn't installed. | Optional |
 | protontricks | Manages the Proton prefix and installs MO2 dependencies. | Bundled with MO2-LINT. | Optional |
 | winetricks | Used to manage Heroic prefixes and other Wine-related tasks. | Bundled with MO2-LINT, but falls back to the system version if installed. | Optional |
 
