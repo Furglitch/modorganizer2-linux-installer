@@ -25,6 +25,8 @@ body:
       options:
         - "7.0.0-b1"
         - "7.0.0"
+        - "7.0.1"
+        - "7.0.2"
     validations:
       required: true
   - type: dropdown
