@@ -4,6 +4,8 @@
 
 <br clear="left"/>
 
+![GitHub Tag](https://img.shields.io/github/v/tag/Furglitch/modorganizer2-linux-installer?label=version) ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/Furglitch/modorganizer2-linux-installer/total)
+
 MO2-LINT aims to make installing [Mod Organizer 2](https://github.com/ModOrganizer2/modorganizer) on Linux systems easier and more accessible, providing a simple process to set up a fully functional Mod Organizer 2 installation with minimal user input.
 
 [Get Started](https://furglitch.github.io/modorganizer2-linux-installer/getting-started/) | [View the CLI Guide](https://furglitch.github.io/modorganizer2-linux-installer/guide/) | [GitHub Releases](https://github.com/furglitch/modorganizer2-linux-installer/releases)<br/>
