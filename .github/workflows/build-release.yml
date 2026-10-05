@@ -75,12 +75,14 @@ jobs:
         with:
           name: mo2-lint_artifact
           path: dist/mo2-lint
+          if-no-files-found: error
 
       - name: Upload REDIRECTOR Artifact
         uses: actions/upload-artifact@v7
         with:
           name: redirector_artifact
           path: dist/mo2-redirector.exe
+          if-no-files-found: error
 
   # ARM64 Linux (e.g. the Valve Steam Frame). The Windows redirector is reused
   # from the x86_64 job, which builds it with Wine.
@@ -99,6 +101,7 @@ jobs:
         with:
           name: mo2-lint-aarch64_artifact
           path: dist/mo2-lint-aarch64
+          if-no-files-found: error
 
   release:
     runs-on: ubuntu-latest

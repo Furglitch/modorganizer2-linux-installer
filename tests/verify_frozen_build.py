@@ -16,6 +16,9 @@ def verify(binary: Path):
         "cfg/resource_info.yml",
         "cfg/plugin_info.yml",
         "cfg/theme_info.yml",
+        "steam-proton-wrapper/proton",
+        "steam-proton-wrapper/compatibilitytool.vdf",
+        "steam-proton-wrapper/toolmanifest.vdf",
         "dist/mo2-redirector.exe",
         "dist/nxm-handler",
     ):
@@ -26,7 +29,9 @@ def verify(binary: Path):
         handler.write_bytes(archive.extract("dist/nxm-handler"))
         handler.chmod(0o755)
         subprocess.run([str(handler), "--help"], check=True, timeout=30)
-    print("Frozen configuration, redirector and nxm-handler startup verified.")
+    print(
+        "Frozen configuration, Steam wrapper, redirector and nxm-handler startup verified."
+    )
 
 
 if __name__ == "__main__":
