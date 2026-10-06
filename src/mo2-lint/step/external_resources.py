@@ -134,10 +134,15 @@ def download_mod_organizer():
     Runs the download and installation process for Mod Organizer 2.
     """
 
-    url = var.resource_info.mod_organizer.download_url
-    checksum = var.resource_info.mod_organizer.checksum
-    path_internal = var.resource_info.mod_organizer.path_internal
-    checksum_internal = var.resource_info.mod_organizer.checksum_internal
+    resource = tool_resource("mod_organizer")
+    if not resource:
+        logger.error("No mod_organizer resource configured in resource_info.yml.")
+        raise SystemExit(1)
+
+    url = resource.download_url
+    checksum = getattr(resource, "checksum", None)
+    path_internal = getattr(resource, "path_internal", None)
+    checksum_internal = getattr(resource, "checksum_internal", None)
     local_archive = var.input_params.mo2_archive
     destination = var.input_params.directory
     theme = getattr(var.input_params, "theme", None)
