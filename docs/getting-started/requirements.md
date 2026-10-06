@@ -25,7 +25,7 @@ parent: Getting Started
 MO2-LINT can run natively on ARM64 Linux, including Steam Frame. The ARM64 binary is named `mo2-lint-aarch64`.
 
 {: .warning }
-> Mod Organizer 2 cannot launch games or tools on ARM64 with its bundled USVFS. Working MO2 support requires the [USVFS ARM64 patch](https://github.com/ModOrganizer2/usvfs/pull/93) to be merged and included in MO2. MO2-LINT does not apply that patch. Steam Frame installation instructions are deferred until MO2 includes the fix.
+> Mod Organizer 2 cannot launch games or tools on ARM64 with its bundled USVFS. MO2 requires the [USVFS ARM64 patch](https://github.com/ModOrganizer2/usvfs/pull/93). You can download patched USVFS binaries from the [releases linked in that PR](https://github.com/ndabas/modorganizer/releases) and apply them to an existing MO2 installation without waiting for an official MO2 release containing the fix. MO2-LINT does not apply that patch. Steam Frame installation instructions are deferred until MO2 includes the fix.
 
 ## Launchers
 
