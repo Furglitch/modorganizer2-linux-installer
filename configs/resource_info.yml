@@ -15,7 +15,7 @@ resources:
     path_internal: "ModOrganizer.exe"
     checksum_internal: "442b354a8f34754da0048654c44d27f51628feba54ce46c3187cf58d6c43e622"
 
-  mod_organizer_arm:
+  mod_organizer_arm64:
     version: "2.5.2-woa.1"
     download_url: "https://github.com/ndabas/modorganizer/releases/download/v2.5.2-woa.1/Mod.Organizer-2.5.2-woa.1.7z"
     checksum: "2c4db585d839e7f05e5167e74936c6d9a9fc6a8b08c4e03bfef5eb58feac280e"

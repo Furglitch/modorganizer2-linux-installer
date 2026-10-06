@@ -158,6 +158,10 @@ def download_mod_organizer():
         downloaded = local_archive
         destination.mkdir(parents=True, exist_ok=True)
     else:
+        if host.is_arm64():
+            logger.info(
+                "ARM64 detected. Downloading Mod Organizer 2 with patched USVFS."
+            )
         logger.info("Starting download process for Mod Organizer 2")
         logger.trace(
             f"Download info: url={url}, checksum={checksum}, path_internal={path_internal}, checksum_internal={checksum_internal}"
