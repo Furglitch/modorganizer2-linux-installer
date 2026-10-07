@@ -747,6 +747,8 @@ class ResourceInfo:
     -----------
     mod_organizer : Resource
         Resource instance for Mod Organizer.
+    mod_organizer_arm64 : Resource, optional
+        Mod Organizer build with ARM64-compatible USVFS, used on ARM64 hosts.
     winetricks : Resource
         Resource instance for Winetricks.
     java : Resource, optional
@@ -779,6 +781,7 @@ class ResourceInfo:
     sevenzip_arm64: Resource | None = None
     cabextract_arm64: Resource | None = None
     libmspack_arm64: Resource | None = None
+    mod_organizer_arm64: Resource | None = None
 
     @classmethod
     def from_dict(cls, data: "dict[str, any] | ResourceInfo") -> "ResourceInfo":
@@ -808,6 +811,9 @@ class ResourceInfo:
             else None,
             libmspack_arm64=Resource.from_dict(data.get("libmspack_arm64"))
             if "libmspack_arm64" in data
+            else None,
+            mod_organizer_arm64=Resource.from_dict(data.get("mod_organizer_arm64"))
+            if "mod_organizer_arm64" in data
             else None,
             cabextract=Resource.from_dict(data.get("cabextract"))
             if "cabextract" in data
@@ -953,6 +959,7 @@ def load_resource_info(path: Path | None = None):
         sevenzip_arm64=resources.get("sevenzip_arm64"),
         cabextract_arm64=resources.get("cabextract_arm64"),
         libmspack_arm64=resources.get("libmspack_arm64"),
+        mod_organizer_arm64=resources.get("mod_organizer_arm64"),
     )
     logger.trace(f"Loaded resource_info: {resource_info}")
 

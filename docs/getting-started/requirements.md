@@ -20,15 +20,7 @@ parent: Getting Started
 {: .danger }
 > **Linux only.** MO2-LINT does not work on Windows, MacOS, or any other operating system.
 
-### ARM64 (e.g. Steam Frame)
-
-ARM64 Linux support currently requires a source build; published ARM64 releases are not available yet. Steam only runs the ARM64 builds of Proton there, so MO2-LINT uses `Proton 11.0 (ARM64)` by default.
-
-{: .note }
-> On the Steam Frame, MO2-LINT doesn't restart Steam after installing (Steam runs the whole VR session there). Reboot the headset afterwards so Steam picks up the new compatibility tool.
-
-{: .warning }
-> With the USVFS version bundled in Mod Organizer 2.5.2, programs started from MO2 (the game, script extenders, tools) close immediately on ARM64. MO2 itself works. The fix is tracked in [ModOrganizer2/usvfs#93](https://github.com/ModOrganizer2/usvfs/pull/93). [ModSync provides an explicit, reversible backport](https://github.com/skjiisa/ModSync/blob/main/docs/usvfs-arm64.md) that has been tested with modded Skyrim on the Frame. MO2-LINT does not apply that backport automatically.
+On ARM64 Linux, including Steam Frame, use `mo2-lint-aarch64`. MO2-LINT installs [MO2 2.5.2-woa.1](https://github.com/ndabas/modorganizer/releases/tag/v2.5.2-woa.1), which includes the USVFS fix needed to launch games on ARM64.
 
 ## Launchers
 
