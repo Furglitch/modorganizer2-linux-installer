@@ -557,3 +557,12 @@ def symlink_instance():
     logger.debug(
         f"Created symlink for instance index {current_instance.index}: {target} -> {source}"
     )
+
+
+def instance_count() -> int:
+    """
+    Returns:
+        int: Number of installed instances
+    """
+
+    return len(state_file.instances)

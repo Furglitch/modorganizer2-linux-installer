@@ -446,3 +446,13 @@ def prompt_uninstall_trash_confirm() -> bool:
     result = prompt([msg])
     logger.debug(f"User confirmed permanent deletion: {result['confirm_trash_config']}")
     return result["confirm_trash_config"]
+
+
+# --- #
+
+ASCII: str = """
+▗▖  ▗▖ ▗▄▖ ▄▄▄▄ ▗▖   ▗▄▄▄▖▗▖  ▗▖▗▄▄▄▖
+▐▛▚▞▜▌▐▌ ▐▌   █ ▐▌     █  ▐▛▚▖▐▌  █
+▐▌  ▐▌▐▌ ▐▌█▀▀▀ ▐▌     █  ▐▌ ▝▜▌  █
+▐▌  ▐▌▝▚▄▞▘█▄▄▄ ▐▙▄▄▖▗▄█▄▖▐▌  ▐▌  █
+"""
