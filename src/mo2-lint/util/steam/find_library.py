@@ -8,12 +8,12 @@ from loguru import logger
 from util import variables as var
 
 steam_directories = [
-    "~/.steam/root",
-    "~/.steam/steam",
     "~/.local/share/Steam",
     "~/.var/app/com.valvesoftware.Steam/.local/share/Steam",
     "~/snap/steam/common/.local/share/Steam",
     "~/.snap/steam/common/.local/share/Steam",
+    "~/.steam/steam",
+    "~/.steam/root",
 ]
 
 
@@ -67,9 +67,9 @@ def get_libraries() -> list[Path]:
                 continue
             try:
                 with open(library_list, "r", encoding="utf-8") as file:
-                    libraries = re.findall(r"/[^\"]+", file.read())
-                    for i in range(len(libraries)):
-                        libraries[i] = Path(libraries[i])
+                    found = re.findall(r"/[^\"]+", file.read())
+                    libraries.extend(Path(p) for p in found)
+                    libraries = list(dict.fromkeys(libraries))
                     logger.trace(f"Found Steam library folders: {libraries}")
             except Exception:
                 logger.exception(f"Error reading libraryfolders.vdf in {library}")
