@@ -16,8 +16,8 @@
 }
 
 #installprogress {
-    width: 20;
-    height: 20;
+    width: 32;
+    height: 23;
     margin: 1 0;
     border: $foreground;
 }
@@ -28,10 +28,24 @@
 }
 
 #installgamelist {
-    height: 10;
+    height: 12;
 }
 
-#installgamenext {
+#installgamenext, #installconfignext {
     width: 100%;
     height: 3;
+}
+
+#installconfigextender, #installconfigplugins, #installconfigthemes {
+    padding: 1 3;
+    margin: 2 3;
+}
+
+#installconfigextender {
+    width: 100%;
+    height: 5;
+}
+
+#installconfigplugins, #installconfigthemes {
+    height: 8;
 }
