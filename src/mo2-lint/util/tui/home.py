@@ -8,7 +8,7 @@ from ..state_file import instance_count
 class Dashboard(App):
     TITLE = "MO2-LINT v" + var.version
     SUB_TITLE = ""
-    CSS_PATH = "home.tcss"
+    CSS_PATH = "tui.tcss"
     BINDINGS = [("t", "toggle_dark", "Toggle Theme")]
 
     MENU_ITEMS = [
@@ -49,6 +49,17 @@ class Dashboard(App):
                 option_list.clear_options()
                 option_list.add_options(new_options)
                 option_list.highlighted = event.option_index
+
+    def on_option_list_option_selected(self, event: OptionList.OptionSelected) -> None:
+        if event.option_list.id != "dashmenu":
+            return
+
+        if event.option_index == 0:
+            from .install import InstallGame
+
+            self.push_screen(InstallGame())
+        elif event.option_index == 4:
+            self.exit()
 
     def action_toggle_dark(self) -> None:
         self.theme = (
