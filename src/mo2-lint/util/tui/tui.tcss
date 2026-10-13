@@ -49,3 +49,20 @@
 #installconfigplugins, #installconfigthemes {
     height: 8;
 }
+
+#manageinstancelist {
+    width: 60%;
+    height: 100%;
+}
+
+#manageinstanceinfo {
+    width: 20%;
+}
+
+#manageinstancebuttons {
+    width: 20%;
+}
+
+#manageinstanceupdate, #manageinstancepin, #manageinstanceuninstall{
+    width: 100%;
+}

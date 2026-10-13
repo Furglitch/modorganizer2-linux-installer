@@ -54,11 +54,15 @@ class Dashboard(App):
         if event.option_list.id != "dashmenu":
             return
 
-        if event.option_index == 0:
+        if event.option_index == 0:  # Create New Instance
             from .install import InstallGame
 
             self.push_screen(InstallGame())
-        elif event.option_index == 4:
+        if event.option_index == 1:  # Manage Instances
+            from .manage import ManageInstance
+
+            self.push_screen(ManageInstance())
+        elif event.option_index == 4:  # Exit
             self.exit()
 
     def action_toggle_dark(self) -> None:
