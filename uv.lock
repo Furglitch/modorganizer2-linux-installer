@@ -375,15 +375,15 @@ wheels = [
 
 [[package]]
 name = "protontricks"
-version = "1.14.1"
+version = "1.15.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pillow" },
     { name = "vdf" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b7/f8/16f50d2aa84cac6c9bd23699f5e8e9a714408ae2c1268b111a787a5762e0/protontricks-1.14.1.tar.gz", hash = "sha256:db242c0249948d3595dd33ffbd0f6850461fbd43665aff40e11ec6ea94e11bc4", size = 187504, upload-time = "2026-03-29T10:12:55.898Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/bd/99/06489779242678bb421cd59589b9fa1e2510047abc44a496553a7245d641/protontricks-1.15.0.tar.gz", hash = "sha256:f40422d4a6c98db7b451d487039070b3c4eaa14767ba7b7b193bfa5a0feed20a", size = 194821, upload-time = "2026-10-04T20:19:43.521Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/68/af/c251ac31a13bfd685cfb7745d8fd96ec59635d330be5f8ef3550a9faa6aa/protontricks-1.14.1-py3-none-any.whl", hash = "sha256:0ba7a6417754d9e11d88a6dd6eada2d28d07b000547ede3a23cd018b24f47fe8", size = 78996, upload-time = "2026-03-29T10:12:54.184Z" },
+    { url = "https://files.pythonhosted.org/packages/92/fd/db457adcc245add22ef81b58ac32e7fbcc267b697876cf684818f94db6c7/protontricks-1.15.0-py3-none-any.whl", hash = "sha256:ff0755446e86c4164c8fd1f5e096b1fc6f0849a0474faad87f8c1608cac348f6", size = 82250, upload-time = "2026-10-04T20:19:41.238Z" },
 ]
 
 [[package]]
