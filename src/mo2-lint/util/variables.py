@@ -1076,7 +1076,7 @@ def load_plugin_info(path: Path | None = None):
 
 # --- #
 
-version: Final = "7.0.2"
+version: Final = "7.0.3"
 """
 Current version of mo2-lint.
 """
