@@ -47,6 +47,9 @@ jobs:
           echo "Error: Tag ${{inputs.version}} already exists."
           exit 1
 
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
       - name: Check version is bumped
         shell: bash
         env:
