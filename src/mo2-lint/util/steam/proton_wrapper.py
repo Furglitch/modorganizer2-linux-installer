@@ -7,8 +7,7 @@ from stat import S_IXGRP, S_IXOTH, S_IXUSR
 from loguru import logger
 from util import variables as var
 from util.internal_file import internal_file
-from util.steam.find_library import get_libraries
-from util.steam.path import find_steam_root
+from util.steam.path import find_steam_root, find_steam_libraries
 from util.steam.proton import find_proton, read_require_tool_appid
 
 from shared import host
@@ -84,7 +83,7 @@ def resolve(appid: int, proton_version: str | None = None) -> var.ProtonWrapper 
             default_proton_version_arm64 if host.is_arm64() else default_proton_version
         )
 
-    libraries = get_libraries()
+    libraries = find_steam_libraries()
     if not libraries:
         logger.error(
             f'Could not find path for Proton "{proton_version}": no library paths found'
