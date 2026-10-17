@@ -47,6 +47,33 @@ jobs:
           echo "Error: Tag ${{inputs.version}} already exists."
           exit 1
 
+      - name: Check version is bumped
+        shell: bash
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+
+          check() {
+            local file="$1"
+            local actual="$2"
+            [[ "$actual" == "$RELEASE_VERSION" ]] || {
+              echo "Error: $file is $actual, expected $RELEASE_VERSION"
+              exit 1
+            }
+          }
+
+          check "pyproject.toml" "$(grep -E '^version = ".+"$' pyproject.toml | head -n 1 | cut -d '"' -f 2)"
+          check "uv.lock" "$(awk '/name = "modorganizer2-linux-installer"/ { saw = 1 } saw && /version = "/ { gsub(/"/, "", $3); print $3; exit }' uv.lock)"
+          check "src/mo2-lint/util/variables.py" "$(grep -E '^version: Final = ".+"$' src/mo2-lint/util/variables.py | head -n 1 | cut -d '"' -f 2)"
+
+          grep -Fq -- "- \"$RELEASE_VERSION\"" .github/ISSUE_TEMPLATE/bug-installer.yml || {
+            echo "Error: bug-installer.yml is missing $RELEASE_VERSION"
+            exit 1
+          }
+
+          echo "Release version $RELEASE_VERSION is up to date."
+
   build:
     runs-on: ubuntu-latest
     needs: precheck
