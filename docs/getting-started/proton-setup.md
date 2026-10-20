@@ -21,7 +21,7 @@ These same steps are also shown during the interactive install process.
 
 ## Steam
 
-In order to install the custom compatibility tool, **Proton 11** is required to be installed, as listed in the [Compatibility Layer](./requirements#supported-versions) requirements.
+In order to install the custom compatibility tool, **Proton 11.0** is required to be installed, as listed in the [Compatibility Layer](./requirements#supported-versions) requirements.
 
 After installation, you will need to set your game to use the custom compatibility tool created by the installer, as detailed by the [First Launch guide](./first-launch#steam)
 

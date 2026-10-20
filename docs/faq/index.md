@@ -38,7 +38,7 @@ Yes. Each `mo2-lint install` creates a separate, independent instance, including
 
 **Which version of Proton should I use?**
 
-Proton 11.0 is the only officially tested and supported version. Earlier versions may work but aren't guaranteed. See [Setting up Proton](../getting-started/proton-setup).
+Proton 11.0 is the only officially tested version. We also support Proton GE 11-11. Earlier versions may work but aren't guaranteed. See [Setting up Proton](../getting-started/proton-setup).
 
 **Do I need to launch the game before running MO2-LINT?**
 

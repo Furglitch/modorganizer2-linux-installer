@@ -83,7 +83,7 @@ def prompt_prefix_init() -> bool:
 
     match state.current_instance.launcher:
         case "steam":
-            instructions = """In order to set up Mod Organizer 2, you *MUST* have Proton 11 installed, or specify another Proton version with the --proton-version flag. See the CLI guide for more information on the --proton-version flag.
+            instructions = """In order to set up Mod Organizer 2, you *MUST* have Proton 11.0 installed, or specify another Proton version with the --proton-version flag. See the CLI guide for more information on the --proton-version flag.
 
 It is also recommended, but not required, that you clean your game's proton prefix by deleting it and running the game once. Further details, including how to preserve your save files, can be found at the link below.
 https://docs.furglitch.com/modorganizer2-linux-installer/troubleshooting/instance-and-data-issues"""

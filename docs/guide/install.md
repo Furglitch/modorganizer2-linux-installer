@@ -59,10 +59,11 @@ mo2-lint install <game> <directory> [options]
   The instance is automatically [pinned](./managing-instances#pin) afterward, so a later `update` won't overwrite your chosen build.
 
 `--proton-version`
-: Builds the Proton wrapper based on the provided version. Steam only. Accepts either:
+: [Unsupported * / Advanced] Builds the Proton wrapper based on the provided version. Steam only. Accepts either:
  - a Proton installation name found under your Steam libraries, for example `Proton 11.0` or `GE-Proton11-3`, or
  - an absolute path to a Proton directory, for example `/home/you/.steam/steam/compatibilitytools.d/GE-Proton11-3`.
 : When provided the installer will attempt to locate and use that Proton installation when rendering the Steam Proton wrapper.
+: * See [Requirements](../getting-started/requirements#supported-versions) for list of currently supported versions
 
 ## After installing
 

@@ -86,7 +86,7 @@ body:
     attributes:
       label: Proton/Wine Version
       description: What version of Proton or Wine are you using?
-      placeholder: 'Proton 11.0, Wine 6.0, etc.'
+      placeholder: 'Proton 11.0-2, GE-Proton11-10, Wine 6.0, etc.'
     validations:
       required: true
   - type: textarea
