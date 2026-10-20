@@ -83,14 +83,10 @@ def prompt_prefix_init() -> bool:
 
     match state.current_instance.launcher:
         case "steam":
-            instructions = f"""Before continuing, please ensure your Steam prefix is set up correctly:
+            instructions = """In order to set up Mod Organizer 2, you *MUST* have Proton 11 installed, or specify another Proton version with the --proton-version flag. See the CLI guide for more information on the --proton-version flag.
 
-  1. Right-click on the game in your Steam library.
-  2. Select 'Properties', and navigate to the 'Compatibility' tab.
-  3. Check the box for 'Force the use of a specific Steam Play compatibility tool', if it's not already checked.
-  4. From the dropdown menu, select the custom MO2 Proton tool created by this installer (named 'MO2 {state.current_instance.display_name}' or the value from --proton-version if you changed it).
-  5. If you haven't already, launch the game once to allow Steam to set up the prefix, then exit completely.
-  6. Do not launch the game again until the installation process is finished."""
+It is also recommended, but not required, that you clean your game's proton prefix by deleting it and running the game once. Further details, including how to preserve your save files, can be found at the link below.
+https://docs.furglitch.com/modorganizer2-linux-installer/troubleshooting/instance-and-data-issues"""
         case "gog" | "epic":
             instructions = """Before continuing, please ensure your Heroic prefix is set up correctly:
 
