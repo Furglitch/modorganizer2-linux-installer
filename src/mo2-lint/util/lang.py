@@ -88,7 +88,7 @@ def prompt_prefix_init() -> bool:
   1. Right-click on the game in your Steam library.
   2. Select 'Properties', and navigate to the 'Compatibility' tab.
   3. Check the box for 'Force the use of a specific Steam Play compatibility tool', if it's not already checked.
-  4. From the dropdown menu, select the custom MO2 Proton tool created by this installer (named 'MO2 {state.current_instance.game}' or the value from --proton-version if you changed it).
+  4. From the dropdown menu, select the custom MO2 Proton tool created by this installer (named 'MO2 {state.current_instance.display_name}' or the value from --proton-version if you changed it).
   5. If you haven't already, launch the game once to allow Steam to set up the prefix, then exit completely.
   6. Do not launch the game again until the installation process is finished."""
         case "gog" | "epic":
