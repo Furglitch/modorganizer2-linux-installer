@@ -42,7 +42,8 @@ See [Setting up Proton](./proton-setup).
 |:--|:--|
 | **Proton 11.0** | The main version of Proton that MO2-LINT is tested against. Early versions may work but aren't guaranteed to, and are not supported. |
 | **GE-Proton11-11** | An alternate, community maintained version of Proton, which may provide game compatibility and bugfixes that standard Proton does not. More information can be found on their [GitHub repo](https://github.com/gloriouseggroll/proton-ge-custom). |
-| **Proton 10.0-4** | There are known issues with Mod Organizer 2 on this version, such as [#878](https://github.com/Furglitch/modorganizer2-linux-installer/issues/878) |
+| **GE-Proton10-14** | Recommended version for ENB users due to [#1185](https://github.com/Furglitch/modorganizer2-linux-installer/issues/1185). Experiences the same MO2 issues as Proton 10.0. |
+| **Proton 10.0** | There are known issues with Mod Organizer 2 on this version, such as [#878](https://github.com/Furglitch/modorganizer2-linux-installer/issues/878) |
 | **Proton 9.0-4** | Known to be incapable of launching some games, such as Fallout 4. |
 
 ## System Packages
