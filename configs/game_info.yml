@@ -151,6 +151,7 @@ games:
 
   fallout3_goty:
     parent: fallout3
+    display_name: 'Fallout 3 - GOTY'
     nexus_slug: fallout3
     executable:
       steam: Fallout3Launcher.exe
@@ -297,6 +298,7 @@ games:
             - "CustomControlMap.txt"
             - "f4se_1_11_240.dll"
             - "f4se_loader.exe"
+
   fallout4_vr:
     display_name: 'Fallout 4 VR'
     nexus_slug: fallout4
@@ -369,6 +371,7 @@ games:
 
   falloutnv_ru:
     parent: falloutnv
+    display_name: 'New Vegas (Russian)'
     launcher_ids:
       steam: 22490
     subdirectory: Fallout New Vegas enplczru
@@ -432,21 +435,25 @@ games:
 
   oblivion_fr:
     parent: oblivion
+    display_name: 'Oblivion (Epic - French)'
     executable:
       epic: Oblivion GOTY French/OblivionLauncher.exe
 
   oblivion_de:
     parent: oblivion
+    display_name: 'Oblivion (Epic - German)'
     executable:
       epic: Oblivion GOTY German/OblivionLauncher.exe
 
   oblivion_it:
     parent: oblivion
+    display_name: 'Oblivion (Epic - Italian)'
     executable:
       epic: Oblivion GOTY Italian/OblivionLauncher.exe
 
   oblivion_es:
     parent: oblivion
+    display_name: 'Oblivion (Epic - Spanish)'
     executable:
       epic: Oblivion GOTY Spanish/OblivionLauncher.exe
 
@@ -558,6 +565,7 @@ games:
 
   skyrim_ae: # Heroic Only
     parent: skyrim_se
+    display_name: "Skyrim Anniversary Edition (Heroic)"
     launcher_ids:
       steam: null
       gog: 1711230643
@@ -658,6 +666,7 @@ games:
 
   witcher3_goty:
     parent: witcher3
+    display_name: 'The Witcher 3: Wild Hunt - GOTY'
     launcher_ids:
       steam: null
       gog: 1495134320
