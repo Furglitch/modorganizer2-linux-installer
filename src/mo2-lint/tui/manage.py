@@ -7,7 +7,7 @@ from textual.widgets import (
     Markdown,
     OptionList,
 )
-from .. import state_file as state
+from util import state_file as state
 
 INSTANCE_INFO = """
 Game: _GAME\n

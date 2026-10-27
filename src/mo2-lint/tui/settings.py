@@ -10,7 +10,7 @@ from textual.widgets import (
     OptionList,
     SelectionList,
 )
-from .. import variables as var
+from util import variables as var
 
 
 class ManageSettings(Screen):

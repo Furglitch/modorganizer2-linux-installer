@@ -1,8 +1,8 @@
 from textual.app import App, ComposeResult, RenderResult
 from textual.widgets import Header, Footer, OptionList, Label
-from .. import variables as var
-from .. import lang
-from ..state_file import instance_count
+from util import variables as var
+from util import lang
+from util.state_file import instance_count
 
 
 class Dashboard(App):

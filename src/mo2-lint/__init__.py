@@ -453,7 +453,7 @@ def cli(ctx):
     ctx.ensure_object(dict)
     if ctx.invoked_subcommand is None:
         start()
-        from util.tui.home import Dashboard
+        from tui.home import Dashboard
 
         Dashboard().run()
         return
