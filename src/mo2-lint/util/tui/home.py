@@ -66,6 +66,10 @@ class Dashboard(App):
             from .settings import ManageSettings
 
             self.push_screen(ManageSettings())
+        if event.option_index == 3:  # Documentation
+            from webbrowser import open
+
+            open("https://docs.furglitch.com/modorganizer2-linux-installer/")
         elif event.option_index == 4:  # Exit
             self.exit()
 
