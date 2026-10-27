@@ -62,6 +62,10 @@ class Dashboard(App):
             from .manage import ManageInstance
 
             self.push_screen(ManageInstance())
+        if event.option_index == 2:  # Settings
+            from .settings import ManageSettings
+
+            self.push_screen(ManageSettings())
         elif event.option_index == 4:  # Exit
             self.exit()
 
