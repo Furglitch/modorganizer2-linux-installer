@@ -34,22 +34,22 @@ MO2-LINT aims to make installing [Mod Organizer 2](https://github.com/ModOrganiz
 | Game | Notes |
 |:--|:--|
 | Baldur's Gate 3 | |
-| Cyberpunk 2077 | See [Game Guide](https://docs.furglitch.com/modorganizer2-linux-installer/game-guides/cyberpunk-2077/) |
+| Cyberpunk 2077 | See [Game Guide](https://docs.furglitch.com/modorganizer2-linux-installer/game-guides/cyberpunk-2077.html) |
 | Dragon Age: Origins - Ultimate Edition | |
 | Dragon Age 2 - Ultimate Edition | |
 | Enderal: Forgotten Stories | |
 | Enderal: Forgotten Stories - Special Edition | |
 | Fallout 3 | |
-| Fallout 3 - Game of the Year Edition | See [Game Guide](https://docs.furglitch.com/modorganizer2-linux-installer/game-guides/fallout-3-goty/) |
-| Fallout 4 | See [Game Guide](https://docs.furglitch.com/modorganizer2-linux-installer/game-guides/fallout-4/) |
+| Fallout 3 - Game of the Year Edition | See [Game Guide](https://docs.furglitch.com/modorganizer2-linux-installer/game-guides/fallout-3-goty.html) |
+| Fallout 4 | See [Game Guide](https://docs.furglitch.com/modorganizer2-linux-installer/game-guides/fallout-4.html) |
 | Fallout 4 VR | |
-| Fallout London | See [Game Guide](https://docs.furglitch.com/modorganizer2-linux-installer/game-guides/fallout-london/) |
+| Fallout London | See [Game Guide](https://docs.furglitch.com/modorganizer2-linux-installer/game-guides/fallout-london.html) |
 | Fallout New Vegas | |
 | Morrowind | |
-| Oblivion | See [Game Guide](https://docs.furglitch.com/modorganizer2-linux-installer/game-guides/oblivion/) |
+| Oblivion | See [Game Guide](https://docs.furglitch.com/modorganizer2-linux-installer/game-guides/oblivion.html) |
 | Skyrim | |
 | Skyrim Special Edition | |
-| Skyrim Anniversary Edition (Heroic) | See [Game Guide](https://docs.furglitch.com/modorganizer2-linux-installer/game-guides/skyrim-ae-heroic/) |
+| Skyrim Anniversary Edition (Heroic) | See [Game Guide](https://docs.furglitch.com/modorganizer2-linux-installer/game-guides/skyrim-ae-heroic.html) |
 | Skyrim VR | |
 | Starfield | |
 | Subnautica | |
