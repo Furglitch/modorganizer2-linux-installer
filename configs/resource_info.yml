@@ -32,8 +32,9 @@ resources:
       subdirectory: jdk8u312-b07-jre
 
   winetricks:
-    version: "latest-autobuild"
-    download_url: "https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks"
+    version: "20260125"
+    download_url: "https://raw.githubusercontent.com/Winetricks/winetricks/20260125/src/winetricks"
+    checksum: "431f82fc74000e6c864409f1d8fb495d696c03928808e3e8acffc45179312a7b"
 
   # Fallbacks for hosts without 7z or cabextract (e.g. SteamOS)
   sevenzip:
