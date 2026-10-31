@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import shlex
 import subprocess
 from pathlib import Path
 
@@ -193,7 +194,13 @@ def send_url(instance_dir: Path, url: str, env_info: dict) -> None:
     proton_version = env_info.get("proton_version")
 
     if launcher == "steam":
-        cmd = ["-c", f"wine '{handler}' '{url}'", str(steam_id)]
+        # protontricks -c runs this string through a shell, and the URL comes
+        # straight from the browser, so every argument must be shell-quoted.
+        cmd = [
+            "-c",
+            f"wine {shlex.quote(str(handler))} {shlex.quote(url)}",
+            str(steam_id),
+        ]
         env = {}
         if proton_version:
             env["PROTON_VERSION"] = proton_version
