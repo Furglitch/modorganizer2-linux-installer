@@ -3,6 +3,9 @@
 run:
 	PYTHONPATH=src/mo2-lint:src uv run src/mo2-lint/__init__.py $(ARGS)
 
+textual:
+	PYTHONPATH=src/mo2-lint:src textual run src/mo2-lint/__init__.py --dev
+
 _build: clean mo2-lint
 
 mo2-lint: redirector nxm-handler
@@ -14,6 +17,7 @@ mo2-lint: redirector nxm-handler
 		--hidden-import pydantic_core \
 		--hidden-import requests \
 		--hidden-import send2trash \
+		--hidden-import textual \
 		--hidden-import websockets \
 		--hidden-import yaml \
 		--add-data "src/mo2-lint:src" \
@@ -34,6 +38,7 @@ mo2-lint_only:
 		--hidden-import pydantic_core \
 		--hidden-import requests \
 		--hidden-import send2trash \
+		--hidden-import textual \
 		--hidden-import websockets \
 		--hidden-import yaml \
 		--add-data "src/mo2-lint:src" \

@@ -23,6 +23,7 @@ dependencies = [
     "send2trash>=2.0.0",
     "websockets>=17.0.1",
     "vdf>=3.4",
+    "textual>=8.2.8",
 ]
 
 [tool.ruff.lint]
