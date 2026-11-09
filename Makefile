@@ -18,6 +18,7 @@ mo2-lint: redirector nxm-handler
 		--hidden-import requests \
 		--hidden-import send2trash \
 		--hidden-import textual \
+		--hidden-import tomlkit \
 		--hidden-import websockets \
 		--hidden-import yaml \
 		--add-data "src/mo2-lint:src" \
@@ -39,6 +40,7 @@ mo2-lint_only:
 		--hidden-import requests \
 		--hidden-import send2trash \
 		--hidden-import textual \
+		--hidden-import tomlkit \
 		--hidden-import websockets \
 		--hidden-import yaml \
 		--add-data "src/mo2-lint:src" \
