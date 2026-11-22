@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/benbalter/jekyll-remote-theme.git
-  revision: b97d214ee1b2f75080b723e096238438db4d39d5
+  revision: d597350d5d77ada54c13c17fdd79a0432ca9d46f
   specs:
     jekyll-remote-theme (0.6.2)
       addressable (~> 2.0)
