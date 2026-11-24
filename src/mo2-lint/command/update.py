@@ -3,15 +3,15 @@
 from pathlib import Path
 
 from loguru import logger
+from step.configure_prefix import get_default_tricks, load_prefix, repair_vcredist_dlls
 from step.external_resources import download_archive_tools, download_mod_organizer
 from step.launch_opt import add_launch_opt, remove_launch_opt
-from step.configure_prefix import get_default_tricks
 from util import state_file as state
 from util import variables as var
 from util.nexus.install_handler import install as install_handler
 from util.redirector.install import install as install_redirector
-from util.wine import protontricks, winetricks
 from util.steam import proton_wrapper
+from util.wine import protontricks, winetricks
 
 
 def _parse_installed_tricks(output: list[str]) -> set[str]:
@@ -58,6 +58,15 @@ def update_tricks():
             winetricks.apply(prefix=prefix, tricks=desired)
     except SystemExit as e:
         logger.warning(f"Failed to update tricks helper; continuing update: {e}")
+
+
+def update_vcredist():
+    """Repair instances whose prefix ended up with Wine's builtin VC++ runtime."""
+    logger.info("Verifying VC++ runtime")
+    try:
+        repair_vcredist_dlls(load_prefix())
+    except SystemExit as e:
+        logger.warning(f"Failed to verify VC++ runtime; continuing update: {e}")
 
 
 def update(
@@ -154,6 +163,7 @@ def update(
         state.write_state(add_current=True)
 
     update_tricks()
+    update_vcredist()
 
     install_redirector()
     install_handler()

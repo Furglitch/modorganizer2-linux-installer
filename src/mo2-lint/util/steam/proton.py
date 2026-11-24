@@ -1,9 +1,8 @@
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 import vdf
 from loguru import logger
-
 
 # Check these files exist when searching for a Proton version
 # NOTE: Consider adding other files required by protonttricks such as files/bin/wine

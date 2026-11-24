@@ -17,6 +17,11 @@ should_redirect() {
 case "${1-}" in
     run|waitforexitandrun)
         if should_redirect "${2:-}"; then
+            if [[ ! -f $mo2 ]]; then
+                # e.g. the game was reinstalled or its files were verified/repaired.
+                printf 'Error: %s not found. Run "mo2-lint update" to reinstall it.\n' "$mo2" >&2
+                exit 1
+            fi
             cmd="$1"
             shift 2
             exec "$proton" "$cmd" "$mo2" "$@"

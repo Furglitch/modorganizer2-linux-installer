@@ -7,7 +7,7 @@ from stat import S_IXGRP, S_IXOTH, S_IXUSR
 from loguru import logger
 from util import variables as var
 from util.internal_file import internal_file
-from util.steam.path import find_steam_root, find_steam_libraries
+from util.steam.path import find_steam_libraries, find_steam_root
 from util.steam.proton import find_proton, read_require_tool_appid
 
 from shared import host
