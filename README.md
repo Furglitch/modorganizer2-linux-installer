@@ -59,7 +59,6 @@ Games that MO2-LINT officially supports setting up instances for.
 
 </details>
 
-{: .note }
 > Check the [Game Guides] section first. Some games need extra steps before or after `install`.
 
 ### Available Plugins
