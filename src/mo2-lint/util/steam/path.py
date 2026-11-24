@@ -61,7 +61,7 @@ def _normalize_steam_library_path(path: str | Path) -> Path:
     path = Path(str(path)).expanduser()
     if str(path).endswith("/steamapps/common"):
         path = path.parent.parent
-    elif str(path).endswith("/steamapps"):
+    elif str(path).endswith("/steamapps") and not (path / "steamapps").is_dir():
         path = path.parent
     return path.resolve(strict=False)
 
