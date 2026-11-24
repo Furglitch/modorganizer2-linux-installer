@@ -650,7 +650,7 @@ def install_scriptextender(
 
 def download_plugin(plugin: str):
     """
-    Downloads and installs the specified plugin from its manifest or direct URL.
+    Downloads and installs the specified plugin from its manifest, direct URL, or Nexus Mods.
 
     Parameters
     ----------
@@ -666,7 +666,37 @@ def download_plugin(plugin: str):
     checksum = None
     file_whitelist = None
 
-    if plugin_obj.direct:
+    destination = download_dir / "plugins" / plugin
+    downloaded = None
+
+    if plugin_obj.nexus:
+        nexus = plugin_obj.nexus
+        slug = nexus.get("slug") or (var.game_info and var.game_info.nexus_slug)
+        if not slug:
+            logger.warning(
+                f"No Nexus game slug available for plugin {plugin}. Skipping."
+            )
+            return
+        logger.debug(
+            f"Using Nexus download for plugin {plugin}: {slug} mod {nexus.get('mod_id')}, file {nexus.get('file_id')}"
+        )
+        downloaded = nexus_dl(
+            slug,
+            nexus.get("mod_id"),
+            nexus.get("file_id"),
+            destination,
+            checksum=plugin_obj.checksum,
+        )
+        file_whitelist = plugin_obj.file_whitelist
+        if not downloaded:
+            logger.warning(
+                f"Could not automatically download plugin {plugin} from Nexus Mods. Manual installation required."
+            )
+            logger.warning(
+                "This may be due to an invalid API key or lack of Nexus Premium subscription."
+            )
+            return
+    elif plugin_obj.direct:
         url = plugin_obj.direct
         checksum = plugin_obj.checksum
         file_whitelist = plugin_obj.file_whitelist
@@ -690,11 +720,13 @@ def download_plugin(plugin: str):
             f"Parsed manifest for plugin {plugin}: download URL: {url}, file whitelist: {file_whitelist}"
         )
 
-    if not url:
-        return
-
-    destination = download_dir / "plugins" / plugin
-    downloaded = dl(url, destination, url.split("/")[-1], checksum=checksum)
+    if not downloaded:
+        if not url:
+            return
+        downloaded = dl(url, destination, url.split("/")[-1], checksum=checksum)
+        if not downloaded:
+            logger.warning(f"Failed to download plugin {plugin} from {url}. Skipping.")
+            return
     logger.debug(f"Downloaded plugin {plugin} to {downloaded}")
 
     extract_dest = extract_dir / "plugins" / plugin / downloaded.name

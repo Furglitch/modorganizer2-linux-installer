@@ -1006,29 +1006,44 @@ class Plugin:
         More info: https://github.com/Kezyma/ModOrganizer-Plugins/blob/main/docs/pluginfinder.md#adding-your-plugin
     direct : str, optional
         Direct download URL for the plugin archive.
-        Must be provided if manifest is not provided.
+    nexus : dict, optional
+        Nexus Mods download info: 'mod_id' and 'file_id' are required; 'slug' is the
+        Nexus game slug and defaults to the current game's nexus_slug if omitted.
     checksum : str, optional
-        SHA-256 checksum of the plugin archive. Only used with direct downloads.
+        SHA-256 checksum of the plugin archive. Used with direct and Nexus downloads.
     file_whitelist : FileWhitelist, optional
-        File paths that should be included when installing the plugin. Only used with direct downloads.
+        File paths that should be included when installing the plugin. Used with direct and Nexus downloads.
     subdirectory : str, optional
         Subdirectory within the instance's plugins/ folder to install into. Defaults to plugins/ root.
 
     Raises
     -------
-    ValueError
-        If neither manifest nor direct is provided
+    SystemExit
+        If not exactly one of manifest, direct, or nexus is provided,
+        or if nexus data is missing 'mod_id' or 'file_id'.
     """
 
     manifest: str | None = None
     direct: str | None = None
+    nexus: dict[str, int | str] | None = None
     checksum: str | None = None
     file_whitelist: FileWhitelist | None = None
     subdirectory: str | None = None
 
     def __post_init__(self):
-        if not (self.manifest or self.direct):
-            logger.critical("Plugin: Either 'manifest' or 'direct' must be provided.")
+        sources = [s for s in (self.manifest, self.direct, self.nexus) if s]
+        if len(sources) != 1:
+            logger.critical(
+                "Plugin: Exactly one of 'manifest', 'direct', or 'nexus' must be provided."
+            )
+            logger.critical(
+                "This should not happen. Please report this to the developer."
+            )
+            raise SystemExit(1)
+        if self.nexus and not (self.nexus.get("mod_id") and self.nexus.get("file_id")):
+            logger.critical(
+                "Plugin: Both 'mod_id' and 'file_id' must be provided for nexus data."
+            )
             logger.critical(
                 "This should not happen. Please report this to the developer."
             )
@@ -1065,6 +1080,7 @@ def load_plugin_info(path: Path | None = None):
                 plugin_info[key] = Plugin(
                     manifest=value.get("manifest"),
                     direct=value.get("direct"),
+                    nexus=value.get("nexus"),
                     checksum=value.get("checksum"),
                     file_whitelist=FileWhitelist.from_dict(value["file_whitelist"])
                     if "file_whitelist" in value
