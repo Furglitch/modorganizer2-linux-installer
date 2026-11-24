@@ -1,4 +1,4 @@
-schema: 7.0.0 # Earliest compatible MO2-LINT Version
+schema: 7.1.0 # Earliest compatible MO2-LINT Version
 
 plugins:
 
