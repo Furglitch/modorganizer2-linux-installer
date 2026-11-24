@@ -1,3 +1,5 @@
+from threading import Thread
+
 from command.pin import pin as _pin
 from command.uninstall import uninstall as _uninstall
 from command.update import update as _update
@@ -100,11 +102,17 @@ class ManageInstance(Screen):
 
     def run_command(self, command, *args, **kwargs) -> None:
         """Runs a CLI command with the TUI suspended, so its prompts and output work as normal."""
-        with self.app.suspend():
+
+        def target() -> None:
             try:
                 command(*args, **kwargs)
             except (SystemExit, KeyboardInterrupt):
                 print("\nCommand did not complete.")
+
+        with self.app.suspend():
+            thread = Thread(target=target)
+            thread.start()
+            thread.join()
             input("\nPress Enter to return to MO2-LINT...")
 
     def refresh_instances(self, index: int = 0) -> None:
