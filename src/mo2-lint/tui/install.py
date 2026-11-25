@@ -101,7 +101,14 @@ class InstallConfig(Screen):
     def compose(self) -> ComposeResult:
         yield Header()
 
-        yield Checkbox("Script Extender", False, id="installconfigextender")
+        extender = Checkbox("Script Extender", False, id="installconfigextender")
+        info = var.games_info[self.game]
+        # Children inherit the parent's script extenders if they don't list their own.
+        extender.display = bool(
+            info.script_extenders
+            or (info.parent and var.games_info[info.parent].script_extenders)
+        )
+        yield extender
 
         plugins = SelectionList(*self.plugin_list, id="installconfigplugins")
         plugins.border_title = "Plugins"
