@@ -43,7 +43,6 @@ PROGRESS = """
 
 
 class InstallGame(Screen):
-    TITLE = "MO2-LINT v" + var.version
     SUB_TITLE = "New Instance"
     BINDINGS = [("escape", "app.pop_screen", "Back")]
 

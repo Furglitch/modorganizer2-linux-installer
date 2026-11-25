@@ -26,7 +26,6 @@ Plugins: _PLUGINS\n
 
 
 class ManageInstance(Screen):
-    # TITLE = "MO2-LINT v" + var.version
     SUB_TITLE = "Manage Instances"
     BINDINGS = [("escape", "app.pop_screen", "Back")]
 
