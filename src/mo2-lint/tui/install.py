@@ -30,6 +30,7 @@ PROGRESS = """
 class InstallGame(Screen):
     TITLE = "MO2-LINT v" + var.version
     SUB_TITLE = "New Instance"
+    BINDINGS = [("escape", "app.pop_screen", "Back")]
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -85,6 +86,7 @@ class InstallGame(Screen):
 class InstallConfig(Screen):
     TITLE = "MO2-LINT v" + var.version
     SUB_TITLE = "New Instance Settings"
+    BINDINGS = [("escape", "app.pop_screen", "Back")]
 
     plugin_list = [
         (plugin, plugin, plugin in var.settings.plugins) for plugin in var.plugin_info
@@ -176,11 +178,18 @@ class InstallConfig(Screen):
                     )
                     state.write_state()
 
-                if self.app.run_command(install):
-                    # Back to the main menu, with the instance count updated.
-                    self.app.pop_screen()
-                    self.app.pop_screen()
-                    self.app.screen_stack[0].query_one("#dashcount").refresh()
+                def on_complete(completed: bool | None) -> None:
+                    if completed:
+                        # Back to the main menu, with the instance count updated.
+                        self.app.pop_screen()
+                        self.app.pop_screen()
+                        self.app.screen_stack[0].query_one("#dashcount").refresh()
+
+                self.app.run_command(
+                    f"Installing {var.games_info[self.game].display_name}",
+                    install,
+                    callback=on_complete,
+                )
 
             def on_prefix_setup(choice: str | None) -> None:
                 if choice == "installprefixyes":

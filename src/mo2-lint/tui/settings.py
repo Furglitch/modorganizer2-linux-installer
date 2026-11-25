@@ -19,7 +19,10 @@ LAUNCHERS = ("steam", "gog", "epic")
 
 class ManageSettings(Screen):
     SUB_TITLE = "Installer Settings"
-    BINDINGS = (("ctrl+s", "save_settings", "Save Settings"),)
+    BINDINGS = (
+        ("ctrl+s", "save_settings", "Save Settings"),
+        ("escape", "app.pop_screen", "Back"),
+    )
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -65,6 +68,7 @@ class ManageSettings(Screen):
         var.settings.folder_name = folder_name or None
 
         var.save_settings()
+        self.app.add_loggers()  # Apply the new log level
         self.notify("Settings saved")
 
     class Settings(VerticalGroup):

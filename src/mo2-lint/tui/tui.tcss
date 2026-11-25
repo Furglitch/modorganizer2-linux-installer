@@ -72,7 +72,7 @@
     width: 20%;
 }
 
-#manageinstanceupdate, #manageinstancepin, #manageinstanceuninstall{
+#manageinstanceupdate, #manageinstancepin, #manageinstanceuninstall, #manageinstanceback {
     width: 100%;
 }
 
@@ -126,4 +126,45 @@ PrefixSetup {
 
 #installprefixbuttons > Button {
     margin-left: 1;
+}
+
+CommandProgress {
+    align: center middle;
+}
+
+#commanddialog {
+    width: 90%;
+    height: 80%;
+    padding: 1 2;
+    border: thick $primary;
+    background: $surface;
+}
+
+#commandtitle {
+    width: 100%;
+    text-style: bold;
+}
+
+#commandstatus {
+    width: 100%;
+    margin: 1 0;
+}
+
+#commandprogress {
+    width: 100%;
+}
+
+#commandprogress Bar {
+    width: 1fr;
+}
+
+#commandlog {
+    height: 1fr;
+    margin: 1 0;
+    border: round $foreground;
+}
+
+#commandbuttons {
+    width: 100%;
+    align-horizontal: right;
 }

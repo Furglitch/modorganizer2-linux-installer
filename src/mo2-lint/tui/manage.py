@@ -28,6 +28,7 @@ Plugins: _PLUGINS\n
 class ManageInstance(Screen):
     # TITLE = "MO2-LINT v" + var.version
     SUB_TITLE = "Manage Instances"
+    BINDINGS = [("escape", "app.pop_screen", "Back")]
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -51,6 +52,7 @@ class ManageInstance(Screen):
                 yield Button("Update", id="manageinstanceupdate")
                 yield Button("Pin", id="manageinstancepin")
                 yield Button("Uninstall", id="manageinstanceuninstall")
+                yield Button("Back", id="manageinstanceback")
 
     class ConfirmUninstall(ModalScreen[bool]):
         BINDINGS = [("escape", "dismiss(False)", "Cancel")]
@@ -135,6 +137,10 @@ class ManageInstance(Screen):
         self.refresh_instances()
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
+        if event.button.id == "manageinstanceback":
+            self.app.pop_screen()
+            return
+
         index = self.query_one("#manageinstancelist", OptionList).highlighted
         if index is None:
             return
@@ -146,19 +152,22 @@ class ManageInstance(Screen):
                     "Instance is pinned. Unpin it to update.", severity="warning"
                 )
                 return
-            self.app.run_command(_update, instance.instance_path)
+            self.app.run_command(
+                f"Updating {instance.display_name}", _update, instance.instance_path
+            )
         elif event.button.id == "manageinstancepin":
             _pin(instance.instance_path, pin=not instance.pin)
         elif event.button.id == "manageinstanceuninstall":
 
             def uninstall(permanent: bool) -> None:
                 self.app.run_command(
+                    f"Uninstalling {instance.display_name}",
                     _uninstall,
                     directory=instance.instance_path,
                     confirmed=True,
                     permanent=permanent,
+                    callback=lambda _: self.refresh_instances(index),
                 )
-                self.refresh_instances(index)
 
             def confirm_permanent(confirmed: bool | None) -> None:
                 # Declining permanent deletion falls back to trash, as in the CLI.

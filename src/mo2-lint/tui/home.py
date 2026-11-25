@@ -1,7 +1,18 @@
-from threading import Thread
-
+from loguru import logger
+from shared.logger import add_loggers, remove_loggers
+from textual import events
 from textual.app import App, ComposeResult, RenderResult
-from textual.widgets import Header, Footer, OptionList, Label
+from textual.containers import HorizontalGroup, VerticalGroup
+from textual.screen import ModalScreen
+from textual.widgets import (
+    Button,
+    Header,
+    Footer,
+    OptionList,
+    Label,
+    ProgressBar,
+    RichLog,
+)
 from util import variables as var
 from util import lang
 from util.state_file import instance_count
@@ -21,8 +32,33 @@ class Dashboard(App):
         "Exit",
     ]
 
+    progress = None  # The open CommandProgress screen, if any
+
     def on_mount(self) -> None:
         self.theme = "catppuccin-mocha"
+        self.add_loggers()
+
+    def add_loggers(self) -> None:
+        """
+        Sends console logging to the TUI instead of stdout, at the log level from settings.
+        """
+        remove_loggers()
+        add_loggers(
+            log_level=var.settings.log_level,
+            process="installer",
+            console_sink=self.log_sink,
+        )
+
+    def log_sink(self, message) -> None:
+        if self.progress:
+            self.progress.write(message)
+        elif message.record["level"].no >= logger.level("WARNING").no:
+            severity = (
+                "error"
+                if message.record["level"].no >= logger.level("ERROR").no
+                else "warning"
+            )
+            self.notify(message.record["message"], severity=severity)
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -75,30 +111,13 @@ class Dashboard(App):
         elif event.option_index == 4:  # Exit
             self.exit()
 
-    def run_command(self, command, *args, **kwargs) -> bool:
+    def run_command(self, title: str, command, *args, callback=None, **kwargs) -> None:
         """
-        Runs a CLI command with the TUI suspended, so its prompts and output work as normal.
+        Runs a CLI command in a separate thread, showing its progress and log output.
 
-        Returns True if the command completed.
+        callback is called with True if the command completed, once the progress screen is closed.
         """
-        completed = False
-
-        def target() -> None:
-            nonlocal completed
-            try:
-                command(*args, **kwargs)
-                completed = True
-            except (SystemExit, KeyboardInterrupt):
-                print("\nCommand did not complete.")
-
-        # InquirerPy prompts start their own asyncio loop, which can't run on
-        # Textual's loop thread, so run the command in a separate thread.
-        with self.suspend():
-            thread = Thread(target=target)
-            thread.start()
-            thread.join()
-            input("\nPress Enter to return to MO2-LINT...")
-        return completed
+        self.push_screen(self.CommandProgress(title, command, args, kwargs), callback)
 
     def action_toggle_dark(self) -> None:
         self.theme = (
@@ -114,3 +133,74 @@ class Dashboard(App):
     class Count(Label):
         def render(self) -> RenderResult:
             return f"[Total Instances: {instance_count()}]"
+
+    class CommandProgress(ModalScreen[bool]):
+        def __init__(self, title: str, command, args, kwargs) -> None:
+            super().__init__()
+            self.heading = title
+            self.command = command
+            self.args = args
+            self.kwargs = kwargs
+            self.completed = False
+
+        def compose(self) -> ComposeResult:
+            with VerticalGroup(id="commanddialog"):
+                yield Label(self.heading, id="commandtitle")
+                yield Label("Starting...", id="commandstatus", markup=False)
+                yield ProgressBar(total=None, show_eta=False, id="commandprogress")
+                yield RichLog(id="commandlog", wrap=True)
+                with HorizontalGroup(id="commandbuttons"):
+                    yield Button("Close", id="commandclose", disabled=True)
+
+        def on_mount(self) -> None:
+            self.app.progress = self
+            # Commands print some messages (e.g. post-install steps) instead of logging them.
+            self.app.begin_capture_print(self)
+            self.run_worker(self.run_command, thread=True)
+
+        def run_command(self) -> None:
+            completed = False
+            try:
+                self.command(*self.args, **self.kwargs)
+                completed = True
+            except SystemExit:
+                pass
+            except Exception:
+                logger.exception("Command failed with an unexpected error")
+            self.app.call_from_thread(self.finish, completed)
+
+        def finish(self, completed: bool) -> None:
+            self.completed = completed
+            self.app.end_capture_print(self)
+            self.app.progress = None
+            self.query_one("#commandprogress", ProgressBar).update(total=1, progress=1)
+            self.query_one("#commandstatus", Label).update(
+                "Completed." if completed else "Did not complete. See the log above."
+            )
+            close = self.query_one("#commandclose", Button)
+            close.disabled = False
+            close.variant = "success" if completed else "error"
+            close.focus()
+
+        def write(self, message) -> None:
+            """Log sink; called from the command's thread."""
+            try:
+                self.app.call_from_thread(
+                    self.add_line, message.rstrip("\n"), message.record
+                )
+            except RuntimeError:  # Logged from the app's own thread
+                self.add_line(message.rstrip("\n"), message.record)
+
+        def add_line(self, line: str, record=None) -> None:
+            self.query_one("#commandlog", RichLog).write(line)
+            if record and record["level"].no >= logger.level("INFO").no:
+                self.query_one("#commandstatus", Label).update(record["message"])
+
+        def on_print(self, event: events.Print) -> None:
+            if event.text.strip():
+                self.add_line(event.text.rstrip("\n"))
+
+        def on_button_pressed(self, event: Button.Pressed) -> None:
+            event.stop()
+            if event.button.id == "commandclose":
+                self.dismiss(self.completed)
