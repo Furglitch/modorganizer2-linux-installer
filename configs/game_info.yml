@@ -565,7 +565,7 @@ games:
 
   skyrim_ae: # Heroic Only
     parent: skyrim_se
-    display_name: "Skyrim Anniversary Edition (Heroic)"
+    display_name: "Skyrim Anniversary Edition (Epic / GOG)"
     launcher_ids:
       steam: null
       gog: 1711230643

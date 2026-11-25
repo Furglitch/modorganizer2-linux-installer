@@ -1,3 +1,5 @@
+from threading import Thread
+
 from textual.app import App, ComposeResult, RenderResult
 from textual.widgets import Header, Footer, OptionList, Label
 from util import variables as var
@@ -72,6 +74,31 @@ class Dashboard(App):
             open("https://docs.furglitch.com/modorganizer2-linux-installer/")
         elif event.option_index == 4:  # Exit
             self.exit()
+
+    def run_command(self, command, *args, **kwargs) -> bool:
+        """
+        Runs a CLI command with the TUI suspended, so its prompts and output work as normal.
+
+        Returns True if the command completed.
+        """
+        completed = False
+
+        def target() -> None:
+            nonlocal completed
+            try:
+                command(*args, **kwargs)
+                completed = True
+            except (SystemExit, KeyboardInterrupt):
+                print("\nCommand did not complete.")
+
+        # InquirerPy prompts start their own asyncio loop, which can't run on
+        # Textual's loop thread, so run the command in a separate thread.
+        with self.suspend():
+            thread = Thread(target=target)
+            thread.start()
+            thread.join()
+            input("\nPress Enter to return to MO2-LINT...")
+        return completed
 
     def action_toggle_dark(self) -> None:
         self.theme = (

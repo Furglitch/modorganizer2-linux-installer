@@ -192,9 +192,14 @@ def configure():
             install_vcredist()
 
 
-def prompt():
+def prompt(confirmed: bool | None = None):
     """
     Prompts the user to confirm their prefix is set up, then configures it.
+
+    Parameters
+    ----------
+    confirmed : bool, optional
+        The user's answer, if already asked elsewhere. If None, the user is prompted.
     """
     prefix = load_prefix()
     for suffix in ["users", "drive_c", "pfx"]:
@@ -203,7 +208,9 @@ def prompt():
     var.prefix = prefix
     logger.trace(f"Resolved prefix path for prompting: {prefix}")
 
-    if not lang.prompt_prefix_init():
+    if confirmed is None:
+        confirmed = lang.prompt_prefix_init()
+    if not confirmed:
         logger.warning(
             "User did not confirm prefix setup. No support will be provided if errors occur."
         )

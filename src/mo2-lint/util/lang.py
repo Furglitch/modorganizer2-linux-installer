@@ -65,6 +65,42 @@ def list_instances(instance_list: list) -> list:
     return instances
 
 
+def prefix_instructions(launcher: str, game: str) -> str:
+    """
+    Returns the prefix setup instructions for the given launcher.
+
+    Parameters
+    ----------
+    launcher : str
+        The launcher the instance uses ("steam", "gog" or "epic").
+    game : str
+        The game identifier, used in the Steam compatibility tool name.
+    """
+    match launcher:
+        case "steam":
+            return f"""Before continuing, please ensure your Steam prefix is set up correctly:
+
+  1. Right-click on the game in your Steam library.
+  2. Select 'Properties', and navigate to the 'Compatibility' tab.
+  3. Check the box for 'Force the use of a specific Steam Play compatibility tool', if it's not already checked.
+  4. From the dropdown menu, select the custom MO2 Proton tool created by this installer (named 'MO2 {game}' or the value from --proton-version if you changed it).
+  5. If you haven't already, launch the game once to allow Steam to set up the prefix, then exit completely.
+  6. Do not launch the game again until the installation process is finished."""
+        case "gog" | "epic":
+            return """Before continuing, please ensure your Heroic prefix is set up correctly:
+
+  1. Right-click on the game in your Heroic library.
+  2. Select 'Settings', and navigate to the 'WINE' tab.
+  3. Under 'Wine Version', select your preferred Wine/Proton version.
+     * Proton - Proton 11.0 is the currently supported and recommended version.
+     * If Proton versions are not available, you will need to enable "Allow using Valve Proton builds to run games"
+       in Heroic's Settings, under the 'Advanced' tab. Then, ensure that Proton is downloaded and installed in Steam.
+  4. Optional: Navigate to the 'OTHER' tab and check 'Use Steam Runtime'. This is recommended and may help with compatibility.
+  5. If you haven't already, launch the game once to allow Heroic to set up the prefix, then exit completely.
+  6. Do not launch the game again until the installation process is finished."""
+    return ""
+
+
 def prompt_prefix_init() -> bool:
     """
     Prompts the user to confirm their game prefix has been set up.
@@ -81,28 +117,9 @@ def prompt_prefix_init() -> bool:
         logger.debug("Unattended mode: skipping prefix init prompt, defaulting to True")
         return True
 
-    match state.current_instance.launcher:
-        case "steam":
-            instructions = f"""Before continuing, please ensure your Steam prefix is set up correctly:
-
-  1. Right-click on the game in your Steam library.
-  2. Select 'Properties', and navigate to the 'Compatibility' tab.
-  3. Check the box for 'Force the use of a specific Steam Play compatibility tool', if it's not already checked.
-  4. From the dropdown menu, select the custom MO2 Proton tool created by this installer (named 'MO2 {state.current_instance.game}' or the value from --proton-version if you changed it).
-  5. If you haven't already, launch the game once to allow Steam to set up the prefix, then exit completely.
-  6. Do not launch the game again until the installation process is finished."""
-        case "gog" | "epic":
-            instructions = """Before continuing, please ensure your Heroic prefix is set up correctly:
-
-  1. Right-click on the game in your Heroic library.
-  2. Select 'Settings', and navigate to the 'WINE' tab.
-  3. Under 'Wine Version', select your preferred Wine/Proton version.
-     * Proton - Proton 11.0 is the currently supported and recommended version.
-     * If Proton versions are not available, you will need to enable "Allow using Valve Proton builds to run games"
-       in Heroic's Settings, under the 'Advanced' tab. Then, ensure that Proton is downloaded and installed in Steam.
-  4. Optional: Navigate to the 'OTHER' tab and check 'Use Steam Runtime'. This is recommended and may help with compatibility.
-  5. If you haven't already, launch the game once to allow Heroic to set up the prefix, then exit completely.
-  6. Do not launch the game again until the installation process is finished."""
+    instructions = prefix_instructions(
+        state.current_instance.launcher, state.current_instance.game
+    )
 
     msg = {
         "type": "confirm",

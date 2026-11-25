@@ -73,6 +73,7 @@ def install(
     proton_version: str | None = None,
     mo2_archive: Path | None = None,
     mo2_checksum: str | None = None,
+    prefix_confirmed: bool | None = None,
 ):
     directory = get_install_dir(game, directory, launcher)
     var.set_parameters(
@@ -150,7 +151,7 @@ def install(
 
     download_archive_tools()
     download_winetricks()
-    configure_prefix()
+    configure_prefix(prefix_confirmed)
     logger.info("Prefix configuration completed")
 
     download()

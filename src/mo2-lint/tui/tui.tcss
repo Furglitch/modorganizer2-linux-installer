@@ -31,13 +31,22 @@
     height: 12;
 }
 
-#installgamenext, #installconfignext {
+#installgamenav, #installconfignav {
     width: 100%;
+}
+
+#installgameback, #installgamenext, #installconfigback, #installconfignext {
+    width: 1fr;
     height: 3;
 }
 
 #installconfigextender, #installconfigplugins, #installconfigthemes {
     padding: 1 3;
+    margin: 2 3;
+}
+
+#installconfigdirectory {
+    padding: 0 3;
     margin: 2 3;
 }
 
@@ -89,5 +98,32 @@ ConfirmUninstall, TrashChoice {
 }
 
 #manageuninstallbuttons > Button {
+    margin-left: 1;
+}
+
+PrefixSetup {
+    align: center middle;
+}
+
+#installprefixdialog {
+    width: 110;
+    max-width: 95%;
+    padding: 1 2;
+    border: thick $primary;
+    background: $surface;
+}
+
+#installprefixmessage {
+    width: 100%;
+    margin-bottom: 1;
+}
+
+#installprefixbuttons {
+    width: 100%;
+    margin-top: 1;
+    align-horizontal: right;
+}
+
+#installprefixbuttons > Button {
     margin-left: 1;
 }

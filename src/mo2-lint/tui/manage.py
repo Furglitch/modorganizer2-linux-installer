@@ -1,5 +1,3 @@
-from threading import Thread
-
 from command.pin import pin as _pin
 from command.uninstall import uninstall as _uninstall
 from command.update import update as _update
@@ -148,13 +146,13 @@ class ManageInstance(Screen):
                     "Instance is pinned. Unpin it to update.", severity="warning"
                 )
                 return
-            self.run_command(_update, instance.instance_path)
+            self.app.run_command(_update, instance.instance_path)
         elif event.button.id == "manageinstancepin":
             _pin(instance.instance_path, pin=not instance.pin)
         elif event.button.id == "manageinstanceuninstall":
 
             def uninstall(permanent: bool) -> None:
-                self.run_command(
+                self.app.run_command(
                     _uninstall,
                     directory=instance.instance_path,
                     confirmed=True,
@@ -194,21 +192,6 @@ class ManageInstance(Screen):
             return
 
         self.refresh_instances(index)
-
-    def run_command(self, command, *args, **kwargs) -> None:
-        """Runs a CLI command with the TUI suspended, so its prompts and output work as normal."""
-
-        def target() -> None:
-            try:
-                command(*args, **kwargs)
-            except (SystemExit, KeyboardInterrupt):
-                print("\nCommand did not complete.")
-
-        with self.app.suspend():
-            thread = Thread(target=target)
-            thread.start()
-            thread.join()
-            input("\nPress Enter to return to MO2-LINT...")
 
     def refresh_instances(self, index: int = 0) -> None:
         instances = self.query_one("#manageinstancelist", OptionList)
