@@ -1,3 +1,5 @@
+from threading import Event
+
 from loguru import logger
 from shared.logger import add_loggers, remove_loggers
 from textual import events
@@ -37,6 +39,7 @@ class Dashboard(App):
     def on_mount(self) -> None:
         self.theme = "catppuccin-mocha"
         self.add_loggers()
+        lang.tui_choice = self.ask_choice
 
     def add_loggers(self) -> None:
         """
@@ -110,6 +113,25 @@ class Dashboard(App):
             open("https://docs.furglitch.com/modorganizer2-linux-installer/")
         elif event.option_index == 4:  # Exit
             self.exit()
+
+    def ask_choice(self, message: str, choices: list[str]) -> int:
+        """
+        Shows a list prompt as a modal, for commands running in a separate thread.
+
+        Returns the chosen index, or -1 if cancelled.
+        """
+        result = []
+        answered = Event()
+
+        def on_choice(index: int | None) -> None:
+            result.append(-1 if index is None else index)
+            answered.set()
+
+        self.call_from_thread(
+            self.push_screen, self.Choice(message, choices), on_choice
+        )
+        answered.wait()
+        return result[0]
 
     def run_command(self, title: str, command, *args, callback=None, **kwargs) -> None:
         """
@@ -209,3 +231,35 @@ class Dashboard(App):
             event.stop()
             if event.button.id == "commandclose":
                 self.dismiss(self.completed)
+
+    class Choice(ModalScreen[int | None]):
+        BINDINGS = [("escape", "dismiss(None)", "Cancel")]
+
+        def __init__(self, message: str, choices: list[str]) -> None:
+            super().__init__()
+            self.message = "\n".join(line.strip() for line in message.splitlines())
+            self.choices = choices
+
+        def compose(self) -> ComposeResult:
+            with VerticalGroup(id="choicedialog"):
+                yield Label(self.message, id="choicemessage", markup=False)
+                yield OptionList(*self.choices, id="choicelist", markup=False)
+                with HorizontalGroup(id="choicebuttons"):
+                    yield Button("Select", id="choiceselect", variant="primary")
+                    yield Button("Cancel", id="choicecancel")
+
+        def on_mount(self) -> None:
+            self.query_one("#choicelist", OptionList).highlighted = 0
+
+        def on_option_list_option_selected(
+            self, event: OptionList.OptionSelected
+        ) -> None:
+            event.stop()
+            self.dismiss(event.option_index)
+
+        def on_button_pressed(self, event: Button.Pressed) -> None:
+            event.stop()
+            if event.button.id == "choiceselect":
+                self.dismiss(self.query_one("#choicelist", OptionList).highlighted)
+            else:
+                self.dismiss(None)

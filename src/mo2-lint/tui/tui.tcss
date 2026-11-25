@@ -168,3 +168,34 @@ CommandProgress {
     width: 100%;
     align-horizontal: right;
 }
+
+Choice {
+    align: center middle;
+}
+
+#choicedialog {
+    width: 80;
+    max-width: 95%;
+    padding: 1 2;
+    border: thick $primary;
+    background: $surface;
+}
+
+#choicemessage {
+    width: 100%;
+    margin-bottom: 1;
+}
+
+#choicelist {
+    max-height: 12;
+}
+
+#choicebuttons {
+    width: 100%;
+    margin-top: 1;
+    align-horizontal: right;
+}
+
+#choicebuttons > Button {
+    margin-left: 1;
+}

@@ -7,6 +7,8 @@ from loguru import logger
 from util import state_file as state
 from util import variables as var
 
+tui_choice = None
+
 help_install = """Create a new Mod Organizer 2 instance.
 \nGAME                            Game for the Mod Organizer 2 instance.
 \n                                Options: [{list}]
@@ -206,6 +208,11 @@ def prompt_install_scriptextender_choice(script_extenders: dict) -> int:
         else:
             runtime = runtimes
         choices.append(f"{idx}: Version {version} for runtime: [{runtime}]")
+
+    if tui_choice:
+        index = tui_choice(message, choices)
+        logger.debug(f"User selected script extender at index: {index}")
+        return index
 
     msg = {
         "type": "list",
