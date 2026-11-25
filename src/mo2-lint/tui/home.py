@@ -40,6 +40,8 @@ class Dashboard(App):
         self.theme = "catppuccin-mocha"
         self.add_loggers()
         lang.tui_choice = self.ask_choice
+        self.update_menu()
+        self.screen_change_signal.subscribe(self, self.update_menu)
 
     def add_loggers(self) -> None:
         """
@@ -90,6 +92,20 @@ class Dashboard(App):
                 option_list.clear_options()
                 option_list.add_options(new_options)
                 option_list.highlighted = event.option_index
+                self.update_menu()
+
+    def update_menu(self, _=None) -> None:
+        """
+        Disables Manage Instances when there are no instances.
+        """
+        menu = self.screen_stack[0].query_one("#dashmenu", OptionList)
+        disabled = not instance_count()
+
+        if menu.get_option_at_index(1).disabled != disabled:
+            if disabled:
+                menu.disable_option_at_index(1)
+            else:
+                menu.enable_option_at_index(1)
 
     def on_option_list_option_selected(self, event: OptionList.OptionSelected) -> None:
         if event.option_list.id != "dashmenu":
