@@ -15,11 +15,26 @@ from textual.widgets import (
     OptionList,
     SelectionList,
 )
+from textual.widgets.option_list import Option, OptionDoesNotExist
 from util import state_file as state
 from util.lang import prefix_instructions
 from util import variables as var
 
 LAUNCHERS = ("steam", "gog", "epic")  # Same order as GameSelect.launcher_list
+
+
+def game_list(launcher: str | None) -> list[Option]:
+    """
+    Returns the games available for the launcher, or all games if no launcher is given.
+    """
+    games = []
+    for key, info in var.games_info.items():
+        # Children without their own launcher IDs use the parent's.
+        ids = info.launcher_ids or var.games_info[info.parent].launcher_ids
+        if launcher is None or getattr(ids, launcher, None):
+            games.append(Option(info.display_name, id=key))
+    return games
+
 
 PROGRESS = """
 1. Game Select
@@ -47,7 +62,6 @@ class InstallGame(Screen):
 
         class GameSelect(VerticalGroup):
             launcher_list = ["Steam", "GOG", "Epic Games"]
-            game_list = [info.display_name for info in var.games_info.values()]
 
             def compose(self) -> ComposeResult:
                 launcher = OptionList(
@@ -55,29 +69,50 @@ class InstallGame(Screen):
                     id="installgamelauncher",
                 )
                 launcher.border_title = "Launcher"
+                selected = None
                 if var.settings.launcher in LAUNCHERS:
-                    launcher.highlighted = LAUNCHERS.index(var.settings.launcher)
+                    selected = var.settings.launcher
+                    launcher.highlighted = LAUNCHERS.index(selected)
                 yield launcher
 
                 games = OptionList(
-                    *self.game_list,
+                    *game_list(selected),
                     id="installgamelist",
                 )
                 games.border_title = "Game"
                 yield games
+
+    def on_option_list_option_highlighted(
+        self, event: OptionList.OptionHighlighted
+    ) -> None:
+        if event.option_list.id == "installgamelauncher":
+            games = self.query_one("#installgamelist", OptionList)
+            # Keep the current game selected if the new launcher has it.
+            current = (
+                games.get_option_at_index(games.highlighted).id
+                if games.highlighted is not None
+                else None
+            )
+            games.clear_options()
+            games.add_options(game_list(LAUNCHERS[event.option_index]))
+            if current:
+                try:
+                    games.highlighted = games.get_option_index(current)
+                except OptionDoesNotExist:
+                    pass
 
     def on_button_pressed(self, event: Button.Pressed):
         if event.button.id == "installgameback":
             self.app.pop_screen()
         elif event.button.id == "installgamenext":
             launcher = self.query_one("#installgamelauncher", OptionList).highlighted
-            game = self.query_one("#installgamelist", OptionList).highlighted
-            if game is None:
+            games = self.query_one("#installgamelist", OptionList)
+            if games.highlighted is None:
                 self.notify("Select a game to continue.", severity="warning")
                 return
             self.app.push_screen(
                 InstallConfig(
-                    list(var.games_info)[game],
+                    games.get_option_at_index(games.highlighted).id,
                     LAUNCHERS[launcher] if launcher is not None else None,
                 )
             )
