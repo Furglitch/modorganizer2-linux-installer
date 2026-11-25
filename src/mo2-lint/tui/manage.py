@@ -5,10 +5,12 @@ from command.uninstall import uninstall as _uninstall
 from command.update import update as _update
 from textual.app import Screen, ComposeResult
 from textual.containers import HorizontalGroup, VerticalGroup
+from textual.screen import ModalScreen
 from textual.widgets import (
     Button,
     Header,
     Footer,
+    Label,
     Markdown,
     OptionList,
 )
@@ -52,6 +54,62 @@ class ManageInstance(Screen):
                 yield Button("Pin", id="manageinstancepin")
                 yield Button("Uninstall", id="manageinstanceuninstall")
 
+    class ConfirmUninstall(ModalScreen[bool]):
+        BINDINGS = [("escape", "dismiss(False)", "Cancel")]
+
+        def __init__(
+            self,
+            message: str = "Are you sure you want to uninstall the selected instance?",
+            confirm_label: str = "Uninstall",
+        ) -> None:
+            super().__init__()
+            self.message = message
+            self.confirm_label = confirm_label
+
+        def compose(self) -> ComposeResult:
+            with VerticalGroup(id="manageuninstallconfirm"):
+                yield Label(self.message, id="manageuninstallmessage")
+                with HorizontalGroup(id="manageuninstallbuttons"):
+                    yield Button(
+                        self.confirm_label, id="manageuninstallyes", variant="error"
+                    )
+                    yield Button("Cancel", id="manageuninstallno")
+
+        def on_button_pressed(self, event: Button.Pressed) -> None:
+            event.stop()
+            self.dismiss(event.button.id == "manageuninstallyes")
+
+    class TrashChoice(ModalScreen[bool | None]):
+        """Dismisses with True for permanent deletion, False for trash, None to cancel."""
+
+        BINDINGS = [("escape", "dismiss(None)", "Cancel")]
+
+        def compose(self) -> ComposeResult:
+            with VerticalGroup(id="manageuninstallconfirm"):
+                yield Label(
+                    "Please choose how to handle the deleted files:",
+                    id="manageuninstallmessage",
+                )
+                with HorizontalGroup(id="manageuninstallbuttons"):
+                    yield Button(
+                        "Move to Trash", id="manageuninstalltrash", variant="primary"
+                    )
+                    yield Button(
+                        "Delete Permanently",
+                        id="manageuninstalldelete",
+                        variant="error",
+                    )
+                    yield Button("Cancel", id="manageuninstallno")
+
+        def on_button_pressed(self, event: Button.Pressed) -> None:
+            event.stop()
+            if event.button.id == "manageuninstalltrash":
+                self.dismiss(False)
+            elif event.button.id == "manageuninstalldelete":
+                self.dismiss(True)
+            else:
+                self.dismiss(None)
+
     def on_option_list_option_highlighted(
         self, event: OptionList.OptionHighlighted
     ) -> None:
@@ -94,7 +152,44 @@ class ManageInstance(Screen):
         elif event.button.id == "manageinstancepin":
             _pin(instance.instance_path, pin=not instance.pin)
         elif event.button.id == "manageinstanceuninstall":
-            self.run_command(_uninstall, directory=instance.instance_path)
+
+            def uninstall(permanent: bool) -> None:
+                self.run_command(
+                    _uninstall,
+                    directory=instance.instance_path,
+                    confirmed=True,
+                    permanent=permanent,
+                )
+                self.refresh_instances(index)
+
+            def confirm_permanent(confirmed: bool | None) -> None:
+                # Declining permanent deletion falls back to trash, as in the CLI.
+                uninstall(bool(confirmed))
+
+            def choose_trash(permanent: bool | None) -> None:
+                if permanent is None:
+                    return
+                if permanent:
+                    self.app.push_screen(
+                        self.ConfirmUninstall(
+                            "Are you sure you want to permanently delete this? This action cannot be undone.",
+                            "Delete Permanently",
+                        ),
+                        confirm_permanent,
+                    )
+                else:
+                    uninstall(False)
+
+            def confirm(confirmed: bool | None) -> None:
+                if not confirmed:
+                    return
+                if instance.instance_path.exists():
+                    self.app.push_screen(self.TrashChoice(), choose_trash)
+                else:
+                    uninstall(False)
+
+            self.app.push_screen(self.ConfirmUninstall(), confirm)
+            return
         else:
             return
 

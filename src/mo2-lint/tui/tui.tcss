@@ -66,3 +66,28 @@
 #manageinstanceupdate, #manageinstancepin, #manageinstanceuninstall{
     width: 100%;
 }
+
+ConfirmUninstall, TrashChoice {
+    align: center middle;
+}
+
+#manageuninstallconfirm {
+    width: 64;
+    padding: 1 2;
+    border: thick $error;
+    background: $surface;
+}
+
+#manageuninstallmessage {
+    width: 100%;
+    margin-bottom: 1;
+}
+
+#manageuninstallbuttons {
+    width: 100%;
+    align-horizontal: right;
+}
+
+#manageuninstallbuttons > Button {
+    margin-left: 1;
+}
