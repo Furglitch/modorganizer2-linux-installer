@@ -131,6 +131,11 @@ class Dashboard(App):
             return lang.ASCII
 
     class Count(Label):
+        def on_mount(self) -> None:
+            self.app.screen_change_signal.subscribe(
+                self, lambda _: self.refresh()
+            )  # Recount on return from other screen
+
         def render(self) -> RenderResult:
             return f"[Total Instances: {instance_count()}]"
 

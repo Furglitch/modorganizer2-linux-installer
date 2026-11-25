@@ -180,10 +180,9 @@ class InstallConfig(Screen):
 
                 def on_complete(completed: bool | None) -> None:
                     if completed:
-                        # Back to the main menu, with the instance count updated.
+                        # Back to the main menu.
                         self.app.pop_screen()
                         self.app.pop_screen()
-                        self.app.screen_stack[0].query_one("#dashcount").refresh()
 
                 self.app.run_command(
                     f"Installing {var.games_info[self.game].display_name}",
