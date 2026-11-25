@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from textual.app import ComposeResult, Screen
-from textual.containers import VerticalGroup
+from textual.containers import HorizontalGroup, VerticalScroll
 from textual.widgets import (
     Button,
     Checkbox,
@@ -26,9 +26,10 @@ class ManageSettings(Screen):
 
     def compose(self) -> ComposeResult:
         yield Header()
-        yield self.Settings()
-        yield Button("Back", id="settings-back")
-        yield Button("Save Settings", id="settings-save")
+        yield self.Settings(id="settings")
+        with HorizontalGroup(id="settings-nav"):
+            yield Button("Back", id="settings-back")
+            yield Button("Save Settings", id="settings-save")
         yield Footer()
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
@@ -71,7 +72,7 @@ class ManageSettings(Screen):
         self.app.add_loggers()  # Apply the new log level
         self.notify("Settings saved")
 
-    class Settings(VerticalGroup):
+    class Settings(VerticalScroll):
         def compose(self) -> ComposeResult:
             # installer.log_level
             _setting = (var.settings.log_level or "info").lower()

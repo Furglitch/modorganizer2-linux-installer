@@ -2,7 +2,7 @@ from pathlib import Path
 
 from command.install import get_install_dir, install as _install
 from textual.app import Screen, ComposeResult
-from textual.containers import HorizontalGroup, VerticalGroup
+from textual.containers import HorizontalGroup, VerticalGroup, VerticalScroll
 from textual.screen import ModalScreen
 from textual.widgets import (
     Button,
@@ -48,7 +48,7 @@ class InstallGame(Screen):
 
     def compose(self) -> ComposeResult:
         yield Header()
-        yield self.InstallScreen()
+        yield self.InstallScreen(id="installgamecontent")
         with HorizontalGroup(id="installgamenav"):
             yield Button("Back", id="installgameback")
             yield Button("Next", id="installgamenext")
@@ -135,44 +135,45 @@ class InstallConfig(Screen):
     def compose(self) -> ComposeResult:
         yield Header()
 
-        extender = Checkbox("Script Extender", False, id="installconfigextender")
-        info = var.games_info[self.game]
-        # Children inherit the parent's script extenders if they don't list their own.
-        extender.display = bool(
-            info.script_extenders
-            or (info.parent and var.games_info[info.parent].script_extenders)
-        )
-        yield extender
+        with VerticalScroll(id="installconfigcontent"):
+            extender = Checkbox("Script Extender", False, id="installconfigextender")
+            info = var.games_info[self.game]
+            # Children inherit the parent's script extenders if they don't list their own.
+            extender.display = bool(
+                info.script_extenders
+                or (info.parent and var.games_info[info.parent].script_extenders)
+            )
+            yield extender
 
-        plugins = SelectionList(*self.plugin_list, id="installconfigplugins")
-        plugins.border_title = "Plugins"
-        yield plugins
+            plugins = SelectionList(*self.plugin_list, id="installconfigplugins")
+            plugins.border_title = "Plugins"
+            yield plugins
 
-        plugins = OptionList(*self.theme_list, id="installconfigthemes")
-        plugins.border_title = "Themes"
-        plugins.highlighted = (
-            self.theme_list.index(var.settings.theme)
-            if var.settings.theme in self.theme_list
-            else 0
-        )
-        yield plugins
+            plugins = OptionList(*self.theme_list, id="installconfigthemes")
+            plugins.border_title = "Themes"
+            plugins.highlighted = (
+                self.theme_list.index(var.settings.theme)
+                if var.settings.theme in self.theme_list
+                else 0
+            )
+            yield plugins
 
-        if var.settings.root_folder:
-            try:
-                # "{launcher}" is shown as-is when the launcher is auto-detected.
-                default = get_install_dir(
-                    self.game,
-                    None,
-                    self.launcher or var.settings.launcher or "{launcher}",
-                )
-            except SystemExit:
-                default = var.settings.root_folder
-            placeholder = f"Default: {default}"
-        else:
-            placeholder = "Required: no default instance folder is set in Settings."
-        directory = Input(placeholder=placeholder, id="installconfigdirectory")
-        directory.border_title = "Install Directory"
-        yield directory
+            if var.settings.root_folder:
+                try:
+                    # "{launcher}" is shown as-is when the launcher is auto-detected.
+                    default = get_install_dir(
+                        self.game,
+                        None,
+                        self.launcher or var.settings.launcher or "{launcher}",
+                    )
+                except SystemExit:
+                    default = var.settings.root_folder
+                placeholder = f"Default: {default}"
+            else:
+                placeholder = "Required: no default instance folder is set in Settings."
+            directory = Input(placeholder=placeholder, id="installconfigdirectory")
+            directory.border_title = "Install Directory"
+            yield directory
 
         with HorizontalGroup(id="installconfignav"):
             yield Button("Back", id="installconfigback")

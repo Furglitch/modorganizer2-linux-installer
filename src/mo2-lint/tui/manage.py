@@ -44,7 +44,7 @@ class ManageInstance(Screen):
             instances.border_title = "Instances"
             yield instances
             yield Markdown(INSTANCE_INFO, id="manageinstanceinfo")
-            yield self.ManageChoices()
+            yield self.ManageChoices(id="manageinstancebuttons")
 
         class ManageChoices(VerticalGroup):
             def compose(self) -> ComposeResult:

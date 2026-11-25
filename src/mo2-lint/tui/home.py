@@ -20,6 +20,10 @@ from util import lang
 from util.state_file import instance_count
 
 
+MIN_WIDTH = 120
+MIN_HEIGHT = 30
+
+
 class Dashboard(App):
     TITLE = "MO2-LINT v" + var.version
     SUB_TITLE = ""
@@ -41,6 +45,7 @@ class Dashboard(App):
         self.add_loggers()
         lang.tui_choice = self.ask_choice
         self.update_menu()
+        self.check_size()
         self.screen_change_signal.subscribe(self, self.update_menu)
 
     def add_loggers(self) -> None:
@@ -93,6 +98,20 @@ class Dashboard(App):
                 option_list.add_options(new_options)
                 option_list.highlighted = event.option_index
                 self.update_menu()
+
+    def on_resize(self, event: events.Resize) -> None:
+        self.check_size(event.size)
+
+    def check_size(self, size=None) -> None:
+        """
+        Covers the TUI with a notice while the terminal is smaller than the minimum size.
+        """
+        size = size or self.size
+        small = size.width < MIN_WIDTH or size.height < MIN_HEIGHT
+        if small and not isinstance(self.screen, self.TooSmall):
+            self.push_screen(self.TooSmall())
+        elif not small and isinstance(self.screen, self.TooSmall):
+            self.pop_screen()
 
     def update_menu(self, _=None) -> None:
         """
@@ -188,7 +207,12 @@ class Dashboard(App):
             with VerticalGroup(id="commanddialog"):
                 yield Label(self.heading, id="commandtitle")
                 yield Label("Starting...", id="commandstatus", markup=False)
-                yield ProgressBar(total=None, show_eta=False, id="commandprogress")
+                yield ProgressBar(
+                    total=None,
+                    show_eta=False,
+                    show_percentage=False,
+                    id="commandprogress",
+                )
                 yield RichLog(id="commandlog", wrap=True)
                 with HorizontalGroup(id="commandbuttons"):
                     yield Button("Close", id="commandclose", disabled=True)
@@ -277,3 +301,19 @@ class Dashboard(App):
                 self.dismiss(self.query_one("#choicelist", OptionList).highlighted)
             else:
                 self.dismiss(None)
+
+    class TooSmall(ModalScreen):
+        def compose(self) -> ComposeResult:
+            yield Label(id="toosmallmessage")
+
+        def on_mount(self) -> None:
+            self.show_size()
+
+        def on_resize(self, event: events.Resize) -> None:
+            self.show_size()
+
+        def show_size(self) -> None:
+            self.query_one("#toosmallmessage", Label).update(
+                f"Please resize your terminal to at least {MIN_WIDTH} x {MIN_HEIGHT}.\n"
+                f"Current size: {self.app.size.width} x {self.app.size.height}"
+            )
