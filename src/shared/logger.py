@@ -7,6 +7,10 @@ from pathlib import Path
 from loguru import logger
 
 timestamp: str | None = None
+console = {  # Console settings from the last add_loggers call
+    "log_level": "INFO",
+    "sink": None,
+}
 
 
 def remove_loggers() -> None:
@@ -35,7 +39,7 @@ def persist_timestamp() -> str:
 
 
 def add_loggers(
-    log_level: str | None = "INFO",
+    log_level: str | None = None,
     script: str = "mo2-lint",
     process: str = "process",
     console_sink=None,
@@ -47,13 +51,13 @@ def add_loggers(
     Parameters
     ----------
     log_level : str, optional
-        Log level for console output. If None, defaults to "INFO".
+        Log level for console output. If None, uses the level from the previous call, or "INFO".
     script : str
         The name of the script calling this function, used in log filenames. Defaults to "mo2-lint".
     process : str, optional
         The name of the process to include in log messages. Defaults to "process".
     console_sink : optional
-        The sink for console output. If None, uses sys.stdout.
+        The sink for console output. If None, uses the sink from the previous call, or sys.stdout.
     log_path : Path, optional
         Custom path for log directory. If None, uses ~/.cache/mo2-lint/logs/
     """
@@ -93,13 +97,16 @@ def add_loggers(
         compression="zip",
     )
 
-    log_level = (log_level or "INFO").upper()
+    log_level = (log_level or console["log_level"]).upper()
     log_level = (
         log_level
         if log_level
         in {"TRACE", "DEBUG", "INFO", "SUCCESS", "WARNING", "ERROR", "CRITICAL"}
         else "INFO"
     )
+
+    console_sink = console_sink if console_sink is not None else console["sink"]
+    console["log_level"], console["sink"] = log_level, console_sink
 
     logger.add(
         sink=console_sink if console_sink is not None else sys.stdout,
