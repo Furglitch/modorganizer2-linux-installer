@@ -21,18 +21,9 @@ These same steps are also shown during the interactive install process.
 
 ## Steam
 
-### Option A: Universal Setting
+In order to install the custom compatibility tool, **Proton 11.0** is required to be installed, as listed in the [Compatibility Layer](./requirements#supported-versions) requirements.
 
-1. Open Steam **Settings** (not the individual game's properties) → **Compatibility**.
-2. Set **Default compatibility tool** to **Proton 11.0**.
-
-This makes *all* Steam games use Proton 11 by default.
-
-### Option B: Per-Game Setting
-
-1. Right-click the game in your library → **Properties** → **Compatibility** tab.
-2. Check **Force the use of a specific Steam Play compatibility tool**.
-3. Select **Proton 11.0** from the dropdown.
+After installation, you will need to set your game to use the custom compatibility tool created by the installer, as detailed by the [First Launch guide](./first-launch#steam)
 
 ## Heroic Games Launcher (GOG and Epic)
 

@@ -11,8 +11,8 @@ except Exception:
     import gog
     import steam
 
-from util import variables as var
 from util import state_file as state
+from util import variables as var
 
 
 def read_launch_option(

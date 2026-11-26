@@ -7,7 +7,7 @@ from util import lang
 from util import state_file as state
 from util import variables as var
 from util.heroic.find_library import get_data as get_heroic_data
-from util.steam.find_library import get_libraries as get_steam_libraries
+from util.steam.path import find_steam_libraries
 
 
 def get_launcher(launcher: str | None = None) -> str:
@@ -38,7 +38,7 @@ def get_launcher(launcher: str | None = None) -> str:
         return var.launcher
 
     logger.debug("Detecting game launchers.")
-    steam_libraries = get_steam_libraries()
+    steam_libraries = find_steam_libraries()
     heroic_data = get_heroic_data()
 
     steam_has_game = False
@@ -139,7 +139,7 @@ def get_library() -> Path:
 
     library = None
     if var.launcher == "steam":
-        libraries = get_steam_libraries()
+        libraries = find_steam_libraries()
         if len(libraries) == 0:
             logger.error(
                 "No Steam libraries found. Cannot determine game installation path."

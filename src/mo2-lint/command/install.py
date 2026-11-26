@@ -4,7 +4,6 @@ from pathlib import Path
 
 from loguru import logger
 from step.configure_prefix import prompt as configure_prefix
-from shared.mo2_ini import launchers, normalize_path, update_mo2_ini
 from step.external_resources import (
     download,
     download_archive_tools,
@@ -15,11 +14,13 @@ from step.load_game_info import get_launcher, get_library
 from step.workarounds import apply_workarounds
 from util import state_file as state
 from util import variables as var
+from util.lang import post_install_heroic, post_install_steam
 from util.nexus.install_handler import install as install_handler
 from util.redirector.install import install as install_redirector
 from util.state_file import InstanceData, set_index
 from util.steam.proton_wrapper import resolve as resolve_proton_wrapper
-from util.lang import post_install_steam, post_install_heroic
+
+from shared.mo2_ini import launchers, normalize_path, update_mo2_ini
 
 
 def get_install_dir(

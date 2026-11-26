@@ -13,6 +13,13 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Conventional Commit validations
+        uses: commit-check/commit-check-action@v2
+        with:
+          message: true
+          branch: false
+          pr-title: true
+
       - name: Set up Python
         uses: actions/setup-python@v7
         with:

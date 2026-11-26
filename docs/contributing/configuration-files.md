@@ -254,13 +254,42 @@ schema:
 
 plugins:
 
+  # Manifest source
   <plugin>: <manifest_url>
+
+  # Direct download source
+  <plugin>:
+    direct: <download_url>
+    checksum: <sha256>
+    subdirectory: <plugins_subdirectory>
+    file_whitelist:
+      paths:
+        - <path>
+
+  # Nexus Mods source
+  <plugin>:
+    nexus:
+      slug: <nexus_game_slug>
+      mod_id: <mod_id>
+      file_id: <file_id>
+    checksum: <sha256>
+    subdirectory: <plugins_subdirectory>
+    file_whitelist:
+      paths:
+        - <path>
 ```
+
+Each plugin uses exactly one source: a manifest URL, `direct`, or `nexus`.
 
 | Field | Required | Description |
 |:--|:--|:--|
 | `plugin` | Yes | Unique plugin identifier. |
-| `manifest_url` | Yes | URL to the plugin's manifest file. Must point directly to the raw file, following the manifest structure created by [@Kezyma](https://github.com/Kezyma) for their "Plugin Finder" plugin. See [Kezyma's Plugin Finder docs](https://github.com/Kezyma/ModOrganizer-Plugins/blob/main/docs/pluginfinder.md#adding-your-plugin) for the schema. |
+| `manifest_url` | No | URL to the plugin's manifest file. Must point directly to the raw file, following the manifest structure created by [@Kezyma](https://github.com/Kezyma) for their "Plugin Finder" plugin. See [Kezyma's Plugin Finder docs](https://github.com/Kezyma/ModOrganizer-Plugins/blob/main/docs/pluginfinder.md#adding-your-plugin) for the schema. |
+| `direct` | No | Direct download URL for the plugin archive. |
+| `nexus` | No | Nexus Mods download info. Requires `mod_id` and `file_id`. `slug` is the Nexus game slug (use `site` for files hosted under Nexus "Modding Tools"); if omitted, the current game's `nexus_slug` is used. Downloading requires a Nexus API key and, for automated downloads, Nexus Premium; otherwise the plugin is skipped with a warning. |
+| `checksum` | No | SHA-256 checksum of the downloaded archive. Used with `direct` and `nexus`. |
+| `subdirectory` | No | Subdirectory within the instance's `plugins/` folder to install into. |
+| `file_whitelist` | No | Files or directories from the archive to install. Used with `direct` and `nexus`; manifest sources take this from the manifest's `PluginPath`. |
 
 ## `theme_info.yml`
 

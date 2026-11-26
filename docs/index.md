@@ -33,42 +33,63 @@ MO2-LINT aims to make installing [Mod Organizer 2](https://github.com/ModOrganiz
 
 ### Supported Games
 
-<br clear="left"/>
-{: .fs-1 }
+Games that MO2-LINT officially supports setting up instances for.
 
 <details open markdown="1">
-<summary>Click to collapse the compatibility table</summary>
+<summary>Click to collapse the game table</summary>
 
-| Game | Notes |
-|:--|:--|
-| Baldur's Gate 3 | |
-| Cyberpunk 2077 | See [Game Guide](./game-guides/cyberpunk-2077) |
-| Dragon Age: Origins - Ultimate Edition | |
-| Dragon Age 2 - Ultimate Edition | |
-| Enderal: Forgotten Stories | |
-| Enderal: Forgotten Stories - Special Edition | |
-| Fallout 3 | |
-| Fallout 3 - Game of the Year Edition | See [Game Guide](./game-guides/fallout-3-goty) |
-| Fallout 4 | See [Game Guide](./game-guides/fallout-4) |
-| Fallout 4 VR | |
-| Fallout London | See [Game Guide](./game-guides/fallout-london) |
-| Fallout New Vegas | |
-| Morrowind | |
-| Oblivion | See [Game Guide](./game-guides/oblivion) |
-| Skyrim | |
-| Skyrim Special Edition | |
-| Skyrim Anniversary Edition (Heroic) | See [Game Guide](./game-guides/skyrim-ae-heroic) |
-| Skyrim VR | |
-| Starfield | |
-| Subnautica | |
-| Valheim | |
-| The Witcher 3: Wild Hunt | |
-| The Witcher 3: Wild Hunt - Game of the Year Edition | |
+| MO2-LINT Slug | Game | Notes |
+|:--|:--|:--|
+| `baldursgate3` | Baldur's Gate 3 | |
+| `cyberpunk2077` | Cyberpunk 2077 | See [Game Guide](https://docs.furglitch.com/modorganizer2-linux-installer/game-guides/cyberpunk-2077.html) |
+| `dragonage` | Dragon Age: Origins - Ultimate Edition | |
+| `dragonage2` | Dragon Age 2 - Ultimate Edition | |
+| `enderal` | Enderal: Forgotten Stories | |
+| `enderal_se` | Enderal: Forgotten Stories - Special Edition | |
+| `fallout3` | Fallout 3 | |
+| `fallout3_goty` | Fallout 3 - Game of the Year Edition | See [Game Guide](https://docs.furglitch.com/modorganizer2-linux-installer/game-guides/fallout-3-goty.html) |
+| `fallout4` | Fallout 4 | See [Game Guide](https://docs.furglitch.com/modorganizer2-linux-installer/game-guides/fallout-4.html) |
+| `fallout4_vr` | Fallout 4 VR | |
+| `falloutlondon` | Fallout London | See [Game Guide](https://docs.furglitch.com/modorganizer2-linux-installer/game-guides/fallout-london.html) |
+| `falloutnv` | Fallout New Vegas | |
+| `morrowind` | Morrowind | |
+| `oblivion` | Oblivion | See [Game Guide](https://docs.furglitch.com/modorganizer2-linux-installer/game-guides/oblivion.html) |
+| `skyrim` | Skyrim | |
+| `skyrim_se` | Skyrim Special Edition | |
+| `skyrim_ae` | Skyrim Anniversary Edition (Heroic) | See [Game Guide](https://docs.furglitch.com/modorganizer2-linux-installer/game-guides/skyrim-ae-heroic.html) |
+| `skyrim_vr` | Skyrim VR | |
+| `starfield` | Starfield | |
+| `subnautica` | Subnautica | |
+| `valheim` | Valheim | |
+| `witcher3` | The Witcher 3: Wild Hunt | |
+| `witcher3_goty` | The Witcher 3: Wild Hunt - Game of the Year Edition | |
 
 </details>
 
 {: .note }
-> Setting up a specific game? Check the [Game Guides] section first. Some games need extra steps before or after `install`.
+> Check the [Game Guides] section first. Some games need extra steps before or after `install`.
+
+### Available Plugins
+
+MO2 Plugins available for automatic install using the `--plugin <slug>` flag
+
+<details open markdown="1">
+<summary>Click to collapse the plugin table</summary>
+
+| MO2-LINT slug | Author | URL |
+|:--|:--|:--|
+| `root-builder` | Kezyma | [Kezyma/Modorganizer-Plugins] |
+| `reinstaller` | Kezyma | [Kezyma/Modorganizer-Plugins]|
+| `shortcutter` | Kezyma | [Kezyma/Modorganizer-Plugins]|
+| `plugin-finder` | Kezyma | [Kezyma/Modorganizer-Plugins]|
+| `profile-sync` | Kezyma | [Kezyma/Modorganizer-Plugins]|
+| `openmw-player` | Kezyma | [Kezyma/Modorganizer-Plugins]|
+| `grass-precacher` | Al12rs | [Al12rs/modorganizer-GrassPrecacher](https://github.com/Al12rs/modorganizer-GrassPrecacher) |
+| `auto-activator` | Jonathan Feenstra | [JonathanFeenstra/modorganizer-auto-activator](https://github.com/JonathanFeenstra/modorganizer-auto-activator) |
+| `fomod-plus` | aglowinthefield | [aglowinthefield/mo2-fomod-plus](https://github.com/aglowinthefield/mo2-fomod-plus) |
+| `collection-installer` | RGM2025 | [Nexus Mods](https://www.nexusmods.com/site/mods/2350)
+
+</details>
 
 ## Where to go next
 
@@ -90,3 +111,5 @@ Originally developed by [rockerbacon](https://github.com/rockerbacon) as a Bash 
 [Troubleshooting]: ./troubleshooting/
 [FAQ]: ./faq/
 [Contributing]: ./contributing/
+
+[Kezyma/ModOrganizer-Plugins]: https://github.com/Kezyma/ModOrganizer-Plugins

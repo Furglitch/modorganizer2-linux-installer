@@ -16,3 +16,13 @@ Some F4SE plugins may not work properly under Proton/Wine. [#32](https://github.
 ## ENB
 
 Version 0.393 and below may need 'EnablePostPassShader' to be disabled in order to work properly. [#95](https://github.com/furglitch/modorganizer2-linux-installer/issues/95) has more information on this.
+
+## Audio Issues
+
+If certain types of audio are missing and not others, add the following to your Steam launch options:
+
+```bash
+WINEDLLOVERRIDES="winmm,version=n,b" %command%
+```
+
+Further audio issues may be resolved by using an alternate Proton version, such as Proton GE.

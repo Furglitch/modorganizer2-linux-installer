@@ -20,12 +20,7 @@ parent: Getting Started
 {: .danger }
 > **Linux only.** MO2-LINT does not work on Windows, MacOS, or any other operating system.
 
-### ARM64 support status
-
-MO2-LINT can run natively on ARM64 Linux, including Steam Frame. The ARM64 binary is named `mo2-lint-aarch64`.
-
-{: .warning }
-> Mod Organizer 2 cannot launch games or tools on ARM64 with its bundled USVFS. MO2 requires the [USVFS ARM64 patch](https://github.com/ModOrganizer2/usvfs/pull/93). You can download patched USVFS binaries from the [releases linked in that PR](https://github.com/ndabas/modorganizer/releases) and apply them to an existing MO2 installation without waiting for an official MO2 release containing the fix. MO2-LINT does not apply that patch. Steam Frame installation instructions are deferred until MO2 includes the fix.
+On ARM64 Linux, including Steam Frame, use `mo2-lint-aarch64`. MO2-LINT installs [MO2 2.5.2-woa.1](https://github.com/ndabas/modorganizer/releases/tag/v2.5.2-woa.1), which includes the USVFS fix needed to launch games on ARM64.
 
 ## Launchers
 
@@ -45,9 +40,11 @@ See [Setting up Proton](./proton-setup).
 
 | Layer | Notes |
 |:--|:--|
-| **Proton 11.0** | The only officially tested and supported version. Early versions may work but aren't guaranteed to, and are not supported. |
-| **Proton 10.0-4** | There are known issues with Mod Organizer 2 on this version, such as [#878](https://github.com/Furglitch/modorganizer2-linux-installer/issues/878) |
-| **Proton 9.0-4** | Known to be incapable of launching games such as Fallout 4. |
+| **Proton 11.0** | The main version of Proton that MO2-LINT is tested against. Early versions may work but aren't guaranteed to, and are not supported. |
+| **GE-Proton11-11** | An alternate, community maintained version of Proton, which may provide game compatibility and bugfixes that standard Proton does not. More information can be found on their [GitHub repo](https://github.com/gloriouseggroll/proton-ge-custom). |
+| **GE-Proton10-14** | Recommended version for ENB users due to [#1185](https://github.com/Furglitch/modorganizer2-linux-installer/issues/1185). Experiences the same MO2 issues as Proton 10.0. |
+| **Proton 10.0** | There are known issues with Mod Organizer 2 on this version, such as [#878](https://github.com/Furglitch/modorganizer2-linux-installer/issues/878) |
+| **Proton 9.0-4** | Known to be incapable of launching some games, such as Fallout 4. |
 
 ## System Packages
 

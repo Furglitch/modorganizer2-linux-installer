@@ -27,6 +27,9 @@ body:
         - "7.0.0"
         - "7.0.1"
         - "7.0.2"
+        - "7.0.3"
+        - "7.0.4"
+        - "7.0.5"
     validations:
       required: true
   - type: dropdown
@@ -86,7 +89,7 @@ body:
     attributes:
       label: Proton/Wine Version
       description: What version of Proton or Wine are you using?
-      placeholder: 'Proton 11.0, Wine 6.0, etc.'
+      placeholder: 'Proton 11.0-2, GE-Proton11-10, Wine 6.0, etc.'
     validations:
       required: true
   - type: textarea

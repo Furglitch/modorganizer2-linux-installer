@@ -143,6 +143,24 @@ class ArchiveToolTests(unittest.TestCase):
             self.assertIsNotNone(var.resource_info.sevenzip)
             self.assertIsNotNone(var.resource_info.libmspack)
 
+    def test_every_bundled_arm64_resource_is_selected_on_arm64(self):
+        bundled = var.internal_file("cfg", "resource_info.yml")
+        names = yaml.safe_load(bundled.read_text())["resources"]
+        arm64 = [
+            name.removesuffix("_arm64") for name in names if name.endswith("_arm64")
+        ]
+        self.assertIn("mod_organizer", arm64)
+        with patch.object(var, "resource_info"):
+            var.load_resource_info(bundled)
+            for name in arm64:
+                for is_arm64, key in ((False, name), (True, name + "_arm64")):
+                    with patch.object(
+                        resources.host, "is_arm64", return_value=is_arm64
+                    ):
+                        resource = resources.tool_resource(name)
+                        self.assertIsNotNone(resource)
+                        self.assertIs(resource, getattr(var.resource_info, key))
+
     def package(self, name, member, content, deb=False):
         data = io.BytesIO()
         with tarfile.open(fileobj=data, mode="w:xz") as archive:
