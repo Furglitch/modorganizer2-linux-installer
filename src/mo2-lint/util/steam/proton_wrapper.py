@@ -19,6 +19,9 @@ default_proton_version_arm64 = "Proton 11.0 (ARM64)"
 # Use a magic marker file to track that a directory is a proton wrapper managed by our application. We do not want to accidentally delete someone's home directory because of a corrupted state file.
 marker_name = ".mo2-lint-proton-wrapper"
 
+# Directories protontricks looks for inside a Proton installation.
+proton_dist_names = ("files", "dist")
+
 
 def default_template_dir() -> Path:
     """
@@ -178,6 +181,40 @@ def render(
 
     proton = target / "proton"
     proton.chmod(proton.stat().st_mode | S_IXUSR | S_IXGRP | S_IXOTH)
+
+    link_proton_dist(target, proton_path)
+
+
+def link_proton_dist(target: Path, proton_path: Path):
+    """
+    Symlinks the wrapped Proton's binary directory into the wrapper.
+
+    Tools such as protontricks treat the wrapper as the Proton installation
+    for the game and expect a "files" (or "dist" for older Proton releases)
+    directory inside it, otherwise they report the installation as incomplete.
+
+    Parameters:
+    -----------
+    target : Path
+        The Proton wrapper directory.
+    proton_path : Path
+        The wrapped Proton installation directory.
+    """
+
+    # Newer Proton ships "files". Older Proton extracts "dist" on first launch,
+    # so link it even if it does not exist yet; it will resolve once extracted.
+    names = ["files"] if (proton_path / "files").is_dir() else ["dist"]
+
+    for name in proton_dist_names:
+        link = target / name
+        if link.is_symlink():
+            link.unlink()
+        elif link.exists():
+            logger.warning(f'Not replacing "{link}": not a symlink')
+            continue
+
+        if name in names:
+            link.symlink_to(proton_path / name, target_is_directory=True)
 
 
 def install(
