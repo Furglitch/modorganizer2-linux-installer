@@ -1,7 +1,7 @@
 ---
 title: Game Guides
 layout: default
-nav_order: 4
+nav_order: 5
 has_children: true
 description: "Game-specific setup notes for MO2-LINT."
 ---

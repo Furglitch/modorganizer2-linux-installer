@@ -36,6 +36,8 @@ chmod +x path/to/downloaded/mo2-lint
 path/to/downloaded/mo2-lint <command> [options]
 ```
 
+Run it with no command or options to open the interactive [TUI](../tui/) instead.
+
 ## 4. (Optional, recommended) Install to PATH
 
 For convenience, you can move the binary to a directory on your `PATH` so you can run it from anywhere, instead of having to navigate to the download location or type the full path every time.

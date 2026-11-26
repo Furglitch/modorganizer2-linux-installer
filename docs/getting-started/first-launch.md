@@ -21,6 +21,8 @@ mo2-lint install <game> <directory>
 
 To see what games are supported, run `mo2-lint install --help`. You can also see the [`install` command reference](../guide/install) for the full list of options (plugins, script extender, themes, custom archives).
 
+Or, run `mo2-lint` with no command and choose **Create New Instance**. See [Creating an Instance](../tui/new-instance) in the TUI Guide.
+
 ## 3. Launch through Steam or Heroic
 
 {: .warning }

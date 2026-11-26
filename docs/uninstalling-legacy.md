@@ -1,7 +1,7 @@
 ---
 title: Uninstalling Legacy (v6) Instances
 layout: default
-nav_order: 8
+nav_order: 9
 description: "How to remove pre-7.0.0 instances and migrate a modlist to v7."
 ---
 

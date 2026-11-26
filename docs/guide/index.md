@@ -1,7 +1,7 @@
 ---
 title: CLI Guide
 layout: default
-nav_order: 3
+nav_order: 4
 has_children: true
 description: "Command reference and configuration for MO2-LINT."
 ---
@@ -10,6 +10,9 @@ description: "Command reference and configuration for MO2-LINT."
 
 {: .note }
 > Read through [Game Guides](../game-guides/) for your game before running `install`. Some games need extra steps.
+
+{: .tip }
+> Prefer an interactive interface? Run `mo2-lint` with no command to open the TUI. See the [TUI Guide](../tui/).
 
 Every MO2-LINT command accepts these two global options:
 
