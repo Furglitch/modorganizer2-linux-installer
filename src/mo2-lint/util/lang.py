@@ -7,6 +7,8 @@ from loguru import logger
 from util import state_file as state
 from util import variables as var
 
+tui_choice = None
+
 help_install = """Create a new Mod Organizer 2 instance.
 \nGAME                            Game for the Mod Organizer 2 instance.
 \n                                Options: [{list}]
@@ -65,6 +67,42 @@ def list_instances(instance_list: list) -> list:
     return instances
 
 
+def prefix_instructions(launcher: str, game: str) -> str:
+    """
+    Returns the prefix setup instructions for the given launcher.
+
+    Parameters
+    ----------
+    launcher : str
+        The launcher the instance uses ("steam", "gog" or "epic").
+    game : str
+        The game identifier, used in the Steam compatibility tool name.
+    """
+    match launcher:
+        case "steam":
+            return f"""Before continuing, please ensure your Steam prefix is set up correctly:
+
+  1. Right-click on the game in your Steam library.
+  2. Select 'Properties', and navigate to the 'Compatibility' tab.
+  3. Check the box for 'Force the use of a specific Steam Play compatibility tool', if it's not already checked.
+  4. From the dropdown menu, select the custom MO2 Proton tool created by this installer (named 'MO2 {game}' or the value from --proton-version if you changed it).
+  5. If you haven't already, launch the game once to allow Steam to set up the prefix, then exit completely.
+  6. Do not launch the game again until the installation process is finished."""
+        case "gog" | "epic":
+            return """Before continuing, please ensure your Heroic prefix is set up correctly:
+
+  1. Right-click on the game in your Heroic library.
+  2. Select 'Settings', and navigate to the 'WINE' tab.
+  3. Under 'Wine Version', select your preferred Wine/Proton version.
+     * Proton - Proton 11.0 is the currently supported and recommended version.
+     * If Proton versions are not available, you will need to enable "Allow using Valve Proton builds to run games"
+       in Heroic's Settings, under the 'Advanced' tab. Then, ensure that Proton is downloaded and installed in Steam.
+  4. Optional: Navigate to the 'OTHER' tab and check 'Use Steam Runtime'. This is recommended and may help with compatibility.
+  5. If you haven't already, launch the game once to allow Heroic to set up the prefix, then exit completely.
+  6. Do not launch the game again until the installation process is finished."""
+    return ""
+
+
 def prompt_prefix_init() -> bool:
     """
     Prompts the user to confirm their game prefix has been set up.
@@ -81,24 +119,9 @@ def prompt_prefix_init() -> bool:
         logger.debug("Unattended mode: skipping prefix init prompt, defaulting to True")
         return True
 
-    match state.current_instance.launcher:
-        case "steam":
-            instructions = """In order to set up Mod Organizer 2, you *MUST* have Proton 11.0 installed, or specify another Proton version with the --proton-version flag. See the CLI guide for more information on the --proton-version flag.
-
-It is also recommended, but not required, that you clean your game's proton prefix by deleting it and running the game once. Further details, including how to preserve your save files, can be found at the link below.
-https://docs.furglitch.com/modorganizer2-linux-installer/troubleshooting/instance-and-data-issues"""
-        case "gog" | "epic":
-            instructions = """Before continuing, please ensure your Heroic prefix is set up correctly:
-
-  1. Right-click on the game in your Heroic library.
-  2. Select 'Settings', and navigate to the 'WINE' tab.
-  3. Under 'Wine Version', select your preferred Wine/Proton version.
-     * Proton - Proton 11.0 is the currently supported and recommended version.
-     * If Proton versions are not available, you will need to enable "Allow using Valve Proton builds to run games"
-       in Heroic's Settings, under the 'Advanced' tab. Then, ensure that Proton is downloaded and installed in Steam.
-  4. Optional: Navigate to the 'OTHER' tab and check 'Use Steam Runtime'. This is recommended and may help with compatibility.
-  5. If you haven't already, launch the game once to allow Heroic to set up the prefix, then exit completely.
-  6. Do not launch the game again until the installation process is finished."""
+    instructions = prefix_instructions(
+        state.current_instance.launcher, state.current_instance.game
+    )
 
     msg = {
         "type": "confirm",
@@ -185,6 +208,11 @@ def prompt_install_scriptextender_choice(script_extenders: dict) -> int:
         else:
             runtime = runtimes
         choices.append(f"{idx}: Version {version} for runtime: [{runtime}]")
+
+    if tui_choice:
+        index = tui_choice(message, choices)
+        logger.debug(f"User selected script extender at index: {index}")
+        return index
 
     msg = {
         "type": "list",
@@ -442,3 +470,13 @@ def prompt_uninstall_trash_confirm() -> bool:
     result = prompt([msg])
     logger.debug(f"User confirmed permanent deletion: {result['confirm_trash_config']}")
     return result["confirm_trash_config"]
+
+
+# --- #
+
+ASCII: str = """
+▗▖  ▗▖ ▗▄▖ ▄▄▄▄ ▗▖   ▗▄▄▄▖▗▖  ▗▖▗▄▄▄▖
+▐▛▚▞▜▌▐▌ ▐▌   █ ▐▌     █  ▐▛▚▖▐▌  █
+▐▌  ▐▌▐▌ ▐▌█▀▀▀ ▐▌     █  ▐▌ ▝▜▌  █
+▐▌  ▐▌▝▚▄▞▘█▄▄▄ ▐▙▄▄▖▗▄█▄▖▐▌  ▐▌  █
+"""

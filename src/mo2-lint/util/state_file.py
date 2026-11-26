@@ -278,7 +278,11 @@ def set_index(index: int | None = None):
     current_instance.index = set
 
 
-def remove_instance(instance: InstanceData, types: list[str] | None = None):
+def remove_instance(
+    instance: InstanceData,
+    types: list[str] | None = None,
+    permanent: bool | None = None,
+):
     """
     Removes an instance by its index.
 
@@ -291,6 +295,9 @@ def remove_instance(instance: InstanceData, types: list[str] | None = None):
         "symlink" removes the symlink to the instance.\n
         "install" removes the installation of the instance.\n
         "state" removes the state file entry for the instance.\n
+    permanent : bool, optional
+        True to permanently delete the instance directory (already confirmed), False to move it to trash.
+        If None, the user is prompted.
     """
 
     if types is None:
@@ -317,7 +324,11 @@ def remove_instance(instance: InstanceData, types: list[str] | None = None):
     if "install" in types:
         instance_path = instance.instance_path
         if instance_path.exists():
-            if not lang.prompt_uninstall_trash():
+            if permanent is None:
+                permanent_choice = lang.prompt_uninstall_trash()
+            else:
+                permanent_choice = permanent
+            if not permanent_choice:
                 logger.debug(
                     f"User chose to send instance directory to trash: {instance_path}"
                 )
@@ -327,7 +338,7 @@ def remove_instance(instance: InstanceData, types: list[str] | None = None):
                 logger.debug(
                     f"User chose to permanently delete instance directory: {instance_path}"
                 )
-                if lang.prompt_uninstall_trash_confirm():
+                if permanent or lang.prompt_uninstall_trash_confirm():
                     logger.debug(
                         f"User confirmed permanent deletion of instance directory: {instance_path}"
                     )
@@ -557,3 +568,12 @@ def symlink_instance():
     logger.debug(
         f"Created symlink for instance index {current_instance.index}: {target} -> {source}"
     )
+
+
+def instance_count() -> int:
+    """
+    Returns:
+        int: Number of installed instances
+    """
+
+    return len(state_file.instances)

@@ -7,6 +7,7 @@ from typing import Final
 
 import yaml
 from loguru import logger
+from tomlkit import document, dumps, parse, table
 from util.internal_file import internal_file
 
 
@@ -90,6 +91,8 @@ class InstallerSettings:
 
 
 settings: InstallerSettings | None = None
+settings_path = Path("~/.config/mo2-lint/settings.toml").expanduser()
+settings_path = Path("~/.config/mo2-lint/settings.toml").expanduser()
 
 
 def set_parameters(args: Input | dict):
@@ -119,9 +122,13 @@ def load_settings(path: Path | None = None):
         Path to the settings TOML file. If not provided, defaults to ~/.config/mo2-lint/settings.toml.
     """
 
-    global settings
+    global settings, settings_path
     if not path:
-        path = Path("~/.config/mo2-lint/settings.toml").expanduser()
+        path = settings_path
+    else:
+        path = path.expanduser()
+
+    settings_path = path
 
     if not path.exists():
         logger.warning(f"Settings TOML file not found at {path}. Using empty settings.")
@@ -158,6 +165,32 @@ def load_settings(path: Path | None = None):
         games=games,
     )
     logger.trace(f"Loaded settings: {settings}")
+
+
+def save_settings(path: Path | None = None):
+    """Persist installer settings while preserving unrelated TOML content."""
+    path = path.expanduser() if path else settings_path
+    if path.exists():
+        config = parse(path.read_text(encoding="utf-8"))
+    else:
+        config = document()
+
+    installer = config.setdefault("installer", table())
+    installer["log_level"] = settings.log_level or "info"
+    installer["check_updates"] = settings.check_updates
+    installer["refresh_configs"] = settings.refresh_configs
+
+    instance = config.setdefault("instance", table())
+    instance["launcher"] = settings.launcher or ""
+    instance["theme"] = settings.theme or ""
+    instance["plugins"] = list(settings.plugins)
+
+    folders = instance.setdefault("folders", table())
+    folders["root_folder"] = str(settings.root_folder) if settings.root_folder else ""
+    folders["folder_name"] = settings.folder_name or ""
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(dumps(config), encoding="utf-8")
 
 
 @dataclass

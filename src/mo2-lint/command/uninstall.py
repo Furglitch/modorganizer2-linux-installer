@@ -5,7 +5,7 @@ from util import lang
 from util.state_file import match_instances, remove_instance
 
 
-def uninstall(game=None, directory=None):
+def uninstall(game=None, directory=None, confirmed=False, permanent=None):
     """
     Matches existing instances based on game and/or directory, prompts the user to select which to uninstall, and proceeds with uninstallation after confirmation.
 
@@ -15,6 +15,11 @@ def uninstall(game=None, directory=None):
         The game nexus slug to match.
     directory : str
         The instance directory to match.
+    confirmed : bool
+        Skip the confirmation prompt, if the user has already confirmed elsewhere.
+    permanent : bool, optional
+        True to permanently delete instance directories, False to move them to trash.
+        If None, the user is prompted.
     """
 
     instance_list = []
@@ -67,7 +72,7 @@ def uninstall(game=None, directory=None):
             logger.critical(f"Invalid selection for uninstallation: {instance}")
             raise SystemExit(1)
 
-    confirm = lang.prompt_uninstall_confirm()
+    confirm = confirmed or lang.prompt_uninstall_confirm()
     if confirm:
         logger.debug(
             "User confirmed uninstallation. Proceeding to uninstall selected instances."
@@ -76,7 +81,7 @@ def uninstall(game=None, directory=None):
             types = ["symlink", "install", "state"]
             if inst.script_extender and inst.script_extender_files:
                 types.append("scriptextender")
-            remove_instance(inst, types)
+            remove_instance(inst, types, permanent)
             logger.info(f"Uninstalled Mod Organizer 2 instance at {inst.instance_path}")
     else:
         logger.debug("Uninstallation aborted by user.")

@@ -31,6 +31,8 @@ def internal_file(*parts) -> Path:
         elif parts and parts[0] == "src":
             path = repo_root / "src" / "mo2-lint"
             parts = parts[1:]
+        elif parts and parts[0] == "steam-proton-wrapper":
+            path = repo_root / "src"
         else:
             path = repo_root
 

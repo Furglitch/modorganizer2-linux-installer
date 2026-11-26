@@ -447,10 +447,16 @@ class CustomCommand(click.Command):  # Move [OPTIONS] to the end in the full hel
             return usage
 
 
-@click.group()
+@click.group(invoke_without_command=True)
 @click.pass_context
 def cli(ctx):
     ctx.ensure_object(dict)
+    if ctx.invoked_subcommand is None:
+        start()
+        from tui.home import Dashboard
+
+        Dashboard().run()
+        return
 
 
 @cli.command(

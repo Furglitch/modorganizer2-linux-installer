@@ -25,7 +25,7 @@ MO2-LINT aims to make installing [Mod Organizer 2](https://github.com/ModOrganiz
 |:--|:--|
 | **Totally Automated** | `mo2-lint install` sets up Proton, downloads MO2, registers compatibility tools, and wires up the NXM handler. |
 | **Multiple Instances** | Run separate MO2 instances for each game, each independently tracked and updatable. |
-| **Easy-to-Use** | The CLI interface is designed to be as user friendly as possible, with clear commands and options. |
+| **Easy-to-Use** | Provides a simple terminal-based UI (TUI), as well as CLI commands, for quick and easy installation. |
 | **Nexus Integration** | The bundled NXM handler makes the "Mod Manager Download" button on Nexus Mods work out of the box. |
 | **Script Extenders** | Optionally install the game's script extender (SKSE, F4SE, etc.) during setup. |
 | **MO2 Plugins & Themes** | Optionally install community plugins and themes for Mod Organizer during setup. |
@@ -94,6 +94,7 @@ MO2 Plugins available for automatic install using the `--plugin <slug>` flag
 ## Where to go next
 
 - **New here?** Start with [Getting Started], which covers prerequisites, installing the binary, setting up Proton, and the first `install`.
+- **Prefer menus over commands?** The [TUI Guide] walks through the interactive interface.
 - **Already installed?** Jump to the [CLI Guide] for every command, option, and file configuration.
 - **Installing a specific game?** Check [Game Guides] for per-game notes before you run `install`.
 - **Something not working?** Head to [Troubleshooting] or the [FAQ].
@@ -104,6 +105,7 @@ MO2 Plugins available for automatic install using the `--plugin <slug>` flag
 Originally developed by [rockerbacon](https://github.com/rockerbacon) as a Bash script, MO2-LINT has since been maintained by [furglitch](https://github.com/furglitch) and fully rewritten in Python for maintainability, extensibility, and cross-distro compatibility.
 
 [Getting Started]: ./getting-started/
+[TUI Guide]: ./tui/
 [CLI Guide]: ./guide/
 [Game Guides]: ./game-guides/
 [Troubleshooting]: ./troubleshooting/
