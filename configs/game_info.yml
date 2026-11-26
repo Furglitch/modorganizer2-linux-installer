@@ -432,7 +432,7 @@ games:
     launcher_ids:
       steam: null
       gog: null
-      # epic: 0d0c62755e5a45c7a07fd9cc0b61c39c
+      epic: 0d0c62755e5a45c7a07fd9cc0b61c39c
     executable:
       epic: Oblivion GOTY French/OblivionLauncher.exe
 
@@ -442,7 +442,7 @@ games:
     launcher_ids:
       steam: null
       gog: null
-      # epic: 0d0c62755e5a45c7a07fd9cc0b61c39c
+      epic: 0d0c62755e5a45c7a07fd9cc0b61c39c
     executable:
       epic: Oblivion GOTY German/OblivionLauncher.exe
 
@@ -452,7 +452,7 @@ games:
     launcher_ids:
       steam: null
       gog: null
-      # epic: 0d0c62755e5a45c7a07fd9cc0b61c39c
+      epic: 0d0c62755e5a45c7a07fd9cc0b61c39c
     executable:
       epic: Oblivion GOTY Italian/OblivionLauncher.exe
 
@@ -462,7 +462,7 @@ games:
     launcher_ids:
       steam: null
       gog: null
-      # epic: 0d0c62755e5a45c7a07fd9cc0b61c39c
+      epic: 0d0c62755e5a45c7a07fd9cc0b61c39c
     executable:
       epic: Oblivion GOTY Spanish/OblivionLauncher.exe
 
