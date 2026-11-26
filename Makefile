@@ -1,9 +1,9 @@
-.PHONY: run _build redirector nxm-handler mo2-lint clean
+.PHONY: run build redirector nxm-handler mo2-lint clean
 
 run:
 	PYTHONPATH=src/mo2-lint:src uv run src/mo2-lint/__init__.py $(ARGS)
 
-_build: clean mo2-lint
+build: clean mo2-lint
 
 mo2-lint: redirector nxm-handler
 	uv run pyinstaller --onefile --name mo2-lint \

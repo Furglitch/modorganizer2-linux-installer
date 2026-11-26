@@ -55,7 +55,7 @@ make run ARGS="install skyrim /path/to/install"
 Build everything:
 
 ```bash
-make _build
+make build
 ```
 
 Or build individual components:

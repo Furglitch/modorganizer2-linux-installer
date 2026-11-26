@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-make _build
+make build
 
 export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/tmp/xdg-runtime-$(id -u)}"
 mkdir -p "$XDG_RUNTIME_DIR"

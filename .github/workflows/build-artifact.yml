@@ -58,7 +58,7 @@ jobs:
         run: |
           export WINEPREFIX=$HOME/.wine-py
           export WINEARCH=win64
-          make _build
+          make build
 
       - name: Upload MO2-LINT Artifact
         uses: actions/upload-artifact@v7
