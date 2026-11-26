@@ -44,11 +44,11 @@ To set the wrapper for your game, follow these steps:
 
 Important: keep at least one other game set to the original Proton version (the one you replaced) so Steam doesn't consider it unused and automatically remove it. A non‑Steam game entry works for this purpose.
 
-## protontricks and PROTON_VERSION
+## protontricks
 
-Some tools (notably `protontricks`) expect a full Proton runtime inside the compatibility tool. The wrapper we install intentionally contains only the files needed to redirect the launch. To avoid failures when `protontricks` runs against a game using the wrapper, `mo2-lint` sets the `PROTON_VERSION` environment variable when invoking `protontricks` so it resolves the real Proton runtime instead of the wrapper.
+Some tools (notably `protontricks`) expect a full Proton runtime inside the compatibility tool. The wrapper only contains the files needed to redirect the launch, plus a `files` symlink (or `dist` for older Proton releases) pointing at the real Proton runtime, so `protontricks <appid> ...` works against the game's prefix as usual.
 
-If you run `protontricks` yourself outside of `mo2-lint`, set `PROTON_VERSION` to the same Proton version used by the wrapper (for example `Proton 11.0`) before invoking protontricks.
+When `mo2-lint` runs `protontricks` itself, it also sets the `PROTON_VERSION` environment variable so protontricks resolves the real Proton runtime directly.
 
 ## Reverting / Uninstalling
 
@@ -58,7 +58,7 @@ If you run `protontricks` yourself outside of `mo2-lint`, set `PROTON_VERSION` t
 ## Troubleshooting
 
 - If the game still launches directly instead of Mod Organizer 2, confirm you selected the MO2 compatibility tool in the game's Compatibility dropdown and restart Steam.
-- If `protontricks` fails, set `PROTON_VERSION` to the wrapper's underlying Proton runtime (see the `mo2-lint` output after installation for the exact version name) and try again.
+- If `protontricks` reports that the Proton installation is incomplete, run `mo2-lint update` to re-create the wrapper, or set `PROTON_VERSION` to the wrapper's underlying Proton runtime (see the `mo2-lint` output after installation for the exact version name) and try again.
 
 ---
 
