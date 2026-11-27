@@ -1,0 +1,145 @@
+---
+title: Command Reference
+sidebar_position: 1
+---
+
+This section lists all the available commands and options. All `mo2-lint` commands use the following structure:
+
+```bash
+mo2-lint <command> <parameters> [options]
+```
+
+## Global Options
+
+Every command accepts these two global options:
+
+| Flag | Short | Description |
+|:--|:--|:--|
+| `--log-level <level>` | `-l <level>` | Controls console log verbosity. Accepts `INFO`, `DEBUG`, or `TRACE`.<br/>Log files will always be `TRACE`. |
+| `--unattended` | `-u` | Skips interactive prompts and uses defaults. |
+
+## Commands
+
+### `install`
+
+**Usage:**
+```bash
+mo2-lint install <game> <directory> [options]
+```
+
+Creates a new Mod Organizer 2 instance for the specified game, within the specified directory.
+
+#### Parameters
+
+| Parameter | Required | Description |
+|:--|:--|:--|
+| game | Yes | The game slug (e.g. `skyrim`, `fallout3_goty`).<br/>See [Compatibility](../resources/index.mdx#games) or run `mo2-lint install --help` for the games list. |
+| directory | No | The location that Mod Organizer will be installed to.<br/>If omitted, the path set by `instance.folders` (in the settings TOML, see [Configuration]) is used by default. |
+
+
+#### Options
+
+| Flag | Short | Description |
+|:--|:--|:--|
+| `--launcher <slug>` | `-L <slug>` | Forces the game scanner to search a specific launcher (`steam`, `gog`, `epic`) instead of using the default `instance.launcher` set in the settings TOML. |
+| `--plugin <slug>` | `-p <slug>` | Installs a Mod Organizer plugin into the new instance. Use multiple times for multiple plugins (e.g. `-p root-builder -p auto-activator`).<br/>See [Compatibility](../resources/index.mdx#plugins) or run `mo2-lint install --help` for the plugin list. |
+| `--script-extender` | `-s` | Installs the game's script extender (e.g. SKSE, F4SE), if one exists. Prompts if multiple versions are available.<br/>If `--plugin root-builder` is also given, the script extender is installed in a Root Builder-compatible format. |
+| `--theme <slug>` | `-t <slug>` | Applies a Mod Organizer theme to the new instance. Default can be set in the settings TOML.<br/>See [Compatibility](../resources/index.mdx#themes) for the theme list. |
+| `--proton-version <version>` | N/A | **[ADVANCED]** **[STEAM ONLY]**<br/>Builds the steam-proton-wrapper around the provided version.<br/>`<version>` accepts either:<br/>- A Proton installation name found under your Steam libraries (e.g. `Proton 11.0`)<br/>- An absolute path to a Proton directory (e.g. `/home/user/.steam/steam/compatibilitytools.d/GE-Proton11-3`).<br/>See [Proton Versions](../resources/proton.mdx) for supported versions. |
+| `--custom <path>` | N/A | **[ADVANCED, UNSUPPORTED]**<br/>Uses a custom `game_info.yml` file, following the structure in [Configuration Files](../contributing/configuration-files.mdx#game_infoyml).<br/>`<path>` must point to a `.yml` file.<br/>Custom games are not supported, as there are too many variables to account for. There is no guarantee of a functional instance, including the installation process, launching, and performance. This is intended for advanced users comfortable with troubleshooting issues themselves. Use at your own risk. |
+| `--mo2-archive <path>` + `--mo2-checksum <sha256>` | N/A | **[ADVANCED, UNSUPPORTED]**<br/>Uses a custom Mod Organizer build. Both flags must be used together.<br/>`<path>` must point to a `.zip` or `.7z` file. `<sha256>` must be the SHA256 checksum of the provided archive.<br/>The instance is automatically pinned afterwards to avoid `update` overwriting the chosen build. |
+
+
+### `update`
+
+Updates the targeted Mod Organizer instance. This:
+
+- Downloads the latest supported Mod Organizer build.
+- Updates the prefix's Protontricks dependencies and Visual C++ runtimes.
+- Reinstalls the redirector and NXM handler.
+- Refreshes the launch configuration, rebuilding the Proton wrapper on Steam.
+
+Pinned instances are skipped, unless `--mo2-archive` is given.
+
+**Usage:**
+```bash
+mo2-lint update <directory> [options]
+```
+
+#### Parameters
+
+| Parameter | Required | Description |
+|:--|:--|:--|
+| directory | Yes | The location of the targeted Mod Organizer instance. Must be the exact path. |
+
+
+#### Options
+
+| Flag | Short | Description |
+|:--|:--|:--|
+| `--theme <slug>` | `-t <slug>` | Applies a Mod Organizer theme to the instance. Default can be set in the settings TOML.<br/>See [Compatibility](../resources/index.mdx#themes) for the theme list. |
+| `--proton-version <version>` | N/A | **[ADVANCED]** **[STEAM ONLY]**<br/>Rebuilds the steam-proton-wrapper around the provided version. The chosen version is kept for future updates.<br/>`<version>` accepts either:<br/>- A Proton installation name found under your Steam libraries (e.g. `Proton 11.0`)<br/>- An absolute path to a Proton directory (e.g. `/home/user/.steam/steam/compatibilitytools.d/GE-Proton11-3`).<br/>See [Proton Versions](../resources/proton.mdx) for supported versions. |
+| `--mo2-archive <path>` + `--mo2-checksum <sha256>` | N/A | **[ADVANCED, UNSUPPORTED]**<br/>Uses a custom Mod Organizer build. Both flags must be used together.<br/>`<path>` must point to a `.zip` or `.7z` file. `<sha256>` must be the SHA256 checksum of the provided archive.<br/>Updates the instance even if it is pinned. The instance is automatically pinned afterwards to avoid `update` overwriting the chosen build. |
+
+
+### `list`
+
+Lists all existing MO2 instances currently tracked by MO2-LINT.
+
+**Usage:**
+```bash
+mo2-lint list [options]
+```
+
+#### Options
+
+| Flag | Short | Description |
+|:--|:--|:--|
+| `--game <slug>` | `-g <slug>` | Filters to instances targeting the specified game. |
+| `--directory <path>`| `-d <path>` | Filters to instances within the specified directory. Checks subdirectories. |
+
+
+### `uninstall`
+
+Removes an existing instance, deregistering its launcher configuration and deleting its files.
+Without options, lists all instances to be chosen for removal.
+
+**Usage:**
+```bash
+mo2-lint uninstall [options]
+```
+
+#### Options
+
+| Flag | Short | Description |
+|:--|:--|:--|
+| `--game <slug>` | `-g <slug>` | Filters to instances targeting the specified game. |
+| `--directory <path>`| `-d <path>` | Filters to instances within the specified directory. Checks subdirectories. |
+
+
+### `pin` and `unpin`
+
+Pinning prevents an instance from being affected by the `update` command; `unpin` reverses a pin. This is useful in case a newer MO2 version breaks compatibility with specific mods or plugins.
+
+:::warning
+This does not affect the game itself, and will not prevent game updates from breaking modlists.
+:::
+
+**Usage:**
+```bash
+mo2-lint pin <directory>
+
+# OR
+
+mo2-lint unpin <directory>
+```
+
+#### Parameters
+
+| Parameter | Required | Description |
+|:--|:--|:--|
+| directory | Yes | The location of the targeted Mod Organizer instance. Must be the exact path. |
+
+
+
+[Configuration]: ../configuration/index.mdx

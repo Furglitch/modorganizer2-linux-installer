@@ -1,0 +1,13 @@
+---
+title: Cyberpunk 2077
+---
+
+Some mods and scripts for Cyberpunk 2077 will fail to load or function properly without setting overrides for the `winmm` and `version` libraries.
+
+If you are experiencing issues with some mods or scripts not working, try adding the following to your Steam launch options:
+
+```bash
+WINEDLLOVERRIDES="winmm,version=n,b" %command%
+```
+
+This will set Proton to prioritize the native DLL files provided by your mods, using Proton's built-in versions if those aren't found.

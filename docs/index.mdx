@@ -1,0 +1,52 @@
+---
+title: Mod Organizer 2 Linux Installer (MO2-LINT)
+sidebar_position: 0
+tags: [linux, proton, wine, steam, gaming, modding]
+---
+
+import Link from '@docusaurus/Link';
+
+The **Mod Organizer 2 Linux Installer** (abbr. **MO2-LINT**) aims to make the installation process for [Mod Organizer 2] (MO2) on Linux systems easier and more accessible, offering a simple process to set up a fully functional MO2 instance along with additional quality-of-life features.
+
+<a className="button button--primary margin-right--sm" href="https://github.com/furglitch/modorganizer2-linux-installer/releases">Download</a>
+<Link className="button button--primary margin-right--sm" to="/modorganizer2-linux-installer/getting-started">Get Started</Link>
+<Link className="button button--secondary margin-right--sm" to="/modorganizer2-linux-installer/tui-guide">View the TUI Guide</Link>
+<Link className="button button--secondary margin-right--sm" to="/modorganizer2-linux-installer/cli-guide">View the CLI Guide</Link>
+
+---
+
+## Why MO2-LINT?
+
+| | |
+|:--|:--|
+| **Totally Automated** | Sets up Proton, downloads MO2, registers compatibility tools, and establishes the `nxm://` protocol handler. |
+| **Multiple Instances** | Run separate MO2 instances for each game, each independently tracked and updatable. |
+| **Easy-to-Use** | Provides a simple terminal-based UI (TUI), as well as CLI commands, for quick and easy installation. |
+| **Nexus Integration** | The bundled `nxm://` protocol handler makes the "Mod Manager Download" button on Nexus Mods work out of the box. |
+| **Script Extenders** | Optionally install the game's script extender (SKSE, F4SE, etc.) during setup. |
+| **MO2 Plugins & Themes** | Optionally install community plugins and themes for Mod Organizer during setup. |
+| **Compatibility Workarounds** | Ships fixes for known Proton/Wine quirks per game, so you don't have to hunt them down yourself. |
+
+## How do I start?
+
+- **Not sure if MO2-LINT supports a game?** Check out the [Compatibility] list.
+- **Ready to install?** Head over to [Getting Started], which covers prerequisites, installing the binary, setting up Proton, and creating your first instance.
+- **Something not working?** Check out the [Troubleshooting] steps or the [FAQ].
+- **Want to help?** See the [Contributing] guide to learn how to get involved.
+
+---
+
+## Credits
+
+The *Mod Organizer 2 Linux Installer* was originally developed by [rockerbacon](https://github.com/rockerbacon) as a Bash script. After version 5.0.3, development was handed over to [Furglitch](https://github.com/furglitch), who has since fully rewritten it in Python for maintainability, extensibility, and cross-distro compatibility.
+
+[Compatibility]: ./resources/index.mdx
+[Getting Started]: ./getting-started/index.mdx
+[TUI Guide]: ./tui-guide/index.mdx
+[CLI Guide]: ./cli-guide/index.mdx
+[Game Guides]: ./game-guide/index.mdx
+[Troubleshooting]: ./troubleshooting/index.mdx
+[FAQ]: ./faq/index.mdx
+[Contributing]: ./contributing/index.mdx
+
+[Mod Organizer 2]: https://github.com/ModOrganizer2/modorganizer

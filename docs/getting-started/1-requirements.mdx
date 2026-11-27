@@ -1,0 +1,54 @@
+---
+title: Requirements
+sidebar_position: 1
+---
+
+Various dependencies and configurations needed for using MO2-LINT. Without these, you may experience issues.
+
+## Operating System
+
+:::danger[Linux Only]
+:::
+
+MO2-LINT does not work on Windows, macOS, or any other operating system. There are no plans to add support for these operating systems.
+
+### ARM64 Systems
+Support for ARM64 architecture is available with the `mo2-lint-aarch64` binary, available alongside the standard binary in [Releases](https://github.com/furglitch/modorganizer2-linux-installer/releases).
+
+Currently, for compatibility, MO2-LINT installs [@ndabas](https://github.com/ndabas)'s [MO2 2.5.2-woa.1](https://github.com/ndabas/modorganizer/releases/tag/v2.5.2-woa.1), which contains the USVFS fix needed to launch games on ARM64 systems.
+
+## Launchers
+
+MO2-LINT currently supports and requires at least one of the following game launchers:
+
+- **Steam** - for *Steam* games
+- **Heroic Games Launcher** - for *GOG* and *Epic Games Store* games
+
+:::warning[Unsupported]
+MO2-LINT does not support Lutris or any other game launchers.
+:::
+
+## Proton/Wine Compatibility Layer
+
+See [Proton Setup] for the full setup process and supported versions.
+
+## System Packages
+
+| Package | Why it's needed | Distro Inclusion | Install Required? |
+|:--|:--|:--|:--|
+| xdg-mime | - Sends Nexus Mods downloads to MO2 via the `nxm://` handler.<br/>- Allows MO2 to use your default applications for folders and various file types. | Included by default on many distros. | Yes |
+| procps | - Utilized to auto-restart Steam/Heroic while adding launch options. | Included by default on many distros.<br/><sup>Fedora known not to.</sup> | Yes |
+| cabextract | - Utilized by *winetricks* to extract fonts and DirectX components. | Most distros don't include by default.<br/><sup>Auto-downloaded if not found.</sup> | No |
+| 7z | - Extracts the Mod Organizer archive and some *winetricks* downloads. | Many distros don't include by default.<br/><sup>Auto-downloaded if not found.</sup> | No |
+| protontricks | - Manages the Proton prefix.<br/>- Installs various prefix dependencies. | Bundled with MO2-LINT. | No |
+| winetricks | - Utilized to manage Heroic prefixes and other Wine-related tasks. | Bundled with MO2-LINT. | No |
+
+---
+
+Once these are in place, continue to [Installation].
+
+
+[Requirements]: ./1-requirements.mdx
+[Installation]: ./2-installation.mdx
+[Proton Setup]: ./3-proton.mdx
+[First Launch]: ./4-launch.mdx

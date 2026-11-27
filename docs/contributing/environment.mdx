@@ -1,0 +1,57 @@
+---
+title: Development Environment
+sidebar_position: 1
+---
+
+
+## Prerequisites
+
+- Python 3.13
+- [`uv`](https://docs.astral.sh/uv/getting-started/installation/#cargo)
+- [`make`](https://www.gnu.org/software/make/)
+- Wine (for building the redirector)
+
+## Setup
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Furglitch/modorganizer2-linux-installer
+   cd modorganizer2-linux-installer
+   ```
+2. Install pre-commit hooks:
+   ```bash
+   uv run pre-commit install
+   ```
+
+## Running from Source
+
+```bash
+make run ARGS="<installer arguments>"
+```
+
+`ARGS` must be all caps. `<installer arguments>` are the same as normal CLI arguments, for example:
+
+```bash
+make run ARGS="install skyrim /path/to/install"
+# equivalent of `mo2-lint install skyrim /path/to/install`
+```
+
+:::note
+Running from source requires the redirector and NXM handler binaries to already be built, otherwise errors *will* occur. Build them first with `make nxm-handler` and `make redirector`.
+:::
+
+## Building
+
+Build everything:
+
+```bash
+make build
+```
+
+Or build individual components:
+
+```bash
+make mo2-lint_only
+make redirector
+make nxm-handler
+```

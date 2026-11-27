@@ -1,0 +1,51 @@
+---
+title: Launch Issues
+sidebar_position: 2
+---
+
+## Check Launch Options
+
+If you add anything to your Steam launch options, make sure `%command%` is included **exactly once**:
+
+```bash
+%command%
+```
+
+Variables go before it, flags go after:
+
+```bash
+VARIABLE=value VARIABLE2=value %command% --flag
+```
+
+:::danger
+Adding `%command%` more than once **will** cause problems.
+:::
+
+## Flatpak Issues
+
+If Steam or Heroic is installed via Flatpak, MO2-LINT applies filesystem overrides during install so the sandbox can see the instance directory, the redirector in the game folder, and `~/.config/mo2-lint`.
+
+If you need to apply the override manually, grant the launcher access to the relevant paths:
+
+```bash
+flatpak override --user --filesystem=/path/to/instance --filesystem=/path/to/game --filesystem=~/.config/mo2-lint com.valvesoftware.Steam
+flatpak override --user --filesystem=/path/to/instance --filesystem=/path/to/game --filesystem=~/.config/mo2-lint com.heroicgameslauncher.hgl
+```
+
+## Game Mode Interference
+
+`gamemoderun` typically improves Proton game performance, but it **will** cause MO2 to fail to launch. Remove it from the launch options.
+
+## Directories Outside Home
+
+If MO2 or your game is installed outside your home directory, add the path to `STEAM_COMPAT_MOUNTS`:
+
+```bash
+STEAM_COMPAT_MOUNTS="/path/to/directory" %command%
+```
+
+Separate multiple directories with colons:
+
+```bash
+STEAM_COMPAT_MOUNTS="/path/to/dir1:/path/to/dir2" %command%
+```

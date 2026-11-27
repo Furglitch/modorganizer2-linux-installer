@@ -1,0 +1,48 @@
+---
+title: Installation Issues
+sidebar_position: 1
+---
+
+## Download Error
+
+If MO2-LINT fails to download a required file, check your internet connection and retry.
+
+If it persists, run with more verbosity:
+
+```bash
+mo2-lint install <game> <directory> --log-level DEBUG  # or TRACE
+```
+
+## Game Not Found
+
+MO2-LINT searches your Steam and Heroic libraries for the specified game.
+
+If it can't find the game:
+
+- Make sure it's installed and visible in your launcher.
+- You **must** launch it at least once before running MO2-LINT. This initializes the Proton prefix.
+- If installed in a non-standard location, verify the launcher is able to view/access that library path. This is a common issue with sandboxed installations like Flatpak or Snap.
+- If you have a copy of the game installed in both Steam and Heroic, disambiguate with `--launcher`:
+  ```bash
+  mo2-lint install <game> <directory> --launcher <launcher>
+  ```
+
+## Steam Not Found
+
+If MO2-LINT does not detect your Steam installation automatically, set the `STEAM_DIR` environment variable to the Steam root:
+
+```bash
+STEAM_DIR="/path/to/Steam" mo2-lint install <game> <directory>
+```
+
+When `STEAM_DIR` is set, MO2-LINT uses that directory instead of trying its built-in Steam path list. This is useful for non-standard installs and sandboxed setups such as Flatpak or Snap.
+
+## "Permission Denied"
+
+Check you have write access to the target directory:
+
+```bash
+ls -ld /path/to/instance
+```
+
+If it's owned by root or another user, either pick a different directory or fix ownership with `chown`.

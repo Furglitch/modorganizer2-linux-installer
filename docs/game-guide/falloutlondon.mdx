@@ -1,0 +1,21 @@
+---
+title: Fallout London
+---
+
+The installation process for Fallout London differs from other games, as it's a mod for Fallout 4 rather than a standalone game, and is available only via GOG.
+
+:::warning[Version Support]
+MO2-LINT *only* supports the **One-click Edition** of Fallout London, available for free on GOG.<br/>
+Claim it [here](https://www.gog.com/en/game/fallout_london_oneclick_edition).
+:::
+
+After claiming, installing, and launching the game at least once, set up an instance using the `falloutlondon` game slug.
+
+## Additional Notes
+
+- Fallout London bundles its own copy of F4SE, so there is **no script extender** version available via MO2-LINT.
+  Launch the game from MO2 with the included F4SE executable selected, not the default Fallout 4 executable.
+- Nexus's "Mod Manager Download" button **does not work** with Fallout London instances, regardless of whether you download from the Fallout 4 or Fallout London mod catalogs. This is due to:
+  - **Fallout 4 mods**: the NXM protocol handler will search for Fallout 4 instances. If you have a Fallout 4 instance installed, it will open that instead.
+  - **Fallout London mods**: a limitation of Mod Organizer itself, which recognizes the game as Fallout 4. Not fixable on the MO2-LINT side.
+  - Either way, you can still download and install mods from Nexus manually.
