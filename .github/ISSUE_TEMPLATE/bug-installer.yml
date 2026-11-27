@@ -30,6 +30,7 @@ body:
         - "7.0.3"
         - "7.0.4"
         - "7.0.5"
+        - "7.1.0"
     validations:
       required: true
   - type: dropdown
