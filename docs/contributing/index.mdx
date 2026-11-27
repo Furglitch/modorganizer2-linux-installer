@@ -1,0 +1,33 @@
+---
+title: Contributing
+sidebar_position: 10
+---
+
+Contributions are welcome! This section covers everything needed to get set up, make a change, and submit it.
+
+## Guidelines
+
+To keep the codebase consistent, we use pre-commit hooks and GitHub Actions for formatting and validation, including:
+
+- Ruff linting (code formatting check)
+- Private key detection
+- Trailing whitespace trimmer
+- YAML formatting checks
+- EOF newline checks
+- 500 KB file size limiter
+- Branch committing restrictions
+- Conventional commit message checks
+
+These checks run automatically on every pull request, in case any are missed locally (or you don't have pre-commit hooks set up).
+
+Pull requests that fail on any of these checks will not be accepted or reviewed until the issues are resolved.
+
+## Where to Go Next
+
+| Page | Covers |
+|:--|:--|
+| [Development Environment](./environment.mdx) | Prerequisites, cloning, running from source, building. |
+| [Adding a New Game](./add-game.mdx) | Steps to add support for a new game. |
+| [Configuration Files](./configuration-files.mdx) | Reference for the YAML files under `configs/`. |
+| [Testing](./testing.mdx) | The Docker-based multi-distro test suite. |
+| [Pull Request Guidelines](./pull-request.mdx) | What to check before opening a PR. |

@@ -1,0 +1,63 @@
+---
+title: FAQ
+sidebar_position: 9
+---
+
+## General
+
+### What is MO2-LINT?
+
+MO2-LINT (Mod Organizer 2 Linux Installer) automates installing and configuring [Mod Organizer 2](https://github.com/Modorganizer2/modorganizer) on Linux. It handles Proton prefix setup, Steam compatibility layer setup / Heroic launch option configuration, `nxm://` protocol registration, and optional plugin and script extender installation.
+
+### Is Mod Organizer 2 itself included?
+
+Yes and no. A copy of MO2 is not bundled into MO2-LINT. The program downloads (if it hasn't been downloaded before) and installs the latest MO2 automatically when you create an instance. You don't need to download it separately.
+
+### What launchers are supported?
+
+- **Steam** - Fully supported.
+- **Heroic Games Launcher** - Supported for GOG and Epic Games Store titles.
+- **Minigalaxy** - Not supported.
+- **Lutris** - Not supported.
+
+### Can I have multiple MO2 instances?
+
+Yes. Each `mo2-lint install` creates a separate, independent instance, including multiple instances of the same game. However, Nexus's "Mod Manager Download" button can only target one instance per game at a time; installing a second instance of the same game prompts you to confirm switching the NXM handler link to it.
+
+## Installation
+
+### Which version of Proton should I use?
+
+Proton 11.0 is the most supported and tested version. For exact details, see [Proton Versions](../resources/proton.mdx).
+
+### Do I need to launch the game before creating an instance?
+
+Yes, at least once through Steam or Heroic, so the launcher can initialize the Proton prefix MO2-LINT depends on.
+
+### I'm getting a "game not found" error. What do I do?
+
+MO2-LINT locates games by searching your Steam or Heroic library. Common causes:
+
+- The game hasn't been launched yet (Proton prefix not initialized)
+- It's installed in a non-standard library location
+- You're using an unsupported launcher
+- You're using a non-standard install (e.g. a cracked version with a non-native shortcut)
+- You're using a sandboxed launcher (e.g. Flatpak Steam) without the proper permissions
+
+See [Installation Issues](../troubleshooting/install.mdx#game-not-found) for the full walkthrough.
+
+## Tips and Tricks
+
+### How do I get MO2 to only open in Desktop Mode on Steam Deck?
+
+Add this to the game's launch options to skip MO2 in Gaming Mode/Big Picture Mode while still opening it in Desktop Mode:
+
+```bash
+%command% $([ -z "$KDE_FULL_SESSION" ] && echo 'moshortcut://"<executable name>"' )
+```
+
+Replace `<executable name>` with the name of the executable entry in MO2 that Gaming Mode should launch directly, such as `SKSE` for Skyrim Special Edition.
+
+:::note
+This was written prior to the Steam Machine/Steam Frame release, so it may need adjustment once those are available. If you are using a Steam Machine or Steam Frame, please report your findings to the [GitHub Issues](https://github.com/furglitch/modorganizer2-linux-installer/issues) page.
+:::

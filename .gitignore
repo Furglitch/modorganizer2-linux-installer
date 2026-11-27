@@ -190,3 +190,7 @@ cython_debug/
 # IDEs
 .vscode/
 .idea/
+
+
+
+/.docs/

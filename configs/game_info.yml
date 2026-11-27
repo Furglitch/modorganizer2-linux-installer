@@ -321,7 +321,7 @@ games:
 
   falloutlondon:
     parent: fallout4
-    display_name: 'Fallout 4 London'
+    display_name: 'Fallout London'
     nexus_slug: fallout4london
     launcher_ids:
       steam: null
@@ -331,7 +331,7 @@ games:
     script_extenders: null
 
   falloutnv:
-    display_name: 'New Vegas'
+    display_name: 'Fallout New Vegas'
     nexus_slug: newvegas
     launcher_ids:
       steam: 22380
@@ -364,7 +364,7 @@ games:
 
   falloutnv_ru:
     parent: falloutnv
-    display_name: 'New Vegas (Russian)'
+    display_name: 'Fallout New Vegas (Russian)'
     launcher_ids:
       steam: 22490
     subdirectory: Fallout New Vegas enplczru

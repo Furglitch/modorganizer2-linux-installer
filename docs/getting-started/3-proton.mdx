@@ -1,0 +1,51 @@
+---
+title: Proton Setup
+sidebar_position: 3
+---
+
+## Steam
+
+MO2-LINT makes use of a custom Proton wrapper in order to execute Mod Organizer within the game's Proton prefix.
+
+In order to install the wrapper, **Proton 11.0** is required to be installed.
+
+:::danger[Advanced]
+Other versions may be used, but function, performance, and support are not guaranteed.<br/>
+See [Proton Versions](../resources/proton.mdx) for a full list of tested and supported Proton versions.
+:::
+
+After installation, you will need to set up your game to use the custom wrapper created by the installer. Details are given in the [First Launch] guide.
+
+## Heroic Games Launcher
+
+:::note[Proton Version Missing?]
+If Proton doesn't appear in the Wine Version dropdowns, make sure it is installed via Steam and enable **Allow using Valve Proton builds to run games** under Heroic's **Advanced** settings.
+:::
+
+### Option A: Universal Setting
+
+1. In Heroic, go to **Settings** → **Game Defaults**.
+2. In the **Wine Version** dropdown, select **Proton 11.0**.
+
+### Option B: Per-Game Setting
+
+1. Right-click the game in your Heroic library → **Settings** → **Wine** tab.
+2. In the **Wine Version** dropdown, select **Proton 11.0**.
+
+## Post-Setup
+
+:::warning[Critical]
+After setting up Proton, **launch the game at least once**. This lets the launcher create the Proton prefix with its default dependencies, which are not bundled with MO2-LINT.
+:::
+
+## Supported Versions
+
+---
+
+Continue to [First Launch] to verify everything is wired up correctly.
+
+
+[Requirements]: ./1-requirements.mdx
+[Installation]: ./2-installation.mdx
+[Proton Setup]: ./3-proton.mdx
+[First Launch]: ./4-launch.mdx

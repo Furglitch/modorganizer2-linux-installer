@@ -1,0 +1,24 @@
+---
+title: Proton Versions
+sidebar_position: 1
+---
+
+MO2-LINT is tested against **Proton 11.0**. Other versions may work, but function, performance, and support are not guaranteed.
+
+For setup instructions, see [Proton Setup](../getting-started/3-proton.mdx).
+
+## Supported Versions
+
+| Version | Notes |
+|:--|:--|
+| **Proton 11.0** | The main version of Proton that MO2-LINT is tested against. Earlier versions may work but aren't guaranteed to, and are not supported. |
+| **GE-Proton11-11** | An alternate, community-maintained version of Proton, which may provide game compatibility and bug fixes that standard Proton does not. More information can be found on the [GE-Proton GitHub repo](https://github.com/gloriouseggroll/proton-ge-custom). |
+| **GE-Proton10-14** | Recommended for ENB users due to [#1185](https://github.com/Furglitch/modorganizer2-linux-installer/issues/1185). Has the same MO2 issues as Proton 10.0. |
+| **Proton 10.0** | Has known issues with Mod Organizer 2, such as [#878](https://github.com/Furglitch/modorganizer2-linux-installer/issues/878). |
+| **Proton 9.0-4** | Known to be unable to launch some games, such as Fallout 4. |
+
+## Using a Different Version
+
+On Steam, you can build the MO2 Proton wrapper around a version other than Proton 11.0 with the `--proton-version` option on [`install`](../cli-guide/command-reference.mdx#install) or [`update`](../cli-guide/command-reference.mdx#update).
+
+On Heroic, select the version in the **Wine Version** dropdown, as described in [Proton Setup](../getting-started/3-proton.mdx#heroic-games-launcher).
